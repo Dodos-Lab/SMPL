@@ -22,7 +22,7 @@ namespace SMPL
 		public Vector2 Direction
 		{
 			get => Vector2.Normalize(Angle.AngleToDirection());
-			set {  }
+			set => Angle = Vector2.Normalize(value).DirectionToAngle();
 		}
 		public Vector2 Origin { get; set; }
 

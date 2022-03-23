@@ -10,3 +10,15 @@ D:\code\SFML\SMPL2\SMPL\obj\Debug\net5.0\SMPL.csproj.CoreCompileInputs.cache
 D:\code\SFML\SMPL2\SMPL\obj\Debug\net5.0\SMPL.dll
 D:\code\SFML\SMPL2\SMPL\obj\Debug\net5.0\ref\SMPL.dll
 D:\code\SFML\SMPL2\SMPL\obj\Debug\net5.0\SMPL.pdb
+G:\SMPL\bin\Debug\net5.0\SMPL.deps.json
+G:\SMPL\bin\Debug\net5.0\SMPL.dll
+G:\SMPL\bin\Debug\net5.0\ref\SMPL.dll
+G:\SMPL\bin\Debug\net5.0\SMPL.pdb
+G:\SMPL\obj\Debug\net5.0\SMPL.csproj.AssemblyReference.cache
+G:\SMPL\obj\Debug\net5.0\SMPL.GeneratedMSBuildEditorConfig.editorconfig
+G:\SMPL\obj\Debug\net5.0\SMPL.AssemblyInfoInputs.cache
+G:\SMPL\obj\Debug\net5.0\SMPL.AssemblyInfo.cs
+G:\SMPL\obj\Debug\net5.0\SMPL.csproj.CoreCompileInputs.cache
+G:\SMPL\obj\Debug\net5.0\SMPL.dll
+G:\SMPL\obj\Debug\net5.0\ref\SMPL.dll
+G:\SMPL\obj\Debug\net5.0\SMPL.pdb

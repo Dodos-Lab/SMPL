@@ -1,15 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "EQUB8fonhBJIh48eEe52rColFNxVSZ4w0Kk9mwuVCXdLSN7tUlP07j/SbECfKFQFz2r4IU/aiT10GD3CtHm04Q==",
+  "dgSpecHash": "v9vPGXu+7DzJrIUm3Rt5C5yKOxoPxfaEs0Xrn/eMlWs2QV3YmZVcFng6uagHWnI8r6Z99MvRTtwK36fD1wp0kg==",
   "success": true,
-  "projectFilePath": "D:\\code\\SFML\\SMPL2\\SMPL\\SMPL.csproj",
+  "projectFilePath": "G:\\SMPL\\SMPL.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\PC PC\\.nuget\\packages\\csfml\\2.5.0\\csfml.2.5.0.nupkg.sha512",
-    "C:\\Users\\PC PC\\.nuget\\packages\\sfml.audio\\2.5.0\\sfml.audio.2.5.0.nupkg.sha512",
-    "C:\\Users\\PC PC\\.nuget\\packages\\sfml.graphics\\2.5.0\\sfml.graphics.2.5.0.nupkg.sha512",
-    "C:\\Users\\PC PC\\.nuget\\packages\\sfml.net\\2.5.0\\sfml.net.2.5.0.nupkg.sha512",
-    "C:\\Users\\PC PC\\.nuget\\packages\\sfml.system\\2.5.0\\sfml.system.2.5.0.nupkg.sha512",
-    "C:\\Users\\PC PC\\.nuget\\packages\\sfml.window\\2.5.0\\sfml.window.2.5.0.nupkg.sha512"
+    "C:\\Users\\GoKsTaR\\.nuget\\packages\\csfml\\2.5.0\\csfml.2.5.0.nupkg.sha512",
+    "C:\\Users\\GoKsTaR\\.nuget\\packages\\sfml.audio\\2.5.0\\sfml.audio.2.5.0.nupkg.sha512",
+    "C:\\Users\\GoKsTaR\\.nuget\\packages\\sfml.graphics\\2.5.0\\sfml.graphics.2.5.0.nupkg.sha512",
+    "C:\\Users\\GoKsTaR\\.nuget\\packages\\sfml.net\\2.5.0\\sfml.net.2.5.0.nupkg.sha512",
+    "C:\\Users\\GoKsTaR\\.nuget\\packages\\sfml.system\\2.5.0\\sfml.system.2.5.0.nupkg.sha512",
+    "C:\\Users\\GoKsTaR\\.nuget\\packages\\sfml.window\\2.5.0\\sfml.window.2.5.0.nupkg.sha512"
   ],
   "logs": []
 }
