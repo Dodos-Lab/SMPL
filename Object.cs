@@ -24,6 +24,7 @@ namespace SMPL
 			get => Vector2.Normalize(Angle.AngleToDirection());
 			set {  }
 		}
+		public Vector2 Origin { get; set; }
 
 		public Vector2 LocalPosition { get => localPos; set { localPos = value; UpdateSelfAndChildren(); } }
 		public Vector2 LocalScale { get => localSc; set { localSc = value; UpdateSelfAndChildren(); } }
@@ -35,8 +36,8 @@ namespace SMPL
 			set
 			{
 				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateScale(LocalScale);
-				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
+				c *= Matrix3x2.CreateScale(LocalScale, Origin);
+				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians(), Origin);
 				c *= Matrix3x2.CreateTranslation(value);
 
 				var local = c * GetInverseParent();
@@ -49,8 +50,8 @@ namespace SMPL
 			set
 			{
 				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateScale(value);
-				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
+				c *= Matrix3x2.CreateScale(value, Origin);
+				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians(), Origin);
 				c *= Matrix3x2.CreateTranslation(LocalPosition);
 
 				var local = c * GetInverseParent();
@@ -63,8 +64,8 @@ namespace SMPL
 			set
 			{
 				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateScale(LocalScale);
-				c *= Matrix3x2.CreateRotation(value.DegreesToRadians());
+				c *= Matrix3x2.CreateScale(LocalScale, Origin);
+				c *= Matrix3x2.CreateRotation(value.DegreesToRadians(), Origin);
 				c *= Matrix3x2.CreateTranslation(LocalPosition);
 
 				var local = c * GetInverseParent();
@@ -114,14 +115,14 @@ namespace SMPL
 
 			if (parent != null)
 			{
-				p *= Matrix3x2.CreateScale(parent.Scale);
-				p *= Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians());
+				p *= Matrix3x2.CreateScale(parent.Scale, parent.Origin);
+				p *= Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians(), parent.Origin);
 				p *= Matrix3x2.CreateTranslation(parent.Position);
 			}
 
 			var c = Matrix3x2.Identity;
-			c *= Matrix3x2.CreateScale(LocalScale);
-			c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
+			c *= Matrix3x2.CreateScale(LocalScale, Origin);
+			c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians(), Origin);
 			c *= Matrix3x2.CreateTranslation(LocalPosition);
 
 			global = c * p;

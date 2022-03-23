@@ -25,7 +25,7 @@ namespace SMPL
 
 			void InitWindow()
 			{
-				Window = new(new(800, 600), "SMPL Game");
+				Window = new(new(1280, 720), "SMPL Game");
 				Window.Clear();
 				Window.Display();
 				Window.Closed += OnClose;
