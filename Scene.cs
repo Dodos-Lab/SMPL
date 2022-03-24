@@ -30,7 +30,7 @@ namespace SMPL
 			}
 		}
 		public static Scene LoadingScene { get; set; }
-		public float LoadingPercent { get; private set; } = 100;
+		public float LoadingPercent { get; private set; }
 		public Color BackgroundColor { get; set; }
 
 		protected Dictionary<string, Texture> Textures { get; } = new();
@@ -48,6 +48,12 @@ namespace SMPL
 		{
 			var assets = OnRequireAssets();
 			var loadedCount = 0;
+
+			if (assets.Textures == null && assets.Sounds == null && assets.Music == null && assets.Fonts == null)
+			{
+				CurrentScene.LoadingPercent = 100;
+				return;
+			}
 
 			for (int i = 0; i < assets.Textures?.Count; i++)
 			{

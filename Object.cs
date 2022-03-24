@@ -10,7 +10,7 @@ namespace SMPL
 	{
 		private readonly List<Object> children = new();
 		private Object parent;
-		private Vector2 localPos, localSc;
+		private Vector2 localPos, localSc, origin;
 		private float localAng;
 		private Matrix3x2 global;
 
@@ -24,20 +24,37 @@ namespace SMPL
 			get => Vector2.Normalize(Angle.AngleToDirection());
 			set => Angle = Vector2.Normalize(value).DirectionToAngle();
 		}
-		public Vector2 Origin { get; set; }
+		public Vector2 Origin
+		{
+			get => origin;
+			set { origin = value; UpdateSelfAndChildren(); }
+		}
 
-		public Vector2 LocalPosition { get => localPos; set { localPos = value; UpdateSelfAndChildren(); } }
-		public Vector2 LocalScale { get => localSc; set { localSc = value; UpdateSelfAndChildren(); } }
-		public float LocalAngle { get => localAng; set { localAng = value; UpdateSelfAndChildren(); } }
+		public Vector2 LocalPosition
+		{
+			get => localPos;
+			set { localPos = value; UpdateSelfAndChildren(); }
+		}
+		public Vector2 LocalScale
+		{
+			get => localSc;
+			set { localSc = value; UpdateSelfAndChildren(); }
+		}
+		public float LocalAngle
+		{
+			get => localAng;
+			set { localAng = value; UpdateSelfAndChildren(); }
+		}
 
 		public Vector2 Position
 		{
-			get => GetPosition(global);
+			get => GetPosition(global) - Origin;
 			set
 			{
 				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateScale(LocalScale, Origin);
-				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians(), Origin);
+				c *= Matrix3x2.CreateTranslation(Origin);
+				c *= Matrix3x2.CreateScale(LocalScale);
+				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
 				c *= Matrix3x2.CreateTranslation(value);
 
 				var local = c * GetInverseParent();
@@ -50,8 +67,9 @@ namespace SMPL
 			set
 			{
 				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateScale(value, Origin);
-				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians(), Origin);
+				c *= Matrix3x2.CreateTranslation(Origin);
+				c *= Matrix3x2.CreateScale(value);
+				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
 				c *= Matrix3x2.CreateTranslation(LocalPosition);
 
 				var local = c * GetInverseParent();
@@ -64,8 +82,9 @@ namespace SMPL
 			set
 			{
 				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateScale(LocalScale, Origin);
-				c *= Matrix3x2.CreateRotation(value.DegreesToRadians(), Origin);
+				c *= Matrix3x2.CreateTranslation(Origin);
+				c *= Matrix3x2.CreateScale(LocalScale);
+				c *= Matrix3x2.CreateRotation(value.DegreesToRadians());
 				c *= Matrix3x2.CreateTranslation(LocalPosition);
 
 				var local = c * GetInverseParent();
@@ -99,7 +118,7 @@ namespace SMPL
 
 		public Object()
 		{
-			localSc = new(1, 1);
+			LocalScale = new(1, 1);
 		}
 
 		private void UpdateSelfAndChildren()
@@ -115,8 +134,8 @@ namespace SMPL
 
 			if (parent != null)
 			{
-				p *= Matrix3x2.CreateScale(parent.Scale, parent.Origin);
-				p *= Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians(), parent.Origin);
+				p *= Matrix3x2.CreateScale(parent.Scale);
+				p *= Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians());
 				p *= Matrix3x2.CreateTranslation(parent.Position);
 			}
 

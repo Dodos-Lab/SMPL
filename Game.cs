@@ -1,11 +1,22 @@
 ﻿using System;
+using System.Numerics;
 using SFML.Graphics;
+using SFML.Window;
 
 namespace SMPL
 {
 	public static class Game
 	{
 		public static RenderWindow Window { get; private set; }
+
+		public static Vector2 MousePosition
+		{
+			get
+			{
+				var p = Window.MapPixelToCoords(Mouse.GetPosition(Window));
+				return new(p.X, p.Y);
+			}
+		}
 
 		public static void Start(Scene startingScene, Scene loadingScene = null)
 		{
@@ -30,6 +41,10 @@ namespace SMPL
 				Window.Display();
 				Window.Closed += OnClose;
 				Window.SetFramerateLimit(120);
+
+				var view = Window.GetView();
+				view.Center = new();
+				Window.SetView(view);
 			}
 			Color GetActiveSceneBgColor()
 			{
