@@ -13,7 +13,7 @@ namespace SMPL
 		{
 			get
 			{
-				var p = Window.MapPixelToCoords(Mouse.GetPosition(Window));
+				var p = Mouse.GetPosition(Window);
 				return new(p.X, p.Y);
 			}
 		}
@@ -21,6 +21,7 @@ namespace SMPL
 		public static void Start(Scene startingScene, Scene loadingScene = null)
 		{
 			InitWindow();
+			Camera.Position = new();
 			Scene.Init(startingScene, loadingScene);
 
 			while (Window.IsOpen)
@@ -41,10 +42,6 @@ namespace SMPL
 				Window.Display();
 				Window.Closed += OnClose;
 				Window.SetFramerateLimit(120);
-
-				var view = Window.GetView();
-				view.Center = new();
-				Window.SetView(view);
 			}
 			Color GetActiveSceneBgColor()
 			{

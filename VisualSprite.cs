@@ -7,9 +7,10 @@ namespace SMPL
 	public class VisualSprite : Visual
 	{
 		private const float BASE_SIZE = 100;
-		private Vector2 repeats;
 
 		public Texture Texture { get; set; }
+		public Vector2 TexCoordsUnitA { get; set; }
+		public Vector2 TexCoordsUnitB { get; set; }
 
 		public Vector2 TopLeft
 		{ get => Position.MoveAtAngle(Angle + Position.AngleToPoint(Position - Origin), Origin.Length() * Scale.Length() * 0.7071f, false); }
@@ -20,27 +21,14 @@ namespace SMPL
 		public Vector2 BottomLeft
 		{ get => BottomRight.MoveAtAngle(Angle + 180, Texture == null ? BASE_SIZE : Texture.Size.X * Scale.X, false); }
 
-		public bool IsFlippedX { get; set; }
-		public bool IsFlippedY { get; set; }
 		public bool IsCaptured
 		{
-			get
-			{
-				var view = RenderTarget.GetView();
-				var screen = new FloatRect(view.Center - view.Size * 0.5f, view.Size);
-				return screen.Contains(TopLeft.X, TopLeft.Y) || screen.Contains(TopRight.X, TopRight.Y) ||
-					screen.Contains(BottomLeft.X, BottomLeft.Y) || screen.Contains(BottomRight.X, BottomRight.Y);
-			}
-		}
-		public Vector2 Repeats
-		{
-			get => repeats;
-			set { repeats = new(MathF.Max(1, value.X), MathF.Max(1, value.Y)); }
+			get => Camera.Captures(TopLeft) || Camera.Captures(TopRight) || Camera.Captures(BottomLeft) || Camera.Captures(BottomRight);
 		}
 
 		public VisualSprite()
 		{
-			Repeats = new(1, 1);
+			TexCoordsUnitB = new(1, 1);
 		}
 
 		public override void Draw()
@@ -48,12 +36,12 @@ namespace SMPL
 			if (IsHidden || IsCaptured == false)
 				return;
 
-			var w = Texture == null ? 0 : Texture.Size.X * Repeats.X;
-			var h = Texture == null ? 0 : Texture.Size.Y * Repeats.Y;
-			var w0 = IsFlippedX ? w : 0;
-			var ww = IsFlippedX ? 0 : w;
-			var h0 = IsFlippedY ? h : 0;
-			var hh = IsFlippedY ? 0 : h;
+			var w = Texture == null ? 0 : Texture.Size.X;
+			var h = Texture == null ? 0 : Texture.Size.Y;
+			var w0 = w * TexCoordsUnitA.X;
+			var ww = w * TexCoordsUnitB.X;
+			var h0 = h * TexCoordsUnitA.Y;
+			var hh = h * TexCoordsUnitB.Y;
 
 			var verts = new Vertex[]
 			{

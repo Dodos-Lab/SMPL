@@ -1,6 +1,8 @@
 ﻿using SFML.Audio;
 using SFML.Graphics;
+using SFML.Window;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading;
 
 namespace SMPL
@@ -18,6 +20,14 @@ namespace SMPL
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		private static Thread assetsLoading;
 
+		public static Vector2 MousePosition
+		{
+			get
+			{
+				var p = Game.Window.MapPixelToCoords(Mouse.GetPosition(Game.Window));
+				return new(p.X, p.Y);
+			}
+		}
 		public static Scene CurrentScene
 		{
 			get => scene;
@@ -30,6 +40,7 @@ namespace SMPL
 			}
 		}
 		public static Scene LoadingScene { get; set; }
+
 		public float LoadingPercent { get; private set; }
 		public Color BackgroundColor { get; set; }
 
@@ -125,6 +136,7 @@ namespace SMPL
 		{
 			while (true)
 			{
+				Thread.Sleep(1);
 				if (loadScene != null)
 				{
 					scene.LoadAssets();
