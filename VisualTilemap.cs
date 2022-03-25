@@ -34,7 +34,7 @@ namespace SMPL
          if (IsHidden)
             return;
 
-         var vertsArr = new VertexArray(PrimitiveType.Triangles);
+         var vertsArr = new VertexArray(PrimitiveType.Quads);
 
          foreach (var kvp in map)
             foreach (var kvp2 in kvp.Value)
@@ -45,16 +45,17 @@ namespace SMPL
                var txCrdsA = kvp2.Value.IndeciesTexCoords * CellSize;
                var txCrdsB = txCrdsA + kvp2.Value.IndeciesSize * CellSize;
                var c = kvp2.Value.Color;
-               
-               vertsArr.Append(new(new(0, 0), c, new(80, 96)));
-               vertsArr.Append(new(new(96, 0), c, new(80 + 16, 96)));
-               vertsArr.Append(new(new(0, 96), c, new(80, 96 + 16)));
-               vertsArr.Append(new(new(96, 0), c, new(80 + 16, 96)));
-               vertsArr.Append(new(new(96, 96), c, new(80 + 16, 96 + 16)));
-               vertsArr.Append(new(new(0, 96), c, new(80, 96 + 16)));
+
+               vertsArr.Append(new(new(posA.X, posA.Y), c, new(txCrdsA.X, txCrdsA.Y)));
+               vertsArr.Append(new(new(posB.X, posA.Y), c, new(txCrdsB.X, txCrdsA.Y)));
+               vertsArr.Append(new(new(posB.X, posB.Y), c, new(txCrdsB.X, txCrdsB.Y)));
+               vertsArr.Append(new(new(posA.X, posB.Y), c, new(txCrdsA.X, txCrdsB.Y)));
             }
 
-         RenderTarget.Draw(vertsArr, new(BlendMode, Transform.Identity, Texture, Shader));
+         var transform = Transform.Identity;
+         transform.Translate(new(0, 1));
+
+         RenderTarget.Draw(vertsArr, new(BlendMode, transform, Texture, Shader));
       }
       public void SetTile(Vector2 tilePositionIndexes, Tile tile)
       {
