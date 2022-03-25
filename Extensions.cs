@@ -476,8 +476,12 @@ namespace SMPL
 		}
 		public static Vector2 ToGrid(this Vector2 point, Vector2 gridSize)
 		{
-			point.X = gridSize.X * (point.X / gridSize.X).Round();
-			point.Y = gridSize.Y * (point.Y / gridSize.Y).Round();
+			// this prevents -0 cells
+			//point.X -= point.X < 0 ? gridSize.X : 0;
+			//point.Y -= point.Y < 0 ? gridSize.Y : 0;
+
+			point.X -= point.X % gridSize.X;
+			point.Y -= point.Y % gridSize.Y;
 			return point;
 		}
 		public static Vector2 DirectionToPoint(this Vector2 point, Vector2 targetPoint)
