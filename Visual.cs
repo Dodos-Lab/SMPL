@@ -16,7 +16,6 @@ namespace SMPL
 			RenderTarget = Game.Window;
 			BlendMode = BlendMode.Alpha;
 		}
-
 		public abstract void Draw();
 	}
 }

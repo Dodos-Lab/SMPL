@@ -1,7 +1,7 @@
 ﻿using SFML.Graphics;
 using System.Collections.Generic;
 using System.Numerics;
-using SFML.System;
+using System.Linq;
 
 namespace SMPL
 {
@@ -57,16 +57,28 @@ namespace SMPL
 
          RenderTarget.Draw(vertsArr, new(BlendMode, transform, Texture, Shader));
       }
-      public void SetTile(Vector2 tilePositionIndexes, Tile tile)
+      public void SetTile(Vector2 tilePositionIndecies, Tile tile)
       {
-         if (map.ContainsKey(tilePositionIndexes) == false)
-            map[tilePositionIndexes] = new();
+         if (map.ContainsKey(tilePositionIndecies) == false)
+            map[tilePositionIndecies] = new();
 
-         map[tilePositionIndexes][tile.Layer] = tile;
+         map[tilePositionIndecies][tile.Layer] = tile;
       }
-      public Vector2 GetTile(Vector2 position)
+      public void SetRepeatedTile(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, Tile tile)
       {
-         return position.ToGrid(CellSize * Scale) / Scale;
+         for (float x = tilePositionIndeciesA.X; x < tilePositionIndeciesB.X; x++)
+            for (float y = tilePositionIndeciesA.Y; y < tilePositionIndeciesB.Y; y++)
+               SetTile(new(x, y), tile);
+      }
+
+      public List<Tile> GetTiles(Vector2 position)
+      {
+         var pos = position.ToGrid(CellSize * Scale) / Scale / CellSize;
+         return map.ContainsKey(pos) == false ? new() : map[pos].Values.ToList();
+		}
+		public Vector2 GetPosition(Vector2 tileIndecies)
+      {
+         return tileIndecies / CellSize / Scale;
       }
    }
 }

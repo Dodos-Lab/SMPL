@@ -477,8 +477,8 @@ namespace SMPL
 		public static Vector2 ToGrid(this Vector2 point, Vector2 gridSize)
 		{
 			// this prevents -0 cells
-			//point.X -= point.X < 0 ? gridSize.X : 0;
-			//point.Y -= point.Y < 0 ? gridSize.Y : 0;
+			point.X -= point.X < 0 ? gridSize.X : 0;
+			point.Y -= point.Y < 0 ? gridSize.Y : 0;
 
 			point.X -= point.X % gridSize.X;
 			point.Y -= point.Y % gridSize.Y;
