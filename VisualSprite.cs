@@ -1,5 +1,4 @@
 ﻿using SFML.Graphics;
-using System;
 using System.Numerics;
 
 namespace SMPL
@@ -8,7 +7,6 @@ namespace SMPL
 	{
 		private const float BASE_SIZE = 100;
 
-		public Texture Texture { get; set; }
 		public Vector2 TexCoordsUnitA { get; set; }
 		public Vector2 TexCoordsUnitB { get; set; }
 

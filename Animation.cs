@@ -1,16 +1,17 @@
 ﻿namespace SMPL
 {
-	public struct Animation
+	public class Animation
 	{
 		private float rawIndex;
+		private const float LOWER_BOUND = -0.49f;
 
 		public int Index => (int)RawIndex.Round();
 		public float RawIndex
 		{
 			get => rawIndex;
-			set { rawIndex = value.Limit(GetLowerBound(), Values.Length); }
+			set { rawIndex = value.Limit(LOWER_BOUND, Values.Length); }
 		}
-		public float Progress => RawIndex.Map(GetLowerBound(), Values.Length, 0, 1);
+		public float Progress => RawIndex.Map(LOWER_BOUND, Values.Length, 0, 1);
 
 		public object[] Values { get; set; }
 		public object CurrentValue { get; private set; }
@@ -23,8 +24,7 @@
 			rawIndex = 0;
 			FPS = fps;
 			IsRepeating = isRepeating;
-			CurrentValue = default;
-			RawIndex = GetLowerBound();
+			RawIndex = LOWER_BOUND;
 		}
 		public void Update()
 		{
@@ -36,11 +36,9 @@
 
 			RawIndex += Time.Delta * FPS;
 			if (Index >= Values.Length)
-				RawIndex = IsRepeating ? GetLowerBound() : Values.Length - 1;
+				RawIndex = IsRepeating ? LOWER_BOUND : Values.Length - 1;
 
 			CurrentValue = Values[Index];
 		}
-
-		private static float GetLowerBound() => -0.49f;
 	}
 }

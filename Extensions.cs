@@ -314,13 +314,13 @@ namespace SMPL
 			var u = inclusiveUpper ? upper >= number : upper > number;
 			return l && u;
 		}
-		public static float Move(this float number, float speed, bool isFpsDependent)
+		public static float Move(this float number, float speed, bool isFpsDependent = true)
 		{
 			if (isFpsDependent)
 				speed *= Time.Delta;
 			return number + speed;
 		}
-		public static float MoveToward(this float number, float targetNumber, float speed, bool isFpsDependent)
+		public static float MoveToward(this float number, float targetNumber, float speed, bool isFpsDependent = true)
 		{
 			var goingPos = number < targetNumber;
 			var result = Move(number, goingPos ? Sign(speed, false) : Sign(speed, true), isFpsDependent);
@@ -333,7 +333,7 @@ namespace SMPL
 		{
 			return (number - lowerA) / (upperA - lowerA) * (upperB - lowerB) + lowerB;
 		}
-		public static float MoveTowardAngle(this float angle, float targetAngle, float speed, bool isFpsDependent)
+		public static float MoveTowardAngle(this float angle, float targetAngle, float speed, bool isFpsDependent = true)
 		{
 			angle = AngleTo360(angle);
 			targetAngle = AngleTo360(targetAngle);
@@ -488,17 +488,17 @@ namespace SMPL
 		{
 			return Vector2.Normalize(targetPoint - point);
 		}
-		public static Vector2 MoveInDirection(this Vector2 point, Vector2 direction, float speed, bool isFpsDependent)
+		public static Vector2 MoveInDirection(this Vector2 point, Vector2 direction, float speed, bool isFpsDependent = true)
 		{
 			point.X += direction.X * speed * (isFpsDependent ? Time.Delta : 1);
 			point.Y += direction.Y * speed * (isFpsDependent ? Time.Delta : 1);
 			return point;
 		}
-		public static Vector2 MoveAtAngle(this Vector2 point, float angle, float speed, bool isFpsDependent)
+		public static Vector2 MoveAtAngle(this Vector2 point, float angle, float speed, bool isFpsDependent = true)
 		{
 			return MoveInDirection(point, Vector2.Normalize(angle.AngleToDirection()), speed, isFpsDependent);
 		}
-		public static Vector2 MoveTowardTarget(this Vector2 point, Vector2 targetPoint, float speed, bool isFpsDependent)
+		public static Vector2 MoveTowardTarget(this Vector2 point, Vector2 targetPoint, float speed, bool isFpsDependent = true)
 		{
 			return point.MoveAtAngle(point.AngleToPoint(targetPoint), speed, isFpsDependent);
 		}

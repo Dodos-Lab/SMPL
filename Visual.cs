@@ -9,6 +9,7 @@ namespace SMPL
 		public Shader Shader { get; set; }
 		public BlendMode BlendMode { get; set; }
 		public bool IsHidden { get; set; }
+		public Texture Texture { get; set; }
 
 		public Visual()
 		{

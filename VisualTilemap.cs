@@ -26,7 +26,6 @@ namespace SMPL
 
       private readonly Dictionary<Vector2, SortedDictionary<float, Tile>> map = new();
 
-      public Texture Texture { get; set; }
       public Vector2 CellSize { get; set; } = new(32);
 
       public override void Draw()
@@ -56,6 +55,7 @@ namespace SMPL
          transform.Translate(new(0, 1));
 
          RenderTarget.Draw(vertsArr, new(BlendMode, transform, Texture, Shader));
+         vertsArr.Dispose();
       }
       public void SetTile(Vector2 tilePositionIndecies, Tile tile)
       {

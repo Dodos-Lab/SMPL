@@ -66,26 +66,30 @@ namespace SMPL
 				return;
 			}
 
-			for (int i = 0; i < assets.Textures?.Count; i++)
+			try
 			{
-				Textures[assets.Textures[i]] = new Texture(assets.Textures[i]);
-				UpdateLoadingPercent();
+				for (int i = 0; i < assets.Textures?.Count; i++)
+				{
+					Textures[assets.Textures[i]] = new Texture(assets.Textures[i]);
+					UpdateLoadingPercent();
+				}
+				for (int i = 0; i < assets.Sounds?.Count; i++)
+				{
+					Sounds[assets.Sounds[i]] = new Sound(new SoundBuffer(assets.Sounds[i]));
+					UpdateLoadingPercent();
+				}
+				for (int i = 0; i < assets.Music?.Count; i++)
+				{
+					Music[assets.Music[i]] = new Music(assets.Music[i]);
+					UpdateLoadingPercent();
+				}
+				for (int i = 0; i < assets.Fonts?.Count; i++)
+				{
+					Fonts[assets.Fonts[i]] = new Font(assets.Fonts[i]);
+					UpdateLoadingPercent();
+				}
 			}
-			for (int i = 0; i < assets.Sounds?.Count; i++)
-			{
-				Sounds[assets.Sounds[i]] = new Sound(new SoundBuffer(assets.Sounds[i]));
-				UpdateLoadingPercent();
-			}
-			for (int i = 0; i < assets.Music?.Count; i++)
-			{
-				Music[assets.Music[i]] = new Music(assets.Music[i]);
-				UpdateLoadingPercent();
-			}
-			for (int i = 0; i < assets.Fonts?.Count; i++)
-			{
-				Fonts[assets.Fonts[i]] = new Font(assets.Fonts[i]);
-				UpdateLoadingPercent();
-			}
+			catch (System.Exception) { return; }
 
 			void UpdateLoadingPercent()
 			{

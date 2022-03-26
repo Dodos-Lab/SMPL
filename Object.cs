@@ -140,8 +140,8 @@ namespace SMPL
 			}
 
 			var c = Matrix3x2.Identity;
-			c *= Matrix3x2.CreateScale(LocalScale, Origin);
-			c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians(), Origin);
+			c *= Matrix3x2.CreateScale(LocalScale);
+			c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
 			c *= Matrix3x2.CreateTranslation(LocalPosition);
 
 			global = c * p;
