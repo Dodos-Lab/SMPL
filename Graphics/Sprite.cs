@@ -3,28 +3,24 @@ using System.Numerics;
 
 namespace SMPL
 {
-	public class VisualSprite : Visual
+	public class Sprite : Visual
 	{
 		private const float BASE_SIZE = 100;
 
 		public Vector2 TexCoordsUnitA { get; set; }
 		public Vector2 TexCoordsUnitB { get; set; }
 
-		public Vector2 TopLeft
-		{ get => Position.MoveAtAngle(Angle + Position.AngleToPoint(Position - Origin), Origin.Length() * Scale.Length() * 0.7071f, false); }
-		public Vector2 TopRight
-		{ get => TopLeft.MoveAtAngle(Angle, Texture == null ? BASE_SIZE : Texture.Size.X * Scale.X, false); }
-		public Vector2 BottomRight
-		{ get => TopRight.MoveAtAngle(Angle + 90, Texture == null ? BASE_SIZE : Texture.Size.Y * Scale.Y, false); }
-		public Vector2 BottomLeft
-		{ get => BottomRight.MoveAtAngle(Angle + 180, Texture == null ? BASE_SIZE : Texture.Size.X * Scale.X, false); }
+		public Vector2 TopLeft => GetPosition(-Origin);
+		public Vector2 TopRight => GetPosition((Texture == null ? new(BASE_SIZE, 0) : new(Texture.Size.X, 0)) - Origin);
+		public Vector2 BottomRight => GetPosition((Texture == null ? new(BASE_SIZE, BASE_SIZE) : new(Texture.Size.X, Texture.Size.Y)) - Origin);
+		public Vector2 BottomLeft => GetPosition((Texture == null ? new(0, BASE_SIZE) : new(0, Texture.Size.Y)) - Origin);
 
 		public bool IsCaptured
 		{
 			get => Camera.Captures(TopLeft) || Camera.Captures(TopRight) || Camera.Captures(BottomLeft) || Camera.Captures(BottomRight);
 		}
 
-		public VisualSprite()
+		public Sprite()
 		{
 			TexCoordsUnitB = new(1, 1);
 		}

@@ -48,48 +48,18 @@ namespace SMPL
 
 		public Vector2 Position
 		{
-			get => GetPosition(global) - Origin;
-			set
-			{
-				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateTranslation(Origin);
-				c *= Matrix3x2.CreateScale(LocalScale);
-				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
-				c *= Matrix3x2.CreateTranslation(value);
-
-				var local = c * GetInverseParent();
-				LocalPosition = GetPosition(local);
-			}
+			get => GetPosition(global);
+			set => LocalPosition = GetLocalPosition(value);
 		}
 		public Vector2 Scale
 		{
 			get => GetScale(global);
-			set
-			{
-				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateTranslation(Origin);
-				c *= Matrix3x2.CreateScale(value);
-				c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
-				c *= Matrix3x2.CreateTranslation(LocalPosition);
-
-				var local = c * GetInverseParent();
-				LocalScale = GetScale(local);
-			}
+			set => LocalScale = GetScale(GlobalToLocal(value, LocalAngle, LocalPosition));
 		}
 		public float Angle
 		{
 			get => GetAngle(global);
-			set
-			{
-				var c = Matrix3x2.Identity;
-				c *= Matrix3x2.CreateTranslation(Origin);
-				c *= Matrix3x2.CreateScale(LocalScale);
-				c *= Matrix3x2.CreateRotation(value.DegreesToRadians());
-				c *= Matrix3x2.CreateTranslation(LocalPosition);
-
-				var local = c * GetInverseParent();
-				LocalAngle = GetAngle(local);
-			}
+			set => LocalAngle = GetAngle(GlobalToLocal(LocalScale, value, LocalPosition));
 		}
 
 		public Object Parent
@@ -116,6 +86,15 @@ namespace SMPL
 		}
 		public ReadOnlyCollection<Object> Children => children.AsReadOnly();
 
+		public Vector2 GetLocalPosition(Vector2 position)
+		{
+			return GetPosition(GlobalToLocal(LocalScale, LocalAngle, position));
+		}
+		public Vector2 GetPosition(Vector2 localPosition)
+		{
+			return GetPosition(LocalToGlobal(LocalScale, LocalAngle, localPosition));
+		}
+
 		public Object()
 		{
 			LocalScale = new(1, 1);
@@ -130,37 +109,45 @@ namespace SMPL
 		}
 		private void UpdateGlobalMatrix()
 		{
-			var p = Matrix3x2.Identity;
+			global = LocalToGlobal(LocalScale, LocalAngle, LocalPosition);
+		}
 
+		private Matrix3x2 LocalToGlobal(Vector2 localScale, float localAngle, Vector2 localPosition)
+		{
+			var c = Matrix3x2.Identity;
+			c *= Matrix3x2.CreateTranslation(localPosition);
+			c *= Matrix3x2.CreateRotation(localAngle.DegreesToRadians());
+			c *= Matrix3x2.CreateScale(localScale);
+
+			var p = Matrix3x2.Identity;
 			if (parent != null)
 			{
 				p *= Matrix3x2.CreateScale(parent.Scale);
 				p *= Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians());
 				p *= Matrix3x2.CreateTranslation(parent.Position);
 			}
-
-			var c = Matrix3x2.Identity;
-			c *= Matrix3x2.CreateScale(LocalScale);
-			c *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
-			c *= Matrix3x2.CreateTranslation(LocalPosition);
-
-			global = c * p;
+			return c * p;
 		}
-		private Matrix3x2 GetInverseParent()
+		private Matrix3x2 GlobalToLocal(Vector2 scale, float angle, Vector2 position)
 		{
-			var p = Matrix3x2.Identity;
+			var c = Matrix3x2.Identity;
+			c *= Matrix3x2.CreateScale(scale);
+			c *= Matrix3x2.CreateRotation(angle.DegreesToRadians());
+			c *= Matrix3x2.CreateTranslation(position);
 
+			var inverseParent = Matrix3x2.Identity;
 			if (parent != null)
 			{
 				Matrix3x2.Invert(Matrix3x2.CreateScale(parent.Scale), out var s);
 				Matrix3x2.Invert(Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians()), out var r);
 				Matrix3x2.Invert(Matrix3x2.CreateTranslation(parent.Position), out var t);
 
-				p *= t;
-				p *= r;
-				p *= s;
+				inverseParent *= t;
+				inverseParent *= r;
+				inverseParent *= s;
 			}
-			return p;
+
+			return c * inverseParent;
 		}
 
 		private static float GetAngle(Matrix3x2 matrix)

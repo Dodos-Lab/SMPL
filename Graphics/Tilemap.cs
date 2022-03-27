@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace SMPL
 {
-   public class VisualTilemap : Visual
+   public class Tilemap : Visual
    {
       public struct Tile
       {
@@ -76,7 +76,7 @@ namespace SMPL
          var pos = position.ToGrid(CellSize * Scale) / Scale / CellSize;
          return map.ContainsKey(pos) == false ? new() : map[pos].Values.ToList();
 		}
-		public Vector2 GetPosition(Vector2 tileIndecies)
+		public Vector2 GetTilePosition(Vector2 tileIndecies)
       {
          return tileIndecies / CellSize / Scale;
       }

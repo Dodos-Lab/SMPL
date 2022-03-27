@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace SMPL
 {
-	public class VisualSpriteBorder : Visual
+	public class SpriteBorder : Visual
 	{
 		private const float BASE_SIZE = 100;
 
@@ -36,7 +36,7 @@ namespace SMPL
 		}
 		public float BorderSize { get; set; } = 16;
 
-		public VisualSpriteBorder()
+		public SpriteBorder()
 		{
 			TexCoordsUnitB = new(1, 1);
 		}

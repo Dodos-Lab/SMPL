@@ -5,7 +5,7 @@ using SFML.System;
 
 namespace SMPL
 {
-	public abstract class VisualParticles : Visual
+	public abstract class Particles : Visual
 	{
 		public class Particle
 		{
