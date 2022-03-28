@@ -20,14 +20,10 @@ namespace SMPL
 		public Vector2 BorderBottomLeft
 		{ get => CenterBottomLeft.MoveAtAngle(Angle + 180, BorderSize, false).MoveAtAngle(Angle + 90, BorderSize, false); }
 
-		public Vector2 CenterTopLeft
-		{ get => Position.MoveAtAngle(Angle + Position.AngleToPoint(Position - Origin), Origin.Length() * Scale.Length() * 0.7071f, false); }
-		public Vector2 CenterTopRight
-		{ get => CenterTopLeft.MoveAtAngle(Angle, Texture == null ? BASE_SIZE : Texture.Size.X * Scale.X, false); }
-		public Vector2 CenterBottomRight
-		{ get => CenterTopRight.MoveAtAngle(Angle + 90, Texture == null ? BASE_SIZE : Texture.Size.Y * Scale.Y, false); }
-		public Vector2 CenterBottomLeft
-		{ get => CenterBottomRight.MoveAtAngle(Angle + 180, Texture == null ? BASE_SIZE : Texture.Size.X * Scale.X, false); }
+		public Vector2 CenterTopLeft => default;
+		public Vector2 CenterTopRight => default;
+		public Vector2 CenterBottomRight => default;
+		public Vector2 CenterBottomLeft => default;
 
 		public bool IsCaptured
 		{
