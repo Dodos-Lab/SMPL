@@ -39,7 +39,17 @@ namespace SMPL
 		private static readonly Dictionary<string, int> gateEntries = new();
 		private static readonly Dictionary<string, bool> gates = new();
 
-		public static bool Once(this bool condition, uint maxEntries = uint.MaxValue, string uniqueness = default)
+		/// <summary>
+		/// Returns true only the first time <paramref name="condition"/> is true. This is reset whenever <paramref name="condition"/> becomes false.
+		/// This process can be repeated <paramref name="max"/> amount of times, always returns false after that.
+		/// Some <paramref name="uniqueness"/> can be included if the line at which this method is called is not unique enough
+		/// (for example in a for loop or in cases where multiple instances can be checked in the same condition):<br></br>
+		/// <code>
+		/// if (unit1.Overlaps(unit2).Once(uniqueness: unit1.Name)))
+		/// ...
+		/// </code>
+		/// </summary>
+		public static bool Once(this bool condition, uint max = uint.MaxValue, string uniqueness = default)
 		{
 			var uniqueID = $"{Debug.GetFilePath(1)}-{Debug.GetLineNumber(1)}-{uniqueness}";
 			if (gates.ContainsKey(uniqueID) == false && condition == false) return false;
@@ -58,15 +68,21 @@ namespace SMPL
 					gateEntries[uniqueID]++;
 					return true;
 				}
-				else if (gateEntries[uniqueID] < maxEntries) gates[uniqueID] = false;
+				else if (gateEntries[uniqueID] < max) gates[uniqueID] = false;
 			}
 			return false;
 		}
 
+		/// <summary>
+		/// Picks randomly a single <typeparamref name="T"/> value out of a <paramref name="list"/> and returns it.
+		/// </summary>
 		public static T Choose<T>(this List<T> list)
 		{
 			return list[Random(0, list.Count - 1)];
 		}
+		/// <summary>
+		/// Randomly shuffles the contents of a <paramref name="list"/>.
+		/// </summary>
 		public static void Shuffle<T>(this List<T> list)
 		{
 			var n = list.Count;
@@ -79,6 +95,9 @@ namespace SMPL
 				list[n] = value;
 			}
 		}
+		/// <summary>
+		/// Calculates the average <see cref="float"/> out of a <paramref name="list"/> of <see cref="float"/>s and returns it.
+		/// </summary>
 		public static float Average(this List<float> list)
 		{
 			var sum = 0f;
@@ -87,23 +106,37 @@ namespace SMPL
 			return sum / list.Count;
 		}
 
+		/// <summary>
+		/// Whether <paramref name="text"/> can be cast to a <see cref="float"/>.
+		/// </summary>
 		public static bool IsNumber(this string text)
 		{
 			return float.IsNaN(ToNumber(text));
 		}
+		/// <summary>
+		/// Whether <paramref name="text"/> contains only letters.
+		/// </summary>
 		public static bool IsLetters(this string text)
 		{
 			for (int i = 0; i < text.Length; i++)
 			{
 				var isLetter = (text[i] >= 'A' && text[i] <= 'Z') || (text[i] >= 'a' && text[i] <= 'z');
-				if (isLetter == false) return false;
+				if (isLetter == false)
+					return false;
 			}
 			return true;
 		}
+		/// <summary>
+		/// Puts <paramref name="text"/> to the right with a set amount of <paramref name="spaces"/>
+		/// if they are more than the <paramref name="text"/>'s length.<br></br>
+		/// </summary>
 		public static string Align(this string text, int spaces)
 		{
 			return string.Format("{0," + spaces + "}", text);
 		}
+		/// <summary>
+		/// Adds <paramref name="text"/> to itself a certain amount of <paramref name="times"/> and returns it.
+		/// </summary>
 		public static string Repeat(this string text, uint times)
 		{
 			var result = "";
@@ -111,6 +144,10 @@ namespace SMPL
 				result = $"{result}{text}";
 			return result;
 		}
+		/// <summary>
+		/// Encrypts and compresses a <paramref name="text"/> and returns the result.
+		/// The <paramref name="text"/> can be retrieved back with <see cref="Decompress(string)"/>
+		/// </summary>
 		public static string Compress(this string text)
 		{
 			var buffer = Encoding.UTF8.GetBytes(text);
@@ -128,6 +165,9 @@ namespace SMPL
 			Buffer.BlockCopy(BitConverter.GetBytes(buffer.Length), 0, gZipBuffer, 0, 4);
 			return Convert.ToBase64String(gZipBuffer);
 		}
+		/// <summary>
+		/// Decrypts and decompresses a <paramref name="compressedText"/> and returns it. See <see cref="Compress(string)"/>.
+		/// </summary>
 		public static string Decompress(this string compressedText)
 		{
 			var gZipBuffer = Convert.FromBase64String(compressedText);
@@ -143,6 +183,10 @@ namespace SMPL
 
 			return Encoding.UTF8.GetString(buffer);
 		}
+		/// <summary>
+		/// Tries to convert <paramref name="text"/> to a <see cref="float"/> and returns the result (<see cref="float.NaN"/> if unsuccessful).
+		/// This also takes into account the system's default decimal symbol.
+		/// </summary>
 		public static float ToNumber(this string text)
 		{
 			var result = 0.0f;

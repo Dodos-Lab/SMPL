@@ -45,6 +45,9 @@ namespace SMPL
 		#endregion
 		private static bool consoleShown;
 
+		/// <summary>
+		/// Get the line entered by the user in the <see cref="Console"/>.
+		/// </summary>
 		public static string Input
 		{
 			get
@@ -57,12 +60,26 @@ namespace SMPL
 				return result;
 			}
 		}
+		public static string Title
+		{
+#pragma warning disable CA1416
+			get => System.Console.Title;
+#pragma warning restore CA1416
+			set => System.Console.Title = value;
+		}
 
+		/// <summary>
+		/// Display <paramref name="message"/> on the <see cref="Console"/>. May be followed by <paramref name="newLine"/>.
+		/// </summary>
 		public static void Log(object message, bool newLine = true)
 		{
 			Show();
 			System.Console.Write(message + (newLine ? "\n" : ""));
 		}
+		/// <summary>
+		/// Display an error on the <see cref="Console"/> with <paramref name="description"/>.
+		/// Some information about where the error has occurred is also included through <paramref name="depth"/> and <see cref="Debug"/>.
+		/// </summary>
 		public static void LogError(int depth, string description)
 		{
 			if (Debug.IsRunningInVisualStudio == false)
@@ -100,9 +117,13 @@ namespace SMPL
 				}
 			}
 		}
+		/// <summary>
+		/// Remove all logs on the <see cref="Console"/>.
+		/// </summary>
 		public static void Clear()
 		{
 			Show();
+
 			System.Console.Clear();
 		}
 

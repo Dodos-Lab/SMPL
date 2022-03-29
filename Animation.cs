@@ -5,17 +5,38 @@
 		private float rawIndex;
 		private const float LOWER_BOUND = -0.49f;
 
+		/// <summary>
+		/// This is calculated by rounding <see cref="RawIndex"/> and is used to retrieve the <see cref="CurrentValue"/> from <see cref="Values"/>.
+		/// </summary>
 		public int Index => (int)RawIndex.Round();
+		/// <summary>
+		/// A value used for time incrementation. See <see cref="Advance"/> for more info.
+		/// </summary>
 		public float RawIndex
 		{
 			get => rawIndex;
 			set { rawIndex = value.Limit(LOWER_BOUND, Values.Length); }
 		}
-		public float Progress => RawIndex.Map(LOWER_BOUND, Values.Length, 0, 1);
+		/// <summary>
+		/// The current progress (from 0 to 1).
+		/// </summary>
+		public float ProgressUnit => RawIndex.Map(LOWER_BOUND, Values.Length, 0, 1);
 
+		/// <summary>
+		/// All possible "frames" that the <see cref="Animation"/> goes over.
+		/// </summary>
 		public object[] Values { get; set; }
+		/// <summary>
+		/// The current "frame".
+		/// </summary>
 		public object CurrentValue { get; private set; }
+		/// <summary>
+		/// The speed (in frames per second).
+		/// </summary>
 		public float FPS { get; set; }
+		/// <summary>
+		/// Whether the <see cref="Animation"/> starts over when the end is reached.
+		/// </summary>
 		public bool IsRepeating { get; set; }
 
 		public Animation(float fps, bool isRepeating, params object[] values)
@@ -26,7 +47,13 @@
 			IsRepeating = isRepeating;
 			RawIndex = LOWER_BOUND;
 		}
-		public void Update()
+
+		/// <summary>
+		/// This updates the <see cref="Animation"/> by incrementing the <see cref="RawIndex"/> according to
+		/// <see cref="Time.Delta"/> and <see cref="FPS"/> (so that the <see cref="Animation"/> runs consistently on all systems).
+		/// Wraps back to 0 if <see cref="IsRepeating"/>.
+		/// </summary>
+		public void Advance()
 		{
 			if (Values == default)
 			{

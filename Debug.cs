@@ -4,6 +4,9 @@ namespace SMPL
 {
 	public static class Debug
 	{
+		/// <summary>
+		/// Whether this application is started from a standalone .exe or through Visual Studio.
+		/// </summary>
 		public static bool IsRunningInVisualStudio => Debugger.IsAttached;
 
 		public static uint GetLineNumber(int depth = 0)

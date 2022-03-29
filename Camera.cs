@@ -44,7 +44,6 @@ namespace SMPL
 			}
 		}
 		
-
 		/// <summary>
 		/// The top left corner of the <see cref="Camera"/> in the world.
 		/// </summary>
@@ -76,7 +75,7 @@ namespace SMPL
 
 		/// <summary>
 		/// Whether the <see cref="Camera"/> can "see" <paramref name="hitbox"/>.<br></br>
-		/// - Note: This uses <see cref="Hitbox.ConvexContains(Hitbox)"/> so concave <see cref="Hitbox"/>es will give wrong results.
+		/// - Note: This uses <see cref="Hitbox.ConvexContains(Hitbox)"/> so concave <see cref="Hitbox"/>es may give wrong results.
 		/// </summary>
 		public static bool Captures(Hitbox hitbox)
 		{
