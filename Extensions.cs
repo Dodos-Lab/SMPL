@@ -196,19 +196,21 @@ namespace SMPL
 			return parsed ? result : float.NaN;
 		}
 
-		public static bool IsSigned(this float number)
-		{
-			return number.ToString()[0] == '-';
-		}
+		/// <summary>
+		/// Wraps a <paramref name="number"/> around the range 0-360 and returns it.
+		/// </summary>
 		public static float AngleTo360(this float number)
 		{
 			return ((number % 360) + 360) % 360;
 		}
-		public static float Animate(this float progressPercent, Animations animationType, AnimationCurves animationCurve)
+		/// <summary>
+		/// Converts a unit <paramref name="progress"/> (0 to 1) to a value calculated according to
+		/// <paramref name="animationType"/> and <paramref name="animationCurve"/> then returns it.
+		/// </summary>
+		public static float AnimateUnit(this float progress, Animations animationType, AnimationCurves animationCurve)
 		{
 			var result = 0f;
-			progressPercent /= 100;
-			var x = progressPercent;
+			var x = progress;
 			switch (animationType)
 			{
 				case Animations.BendWeak:
@@ -274,6 +276,11 @@ namespace SMPL
 					x < 2.5f / 2.75f ? 7.5625f * (x -= 2.25f / 2.75f) * x + 0.9375f : 7.5625f * (x -= 2.625f / 2.75f) * x + 0.984375f;
 			}
 		}
+		/// <summary>
+		/// Restricts a <paramref name="number"/> in the range <paramref name="lower"/> to <paramref name="upper"/> with <paramref name="limitType"/>
+		/// and returns it.
+		/// Also known as Clamp.
+		/// </summary>
 		public static float Limit(this float number, float lower, float upper, Limits limitType = Limits.ClosestBound)
 		{
 			if (limitType == Limits.ClosestBound)
@@ -297,16 +304,26 @@ namespace SMPL
 				}
 			}
 		}
+		/// <summary>
+		/// Ensures a <paramref name="number"/> is <paramref name="signed"/> and returns the result.
+		/// </summary>
 		public static float Sign(this float number, bool signed)
 		{
 			return signed ? -MathF.Abs(number) : MathF.Abs(number);
 		}
-		public static float Precision(this float number)
+		/// <summary>
+		/// Calculates <paramref name="number"/>'s precision (amount of digits after the decimal point) and returns it.
+		/// </summary>
+		public static int Precision(this float number)
 		{
 			var cultDecPoint = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
 			var split = number.ToString().Split(cultDecPoint);
 			return split.Length > 1 ? split[1].Length : 0;
 		}
+		/// <summary>
+		/// Rounds a <paramref name="number"/> <paramref name="toward"/> a chosen way and <paramref name="precision"/> then returns the result.
+		/// May take into account a certain <paramref name="priority"/>.
+		/// </summary>
 		public static float Round(this float number, float precision = 0, RoundWay toward = RoundWay.Closest,
 			RoundWhen5 priority = RoundWhen5.AwayFromZero)
 		{
@@ -327,9 +344,12 @@ namespace SMPL
 
 			return MathF.Round(number, (int)precision, (MidpointRounding)priority);
 		}
-		public static float ToDataSize(this float number, SizeToSize dataSize)
+		/// <summary>
+		/// Converts a <paramref name="number"/> from <paramref name="sizeToSize"/> and returns it.
+		/// </summary>
+		public static float ToDataSize(this float number, SizeToSize sizeToSize)
 		{
-			return dataSize switch
+			return sizeToSize switch
 			{
 				SizeToSize.Bit_Byte => number / 8,
 				SizeToSize.Bit_KB => number / 8000,
@@ -352,31 +372,57 @@ namespace SMPL
 				_ => default,
 			};
 		}
+		/// <summary>
+		/// Whether <paramref name="number"/> is in range <paramref name="lower"/> to <paramref name="upper"/>.
+		/// The ranges may be <paramref name="inclusiveLower"/> or <paramref name="inclusiveUpper"/>.
+		/// </summary>
 		public static bool IsBetween(this float number, float lower, float upper, bool inclusiveLower = false, bool inclusiveUpper = false)
 		{
 			var l = inclusiveLower ? lower <= number : lower < number;
 			var u = inclusiveUpper ? upper >= number : upper > number;
 			return l && u;
 		}
+		/// <summary>
+		/// Moves a <paramref name="number"/> in the direction of <paramref name="speed"/> while <paramref name="isFpsDependent"/> and returns the result.
+		/// If the operation <paramref name="isFpsDependent"/> then see <see cref="Time.Delta"/> for more info.
+		/// </summary>
 		public static float Move(this float number, float speed, bool isFpsDependent = true)
 		{
 			if (isFpsDependent)
 				speed *= Time.Delta;
 			return number + speed;
 		}
+		/// <summary>
+		/// Moves a <paramref name="number"/> toward a <paramref name="targetNumber"/> with <paramref name="speed"/> while
+		/// <paramref name="isFpsDependent"/> and returns it. The calculation ensures not to pass the <paramref name="targetNumber"/>.
+		/// If the operation <paramref name="isFpsDependent"/> then see <see cref="Time.Delta"/> for more info.
+		/// </summary>
 		public static float MoveToward(this float number, float targetNumber, float speed, bool isFpsDependent = true)
 		{
 			var goingPos = number < targetNumber;
 			var result = Move(number, goingPos ? Sign(speed, false) : Sign(speed, true), isFpsDependent);
 
-			if (goingPos && result > targetNumber) return targetNumber;
-			else if (goingPos == false && result < targetNumber) return targetNumber;
+			if (goingPos && result > targetNumber)
+				return targetNumber;
+			else if (goingPos == false && result < targetNumber)
+				return targetNumber;
 			return result;
 		}
-		public static float Map(this float number, float lowerA, float upperA, float lowerB, float upperB)
+		/// <summary>
+		/// Maps a <paramref name="number"/> from (<paramref name="A1"/> - <paramref name="B1"/>) to
+		/// (<paramref name="B1"/> - <paramref name="B2"/>) and returns it.<br></br>
+		/// Example: 50 mapped from (0 - 100) and (0 - 1) results to 0.5<br></br>
+		/// Example: 25 mapped from (30 - 20) and (1 - 5) results to 3
+		/// </summary>
+		public static float Map(this float number, float A1, float A2, float B1, float B2)
 		{
-			return (number - lowerA) / (upperA - lowerA) * (upperB - lowerB) + lowerB;
+			return (number - A1) / (A2 - A1) * (B2 - B1) + B1;
 		}
+		/// <summary>
+		/// Rotates an <paramref name="angle"/> toward <paramref name="targetAngle"/> with <paramref name="speed"/> while
+		/// <paramref name="isFpsDependent"/> taking the closest path. The calculation ensures not to pass the <paramref name="targetAngle"/>.
+		/// If the operation <paramref name="isFpsDependent"/> then see <see cref="Time.Delta"/> for more info.
+		/// </summary>
 		public static float MoveTowardAngle(this float angle, float targetAngle, float speed, bool isFpsDependent = true)
 		{
 			angle = AngleTo360(angle);

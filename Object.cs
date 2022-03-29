@@ -82,7 +82,7 @@ namespace SMPL
 		}
 
 		/// <summary>
-		/// Having a <see cref="Parent"/> will make this <see cref="Object"/> move, rotate and scale as if they are one <see cref="Object"/>.
+		/// Having an <see cref="Parent"/> will make this <see cref="Object"/> move, rotate and scale as if they are one <see cref="Object"/>.
 		/// </summary>
 		public Object Parent
 		{
