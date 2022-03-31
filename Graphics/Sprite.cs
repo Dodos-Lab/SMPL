@@ -5,6 +5,8 @@ namespace SMPL
 {
 	public class Sprite : Visual
 	{
+		private Vector2 localSz, originUnit;
+
 		/// <summary>
 		/// <see cref="Draw"/> uses this unit vector and <see cref="TexCoordsUnitB"/> to determine the visible square on <see cref="Visual.Texture"/>.<br></br>
 		/// - Note: [0, 0] is the top left and [1, 1] is the bottom right of the <see cref="Visual.Texture"/>
@@ -20,7 +22,8 @@ namespace SMPL
 		/// <summary>
 		/// Size relative to <see cref="Object.Scale"/>.
 		/// </summary>
-		public Vector2 LocalSize { get; set; }
+		public Vector2 LocalSize
+		{ get => localSz; set { localSz = value; UpdateHitbox(); } }
 		/// <summary>
 		/// Size in the world.
 		/// </summary>
@@ -35,7 +38,8 @@ namespace SMPL
 		/// Note: [0, 0] is the top left and [1, 1] is the bottom right corner of the <see cref="Sprite"/> (no matter the <see cref="Size"/>).
 		/// Values can also go bellow 0 and above 1.
 		/// </summary>
-		public Vector2 OriginUnit { get; set; }
+		public Vector2 OriginUnit
+		{ get => originUnit; set { originUnit = value; UpdateHitbox(); } }
 		/// <summary>
 		/// This determines the positional offset from <see cref="Object.Position"/> as a point vector.<br></br>
 		/// </summary>
@@ -59,8 +63,17 @@ namespace SMPL
 		/// </summary>
 		public Vector2 BottomLeft => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin);
 
+		/// <summary>
+		/// A set of <see cref="Hitbox.Lines"/> that determine if and where this <see cref="Sprite"/> interacts with other <see cref="SMPL.Hitbox"/>es.
+		/// Useful for collision detection, checking whether it is hovered by the mouse cursor etc.<br></br>
+		/// - Note: Use <see cref="Hitbox.UpdateLines(Object)"/> by passing this <see cref="Sprite"/> in order for the <see cref="Object"/>
+		/// transformations to affect this <see cref="Hitbox"/>.
+		/// </summary>
+		public Hitbox Hitbox { get; set; }
+
 		public Sprite()
 		{
+			Hitbox = new();
 			TexCoordsUnitB = new(1, 1);
 			LocalSize = new(100, 100);
 			OriginUnit = new(0.5f, 0.5f);
@@ -91,6 +104,15 @@ namespace SMPL
 			};
 
 			RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+		}
+
+		private void UpdateHitbox()
+		{
+			Hitbox.LocalLines.Clear();
+			Hitbox.LocalLines.Add(new(-Origin, new Vector2(LocalSize.X, 0) - Origin));
+			Hitbox.LocalLines.Add(new(new Vector2(LocalSize.X, 0) - Origin, LocalSize - Origin));
+			Hitbox.LocalLines.Add(new(LocalSize - Origin, new Vector2(0, LocalSize.Y) - Origin));
+			Hitbox.LocalLines.Add(new(new Vector2(0, LocalSize.Y) - Origin, -Origin));
 		}
 	}
 }

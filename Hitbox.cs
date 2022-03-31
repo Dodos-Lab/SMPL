@@ -28,8 +28,9 @@ namespace SMPL
 		}
 
 		/// <summary>
-		/// Takes <see cref="LocalLines"/>, applies the <paramref name="obj"/>'s transformations on them and puts them into <see cref="Lines"/>
-		/// for the rest of the methods to use.
+		/// Takes <see cref="LocalLines"/>, applies <paramref name="obj"/>'s transformations on them and puts the result into <see cref="Lines"/>
+		/// for the rest of the methods to use.<br></br>
+		/// - Note: Any previous changes to the <see cref="Lines"/> list will be erased.
 		/// </summary>
 		public void UpdateLines(Object obj)
 		{
