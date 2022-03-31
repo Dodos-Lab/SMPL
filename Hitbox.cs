@@ -36,7 +36,7 @@ namespace SMPL
 			Lines.Clear();
 
 			for (int i = 0; i < LocalLines.Count; i++)
-				Lines.Add(new(obj.GetPosition(LocalLines[i].A), obj.GetPosition(LocalLines[i].B)));
+				Lines.Add(new(obj.GetPositionFromSelf(LocalLines[i].A), obj.GetPositionFromSelf(LocalLines[i].B)));
 		}
 		/// <summary>
 		/// Draws all <see cref="Lines"/> onto <paramref name="renderTarget"/> with <paramref name="color"/> and <paramref name="width"/>.

@@ -45,19 +45,19 @@ namespace SMPL
 		/// <summary>
 		/// The top left corner of the <see cref="Sprite"/> in the world.
 		/// </summary>
-		public Vector2 TopLeft => GetPosition(-Origin);
+		public Vector2 TopLeft => GetPositionFromSelf(-Origin);
 		/// <summary>
 		/// The top right corner of the <see cref="Sprite"/> in the world.
 		/// </summary>
-		public Vector2 TopRight => GetPosition(new Vector2(LocalSize.X, 0) - Origin);
+		public Vector2 TopRight => GetPositionFromSelf(new Vector2(LocalSize.X, 0) - Origin);
 		/// <summary>
 		/// The bottom right corner of the <see cref="Sprite"/> in the world.
 		/// </summary>
-		public Vector2 BottomRight => GetPosition(LocalSize - Origin);
+		public Vector2 BottomRight => GetPositionFromSelf(LocalSize - Origin);
 		/// <summary>
 		/// The bottom left corner of the <see cref="Sprite"/> in the world.
 		/// </summary>
-		public Vector2 BottomLeft => GetPosition(new Vector2(0, LocalSize.Y) - Origin);
+		public Vector2 BottomLeft => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin);
 
 		public Sprite()
 		{

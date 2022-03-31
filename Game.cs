@@ -23,7 +23,6 @@ namespace SMPL
 			InitWindow();
 			Camera.Position = new();
 			Scene.Init(startingScene, loadingScene);
-			//var texture = new Texture("tileset.png");
 
 			while (Window.IsOpen)
 			{
@@ -32,16 +31,6 @@ namespace SMPL
 
 				Time.Update();
 				Scene.UpdateCurrentScene();
-
-				//var vertsArr = new Vertex[4];
-				//var c = Color.White;
-				//
-				//vertsArr[0] = (new(new(0, 0), c, new(0, 0)));
-				//vertsArr[1] = (new(new(96, 0), c, new(16, 0)));
-				//vertsArr[2] = (new(new(96, 96), c, new(16, 16)));
-				//vertsArr[3] = (new(new(0, 96), c, new(0, 16)));
-				//
-				//Window.Draw(vertsArr, PrimitiveType.Quads, new(BlendMode.Alpha, Transform.Identity, texture, null));
 
 				Window.Display();
 			}

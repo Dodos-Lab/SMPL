@@ -62,7 +62,7 @@ namespace SMPL
 		public Vector2 Position
 		{
 			get => GetPosition(global);
-			set => LocalPosition = GetLocalPosition(value);
+			set => LocalPosition = GetLocalPositionFromParent(value);
 		}
 		/// <summary>
 		/// Scale in the world. This is used with some size value (for example <see cref="Sprite.LocalSize"/>).
@@ -70,7 +70,7 @@ namespace SMPL
 		public float Scale
 		{
 			get => GetScale(global);
-			set => LocalScale = GetScale(GlobalToLocal(value, LocalAngle, LocalPosition));
+			set => LocalScale = GetScale(GlobalToLocal(value, Angle, Position));
 		}
 		/// <summary>
 		/// Angle in the world (where this <see cref="Object"/> is facing towards in 0-360 degrees).
@@ -78,7 +78,7 @@ namespace SMPL
 		public float Angle
 		{
 			get => GetAngle(global);
-			set => LocalAngle = GetAngle(GlobalToLocal(LocalScale, value, LocalPosition));
+			set => LocalAngle = GetAngle(GlobalToLocal(Scale, value, Position));
 		}
 
 		/// <summary>
@@ -114,16 +114,44 @@ namespace SMPL
 		/// <summary>
 		/// Transform a world <paramref name="position"/> into a position that's relative to <see cref="Parent"/>.
 		/// </summary>
-		public Vector2 GetLocalPosition(Vector2 position)
+		public Vector2 GetLocalPositionFromParent(Vector2 position)
 		{
-			return GetPosition(GlobalToLocal(LocalScale, LocalAngle, position));
+			return GetPosition(GlobalToLocal(Scale, Angle, position));
 		}
 		/// <summary>
 		/// Transform a <paramref name="localPosition"/> (relative to <see cref="Parent"/>) to a position in the world.
 		/// </summary>
-		public Vector2 GetPosition(Vector2 localPosition)
+		public Vector2 GetPositionFromParent(Vector2 localPosition)
 		{
 			return GetPosition(LocalToGlobal(LocalScale, LocalAngle, localPosition));
+		}
+		/// <summary>
+		/// Transform a world <paramref name="position"/> into a position that's relative to this <see cref="Object"/>.
+		/// Its <see cref="Parent"/> is also accounted for.
+		/// </summary>
+		public Vector2 GetLocalPositionFromSelf(Vector2 position)
+		{
+			var m = Matrix3x2.Identity;
+			m *= Matrix3x2.CreateTranslation(position);
+			m *= Matrix3x2.CreateRotation(Angle.DegreesToRadians());
+			m *= Matrix3x2.CreateScale(Scale);
+			m *= Matrix3x2.CreateTranslation(Position);
+
+			return GetPosition(m * GetInverseParentMatrix());
+		}
+		/// <summary>
+		/// Transform a <paramref name="localPosition"/> (relative to this <see cref="Object"/>) to a position in the world.
+		/// Its <see cref="Parent"/> is also accounted for.
+		/// </summary>
+		public Vector2 GetPositionFromSelf(Vector2 localPosition)
+		{
+			var m = Matrix3x2.Identity;
+			m *= Matrix3x2.CreateTranslation(localPosition);
+			m *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
+			m *= Matrix3x2.CreateScale(LocalScale);
+			m *= Matrix3x2.CreateTranslation(LocalPosition);
+
+			return GetPosition(m * GetParentMatrix());
 		}
 
 		public Object()
@@ -146,18 +174,11 @@ namespace SMPL
 		private Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)
 		{
 			var c = Matrix3x2.Identity;
-			c *= Matrix3x2.CreateTranslation(localPosition);
-			c *= Matrix3x2.CreateRotation(localAngle.DegreesToRadians());
 			c *= Matrix3x2.CreateScale(localScale, localScale);
+			c *= Matrix3x2.CreateRotation(localAngle.DegreesToRadians());
+			c *= Matrix3x2.CreateTranslation(localPosition);
 
-			var p = Matrix3x2.Identity;
-			if (parent != null)
-			{
-				p *= Matrix3x2.CreateScale(parent.Scale);
-				p *= Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians());
-				p *= Matrix3x2.CreateTranslation(parent.Position);
-			}
-			return c * p;
+			return c * GetParentMatrix();
 		}
 		private Matrix3x2 GlobalToLocal(float scale, float angle, Vector2 position)
 		{
@@ -166,6 +187,21 @@ namespace SMPL
 			c *= Matrix3x2.CreateRotation(angle.DegreesToRadians());
 			c *= Matrix3x2.CreateTranslation(position);
 
+			return c * GetInverseParentMatrix();
+		}
+		private Matrix3x2 GetParentMatrix()
+		{
+			var p = Matrix3x2.Identity;
+			if (parent != null)
+			{
+				p *= Matrix3x2.CreateScale(parent.Scale);
+				p *= Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians());
+				p *= Matrix3x2.CreateTranslation(parent.Position);
+			}
+			return p;
+		}
+		private Matrix3x2 GetInverseParentMatrix()
+		{
 			var inverseParent = Matrix3x2.Identity;
 			if (parent != null)
 			{
@@ -178,7 +214,7 @@ namespace SMPL
 				inverseParent *= s;
 			}
 
-			return c * inverseParent;
+			return inverseParent;
 		}
 
 		private static float GetAngle(Matrix3x2 matrix)
