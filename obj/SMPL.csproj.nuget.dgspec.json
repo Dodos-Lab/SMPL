@@ -1,27 +1,28 @@
 {
   "format": 1,
   "restore": {
-    "D:\\code\\SFML\\SMPL2\\SMPL\\SMPL.csproj": {}
+    "G:\\SMPL\\SMPL.csproj": {}
   },
   "projects": {
-    "D:\\code\\SFML\\SMPL2\\SMPL\\SMPL.csproj": {
+    "G:\\SMPL\\SMPL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\code\\SFML\\SMPL2\\SMPL\\SMPL.csproj",
+        "projectUniqueName": "G:\\SMPL\\SMPL.csproj",
         "projectName": "SMPL",
-        "projectPath": "D:\\code\\SFML\\SMPL2\\SMPL\\SMPL.csproj",
-        "packagesPath": "C:\\Users\\PC PC\\.nuget\\packages\\",
-        "outputPath": "D:\\code\\SFML\\SMPL2\\SMPL\\obj\\",
+        "projectPath": "G:\\SMPL\\SMPL.csproj",
+        "packagesPath": "C:\\Users\\GoKsTaR\\.nuget\\packages\\",
+        "outputPath": "G:\\SMPL\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\PC PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\GoKsTaR\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net5.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -60,7 +61,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files (x86)\\dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.406\\RuntimeIdentifierGraph.json"
         }
       }
     }

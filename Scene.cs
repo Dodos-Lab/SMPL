@@ -22,11 +22,8 @@ namespace SMPL
 
 		public static Vector2 MousePosition
 		{
-			get
-			{
-				var p = Game.Window.MapPixelToCoords(Mouse.GetPosition(Game.Window));
-				return new(p.X, p.Y);
-			}
+			get { var p = Game.Window.MapPixelToCoords(Mouse.GetPosition(Game.Window)); return new(p.X, p.Y); }
+			set => Game.Window.MapCoordsToPixel(value.ToSFML());
 		}
 		public static Scene CurrentScene
 		{

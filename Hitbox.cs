@@ -32,7 +32,7 @@ namespace SMPL
 		/// for the rest of the methods to use.<br></br>
 		/// - Note: Any previous changes to the <see cref="Lines"/> list will be erased.
 		/// </summary>
-		public void UpdateLines(Object obj)
+		public void TransformLocalLines(Object obj)
 		{
 			Lines.Clear();
 

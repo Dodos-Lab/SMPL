@@ -5,8 +5,6 @@ namespace SMPL
 {
 	public class Sprite : Visual
 	{
-		private Vector2 localSz, originUnit;
-
 		/// <summary>
 		/// <see cref="Draw"/> uses this unit vector and <see cref="TexCoordsUnitB"/> to determine the visible square on <see cref="Visual.Texture"/>.<br></br>
 		/// - Note: [0, 0] is the top left and [1, 1] is the bottom right of the <see cref="Visual.Texture"/>
@@ -22,8 +20,7 @@ namespace SMPL
 		/// <summary>
 		/// Size relative to <see cref="Object.Scale"/>.
 		/// </summary>
-		public Vector2 LocalSize
-		{ get => localSz; set { localSz = value; UpdateHitbox(); } }
+		public Vector2 LocalSize { get; set; }
 		/// <summary>
 		/// Size in the world.
 		/// </summary>
@@ -38,8 +35,7 @@ namespace SMPL
 		/// Note: [0, 0] is the top left and [1, 1] is the bottom right corner of the <see cref="Sprite"/> (no matter the <see cref="Size"/>).
 		/// Values can also go bellow 0 and above 1.
 		/// </summary>
-		public Vector2 OriginUnit
-		{ get => originUnit; set { originUnit = value; UpdateHitbox(); } }
+		public Vector2 OriginUnit { get; set; }
 		/// <summary>
 		/// This determines the positional offset from <see cref="Object.Position"/> as a point vector.<br></br>
 		/// </summary>
@@ -106,7 +102,11 @@ namespace SMPL
 			RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 
-		private void UpdateHitbox()
+		/// <summary>
+		/// Sets a rectangular <see cref="SMPL.Hitbox"/> to <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="OriginUnit"/> and
+		/// <see cref="Size"/> so this should be called after each change on these in order to maintain the default <see cref="SMPL.Hitbox"/>'s proper shape.
+		/// </summary>
+		public void SetDefaultHitbox()
 		{
 			Hitbox.LocalLines.Clear();
 			Hitbox.LocalLines.Add(new(-Origin, new Vector2(LocalSize.X, 0) - Origin));
