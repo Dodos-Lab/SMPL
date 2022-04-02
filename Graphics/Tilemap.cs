@@ -64,8 +64,21 @@ namespace SMPL
 
          map[tilePositionIndecies][tile.Layer] = tile;
       }
-      public void SetRepeatedTile(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, Tile tile)
+      public void SetTileSquare(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, Tile tile)
       {
+         if (tilePositionIndeciesA.X > tilePositionIndeciesB.X)
+         {
+            var swap = tilePositionIndeciesB.X;
+            tilePositionIndeciesB.X = tilePositionIndeciesA.X;
+            tilePositionIndeciesA.X = swap;
+         }
+         if (tilePositionIndeciesA.Y > tilePositionIndeciesB.Y)
+         {
+            var swap = tilePositionIndeciesB.Y;
+            tilePositionIndeciesB.Y = tilePositionIndeciesA.Y;
+            tilePositionIndeciesA.Y = swap;
+         }
+
          for (float x = tilePositionIndeciesA.X; x < tilePositionIndeciesB.X; x++)
             for (float y = tilePositionIndeciesA.Y; y < tilePositionIndeciesB.Y; y++)
                SetTile(new(x, y), tile);

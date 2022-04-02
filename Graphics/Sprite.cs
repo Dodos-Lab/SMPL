@@ -106,7 +106,7 @@ namespace SMPL
 		/// Sets a rectangular <see cref="SMPL.Hitbox"/> to <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="OriginUnit"/> and
 		/// <see cref="Size"/> so this should be called after each change on these in order to maintain the default <see cref="SMPL.Hitbox"/>'s proper shape.
 		/// </summary>
-		public void SetDefaultHitbox()
+		public virtual void SetDefaultHitbox()
 		{
 			Hitbox.LocalLines.Clear();
 			Hitbox.LocalLines.Add(new(-Origin, new Vector2(LocalSize.X, 0) - Origin));

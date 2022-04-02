@@ -623,6 +623,47 @@ namespace SMPL
 		{
 			return new(vec.X, vec.Y);
 		}
+		public static List<Vector2> Outline(this List<Vector2> points)
+		{
+			var result = new List<Vector2>();
+			foreach (var p in points)
+			{
+				if (result.Count == 0)
+					result.Add(p);
+				else
+				{
+					if (result[0].X > p.X)
+						result[0] = p;
+					else if (result[0].X == p.X)
+						if (result[0].Y > p.Y)
+							result[0] = p;
+				}
+			}
+			var counter = 0;
+			while (counter < result.Count)
+			{
+				var q = Next(points, result[counter]);
+				result.Add(q);
+				if (q == result[0] || result.Count > points.Count)
+					break;
+				counter++;
+
+				Vector2 Next(List<Vector2> points, Vector2 p)
+				{
+					Vector2 q = p;
+					int t;
+					foreach (Vector2 r in points)
+					{
+						t = ((q.X - p.X) * (r.Y - p.Y) - (r.X - p.X) * (q.Y - p.Y)).CompareTo(0);
+						if (t == -1 || t == 0 && Vector2.Distance(p, r) > Vector2.Distance(p, q))
+							q = r;
+					}
+					return q;
+				}
+			}
+			result.Add(result[0]);
+			return result;
+		}
 
 		public static bool IsSigned(this int number)
 		{

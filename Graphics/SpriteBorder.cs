@@ -4,32 +4,17 @@ using System.Numerics;
 
 namespace SMPL
 {
-	public class SpriteBorder : Visual
+	public class SpriteBorder : Sprite
 	{
-		private const float BASE_SIZE = 100;
-
-		public Vector2 TexCoordsUnitA { get; set; }
-		public Vector2 TexCoordsUnitB { get; set; }
-
 		public Vector2 BorderTopLeft
-		{ get => CenterTopLeft.MoveAtAngle(Angle + 270, BorderSize, false).MoveAtAngle(Angle + 180, BorderSize, false); }
+		{ get => TopLeft.MoveAtAngle(Angle + 270, BorderSize, false).MoveAtAngle(Angle + 180, BorderSize, false); }
 		public Vector2 BorderTopRight
-		{ get => CenterTopRight.MoveAtAngle(270 + Angle, BorderSize, false).MoveAtAngle(Angle, BorderSize, false); }
+		{ get => TopRight.MoveAtAngle(270 + Angle, BorderSize, false).MoveAtAngle(Angle, BorderSize, false); }
 		public Vector2 BorderBottomRight
-		{ get => CenterBottomRight.MoveAtAngle(Angle, BorderSize, false).MoveAtAngle(Angle + 90, BorderSize, false); }
+		{ get => BottomRight.MoveAtAngle(Angle, BorderSize, false).MoveAtAngle(Angle + 90, BorderSize, false); }
 		public Vector2 BorderBottomLeft
-		{ get => CenterBottomLeft.MoveAtAngle(Angle + 180, BorderSize, false).MoveAtAngle(Angle + 90, BorderSize, false); }
+		{ get => BottomLeft.MoveAtAngle(Angle + 180, BorderSize, false).MoveAtAngle(Angle + 90, BorderSize, false); }
 
-		public Vector2 CenterTopLeft => default;
-		public Vector2 CenterTopRight => default;
-		public Vector2 CenterBottomRight => default;
-		public Vector2 CenterBottomLeft => default;
-
-		public bool IsCaptured
-		{
-			get => Camera.Captures(CenterTopLeft) || Camera.Captures(CenterTopRight) ||
-				Camera.Captures(CenterBottomLeft) || Camera.Captures(CenterBottomRight);
-		}
 		public float BorderSize { get; set; } = 16;
 
 		public SpriteBorder()
@@ -39,7 +24,7 @@ namespace SMPL
 
 		public override void Draw()
 		{
-			if (IsHidden || IsCaptured == false)
+			if (IsHidden)
 				return;
 
 			var w = Texture == null ? 0 : Texture.Size.X;
@@ -55,59 +40,68 @@ namespace SMPL
 				// top left
 				new(BorderTopLeft.ToSFML(), Color, topLeft),
 				new(BorderTopLeft.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(BorderSize, 0)),
-				new(CenterTopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
-				new(CenterTopLeft.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(0, BorderSize)),
+				new(TopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
+				new(TopLeft.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(0, BorderSize)),
 
 				// top
-				new(CenterTopLeft.MoveAtAngle(Angle + 270, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(BorderSize, 0)),
-				new(CenterTopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
-				new(CenterTopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
-				new(CenterTopRight.MoveAtAngle(Angle + 270, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(-BorderSize, 0)),
+				new(TopLeft.MoveAtAngle(Angle + 270, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(BorderSize, 0)),
+				new(TopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
+				new(TopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
+				new(TopRight.MoveAtAngle(Angle + 270, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(-BorderSize, 0)),
 
 				// top right
 				new(BorderTopRight.ToSFML(), Color, topRight),
 				new(BorderTopRight.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(-BorderSize, 0)),
-				new(CenterTopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
-				new(CenterTopRight.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(0, BorderSize)),
+				new(TopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
+				new(TopRight.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(0, BorderSize)),
 
 				// left
-				new(CenterTopLeft.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(0, BorderSize)),
-				new(CenterTopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
-				new(CenterBottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
-				new(CenterBottomLeft.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(0, -BorderSize)),
+				new(TopLeft.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(0, BorderSize)),
+				new(TopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
+				new(BottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
+				new(BottomLeft.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(0, -BorderSize)),
 
 				// center
-				new(CenterTopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
-				new(CenterTopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
-				new(CenterBottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
-				new(CenterBottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
+				new(TopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
+				new(TopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
+				new(BottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
+				new(BottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
 
 				// right
-				new(CenterTopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
-				new(CenterTopRight.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(0, BorderSize)),
-				new(CenterBottomRight.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, bottomRight + new Vector2f(0, -BorderSize)),
-				new(CenterBottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
+				new(TopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
+				new(TopRight.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(0, BorderSize)),
+				new(BottomRight.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, bottomRight + new Vector2f(0, -BorderSize)),
+				new(BottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
 
 				// bot left
-				new(CenterBottomLeft.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(0, -BorderSize)),
-				new(CenterBottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
-				new(CenterBottomLeft.MoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, 0)),
+				new(BottomLeft.MoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(0, -BorderSize)),
+				new(BottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
+				new(BottomLeft.MoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, 0)),
 				new(BorderBottomLeft.ToSFML(), Color, bottomLeft),
 
 				// bot
-				new(CenterBottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
-				new(CenterBottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
-				new(CenterBottomRight.MoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
-				new(CenterBottomLeft.MoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, 0)),
+				new(BottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
+				new(BottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
+				new(BottomRight.MoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
+				new(BottomLeft.MoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, 0)),
 
 				// bot right
-				new(CenterBottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
-				new(CenterBottomRight.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(0, BorderSize)),
+				new(BottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
+				new(BottomRight.MoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(0, BorderSize)),
 				new(BorderBottomRight.ToSFML(), Color, bottomRight),
-				new(CenterBottomRight.MoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
+				new(BottomRight.MoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
 			};
 
 			RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+		}
+		public override void SetDefaultHitbox()
+		{
+			var borderSz = new Vector2(BorderSize, BorderSize) / Scale;
+			Hitbox.LocalLines.Clear();
+			Hitbox.LocalLines.Add(new(-Origin - borderSz, new Vector2(LocalSize.X + borderSz.X, -borderSz.Y) - Origin));
+			Hitbox.LocalLines.Add(new(new Vector2(LocalSize.X + borderSz.X, -borderSz.Y) - Origin, LocalSize - Origin + borderSz));
+			Hitbox.LocalLines.Add(new(LocalSize - Origin + borderSz, new Vector2(-borderSz.X, LocalSize.Y + borderSz.Y) - Origin));
+			Hitbox.LocalLines.Add(new(new Vector2(-borderSz.X, LocalSize.Y + borderSz.Y) - Origin, -Origin - borderSz));
 		}
 	}
 }

@@ -9,12 +9,30 @@ namespace SMPL
 {
 	public class Scene
 	{
+		public struct TexturedModel3D
+      {
+			public string TexturePath { get; set; }
+			public string ObjModelPath { get; set; }
+			public string UniqueName { get; set; }
+			public uint MaxTextureCount { get; set; }
+			public uint DetailAmount { get; set; }
+
+			public TexturedModel3D(string uniqueName, string objPath, string texturePath, uint maxTextureCount = 20, uint detailAmount = 20)
+         {
+				ObjModelPath = objPath;
+				TexturePath = texturePath;
+				UniqueName = uniqueName;
+				MaxTextureCount = maxTextureCount;
+				DetailAmount = detailAmount;
+         }
+		}
 		public struct AssetQueue
 		{
 			public List<string> Textures { get; set; }
 			public List<string> Music { get; set; }
 			public List<string> Sounds { get; set; }
 			public List<string> Fonts { get; set; }
+			public List<TexturedModel3D> TexturedModels3D { get; set; }
 		}
 
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
@@ -45,6 +63,7 @@ namespace SMPL
 		protected Dictionary<string, Music> Music { get; } = new();
 		protected Dictionary<string, Sound> Sounds { get; } = new();
 		protected Dictionary<string, Font> Fonts { get; } = new();
+		protected Dictionary<string, Sprite3D> Sprites3D { get; } = new();
 
 		protected virtual AssetQueue OnRequireAssets() => default;
 		protected virtual void OnStart() { }
@@ -57,13 +76,13 @@ namespace SMPL
 			var assets = OnRequireAssets();
 			var loadedCount = 0;
 
-			if (assets.Textures == null && assets.Sounds == null && assets.Music == null && assets.Fonts == null)
+			if (assets.Textures == null && assets.Sounds == null && assets.Music == null && assets.Fonts == null && assets.TexturedModels3D == null)
 			{
 				CurrentScene.LoadingPercent = 100;
 				return;
 			}
 
-			try
+			//try
 			{
 				for (int i = 0; i < assets.Textures?.Count; i++)
 				{
@@ -85,17 +104,23 @@ namespace SMPL
 					Fonts[assets.Fonts[i]] = new Font(assets.Fonts[i]);
 					UpdateLoadingPercent();
 				}
+				for (int i = 0; i < assets.TexturedModels3D?.Count; i++)
+				{
+					Sprites3D[assets.TexturedModels3D[i].UniqueName] = new Sprite3D(assets.TexturedModels3D[i]);
+					UpdateLoadingPercent();
+				}
 			}
-			catch (System.Exception) { return; }
+			//catch (System.Exception) { return; }
 
 			void UpdateLoadingPercent()
 			{
 				loadedCount++;
 
-				var total = GetCount(assets.Fonts) + GetCount(assets.Music) + GetCount(assets.Sounds) + GetCount(assets.Textures);
+				var total = GetCount(assets.Fonts) + GetCount(assets.Music) + GetCount(assets.Sounds) + GetCount(assets.Textures) +
+					GetCount(assets.TexturedModels3D);
 				CurrentScene.LoadingPercent = loadedCount.Map(0, total, 0, 100);
 
-				int GetCount(List<string> list) => list?.Count ?? 0;
+				int GetCount<T>(List<T> list) => list?.Count ?? 0;
 			}
 		}
 		internal void UnloadAssets()
