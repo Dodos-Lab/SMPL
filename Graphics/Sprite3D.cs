@@ -10,16 +10,18 @@ namespace SMPL
    {
 		private readonly Texture[] textures;
 
+		public float Height { get; set; } = 4;
+		public float Angle3D { get; set; } = 270;
+
 		public Sprite3D(Scene.TexturedModel3D texturedModel3D)
 		{
 			if (texturedModel3D.ObjModelPath == null || texturedModel3D.TexturePath == null ||
-				texturedModel3D.MaxTextureCount == 0)
-				return;
+				texturedModel3D.MaxTextureCount == 0 || File.Exists(texturedModel3D.ObjModelPath) == false)
+				throw new System.Exception();
 
-			if (File.Exists(texturedModel3D.ObjModelPath) == false)
-				return;
-
-			var img = new Image(texturedModel3D.TexturePath);
+			var img = default(Image);
+         if (File.Exists(texturedModel3D.TexturePath))
+				img = new Image(texturedModel3D.TexturePath);
 			var content = File.ReadAllText(texturedModel3D.ObjModelPath).Replace('\r', ' ').Split('\n');
 			var layeredImages = new List<Image>();
 			var indexTexCoords = new List<int>();
@@ -39,7 +41,7 @@ namespace SMPL
 				{
 					case "v":
 						{
-							var v = new Vector3(N(1), N(2), N(3));
+							var v = new Vector3(N(1), N(2) * -1, N(3));
 							verts.Add(v);
 
 							if (v.X < boundingBoxA.X)
@@ -90,7 +92,7 @@ namespace SMPL
 				var resultTexCoordsX = (uint)(p.X - vertsOffset.X).Map(0, boundingBoxB.X, 0, (uint)textureSize.X - 1);
 				var resultTexCoordsY = (uint)(p.Z - vertsOffset.Z).Map(0, boundingBoxB.Z, 0, (uint)textureSize.Z - 1);
 				var textureIndex = (int)(p.Y - vertsOffset.Y).Map(0, boundingBoxB.Y, 0, texturedModel3D.MaxTextureCount - 1);
-				var color = img.GetPixel((uint)(tx.X * img.Size.X), (uint)(tx.Y * img.Size.Y));
+				var color = img == null ? Color.White : img.GetPixel((uint)(tx.X * img.Size.X), (uint)(tx.Y * img.Size.Y));
 
 				layeredImages[textureIndex].SetPixel(resultTexCoordsX, resultTexCoordsY, color);
 			}
@@ -101,7 +103,7 @@ namespace SMPL
 				layeredTextures[i] = new Texture(layeredImages[i]);
 				layeredImages[i].Dispose();
 			}
-			img.Dispose();
+			img?.Dispose();
 
 			textures = layeredTextures;
 		}
@@ -118,18 +120,16 @@ namespace SMPL
          for (int i = 0; i < textures.Length; i++)
          {
 				Texture = textures[i];
-				var y = new Vector2f(0, -i * 1);
 				var verts = new Vertex[]
 				{
-					new(TopLeft.ToSFML() + y, Color, new(0, 0)),
-					new(TopRight.ToSFML() + y, Color, new(Texture.Size.X, 0)),
-					new(BottomRight.ToSFML() + y, Color, new(Texture.Size.X, Texture.Size.Y)),
-					new(BottomLeft.ToSFML() + y, Color, new(0, Texture.Size.Y)),
+					new(TopLeft.MoveAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, 0)),
+					new(TopRight.MoveAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(Texture.Size.X, 0)),
+					new(BottomRight.MoveAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(Texture.Size.X, Texture.Size.Y)),
+					new(BottomLeft.MoveAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, Texture.Size.Y)),
 				};
 
 				RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 			}
-			textures[78].CopyToImage().SaveToFile("img.png");
 		}
    }
 }

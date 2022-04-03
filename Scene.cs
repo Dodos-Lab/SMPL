@@ -15,9 +15,9 @@ namespace SMPL
 			public string ObjModelPath { get; set; }
 			public string UniqueName { get; set; }
 			public uint MaxTextureCount { get; set; }
-			public uint DetailAmount { get; set; }
+			public float DetailAmount { get; set; }
 
-			public TexturedModel3D(string uniqueName, string objPath, string texturePath, uint maxTextureCount = 20, uint detailAmount = 20)
+			public TexturedModel3D(string uniqueName, string objPath, string texturePath, uint maxTextureCount = 20, float detailAmount = 20)
          {
 				ObjModelPath = objPath;
 				TexturePath = texturePath;
@@ -82,7 +82,7 @@ namespace SMPL
 				return;
 			}
 
-			//try
+			try
 			{
 				for (int i = 0; i < assets.Textures?.Count; i++)
 				{
@@ -110,7 +110,7 @@ namespace SMPL
 					UpdateLoadingPercent();
 				}
 			}
-			//catch (System.Exception) { return; }
+			catch (System.Exception) { Console.LogError(-1, $"Could not load assets."); }
 
 			void UpdateLoadingPercent()
 			{
