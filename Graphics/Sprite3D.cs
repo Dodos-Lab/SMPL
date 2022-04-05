@@ -13,10 +13,15 @@ namespace SMPL
 		public float Height { get; set; } = 4;
 		public float Angle3D { get; set; } = 270;
 
+		public Vector2 TopLeft3D => TopLeft.MoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 TopRight3D => TopRight.MoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 BottomLeft3D => BottomLeft.MoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 BottomRight3D => BottomRight.MoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+
 		public Sprite3D(Scene.TexturedModel3D texturedModel3D)
 		{
 			if (texturedModel3D.ObjModelPath == null || texturedModel3D.TexturePath == null ||
-				texturedModel3D.MaxTextureCount == 0 || File.Exists(texturedModel3D.ObjModelPath) == false)
+				texturedModel3D.TextureCount == 0 || File.Exists(texturedModel3D.ObjModelPath) == false)
 				throw new System.Exception();
 
 			var img = default(Image);
@@ -41,7 +46,7 @@ namespace SMPL
 				{
 					case "v":
 						{
-							var v = new Vector3(N(1), N(2) * -1, N(3));
+							var v = new Vector3(N(1), N(2), N(3)) * texturedModel3D.Scale;
 							verts.Add(v);
 
 							if (v.X < boundingBoxA.X)
@@ -78,11 +83,11 @@ namespace SMPL
 			}
 
 			var vertsOffset = boundingBoxA;
-			var detail = texturedModel3D.DetailAmount;
+			var detail = texturedModel3D.TextureDetail;
 			boundingBoxB -= vertsOffset;
 			var textureSize = boundingBoxB * detail;
 
-			for (int i = 0; i < texturedModel3D.MaxTextureCount; i++)
+			for (int i = 0; i < texturedModel3D.TextureCount; i++)
 				layeredImages.Add(new Image((uint)textureSize.X, (uint)textureSize.Z, Color.Transparent));
 
 			for (int i = 0; i < indexVert.Count; i++)
@@ -91,7 +96,7 @@ namespace SMPL
 				var tx = i < indexTexCoords.Count ? texCoords[indexTexCoords[i]] : default;
 				var resultTexCoordsX = (uint)(p.X - vertsOffset.X).Map(0, boundingBoxB.X, 0, (uint)textureSize.X - 1);
 				var resultTexCoordsY = (uint)(p.Z - vertsOffset.Z).Map(0, boundingBoxB.Z, 0, (uint)textureSize.Z - 1);
-				var textureIndex = (int)(p.Y - vertsOffset.Y).Map(0, boundingBoxB.Y, 0, texturedModel3D.MaxTextureCount - 1);
+				var textureIndex = (int)(p.Y - vertsOffset.Y).Map(0, boundingBoxB.Y, 0, texturedModel3D.TextureCount - 1);
 				var color = img == null ? Color.White : img.GetPixel((uint)(tx.X * img.Size.X), (uint)(tx.Y * img.Size.Y));
 
 				layeredImages[textureIndex].SetPixel(resultTexCoordsX, resultTexCoordsY, color);
@@ -112,6 +117,17 @@ namespace SMPL
 			this.textures = textures;
       }
 
+		public void SetHitbox3D()
+      {
+			Hitbox.Lines.Clear();
+			var h = Height * (textures == null || textures.Length == 0 ? 20 : textures.Length);
+
+			var points = new List<Vector2>() { TopLeft, TopRight, BottomLeft, BottomRight, TopLeft3D, TopRight3D, BottomLeft3D, BottomRight3D };
+			var outline = points.Outline();
+
+			for (int i = 1; i < outline.Count; i++)
+				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
+		}
       public override void Draw()
       {
 			if (IsHidden || textures == null || textures.Length == 0)
