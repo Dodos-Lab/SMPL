@@ -13,10 +13,10 @@ namespace SMPL
 		public float Height { get; set; } = 4;
 		public float Angle3D { get; set; } = 270;
 
-		public Vector2 TopLeft3D => TopLeft.MoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
-		public Vector2 TopRight3D => TopRight.MoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
-		public Vector2 BottomLeft3D => BottomLeft.MoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
-		public Vector2 BottomRight3D => BottomRight.MoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 TopLeft3D => TopLeft.MovePointAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 TopRight3D => TopRight.MovePointAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 BottomLeft3D => BottomLeft.MovePointAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 BottomRight3D => BottomRight.MovePointAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
 
 		public Sprite3D(Scene.TexturedModel3D texturedModel3D)
 		{
@@ -123,7 +123,7 @@ namespace SMPL
 			var h = Height * (textures == null || textures.Length == 0 ? 20 : textures.Length);
 
 			var points = new List<Vector2>() { TopLeft, TopRight, BottomLeft, BottomRight, TopLeft3D, TopRight3D, BottomLeft3D, BottomRight3D };
-			var outline = points.Outline();
+			var outline = points.OutlinePoints();
 
 			for (int i = 1; i < outline.Count; i++)
 				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
@@ -138,10 +138,10 @@ namespace SMPL
 				Texture = textures[i];
 				var verts = new Vertex[]
 				{
-					new(TopLeft.MoveAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, 0)),
-					new(TopRight.MoveAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(Texture.Size.X, 0)),
-					new(BottomRight.MoveAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(Texture.Size.X, Texture.Size.Y)),
-					new(BottomLeft.MoveAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, Texture.Size.Y)),
+					new(TopLeft.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, 0)),
+					new(TopRight.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(Texture.Size.X, 0)),
+					new(BottomRight.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(Texture.Size.X, Texture.Size.Y)),
+					new(BottomLeft.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, Texture.Size.Y)),
 				};
 
 				RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));

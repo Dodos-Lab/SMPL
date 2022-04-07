@@ -8,8 +8,8 @@ namespace SMPL
 		public Vector2 A { get; set; }
 		public Vector2 B { get; set; }
 		public float Length => Vector2.Distance(A, B);
-		public float Angle => A.AngleToPoint(B);
-		public Vector2 Direction => A.DirectionToPoint(B);
+		public float Angle => A.AngleBetweenPoints(B);
+		public Vector2 Direction => Angle.AngleToDirection();
 
 		public Line(Vector2 a, Vector2 b)
 		{
@@ -20,10 +20,10 @@ namespace SMPL
 		public void Draw(RenderTarget renderTarget, Color color, float width = 2)
 		{
 			width /= 2;
-			var startLeft = A.MoveAtAngle(Angle - 90, width, false);
-			var startRight = A.MoveAtAngle(Angle + 90, width, false);
-			var endLeft = B.MoveAtAngle(Angle - 90, width, false);
-			var endRight = B.MoveAtAngle(Angle + 90, width, false);
+			var startLeft = A.MovePointAtAngle(Angle - 90, width, false);
+			var startRight = A.MovePointAtAngle(Angle + 90, width, false);
+			var endLeft = B.MovePointAtAngle(Angle - 90, width, false);
+			var endRight = B.MovePointAtAngle(Angle + 90, width, false);
 
 			var vert = new Vertex[]
 			{
@@ -62,7 +62,7 @@ namespace SMPL
 			var bestDist = double.MaxValue;
 			for (int i = 0; i < tries; i++)
 			{
-				var randPoint = A.MoveAtAngle(i * (360 / tries), Vector2.Distance(A, B), false);
+				var randPoint = A.MovePointAtAngle(i * (360 / tries), Vector2.Distance(A, B), false);
 				var sumDist = Vector2.Distance(A, randPoint) + Vector2.Distance(randPoint, B);
 				if (IsCrossing(A, randPoint, B) == false && sumDist < bestDist)
 				{

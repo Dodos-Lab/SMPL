@@ -68,10 +68,10 @@ namespace SMPL
 				var sz = p.Size;
 				var ang = p.Angle;
 
-				var topLeft = pos.MoveAtAngle(ang + 270, sz * 0.5f, false).MoveAtAngle(ang + 180, sz * 0.5f, false);
-				var topRight = topLeft.MoveAtAngle(ang, sz, false);
-				var botRight = topRight.MoveAtAngle(ang + 90, sz, false);
-				var botLeft = topLeft.MoveAtAngle(ang + 90, sz, false);
+				var topLeft = pos.MovePointAtAngle(ang + 270, sz * 0.5f, false).MovePointAtAngle(ang + 180, sz * 0.5f, false);
+				var topRight = topLeft.MovePointAtAngle(ang, sz, false);
+				var botRight = topRight.MovePointAtAngle(ang + 90, sz, false);
+				var botLeft = topLeft.MovePointAtAngle(ang + 90, sz, false);
 
 				verts[i] = new(topLeft.ToSFML(), c, new(txA.X, txA.Y));
 				verts[i + 1] = new(topRight.ToSFML(), c, new(txB.X, txA.Y));

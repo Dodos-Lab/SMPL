@@ -216,7 +216,7 @@ namespace SMPL
 			return ((number % 360) + 360) % 360;
 		}
 		/// <summary>
-		/// Converts a unit <paramref name="progress"/> (0 to 1) to a value calculated according to
+		/// Converts a unit <paramref name="progress"/> [0 - 1] to a value calculated according to
 		/// <paramref name="animationType"/> and <paramref name="animationCurve"/> then returns it.
 		/// </summary>
 		public static float AnimateUnit(this float progress, Animations animationType, AnimationCurves animationCurve)
@@ -289,16 +289,15 @@ namespace SMPL
 			}
 		}
 		/// <summary>
-		/// Restricts a <paramref name="number"/> in the range <paramref name="rangeA"/> to <paramref name="rangeB"/> with <paramref name="limitType"/>
-		/// and returns it.
-		/// Also known as Clamp.
+		/// Restricts a <paramref name="number"/> in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with a
+		/// <paramref name="limitation"/> and returns it. Also known as Clamping.
 		/// </summary>
-		public static float Limit(this float number, float rangeA, float rangeB, Limits limitType = Limits.ClosestBound)
+		public static float Limit(this float number, float rangeA, float rangeB, Limits limitation = Limits.ClosestBound)
 		{
 			if (rangeA > rangeB)
 				Swap(ref rangeA, ref rangeB);
 
-			if (limitType == Limits.ClosestBound)
+			if (limitation == Limits.ClosestBound)
 			{
 				if (number < rangeA)
 					return rangeA;
@@ -402,24 +401,24 @@ namespace SMPL
 			return l && u;
 		}
 		/// <summary>
-		/// Moves a <paramref name="number"/> in the direction of <paramref name="speed"/> while <paramref name="isFpsDependent"/> and returns the result.
-		/// If the operation <paramref name="isFpsDependent"/> then see <see cref="Time.Delta"/> for more info.
+		/// Moves a <paramref name="number"/> in the direction of <paramref name="speed"/>. May be <paramref name="fpsDependent"/>
+		/// (see <see cref="Time.Delta"/> for info). The result is then returned.
 		/// </summary>
-		public static float Move(this float number, float speed, bool isFpsDependent = true)
+		public static float Move(this float number, float speed, bool fpsDependent = true)
 		{
-			if (isFpsDependent)
+			if (fpsDependent)
 				speed *= Time.Delta;
 			return number + speed;
 		}
 		/// <summary>
-		/// Moves a <paramref name="number"/> toward a <paramref name="targetNumber"/> with <paramref name="speed"/> while
-		/// <paramref name="isFpsDependent"/> and returns it. The calculation ensures not to pass the <paramref name="targetNumber"/>.
-		/// If the operation <paramref name="isFpsDependent"/> then see <see cref="Time.Delta"/> for more info.
+		/// Moves a <paramref name="number"/> toward a <paramref name="targetNumber"/> with <paramref name="speed"/>. May be
+		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info).
+		/// The calculation ensures not to pass the <paramref name="targetNumber"/>. The result is then returned.
 		/// </summary>
-		public static float MoveToward(this float number, float targetNumber, float speed, bool isFpsDependent = true)
+		public static float MoveToward(this float number, float targetNumber, float speed, bool fpsDependent = true)
 		{
 			var goingPos = number < targetNumber;
-			var result = Move(number, goingPos ? Sign(speed, false) : Sign(speed, true), isFpsDependent);
+			var result = Move(number, goingPos ? Sign(speed, false) : Sign(speed, true), fpsDependent);
 
 			if (goingPos && result > targetNumber)
 				return targetNumber;
@@ -427,23 +426,21 @@ namespace SMPL
 				return targetNumber;
 			return result;
 		}
-		/// <summary>
-		/// Maps a <paramref name="number"/> from (<paramref name="A1"/> - <paramref name="B1"/>) to
-		/// (<paramref name="B1"/> - <paramref name="B2"/>) and returns it.<br></br>
-		/// Example: 50 mapped from (0 - 100) and (0 - 1) results to 0.5<br></br>
-		/// Example: 25 mapped from (30 - 20) and (1 - 5) results to 3
+		/// Maps a <paramref name="number"/> from [<paramref name="A1"/> - <paramref name="B1"/>] to
+		/// [<paramref name="B1"/> - <paramref name="B2"/>] and returns it. Similar to Lerping (linear interpolation).<br></br>
+		/// Example: 50 mapped from [0 - 100] and [0 - 1] results to 0.5<br></br>
+		/// Example: 25 mapped from [30 - 20] and [1 - 5] results to 3
 		/// </summary>
 		public static float Map(this float number, float A1, float A2, float B1, float B2)
 		{
 			return (number - A1) / (A2 - A1) * (B2 - B1) + B1;
 		}
 		/// <summary>
-		/// Rotates an <paramref name="angle"/> toward <paramref name="targetAngle"/> with <paramref name="speed"/> while
-		/// <paramref name="isFpsDependent"/> taking the closest path. Then returns the result.
-		/// The calculation ensures not to pass the <paramref name="targetAngle"/>.
-		/// If the operation <paramref name="isFpsDependent"/> then see <see cref="Time.Delta"/> for more info.
+		/// Rotates a 360 degrees <paramref name="angle"/> toward a <paramref name="targetAngle"/> with <paramref name="speed"/>
+		/// taking the closest direction. May be <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info).
+		/// The calculation ensures not to pass the <paramref name="targetAngle"/>. The result is then returned.
 		/// </summary>
-		public static float MoveTowardAngle(this float angle, float targetAngle, float speed, bool isFpsDependent = true)
+		public static float MoveAngleTowardAngle(this float angle, float targetAngle, float speed, bool fpsDependent = true)
 		{
 			angle = AngleTo360(angle);
 			targetAngle = AngleTo360(targetAngle);
@@ -453,12 +450,12 @@ namespace SMPL
 			// stops the rotation with an else when close enough
 			// prevents the rotation from staying behind after the stop
 			var checkedSpeed = speed;
-			if (isFpsDependent) checkedSpeed *= Time.Delta;
+			if (fpsDependent) checkedSpeed *= Time.Delta;
 			if (Math.Abs(difference) < checkedSpeed) angle = targetAngle;
-			else if (difference >= 0 && difference < 180) angle = Move(angle, -speed, isFpsDependent);
-			else if (difference >= -180 && difference < 0) angle = Move(angle, speed, isFpsDependent);
-			else if (difference >= -360 && difference < -180) angle = Move(angle, -speed, isFpsDependent);
-			else if (difference >= 180 && difference < 360) angle = Move(angle, speed, isFpsDependent);
+			else if (difference >= 0 && difference < 180) angle = Move(angle, -speed, fpsDependent);
+			else if (difference >= -180 && difference < 0) angle = Move(angle, speed, fpsDependent);
+			else if (difference >= -360 && difference < -180) angle = Move(angle, -speed, fpsDependent);
+			else if (difference >= 180 && difference < 360) angle = Move(angle, speed, fpsDependent);
 
 			// detects speed greater than possible
 			// prevents jiggle when passing 0-360 & 360-0 | simple to fix yet took me half a day
@@ -467,8 +464,8 @@ namespace SMPL
 			return angle;
 		}
 		/// <summary>
-		/// Generates a random number between this number (<paramref name="rangeA"/>) and <paramref name="rangeB"/> with <paramref name="precision"/>
-		/// and an optional <paramref name="seed"/>. Then returns the result.
+		/// Generates a random <see cref="float"/> number in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with
+		/// <paramref name="precision"/> and an optional <paramref name="seed"/>. Then returns the result.
 		/// </summary>
 		public static float Random(this float rangeA, float rangeB, float precision = 0, float seed = float.NaN)
 		{
@@ -526,7 +523,7 @@ namespace SMPL
 		/// <summary>
 		/// Converts <paramref name="seconds"/> into a <see cref="string"/> following a <paramref name="format"/>. Then returns the result.
 		/// </summary>
-		public static string ToTimeText(this float seconds, Time.Format format = new())
+		public static string SecondsToTimeText(this float seconds, Time.Format format = new())
 		{
 			seconds = seconds.Sign(false);
 			var secondsStr = $"{seconds:F0}";
@@ -561,8 +558,7 @@ namespace SMPL
 			return $"{hrStr}{hrF}{hrMinSep}{minStr}{minF}{minSecSep}{secStr}{secF}{secMsSep}{msStr}{msF}";
 		}
 		/// <summary>
-		/// Converts an <paramref name="angle"/> in degrees into a non-normalized direction <see cref="Vector2"/>. The result is then returned.
-		/// 
+		/// Converts a 360 degrees <paramref name="angle"/> into a normalized direction <see cref="Vector2"/> then returns the result.
 		/// </summary>
 		public static Vector2 AngleToDirection(this float angle)
 		{
@@ -572,7 +568,7 @@ namespace SMPL
 			var rad = MathF.PI / 180 * angle;
 			var dir = new Vector2(MathF.Cos(rad), MathF.Sin(rad));
 
-			return new Vector2(dir.X, dir.Y);
+			return new(dir.X, dir.Y);
 		}
 		/// <summary>
 		/// Converts <paramref name="radians"/> to a 360 degrees angle and returns the result.
@@ -590,6 +586,29 @@ namespace SMPL
 		}
 
 		/// <summary>
+		/// Calculates a reflected normalized <paramref name="direction"/> <see cref="Vector2"/> as if it was to bounce off of a
+		/// <paramref name="surfaceNormal"/> (the direction the surface is facing) and returns it.
+		/// </summary>
+		public static Vector2 ReflectDirection(this Vector2 direction, Vector2 surfaceNormal)
+      {
+			return Vector2.Reflect(direction, surfaceNormal);
+      }
+		/// <summary>
+		/// Normalizes a <paramref name="direction"/> <see cref="Vector2"/>. Or in other words: sets the length (magnitude) of the
+		/// <paramref name="direction"/> <see cref="Vector2"/> to 1. Then the result is returned.
+		/// </summary>
+		public static Vector2 NormalizeDirection(this Vector2 direction)
+      {
+			return Vector2.Normalize(direction);
+      }
+		/// <summary>
+		/// Calculates the distance between a <paramref name="point"/> and a <paramref name="targetPoint"/> then returns it.
+		/// </summary>
+		public static float DistanceBetweenPoints(this Vector2 point, Vector2 targetPoint)
+      {
+			return Vector2.Distance(point, targetPoint);
+      }
+		/// <summary>
 		/// Returns whether this <paramref name="vector"/> is invalid.
 		/// </summary>
 		public static bool IsNaN(this Vector2 vector)
@@ -603,6 +622,9 @@ namespace SMPL
 		{
 			return new(float.NaN, float.NaN);
 		}
+		/// <summary>
+		/// Converts a directional unit <see cref="Vector2"/> into a 360 degrees angle and returns the result.
+		/// </summary>
 		public static float DirectionToAngle(this Vector2 direction)
 		{
 			//Vector2 to Radians: atan2(Vector2.y, Vector2.x)
@@ -612,11 +634,17 @@ namespace SMPL
 			var result = rad * (180f / MathF.PI);
 			return result;
 		}
-		public static float AngleToPoint(this Vector2 point, Vector2 targetPoint)
+		/// <summary>
+		/// Calculates the 360 degrees angle between two <see cref="Vector2"/> points and returns it.
+		/// </summary>
+		public static float AngleBetweenPoints(this Vector2 point, Vector2 targetPoint)
 		{
 			return DirectionToAngle(targetPoint - point);
 		}
-		public static Vector2 ToGrid(this Vector2 point, Vector2 gridSize)
+		/// <summary>
+		/// Snaps a <paramref name="point"/> to the closest grid cell according to <paramref name="gridSize"/> and returns the result.
+		/// </summary>
+		public static Vector2 PointToGrid(this Vector2 point, Vector2 gridSize)
 		{
 			// this prevents -0 cells
 			point.X -= point.X < 0 ? gridSize.X : 0;
@@ -626,37 +654,71 @@ namespace SMPL
 			point.Y -= point.Y % gridSize.Y;
 			return point;
 		}
-		public static Vector2 DirectionToPoint(this Vector2 point, Vector2 targetPoint)
+		/// <summary>
+		/// Calculates the direction between <paramref name="point"/> and <paramref name="targetPoint"/>. The result may be
+		/// <paramref name="normalized"/> (see <see cref="NormalizeDirection"/> for info). Then it is returned.
+		/// </summary>
+		public static Vector2 DirectionBetweenPoints(this Vector2 point, Vector2 targetPoint, bool normalized = true)
 		{
-			return Vector2.Normalize(targetPoint - point);
+			return normalized ? Vector2.Normalize(targetPoint - point) : targetPoint - point;
 		}
-		public static Vector2 MoveInDirection(this Vector2 point, Vector2 direction, float speed, bool isFpsDependent = true)
+		/// <summary>
+		/// Moves a <paramref name="point"/> in <paramref name="direction"/> with <paramref name="speed"/>. May be <paramref name="fpsDependent"/>
+		/// (see <see cref="Time.Delta"/> for info). The result is then returned.
+		/// </summary>
+		public static Vector2 MovePointInDirection(this Vector2 point, Vector2 direction, float speed, bool fpsDependent = true)
 		{
-			point.X += direction.X * speed * (isFpsDependent ? Time.Delta : 1);
-			point.Y += direction.Y * speed * (isFpsDependent ? Time.Delta : 1);
-			return point;
+			point.X += direction.X * speed * (fpsDependent ? Time.Delta : 1);
+			point.Y += direction.Y * speed * (fpsDependent ? Time.Delta : 1);
+			return new(point.X, point.Y);
 		}
-		public static Vector2 MoveAtAngle(this Vector2 point, float angle, float speed, bool isFpsDependent = true)
+		/// <summary>
+		/// Moves a <paramref name="point"/> at a 360 degrees <paramref name="angle"/> with <paramref name="speed"/>. May be
+		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info). The result is then returned.
+		/// </summary>
+		public static Vector2 MovePointAtAngle(this Vector2 point, float angle, float speed, bool fpsDependent = true)
 		{
-			return MoveInDirection(point, Vector2.Normalize(angle.AngleToDirection()), speed, isFpsDependent);
+			var result = MovePointInDirection(point, Vector2.Normalize(angle.AngleToDirection()), speed, fpsDependent);
+			return result;
 		}
-		public static Vector2 MoveTowardTarget(this Vector2 point, Vector2 targetPoint, float speed, bool isFpsDependent = true)
+		/// <summary>
+		/// Moves a <paramref name="point"/> toward <paramref name="targetPoint"/> with <paramref name="speed"/>. May be
+		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info). The calculation ensures not to pass the
+		/// <paramref name="targetPoint"/>. The result is then returned.
+		/// </summary>
+		public static Vector2 MovePointTowardPoint(this Vector2 point, Vector2 targetPoint, float speed, bool fpsDependent = true)
 		{
-			return point.MoveAtAngle(point.AngleToPoint(targetPoint), speed, isFpsDependent);
-		}
-		public static Vector2 PercentTowardTarget(this Vector2 point, Vector2 targetPoint, Vector2 percent)
+			var result = point.MovePointAtAngle(point.AngleBetweenPoints(targetPoint), speed, fpsDependent);
+
+			speed *= fpsDependent ? Time.Delta : 1;
+         return Vector2.Distance(result, targetPoint) < speed * 2 ? targetPoint : result;
+      }
+		/// <summary>
+		/// Calculates the <see cref="Vector2"/> point that is a certain <paramref name="percent"/> between <paramref name="point"/> and
+		/// <paramref name="targetPoint"/> then returns the result. Also known as Lerping (linear interpolation).
+		/// </summary>
+      public static Vector2 PercentTowardTarget(this Vector2 point, Vector2 targetPoint, Vector2 percent)
 		{
 			point.X = percent.X.Map(0, 100, point.X, targetPoint.X);
 			point.Y = percent.Y.Map(0, 100, point.Y, targetPoint.Y);
 			return point;
 		}
-		public static void Draw(this Vector2 point, RenderTarget renderTarget, Color color, float width = 2)
+		/// <summary>
+		/// Draws <paramref name="point"/> to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
+		/// <paramref name="size"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Game.Window"/> if no
+		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// <paramref name="color"/> is passed.
+		/// </summary>
+		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
 		{
-			width /= 2;
-			var tl = point.MoveAtAngle(270, width, false).MoveAtAngle(180, width, false);
-			var tr = point.MoveAtAngle(270, width, false).MoveAtAngle(0, width, false);
-			var br = point.MoveAtAngle(90, width, false).MoveAtAngle(0, width, false);
-			var bl = point.MoveAtAngle(90, width, false).MoveAtAngle(180, width, false);
+			renderTarget ??= Game.Window;
+			color = color == default ? Color.White : color;
+
+			size /= 2;
+			var tl = point.MovePointAtAngle(270, size, false).MovePointAtAngle(180, size, false);
+			var tr = point.MovePointAtAngle(270, size, false).MovePointAtAngle(0, size, false);
+			var br = point.MovePointAtAngle(90, size, false).MovePointAtAngle(0, size, false);
+			var bl = point.MovePointAtAngle(90, size, false).MovePointAtAngle(180, size, false);
 
 			var vert = new Vertex[]
 			{
@@ -667,15 +729,25 @@ namespace SMPL
 			};
 			renderTarget.Draw(vert, PrimitiveType.Quads);
 		}
-		public static Vector2 ToSystem(this Vector2f vec)
+		/// <summary>
+		/// Converts a <see cref="Vector2f"/> into a <see cref="Vector2"/> and returns the result.
+		/// </summary>
+		public static Vector2 ToSystem(this Vector2f vector)
 		{
-			return new(vec.X, vec.Y);
+			return new(vector.X, vector.Y);
 		}
-		public static Vector2f ToSFML(this Vector2 vec)
+		/// <summary>
+		/// Converts a <see cref="Vector2"/> into a <see cref="Vector2f"/> and returns the result.
+		/// </summary>
+		public static Vector2f ToSFML(this Vector2 vector)
 		{
-			return new(vec.X, vec.Y);
+			return new(vector.X, vector.Y);
 		}
-		public static List<Vector2> Outline(this List<Vector2> points)
+		/// <summary>
+		/// Picks the outside points in a collection of <paramref name="points"/> which when connected will form an outline of the initial collection.
+		/// The picked points are then returned in a new list.
+		/// </summary>
+		public static List<Vector2> OutlinePoints(this ICollection<Vector2> points)
 		{
 			var result = new List<Vector2>();
 			foreach (var p in points)
@@ -700,7 +772,7 @@ namespace SMPL
 					break;
 				counter++;
 
-				Vector2 Next(List<Vector2> points, Vector2 p)
+				Vector2 Next(ICollection<Vector2> points, Vector2 p)
 				{
 					Vector2 q = p;
 					int t;
@@ -717,25 +789,45 @@ namespace SMPL
 			return result;
 		}
 
-		public static bool IsSigned(this int number)
-		{
-			return number.ToString()[0] == '-';
-		}
+		/// <summary>
+		/// Generates a random <see cref="int"/> number in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with an
+		/// optional <paramref name="seed"/>. Then returns the result.
+		/// </summary>
 		public static int Random(this int rangeA, int rangeB, float seed = float.NaN)
 		{
 			return (int)Random(rangeA, rangeB, 0, seed);
 		}
+		/// <summary>
+		/// Returns true only <paramref name="percent"/>% / returns false (100 - <paramref name="percent"/>)% of the times.
+		/// </summary>
 		public static bool HasChance(this int percent)
 		{
 			return HasChance((float)percent);
 		}
+		/// <summary>
+		/// Restricts a <paramref name="number"/> in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with a
+		/// <paramref name="limitation"/> and returns it. Also known as Clamping.
+		/// </summary>
 		public static int Limit(this int number, int rangeA, int rangeB, Limits limitation = Limits.ClosestBound)
 		{
 			return (int)Limit((float)number, rangeA, rangeB, limitation);
 		}
+		/// <summary>
+		/// Ensures a <paramref name="number"/> is <paramref name="signed"/> and returns the result.
+		/// </summary>
 		public static int Sign(this int number, bool signed) => (int)Sign((float)number, signed);
+		/// <summary>
+		/// Returns whether <paramref name="number"/> is in range [<paramref name="rangeA"/> - <paramref name="rangeB"/>].
+		/// The ranges may be <paramref name="inclusiveLower"/> or <paramref name="inclusiveUpper"/>.
+		/// </summary>
 		public static bool IsBetween(this int number, int rangeA, int rangeB, bool inclusiveLower = false,
 			bool inclusiveUpper = false) => IsBetween((float)number, rangeA, rangeB, inclusiveLower, inclusiveUpper);
+		/// <summary>
+		/// Maps a <paramref name="number"/> from [<paramref name="A1"/> - <paramref name="B1"/>] to
+		/// [<paramref name="B1"/> - <paramref name="B2"/>] and returns it. Similar to Lerping (linear interpolation).<br></br>
+		/// Example: 50 mapped from [0 - 100] and [0 - 1] results to 0.5<br></br>
+		/// Example: 25 mapped from [30 - 20] and [1 - 5] results to 3
+		/// </summary>
 		public static int Map(this int number, int A1, int A2, int B1, int B2) =>
 			(int)Map((float)number, A1, A2, B1, B2);
 	}

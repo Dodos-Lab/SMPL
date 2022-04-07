@@ -86,7 +86,7 @@ namespace SMPL
 
       public List<Tile> GetTiles(Vector2 position)
       {
-         var pos = position.ToGrid(CellSize * Scale) / Scale / CellSize;
+         var pos = position.PointToGrid(CellSize * Scale) / Scale / CellSize;
          return map.ContainsKey(pos) == false ? new() : map[pos].Values.ToList();
 		}
 		public Vector2 GetTilePosition(Vector2 tileIndecies)
