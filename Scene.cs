@@ -69,7 +69,7 @@ namespace SMPL
          {
 				ObjModelPath = objPath;
 				TexturePath = texturePath;
-				UniqueName = uniqueName;
+				UniqueName = uniqueName ?? objPath;
 				TextureCount = textureCount;
 				TextureDetail = textureDetail;
 				Scale = new(scaleX, scaleY, scaleZ);
@@ -105,11 +105,17 @@ namespace SMPL
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		private static Thread assetsLoading;
 
+		/// <summary>
+		/// The mouse cursor's position in the world (<see cref="CurrentScene"/>).
+		/// </summary>
 		public static Vector2 MouseCursorPosition
 		{
 			get { var p = Game.Window.MapPixelToCoords(Mouse.GetPosition(Game.Window)); return new(p.X, p.Y); }
 			set => Mouse.SetPosition(Game.Window.MapCoordsToPixel(value.ToSFML()), Game.Window);
 		}
+		/// <summary>
+		/// A scene in which all the game logic is executing currently (unless assets for this scene are loading). See <see cref="Scene"/> for more info.
+		/// </summary>
 		public static Scene CurrentScene
 		{
 			get => scene;
@@ -121,21 +127,64 @@ namespace SMPL
 				loadScene = value;
 			}
 		}
+		/// <summary>
+		/// A scene that takes over whenever <see cref="CurrentScene"/> is loading. See <see cref="Scene"/> for more info.
+		/// </summary>
 		public static Scene LoadingScene { get; set; }
 
+		/// <summary>
+		/// The percentage of loaded assets whenever this scene is the <see cref="CurrentScene"/>.
+		/// </summary>
 		public float LoadingPercent { get; private set; }
+		/// <summary>
+		/// The initial color of the world whenever this scene needs to be displayed to the <see cref="Game.Window"/>.
+		/// </summary>
 		public Color BackgroundColor { get; set; }
 
+		/// <summary>
+		/// The loaded textures whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected Dictionary<string, Texture> Textures { get; } = new();
+		/// <summary>
+		/// The loaded music whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected Dictionary<string, Music> Music { get; } = new();
+		/// <summary>
+		/// The loaded sounds whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected Dictionary<string, Sound> Sounds { get; } = new();
+		/// <summary>
+		/// The loaded fonts whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected Dictionary<string, Font> Fonts { get; } = new();
+		/// <summary>
+		/// The loaded 3D sprites whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected Dictionary<string, Sprite3D> Sprites3D { get; } = new();
 
+		/// <summary>
+		/// Returns the required asset paths and details whenever this scene becomes the <see cref="CurrentScene"/>.
+		/// See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected virtual AssetQueue OnRequireAssets() => default;
+		/// <summary>
+		/// Called when this scene is done loading its assets after becoming the <see cref="CurrentScene"/>.
+		/// See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected virtual void OnStart() { }
+		/// <summary>
+		/// This is the game loop of this scene. It is called continuously while this scene is the <see cref="CurrentScene"/>.
+		/// See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected virtual void OnUpdate() { }
+		/// <summary>
+		/// Called when this scene is no longer the <see cref="CurrentScene"/>.
+		/// See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected virtual void OnStop() { }
+		/// <summary>
+		/// Called before the game is closed. See <see cref="Scene"/> for more info.
+		/// </summary>
 		protected virtual void OnGameStop() { }
 
 		internal void LoadAssets()

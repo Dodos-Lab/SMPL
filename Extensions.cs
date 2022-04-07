@@ -10,6 +10,9 @@ using System.Text;
 
 namespace SMPL
 {
+	/// <summary>
+	/// Various methods that extend the primitive types and collections aiming to be a shortcut for longer calculations/systems.
+	/// </summary>
 	public static class Extensions
 	{
 		public enum Limits { ClosestBound, Overflow }
@@ -72,6 +75,15 @@ namespace SMPL
 			}
 			return false;
 		}
+		/// <summary>
+		/// Switches the values of two variables.
+		/// </summary>
+		public static void Swap<T>(ref T A, ref T B)
+      {
+			var swap = A;
+			A = B;
+			B = swap;
+      }
 
 		/// <summary>
 		/// Picks randomly a single <typeparamref name="T"/> value out of a <paramref name="list"/> and returns it.
@@ -107,14 +119,14 @@ namespace SMPL
 		}
 
 		/// <summary>
-		/// Whether <paramref name="text"/> can be cast to a <see cref="float"/>.
+		/// Returns whether <paramref name="text"/> can be cast to a <see cref="float"/>.
 		/// </summary>
 		public static bool IsNumber(this string text)
 		{
 			return float.IsNaN(ToNumber(text));
 		}
 		/// <summary>
-		/// Whether <paramref name="text"/> contains only letters.
+		/// Returns whether <paramref name="text"/> contains only letters.
 		/// </summary>
 		public static bool IsLetters(this string text)
 		{
@@ -277,29 +289,34 @@ namespace SMPL
 			}
 		}
 		/// <summary>
-		/// Restricts a <paramref name="number"/> in the range <paramref name="lower"/> to <paramref name="upper"/> with <paramref name="limitType"/>
+		/// Restricts a <paramref name="number"/> in the range <paramref name="rangeA"/> to <paramref name="rangeB"/> with <paramref name="limitType"/>
 		/// and returns it.
 		/// Also known as Clamp.
 		/// </summary>
-		public static float Limit(this float number, float lower, float upper, Limits limitType = Limits.ClosestBound)
+		public static float Limit(this float number, float rangeA, float rangeB, Limits limitType = Limits.ClosestBound)
 		{
+			if (rangeA > rangeB)
+				Swap(ref rangeA, ref rangeB);
+
 			if (limitType == Limits.ClosestBound)
 			{
-				if (number < lower) return lower;
-				else if (number > upper) return upper;
+				if (number < rangeA)
+					return rangeA;
+				else if (number > rangeB)
+					return rangeB;
 				return number;
 			}
 			else
 			{
-				upper += 1;
+				rangeB += 1;
 				var a = number;
 				a = Map(a);
-				while (a < lower) a = Map(a);
+				while (a < rangeA) a = Map(a);
 				return a;
 				float Map(float b)
 				{
-					b = ((b % upper) + upper) % upper;
-					if (b < lower) b = upper - (lower - b);
+					b = ((b % rangeB) + rangeB) % rangeB;
+					if (b < rangeA) b = rangeB - (rangeA - b);
 					return b;
 				}
 			}
@@ -373,13 +390,15 @@ namespace SMPL
 			};
 		}
 		/// <summary>
-		/// Whether <paramref name="number"/> is in range <paramref name="lower"/> to <paramref name="upper"/>.
+		/// Returns whether <paramref name="number"/> is in range [<paramref name="rangeA"/> - <paramref name="rangeB"/>].
 		/// The ranges may be <paramref name="inclusiveLower"/> or <paramref name="inclusiveUpper"/>.
 		/// </summary>
-		public static bool IsBetween(this float number, float lower, float upper, bool inclusiveLower = false, bool inclusiveUpper = false)
+		public static bool IsBetween(this float number, float rangeA, float rangeB, bool inclusiveLower = false, bool inclusiveUpper = false)
 		{
-			var l = inclusiveLower ? lower <= number : lower < number;
-			var u = inclusiveUpper ? upper >= number : upper > number;
+			if (rangeA > rangeB)
+				Swap(ref rangeA, ref rangeB);
+			var l = inclusiveLower ? rangeA <= number : rangeA < number;
+			var u = inclusiveUpper ? rangeB >= number : rangeB > number;
 			return l && u;
 		}
 		/// <summary>
@@ -420,7 +439,8 @@ namespace SMPL
 		}
 		/// <summary>
 		/// Rotates an <paramref name="angle"/> toward <paramref name="targetAngle"/> with <paramref name="speed"/> while
-		/// <paramref name="isFpsDependent"/> taking the closest path. The calculation ensures not to pass the <paramref name="targetAngle"/>.
+		/// <paramref name="isFpsDependent"/> taking the closest path. Then returns the result.
+		/// The calculation ensures not to pass the <paramref name="targetAngle"/>.
 		/// If the operation <paramref name="isFpsDependent"/> then see <see cref="Time.Delta"/> for more info.
 		/// </summary>
 		public static float MoveTowardAngle(this float angle, float targetAngle, float speed, bool isFpsDependent = true)
@@ -446,25 +466,38 @@ namespace SMPL
 
 			return angle;
 		}
-		public static float Random(this float lower, float upper, float precision = 0, float seed = float.NaN)
+		/// <summary>
+		/// Generates a random number between this number (<paramref name="rangeA"/>) and <paramref name="rangeB"/> with <paramref name="precision"/>
+		/// and an optional <paramref name="seed"/>. Then returns the result.
+		/// </summary>
+		public static float Random(this float rangeA, float rangeB, float precision = 0, float seed = float.NaN)
 		{
+			if (rangeA > rangeB)
+				Swap(ref rangeA, ref rangeB);
+
 			precision = (int)precision.Limit(0, 5);
 			precision = MathF.Pow(10, precision);
 
-			lower *= precision;
-			upper *= precision;
+			rangeA *= precision;
+			rangeB *= precision;
 
 			var s = new Random(float.IsNaN(seed) ? Guid.NewGuid().GetHashCode() : (int)seed);
-			var randInt = s.Next((int)lower, (int)upper + 1).Limit((int)lower, (int)upper);
+			var randInt = s.Next((int)rangeA, (int)rangeB + 1).Limit((int)rangeA, (int)rangeB);
 
 			return randInt / (precision);
 		}
+		/// <summary>
+		/// Returns true only <paramref name="percent"/>% / returns false (100 - <paramref name="percent"/>)% of the times.
+		/// </summary>
 		public static bool HasChance(this float percent)
 		{
 			percent = percent.Limit(0, 100);
 			var n = Random(1f, 100f); // should not roll 0 so it doesn't return true with 0% (outside of roll)
 			return n <= percent;
 		}
+		/// <summary>
+		/// Converts a <paramref name="number"/> from one time unit to another (chosen by <paramref name="convertType"/>). Then returns the result.
+		/// </summary>
 		public static float ToTime(this float number, Time.ChoiceConvertion convertType)
 		{
 			return convertType switch
@@ -490,6 +523,9 @@ namespace SMPL
 				_ => 0,
 			};
 		}
+		/// <summary>
+		/// Converts <paramref name="seconds"/> into a <see cref="string"/> following a <paramref name="format"/>. Then returns the result.
+		/// </summary>
 		public static string ToTimeText(this float seconds, Time.Format format = new())
 		{
 			seconds = seconds.Sign(false);
@@ -524,6 +560,10 @@ namespace SMPL
 
 			return $"{hrStr}{hrF}{hrMinSep}{minStr}{minF}{minSecSep}{secStr}{secF}{secMsSep}{msStr}{msF}";
 		}
+		/// <summary>
+		/// Converts an <paramref name="angle"/> in degrees into a non-normalized direction <see cref="Vector2"/>. The result is then returned.
+		/// 
+		/// </summary>
 		public static Vector2 AngleToDirection(this float angle)
 		{
 			//Angle to Radians : (Math.PI / 180) * angle
@@ -534,18 +574,34 @@ namespace SMPL
 
 			return new Vector2(dir.X, dir.Y);
 		}
-		public static float RadiansToDegrees(this float rad)
+		/// <summary>
+		/// Converts <paramref name="radians"/> to a 360 degrees angle and returns the result.
+		/// </summary>
+		public static float RadiansToDegrees(this float radians)
 		{
-			return rad * (180f / MathF.PI);
+			return radians * (180f / MathF.PI);
 		}
-		public static float DegreesToRadians(this float deg)
+		/// <summary>
+		/// Converts a 360 <paramref name="degrees"/> angle into radians and returns the result.
+		/// </summary>
+		public static float DegreesToRadians(this float degrees)
 		{
-			return (MathF.PI / 180f) * deg;
+			return (MathF.PI / 180f) * degrees;
 		}
 
-		public static bool IsNaN(this Vector2 vec)
+		/// <summary>
+		/// Returns whether this <paramref name="vector"/> is invalid.
+		/// </summary>
+		public static bool IsNaN(this Vector2 vector)
 		{
-			return float.IsNaN(vec.X) || float.IsNaN(vec.Y);
+			return float.IsNaN(vector.X) || float.IsNaN(vector.Y);
+		}
+		/// <summary>
+		/// Returns an invalid <see cref="Vector2"/>.
+		/// </summary>
+		public static Vector2 NaN(this Vector2 vector)
+		{
+			return new(float.NaN, float.NaN);
 		}
 		public static float DirectionToAngle(this Vector2 direction)
 		{
@@ -559,10 +615,6 @@ namespace SMPL
 		public static float AngleToPoint(this Vector2 point, Vector2 targetPoint)
 		{
 			return DirectionToAngle(targetPoint - point);
-		}
-		public static Vector2 NaN(this Vector2 vec)
-		{
-			return new(float.NaN, float.NaN);
 		}
 		public static Vector2 ToGrid(this Vector2 point, Vector2 gridSize)
 		{
@@ -669,22 +721,22 @@ namespace SMPL
 		{
 			return number.ToString()[0] == '-';
 		}
-		public static int Random(this int lowerBound, int upperBound, float seed = float.NaN)
+		public static int Random(this int rangeA, int rangeB, float seed = float.NaN)
 		{
-			return (int)Random((float)lowerBound, (float)upperBound, 0, seed);
+			return (int)Random(rangeA, rangeB, 0, seed);
 		}
 		public static bool HasChance(this int percent)
 		{
 			return HasChance((float)percent);
 		}
-		public static int Limit(this int number, int lower, int upper, Limits limitation = Limits.ClosestBound)
+		public static int Limit(this int number, int rangeA, int rangeB, Limits limitation = Limits.ClosestBound)
 		{
-			return (int)Limit((float)number, lower, upper, limitation);
+			return (int)Limit((float)number, rangeA, rangeB, limitation);
 		}
 		public static int Sign(this int number, bool signed) => (int)Sign((float)number, signed);
-		public static bool IsBetween(this int number, int lower, int upper, bool inclusiveLower = false,
-			bool inclusiveUpper = false) => IsBetween((float)number, lower, upper, inclusiveLower, inclusiveUpper);
-		public static int Map(this int number, int lowerA, int upperA, int lowerB, int upperB) =>
-			(int)Map((float)number, lowerA, upperA, lowerB, upperB);
+		public static bool IsBetween(this int number, int rangeA, int rangeB, bool inclusiveLower = false,
+			bool inclusiveUpper = false) => IsBetween((float)number, rangeA, rangeB, inclusiveLower, inclusiveUpper);
+		public static int Map(this int number, int A1, int A2, int B1, int B2) =>
+			(int)Map((float)number, A1, A2, B1, B2);
 	}
 }

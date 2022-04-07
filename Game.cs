@@ -6,7 +6,7 @@ using SFML.Window;
 namespace SMPL
 {
 	/// <summary>
-	/// All the core systems are handled here (starting and stopping the <see cref="Game"/>, the <see cref="Window"/>, the game loop etc).
+	/// All the core systems are handled here (the <see cref="Game"/> states, the <see cref="Window"/>, the game loop etc).
 	/// </summary>
 	public static class Game
 	{

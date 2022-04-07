@@ -4,6 +4,9 @@ using System.Numerics;
 
 namespace SMPL
 {
+	/// <summary>
+	/// A <see cref="Line"/> collection used to determine whether it interacts in any way with other hitboxes/points in the world.
+	/// </summary>
 	public class Hitbox
 	{
 		/// <summary>
@@ -16,7 +19,7 @@ namespace SMPL
 		public List<Line> Lines { get; } = new();
 
 		/// <summary>
-		/// Constructs both <see cref="LocalLines"/> and <see cref="Lines"/> from between <paramref name="points"/>.
+		/// Constructs both <see cref="LocalLines"/> and <see cref="Lines"/> from between the <paramref name="points"/>.
 		/// </summary>
 		public Hitbox(params Vector2[] points)
 		{
