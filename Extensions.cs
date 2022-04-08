@@ -426,14 +426,14 @@ namespace SMPL
 				return targetNumber;
 			return result;
 		}
-		/// Maps a <paramref name="number"/> from [<paramref name="A1"/> - <paramref name="B1"/>] to
-		/// [<paramref name="B1"/> - <paramref name="B2"/>] and returns it. Similar to Lerping (linear interpolation).<br></br>
+		/// Maps a <paramref name="number"/> from [<paramref name="a1"/> - <paramref name="b1"/>] to
+		/// [<paramref name="b1"/> - <paramref name="b2"/>] and returns it. Similar to Lerping (linear interpolation).<br></br>
 		/// Example: 50 mapped from [0 - 100] and [0 - 1] results to 0.5<br></br>
 		/// Example: 25 mapped from [30 - 20] and [1 - 5] results to 3
 		/// </summary>
-		public static float Map(this float number, float A1, float A2, float B1, float B2)
+		public static float Map(this float number, float a1, float a2, float b1, float b2)
 		{
-			return (number - A1) / (A2 - A1) * (B2 - B1) + B1;
+			return (number - a1) / (a2 - a1) * (b2 - b1) + b1;
 		}
 		/// <summary>
 		/// Rotates a 360 degrees <paramref name="angle"/> toward a <paramref name="targetAngle"/> with <paramref name="speed"/>

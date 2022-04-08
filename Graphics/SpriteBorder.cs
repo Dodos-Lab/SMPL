@@ -4,24 +4,42 @@ using System.Numerics;
 
 namespace SMPL
 {
+	/// <summary>
+	/// A sprite surrounded by 8 fragments acting as a border. Resizing the sprite will keep the border untouched in most cases.
+	/// </summary>
 	public class SpriteBorder : Sprite
 	{
+		/// <summary>
+		/// The top left corner of the border in the world.
+		/// </summary>
 		public Vector2 BorderTopLeft
 		{ get => TopLeft.MovePointAtAngle(Angle + 270, BorderSize, false).MovePointAtAngle(Angle + 180, BorderSize, false); }
+		/// <summary>
+		/// The top right corner of the border in the world.
+		/// </summary>
 		public Vector2 BorderTopRight
 		{ get => TopRight.MovePointAtAngle(270 + Angle, BorderSize, false).MovePointAtAngle(Angle, BorderSize, false); }
+		/// <summary>
+		/// The bottom right corner of the border in the world.
+		/// </summary>
 		public Vector2 BorderBottomRight
 		{ get => BottomRight.MovePointAtAngle(Angle, BorderSize, false).MovePointAtAngle(Angle + 90, BorderSize, false); }
+		/// <summary>
+		/// The bottom left corner of the border in the world.
+		/// </summary>
 		public Vector2 BorderBottomLeft
 		{ get => BottomLeft.MovePointAtAngle(Angle + 180, BorderSize, false).MovePointAtAngle(Angle + 90, BorderSize, false); }
 
+		/// <summary>
+		/// The size of the border which determines each of the 8 fragment sizes and their texture coordinates
+		/// (spacing from each side of the <see cref="Visual.Texture"/>).
+		/// </summary>
 		public float BorderSize { get; set; } = 16;
 
-		public SpriteBorder()
-		{
-			TexCoordsUnitB = new(1, 1);
-		}
-
+		/// <summary>
+		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.RenderTarget"/> according
+		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Sprite"/> and <see cref="SpriteBorder"/> parameters.
+		/// </summary>
 		public override void Draw()
 		{
 			if (IsHidden)
@@ -94,6 +112,11 @@ namespace SMPL
 
 			RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
+		/// <summary>
+		/// Sets a rectangular <see cref="Hitbox"/> in <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="Sprite.OriginUnit"/>,
+		/// <see cref="Sprite.Size"/> and <see cref="BorderSize"/> so this should be called after each change on these in order to maintain
+		/// the proper shape of the default <see cref="Hitbox"/>.
+		/// </summary>
 		public override void SetDefaultHitbox()
 		{
 			var borderSz = new Vector2(BorderSize, BorderSize) / Scale;

@@ -32,7 +32,7 @@ namespace SMPL
 		/// </summary>
 		public static void Start(Scene startingScene, Scene loadingScene = null)
 		{
-			if (startingScene == null)
+			if (startingScene == null || Window != null)
 				return;
 
 			InitWindow();
@@ -41,8 +41,10 @@ namespace SMPL
 
 			while (Window.IsOpen)
 			{
+				var bgColor = GetActiveSceneBgColor();
+
 				Window.DispatchEvents();
-				Window.Clear(GetActiveSceneBgColor());
+				Window.Clear(bgColor);
 
 				Time.Update();
 				Scene.UpdateCurrentScene();

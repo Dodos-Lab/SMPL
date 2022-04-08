@@ -187,7 +187,7 @@ namespace SMPL
 		/// </summary>
 		protected virtual void OnGameStop() { }
 
-		internal void LoadAssets()
+      internal void LoadAssets()
 		{
 			var assets = OnRequireAssets();
 			var loadedCount = 0;

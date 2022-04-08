@@ -15,12 +15,12 @@ namespace SMPL
 		/// <summary>
 		/// See <see cref="TexCoordsUnitA"/> for info.
 		/// </summary>
-		public Vector2 TexCoordsUnitB { get; set; }
+		public Vector2 TexCoordsUnitB { get; set; } = new(1, 1);
 
 		/// <summary>
 		/// Size relative to <see cref="Object.Scale"/>.
 		/// </summary>
-		public Vector2 LocalSize { get; set; }
+		public Vector2 LocalSize { get; set; } = new(0.5f, 0.5f);
 		/// <summary>
 		/// Size in the world.
 		/// </summary>
@@ -35,7 +35,7 @@ namespace SMPL
 		/// Note: [0, 0] is the top left and [1, 1] is the bottom right corner of the <see cref="Sprite"/> (no matter the <see cref="Size"/>).
 		/// Values can also go bellow 0 and above 1.
 		/// </summary>
-		public Vector2 OriginUnit { get; set; }
+		public Vector2 OriginUnit { get; set; } = new(0.5f, 0.5f);
 		/// <summary>
 		/// This determines the positional offset from <see cref="Object.Position"/> as a point vector.<br></br>
 		/// </summary>
@@ -65,15 +65,7 @@ namespace SMPL
 		/// - Note: Use <see cref="Hitbox.UpdateLines(Object)"/> by passing this <see cref="Sprite"/> in order for the <see cref="Object"/>
 		/// transformations to affect this <see cref="Hitbox"/>.
 		/// </summary>
-		public Hitbox Hitbox { get; set; }
-
-		public Sprite()
-		{
-			Hitbox = new();
-			TexCoordsUnitB = new(1, 1);
-			LocalSize = new(100, 100);
-			OriginUnit = new(0.5f, 0.5f);
-		}
+		public Hitbox Hitbox { get; set; } = new();
 
 		/// <summary>
 		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.RenderTarget"/> according
@@ -101,10 +93,10 @@ namespace SMPL
 
 			RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
-
 		/// <summary>
-		/// Sets a rectangular <see cref="SMPL.Hitbox"/> to <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="OriginUnit"/> and
-		/// <see cref="Size"/> so this should be called after each change on these in order to maintain the default <see cref="SMPL.Hitbox"/>'s proper shape.
+		/// Sets a rectangular <see cref="SMPL.Hitbox"/> in <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="OriginUnit"/> and
+		/// <see cref="Size"/> so this should be called after each change on these in order to maintain the proper shape of
+		/// the default <see cref="Hitbox"/>.
 		/// </summary>
 		public virtual void SetDefaultHitbox()
 		{

@@ -119,12 +119,10 @@ namespace SMPL
 
 		public void SetHitbox3D()
       {
-			Hitbox.Lines.Clear();
-			var h = Height * (textures == null || textures.Length == 0 ? 20 : textures.Length);
-
 			var points = new List<Vector2>() { TopLeft, TopRight, BottomLeft, BottomRight, TopLeft3D, TopRight3D, BottomLeft3D, BottomRight3D };
 			var outline = points.OutlinePoints();
 
+			Hitbox.Lines.Clear();
 			for (int i = 1; i < outline.Count; i++)
 				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
 		}
@@ -132,6 +130,8 @@ namespace SMPL
       {
 			if (IsHidden || textures == null || textures.Length == 0)
 				return;
+
+			RenderTarget ??= Game.Window;
 
          for (int i = 0; i < textures.Length; i++)
          {
@@ -144,7 +144,7 @@ namespace SMPL
 					new(BottomLeft.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, Texture.Size.Y)),
 				};
 
-				RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+				RenderTarget.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 			}
 		}
    }
