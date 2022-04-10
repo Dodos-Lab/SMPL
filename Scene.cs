@@ -105,7 +105,7 @@ namespace SMPL
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		private static Thread assetsLoading;
 
-		public static Camera MainCamera { get; } = new(VideoMode.DesktopMode.Width, VideoMode.DesktopMode.Height);
+		public static Camera MainCamera { get; internal set; }
 		/// <summary>
 		/// A shortcut toward the <see cref="MainCamera"/>'s <see cref="Camera.MouseCursorPosition"/>.
 		/// </summary>

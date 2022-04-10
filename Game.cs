@@ -30,7 +30,7 @@ namespace SMPL
 		/// The <paramref name="startingScene"/> is set as <see cref="Scene.CurrentScene"/> and the optional <paramref name="loadingScene"/> as
 		/// <see cref="Scene.LoadingScene"/>.
 		/// </summary>
-		public static void Start(Scene startingScene, Scene loadingScene = null)
+		public static void Start(Scene startingScene, Scene loadingScene = null, uint mainCameraWidth = 1920, uint mainCameraHeight = 1080)
 		{
 			if (startingScene == null || Window != null)
 				return;
@@ -38,6 +38,7 @@ namespace SMPL
 			InitWindow();
 
 			Scene.Init(startingScene, loadingScene);
+			Scene.MainCamera = new(mainCameraWidth, mainCameraHeight);
 			Scene.MainCamera.ViewPosition = new();
 
 			while (Window.IsOpen)

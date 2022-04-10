@@ -95,10 +95,10 @@ namespace SMPL
                vertsArr.Append(new(new(posA.X, posB.Y), c, new(txCrdsA.X, txCrdsB.Y)));
             }
 
-         var transform = Transform.Identity;
-         transform.Translate(new(0, 1));
+         var tr = Transform.Identity;
+         tr.Translate(0, 1);
 
-         Camera.Draw(vertsArr, new(BlendMode, transform, Texture, Shader));
+         Camera?.Draw(vertsArr, new(BlendMode, tr, Texture, Shader));
          vertsArr.Dispose();
       }
       /// <summary>
