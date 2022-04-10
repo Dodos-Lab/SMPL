@@ -3,10 +3,14 @@ using System.Numerics;
 
 namespace SMPL
 {
+	/// <summary>
+	/// Inherit chain: <see cref="Object"/> : <see cref="Visual"/> : <see cref="Sprite"/><br></br><br></br>
+	/// The №1 used <see cref="Visual"/> in games. A simple image with some extra effects accompanying it.
+	/// </summary>
 	public class Sprite : Visual
 	{
 		/// <summary>
-		/// <see cref="Draw"/> uses this unit vector and <see cref="TexCoordsUnitB"/> to determine the visible square on <see cref="Visual.Texture"/>.<br></br>
+		/// <see cref="Draw"/> uses this vector and <see cref="TexCoordsUnitB"/> to determine the visible square on <see cref="Visual.Texture"/>.<br></br>
 		/// - Note: [0, 0] is the top left and [1, 1] is the bottom right of the <see cref="Visual.Texture"/>
 		/// no matter the <see cref="Texture.Size"/>.<br></br>
 		/// - Example: Switching the X values will flip the texture on the X axis, negative values and values bigger than 1 will wrap around etc.
@@ -31,7 +35,7 @@ namespace SMPL
 		}
 
 		/// <summary>
-		/// This determines the positional offset from <see cref="Object.Position"/> as a unit vector.<br></br>
+		/// This determines the positional offset from <see cref="Object.Position"/> as a vector.<br></br>
 		/// Note: [0, 0] is the top left and [1, 1] is the bottom right corner of the <see cref="Sprite"/> (no matter the <see cref="Size"/>).
 		/// Values can also go bellow 0 and above 1.
 		/// </summary>
@@ -68,13 +72,15 @@ namespace SMPL
 		public Hitbox Hitbox { get; set; } = new();
 
 		/// <summary>
-		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.RenderTarget"/> according
+		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.Camera"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Sprite"/> parameters.
 		/// </summary>
 		public override void Draw()
 		{
 			if (IsHidden)
 				return;
+
+			Camera ??= Scene.MainCamera;
 
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
@@ -91,7 +97,7 @@ namespace SMPL
 				new(BottomLeft.ToSFML(), Color, new(w0, hh)),
 			};
 
-			RenderTarget?.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+			Camera.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 		/// <summary>
 		/// Sets a rectangular <see cref="SMPL.Hitbox"/> in <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="OriginUnit"/> and

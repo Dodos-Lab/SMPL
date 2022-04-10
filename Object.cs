@@ -1,11 +1,14 @@
-﻿using SFML.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Numerics;
 
 namespace SMPL
 {
+	/// <summary>
+	/// The base class for most <see cref="Game"/> objects. Useful for handling their orientation/positioning/area in the world, making parent-child relationships
+	/// with other <see cref="Object"/>s to act as the same <see cref="Object"/>, switch between world/parent local/self local transformations etc.
+	/// </summary>
 	public class Object
 	{
 		private readonly List<Object> children = new();

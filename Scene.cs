@@ -9,7 +9,7 @@ namespace SMPL
 {
 	/// <summary>
 	/// Used to handle multiple stages of the game (like menus, levels, loading screens etc). This class needs to be
-	/// inherited in order to catch all the events and access all the data.<br></br><br></br>
+	/// inherited in order to catch all the events and access all the data (by overriding the 'OnX' methods).<br></br><br></br>
 	/// Each <see cref="Scene"/> has a few states:<br></br>
 	/// - Unloaded: The scene just exists as an instance (perhaps in a scene manager), ready to be started.<br></br>
 	/// - When a scene becomes the <see cref="CurrentScene"/> it requires some optional assets to be loaded in <see cref="OnRequireAssets"/>
@@ -105,13 +105,14 @@ namespace SMPL
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		private static Thread assetsLoading;
 
+		public static Camera MainCamera { get; } = new(VideoMode.DesktopMode.Width, VideoMode.DesktopMode.Height);
 		/// <summary>
-		/// The mouse cursor's position in the world (<see cref="CurrentScene"/>).
+		/// A shortcut toward the <see cref="MainCamera"/>'s <see cref="Camera.MouseCursorPosition"/>.
 		/// </summary>
 		public static Vector2 MouseCursorPosition
 		{
-			get { var p = Game.Window.MapPixelToCoords(Mouse.GetPosition(Game.Window)); return new(p.X, p.Y); }
-			set => Mouse.SetPosition(Game.Window.MapCoordsToPixel(value.ToSFML()), Game.Window);
+			get => MainCamera.MouseCursorPosition;
+			set => MainCamera.MouseCursorPosition = value;
 		}
 		/// <summary>
 		/// A scene in which all the game logic is executing currently (unless assets for this scene are loading). See <see cref="Scene"/> for more info.

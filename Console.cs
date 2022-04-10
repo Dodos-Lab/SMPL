@@ -78,11 +78,12 @@ namespace SMPL
 		}
 		/// <summary>
 		/// Display an error on the <see cref="Console"/> with <paramref name="description"/>.
-		/// Some information about where the error has occurred is also included through <paramref name="depth"/> and <see cref="Debug"/>.
+		/// Some information about where the error has occurred is also included through <paramref name="depth"/> and <see cref="Debug"/> methods.
+		/// The <paramref name="description"/> is skipped if <paramref name="depth"/> is -1.
 		/// </summary>
 		public static void LogError(int depth, string description)
 		{
-			if (Debug.IsRunningInVisualStudio == false)
+			if (Debug.IsRunningInVisualStudio == false || depth < -1)
 				return;
 
 			var methods = new List<string>();
@@ -92,10 +93,12 @@ namespace SMPL
 				for (int i = 0; i < 50; i++)
 					Add(depth + i + 1);
 
-			Log($"[!] Error at");
+			Log($"[!] Error: {description}");
+         if (depth > -1)
+				Log($"[!] Method chain call:");
 			for (int i = methods.Count - 1; i >= 0; i--)
 				Log($"[!] - {methods[i]}{actions[i]}");
-			Log($"[!] {description}");
+			Log("");
 
 			void Add(int depth)
 			{

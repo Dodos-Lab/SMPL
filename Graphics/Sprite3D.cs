@@ -1,23 +1,49 @@
 ﻿using SFML.Graphics;
-using SFML.System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 
 namespace SMPL
 {
+	/// <summary>
+	/// Inherit chain: <see cref="Object"/> : <see cref="Visual"/> : <see cref="Sprite"/> : <see cref="Sprite3D"/><br></br><br></br>
+	/// A "3D" <see cref="Sprite"/> that fakes depth by stacking a set amount of textures on top of each other. Also known as
+	/// the 'sprite stacking technique'.
+	/// </summary>
    public class Sprite3D : Sprite
    {
 		private readonly Texture[] textures;
 
+		/// <summary>
+		/// The amount of faked depth that the spacing between all textures sum up to.
+		/// </summary>
 		public float Height { get; set; } = 4;
+		/// <summary>
+		/// The angle at which the textures are stacked toward. Or in other words: the orthographic up angle of the <see cref="Sprite3D"/>.
+		/// </summary>
 		public float Angle3D { get; set; } = 270;
 
+		/// <summary>
+		/// The top left corner of the very top texture of this <see cref="Sprite3D"/> in the world.
+		/// </summary>
 		public Vector2 TopLeft3D => TopLeft.MovePointAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		/// <summary>
+		/// The top right corner of the very top texture of this <see cref="Sprite3D"/> in the world.
+		/// </summary>
 		public Vector2 TopRight3D => TopRight.MovePointAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		/// <summary>
+		/// The bottom left corner of the very top texture of this <see cref="Sprite3D"/> in the world.
+		/// </summary>
 		public Vector2 BottomLeft3D => BottomLeft.MovePointAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		/// <summary>
+		/// The bottom right corner of the very top texture of this <see cref="Sprite3D"/> in the world.
+		/// </summary>
 		public Vector2 BottomRight3D => BottomRight.MovePointAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
 
+		/// <summary>
+		/// Construct the <see cref="Sprite3D"/> from a 3D model .obj file and its texture with additional details.
+		/// </summary>
 		public Sprite3D(Scene.TexturedModel3D texturedModel3D)
 		{
 			if (texturedModel3D.ObjModelPath == null || texturedModel3D.TexturePath == null ||
@@ -112,11 +138,19 @@ namespace SMPL
 
 			textures = layeredTextures;
 		}
-      public Sprite3D(params Texture[] textures)
-      {
-			this.textures = textures;
-      }
+		/// <summary>
+		/// Construct the <see cref="Sprite3D"/> from some <paramref name="textures"/>.
+		/// </summary>
+      public Sprite3D(params Texture[] textures) => this.textures = textures;
+		/// <summary>
+		/// Construct the <see cref="Sprite3D"/> from some <paramref name="textures"/>.
+		/// </summary>
+		public Sprite3D(ICollection<Texture> textures) => this.textures = textures.ToArray();
 
+		/// <summary>
+		/// Set the <see cref="Sprite.Hitbox"/> to be the outline of all the textures in this <see cref="Sprite3D"/>.
+		/// This needs to be updated frequently in order to maintain the correct shape (in <see cref="Scene.OnUpdate"/> for example).
+		/// </summary>
 		public void SetHitbox3D()
       {
 			var points = new List<Vector2>() { TopLeft, TopRight, BottomLeft, BottomRight, TopLeft3D, TopRight3D, BottomLeft3D, BottomRight3D };
@@ -126,12 +160,16 @@ namespace SMPL
 			for (int i = 1; i < outline.Count; i++)
 				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
 		}
-      public override void Draw()
+		/// <summary>
+		/// Draws all the <see cref="Sprite3D"/>'s textures on the <see cref="Visual.Camera"/> according
+		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/> and <see cref="Sprite3D"/> parameters.
+		/// </summary>
+		public override void Draw()
       {
 			if (IsHidden || textures == null || textures.Length == 0)
 				return;
 
-			RenderTarget ??= Game.Window;
+			Camera ??= Scene.MainCamera;
 
          for (int i = 0; i < textures.Length; i++)
          {
@@ -144,7 +182,7 @@ namespace SMPL
 					new(BottomLeft.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, Texture.Size.Y)),
 				};
 
-				RenderTarget.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+				Camera.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 			}
 		}
    }

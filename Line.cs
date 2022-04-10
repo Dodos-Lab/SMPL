@@ -39,14 +39,14 @@ namespace SMPL
 		}
 
 		/// <summary>
-		/// Draws this line to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
-		/// <paramref name="width"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Game.Window"/> if no
-		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// Draws this line to a <paramref name="camera"/> with <paramref name="color"/> having some
+		/// <paramref name="width"/>. The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if no
+		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 2)
+		public void Draw(Camera camera = default, Color color = default, float width = 4)
 		{
-			renderTarget ??= Game.Window;
+			camera ??= Scene.MainCamera;
 			color = color == default ? Color.White : color;
 
 			width /= 2;
@@ -62,7 +62,7 @@ namespace SMPL
 				new(new(endRight.X, endRight.Y), color),
 				new(new(endLeft.X, endLeft.Y), color),
 			};
-			renderTarget.Draw(vert, PrimitiveType.Quads);
+			camera.Draw(vert, PrimitiveType.Quads);
 		}
 		/// <summary>
 		/// Returns the point where this line and another <paramref name="line"/> cross. Returns an invalid vector

@@ -1,5 +1,8 @@
 ﻿namespace SMPL
 {
+	/// <summary>
+	/// A class for continuously going over set data overtime.
+	/// </summary>
 	public class Animation
 	{
 		private float rawIndex;
@@ -23,11 +26,11 @@
 		public float ProgressUnit => RawIndex.Map(LOWER_BOUND, Values.Length, 0, 1);
 
 		/// <summary>
-		/// All possible "frames" that the <see cref="Animation"/> goes over.
+		/// All possible "frames" that the <see cref="Animation"/> goes over. They can be any <see cref="object"/>.
 		/// </summary>
 		public object[] Values { get; set; }
 		/// <summary>
-		/// The current "frame".
+		/// The current "frame" retrieved by <see cref="Index"/> from <see cref="Values"/>.
 		/// </summary>
 		public object CurrentValue { get; private set; }
 		/// <summary>
@@ -51,7 +54,7 @@
 		/// <summary>
 		/// This updates the <see cref="Animation"/> by incrementing the <see cref="RawIndex"/> according to
 		/// <see cref="Time.Delta"/> and <see cref="FPS"/> (so that the <see cref="Animation"/> runs consistently on all systems).
-		/// Wraps back to 0 if <see cref="IsRepeating"/>.
+		/// Wraps back to 0 if <see cref="IsRepeating"/>. Needs to be called continuously in order to work (in <see cref="Scene.OnUpdate"/> for example).
 		/// </summary>
 		public void Advance()
 		{

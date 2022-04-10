@@ -36,8 +36,9 @@ namespace SMPL
 				return;
 
 			InitWindow();
-			Camera.Position = new();
+
 			Scene.Init(startingScene, loadingScene);
+			Scene.MainCamera.ViewPosition = new();
 
 			while (Window.IsOpen)
 			{
@@ -45,10 +46,11 @@ namespace SMPL
 
 				Window.DispatchEvents();
 				Window.Clear(bgColor);
+				Scene.MainCamera.Clear(bgColor);
 
 				Time.Update();
 				Scene.UpdateCurrentScene();
-
+				Camera.DrawMainCameraToWindow();
 				Window.Display();
 			}
 
@@ -59,6 +61,10 @@ namespace SMPL
 				Window.Display();
 				Window.Closed += OnClose;
 				Window.SetFramerateLimit(120);
+
+				var view = Window.GetView();
+				view.Center = new();
+				Window.SetView(view);
 			}
 			Color GetActiveSceneBgColor()
 			{

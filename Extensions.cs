@@ -415,7 +415,7 @@ namespace SMPL
 		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info).
 		/// The calculation ensures not to pass the <paramref name="targetNumber"/>. The result is then returned.
 		/// </summary>
-		public static float MoveToward(this float number, float targetNumber, float speed, bool fpsDependent = true)
+		public static float MoveTowardTarget(this float number, float targetNumber, float speed, bool fpsDependent = true)
 		{
 			var goingPos = number < targetNumber;
 			var result = Move(number, goingPos ? Sign(speed, false) : Sign(speed, true), fpsDependent);
@@ -691,7 +691,7 @@ namespace SMPL
 			var result = point.MovePointAtAngle(point.AngleBetweenPoints(targetPoint), speed, fpsDependent);
 
 			speed *= fpsDependent ? Time.Delta : 1;
-         return Vector2.Distance(result, targetPoint) < speed * 2 ? targetPoint : result;
+         return Vector2.Distance(result, targetPoint) < speed * 1.1f ? targetPoint : result;
       }
 		/// <summary>
 		/// Calculates the <see cref="Vector2"/> point that is a certain <paramref name="percent"/> between <paramref name="point"/> and
@@ -704,14 +704,14 @@ namespace SMPL
 			return point;
 		}
 		/// <summary>
-		/// Draws <paramref name="point"/> to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
-		/// <paramref name="size"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Game.Window"/> if no
-		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// Draws <paramref name="point"/> to a <paramref name="camera"/> with <paramref name="color"/> having some
+		/// <paramref name="size"/>. The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if no
+		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
+		public static void DrawPoint(this Vector2 point, Camera camera = default, Color color = default, float size = 4)
 		{
-			renderTarget ??= Game.Window;
+			camera ??= Scene.MainCamera;
 			color = color == default ? Color.White : color;
 
 			size /= 2;
@@ -727,7 +727,7 @@ namespace SMPL
 				new(new(br.X, br.Y), color),
 				new(new(bl.X, bl.Y), color),
 			};
-			renderTarget.Draw(vert, PrimitiveType.Quads);
+			camera.Draw(vert, PrimitiveType.Quads);
 		}
 		/// <summary>
 		/// Converts a <see cref="Vector2f"/> into a <see cref="Vector2"/> and returns the result.

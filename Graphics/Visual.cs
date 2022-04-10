@@ -3,6 +3,7 @@
 namespace SMPL
 {
 	/// <summary>
+	/// Inherit chain: <see cref="Object"/> : <see cref="Visual"/><br></br><br></br>
 	/// A base class for most textured graphics.
 	/// </summary>
 	public abstract class Visual : Object
@@ -12,10 +13,10 @@ namespace SMPL
 		/// </summary>
 		public Color Color { get; set; } = Color.White;
 		/// <summary>
-		/// Where this <see cref="Visual"/> should be drawn. It is drawn to the <see cref="Game.Window"/> if this is null. The usual values are
-		/// the <see cref="Game.Window"/> or a <see cref="RenderTexture"/>.
+		/// At which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="Scene.MainCamera"/> if null upon
+		/// drawing.
 		/// </summary>
-		public RenderTarget RenderTarget { get; set; } = Game.Window;
+		public Camera Camera { get; set; } = Scene.MainCamera;
 		/// <summary>
 		/// The type of drawing as to whether it should include the <see cref="BlendMode.Alpha"/> channel, whether it should
 		/// <see cref="BlendMode.Add"/>/<see cref="BlendMode.Multiply"/> the color

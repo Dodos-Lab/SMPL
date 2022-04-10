@@ -43,18 +43,18 @@ namespace SMPL
 				Lines.Add(new(obj.GetPositionFromSelf(LocalLines[i].A), obj.GetPositionFromSelf(LocalLines[i].B)));
 		}
 		/// <summary>
-		/// Draws all <see cref="Lines"/> onto <paramref name="renderTarget"/> with <paramref name="color"/> and <paramref name="width"/> for each line.
-		/// The <paramref name="renderTarget"/> is assumed to be the <see cref="Game.Window"/> if no
-		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// Draws all <see cref="Lines"/> onto <paramref name="camera"/> with <paramref name="color"/> and <paramref name="width"/> for each line.
+		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if no
+		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 2)
+		public void Draw(Camera camera = default, Color color = default, float width = 4)
 		{
-			renderTarget ??= Game.Window;
+			camera ??= Scene.MainCamera;
 			color = color == default ? Color.White : color;
 
 			for (int i = 0; i < Lines.Count; i++)
-				Lines[i].Draw(renderTarget, color, width);
+				Lines[i].Draw(camera, color, width);
 		}
 		/// <summary>
 		/// Gets all the cross points (if any) produced between <see cref="Lines"/> and <paramref name="hitbox"/>'s <see cref="Lines"/>.
