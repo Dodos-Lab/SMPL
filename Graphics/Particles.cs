@@ -55,7 +55,7 @@ namespace SMPL
 		public int ParticleCount => particles == null ? 0 : particles.Count;
 
 		/// <summary>
-		/// Spawn a certain <paramref name="amount"/> of <see cref="Particle"/>.
+		/// Spawn a certain <paramref name="amount"/> of <see cref="Particle"/>s.
 		/// </summary>
 		public void Spawn(uint amount)
 		{

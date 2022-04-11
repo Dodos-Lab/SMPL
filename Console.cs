@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace SMPL
 {
+	/// <summary>
+	/// A wrapper class for the <see cref="System.Console"/>. Mainly used for debugging by logging messages during runtime. This class
+	/// makes sure to instantiate the <see cref="Console"/> once it is needed.
+	/// </summary>
 	public static class Console
 	{
 		#region smol brain
@@ -42,38 +47,51 @@ namespace SMPL
 		private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
 		[DllImport("kernel32.dll", SetLastError = true)]
 		private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+		[DllImport("kernel32.dll")]
+		private static extern IntPtr GetConsoleWindow();
+		[DllImport("user32.dll")]
+		private static extern bool ShowWindow(IntPtr handle, int cmd);
+
 		#endregion
-		private static bool consoleShown;
+		private static string input;
+		private static bool isCreated, isVisible, inputRequired;
+		private static Thread thread;
 
-		/// <summary>
-		/// Get the line entered by the user in the <see cref="Console"/>.
-		/// </summary>
-		public static string Input
+		public static string RequiredInput
 		{
-			get
-			{
-				Show();
-				SelectionEnable(true);
-				var result = System.Console.ReadLine();
-				SelectionEnable(false);
-
-				return result;
-			}
+			get => isCreated ? input : null;
+			private set => input = value;
 		}
 		public static string Title
 		{
 #pragma warning disable CA1416
-			get => System.Console.Title;
+			get => isCreated ? System.Console.Title : null;
 #pragma warning restore CA1416
-			set => System.Console.Title = value;
+			set { TryCreate(); System.Console.Title = value; }
+		}
+		public static bool IsVisible
+		{
+			get => isCreated && isVisible;
+			set
+			{
+				isVisible = value;
+            if (isVisible)
+					TryCreate();
+				ShowWindow(GetConsoleWindow(), value ? 5 : 0);
+			}
 		}
 
+		public static void RequireInput()
+		{
+			inputRequired = true;
+			TryCreate();
+		}
 		/// <summary>
 		/// Display <paramref name="message"/> on the <see cref="Console"/>. May be followed by <paramref name="newLine"/>.
 		/// </summary>
 		public static void Log(object message, bool newLine = true)
 		{
-			Show();
+			TryCreate();
 			System.Console.Write(message + (newLine ? "\n" : ""));
 		}
 		/// <summary>
@@ -125,21 +143,38 @@ namespace SMPL
 		/// </summary>
 		public static void Clear()
 		{
-			Show();
-
+			TryCreate();
 			System.Console.Clear();
 		}
 
-		private static void Show()
+		private static void TryCreate()
 		{
-			if (consoleShown) return;
+			if (isCreated)
+				return;
 
 			AllocConsole();
 
 			SelectionEnable(false);
 			System.Console.Title = "Console";
-			consoleShown = true;
+			isCreated = true;
+			IsVisible = true;
+
+			thread = new(UpdateThread) { IsBackground = true, Name = "Console" };
+			thread.Start();
 		}
+		private static void UpdateThread()
+      {
+         while (true)
+         {
+				Thread.Sleep(1);
+
+				if (inputRequired == false)
+					continue;
+
+				input = System.Console.ReadLine();
+				inputRequired = false;
+         }
+      }
 		private static void SelectionEnable(bool enabled)
 		{
 			var consoleHandle = GetStdHandle((int)StdHandle.STD_INPUT_HANDLE);

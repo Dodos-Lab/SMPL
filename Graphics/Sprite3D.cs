@@ -18,7 +18,7 @@ namespace SMPL
 		/// <summary>
 		/// The amount of faked depth that the spacing between all textures sum up to.
 		/// </summary>
-		public float Height { get; set; } = 4;
+		public float Height { get; set; } = 20;
 		/// <summary>
 		/// The angle at which the textures are stacked toward. Or in other words: the orthographic up angle of the <see cref="Sprite3D"/>.
 		/// </summary>
@@ -47,7 +47,7 @@ namespace SMPL
 		public Sprite3D(Scene.TexturedModel3D texturedModel3D)
 		{
 			if (texturedModel3D.ObjModelPath == null || texturedModel3D.TexturePath == null ||
-				texturedModel3D.TextureCount == 0 || File.Exists(texturedModel3D.ObjModelPath) == false)
+				texturedModel3D.TextureCount == 0 || File.Exists(texturedModel3D.ObjModelPath) == false || texturedModel3D.TextureDetail <= 0)
 				throw new System.Exception();
 
 			var img = default(Image);
@@ -171,15 +171,16 @@ namespace SMPL
 
 			Camera ??= Scene.MainCamera;
 
+			var h = Height * Scale / textures.Length;
          for (int i = 0; i < textures.Length; i++)
          {
 				Texture = textures[i];
 				var verts = new Vertex[]
 				{
-					new(TopLeft.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, 0)),
-					new(TopRight.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(Texture.Size.X, 0)),
-					new(BottomRight.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(Texture.Size.X, Texture.Size.Y)),
-					new(BottomLeft.MovePointAtAngle(Angle3D, i * Height * Scale, false).ToSFML(), Color, new(0, Texture.Size.Y)),
+					new(TopLeft.MovePointAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, 0)),
+					new(TopRight.MovePointAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(Texture.Size.X, 0)),
+					new(BottomRight.MovePointAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(Texture.Size.X, Texture.Size.Y)),
+					new(BottomLeft.MovePointAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, Texture.Size.Y)),
 				};
 
 				Camera.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));

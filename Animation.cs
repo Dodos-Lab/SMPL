@@ -54,7 +54,7 @@
 		/// <summary>
 		/// This updates the <see cref="Animation"/> by incrementing the <see cref="RawIndex"/> according to
 		/// <see cref="Time.Delta"/> and <see cref="FPS"/> (so that the <see cref="Animation"/> runs consistently on all systems).
-		/// Wraps back to 0 if <see cref="IsRepeating"/>. Needs to be called continuously in order to work (in <see cref="Scene.OnUpdate"/> for example).
+		/// Wraps back to 0 if it <see cref="IsRepeating"/>. Needs to be called continuously in order to work (in <see cref="Scene.OnUpdate"/> for example).
 		/// </summary>
 		public void Advance()
 		{
