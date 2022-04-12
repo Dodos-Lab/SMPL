@@ -11,7 +11,6 @@ namespace SMPL
 	/// </summary>
 	public static class Console
 	{
-		#region smol brain
 		private static void Form1_Load(object sender, EventArgs e) => AllocConsole();
 		[DllImport("kernel32.dll", SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -23,7 +22,7 @@ namespace SMPL
 			STD_ERROR_HANDLE = -12,
 		}
 		[DllImport("kernel32.dll", SetLastError = true)]
-		private static extern IntPtr GetStdHandle(int nStdHandle); //returns Handle
+		private static extern IntPtr GetStdHandle(int nStdHandle);
 		internal enum ConsoleMode : uint
 		{
 			ENABLE_ECHO_INPUT = 0x0004,
@@ -52,16 +51,21 @@ namespace SMPL
 		[DllImport("user32.dll")]
 		private static extern bool ShowWindow(IntPtr handle, int cmd);
 
-		#endregion
 		private static string input;
 		private static bool isCreated, isVisible, inputRequired;
 		private static Thread thread;
 
+		/// <summary>
+		/// The result from <see cref="RequireInput"/> that the user entered in the <see cref="Console"/>.
+		/// </summary>
 		public static string RequiredInput
 		{
 			get => isCreated ? input : null;
 			private set => input = value;
 		}
+		/// <summary>
+		/// The title of the <see cref="Console"/>. This may not work in some operating systems other than Windows.
+		/// </summary>
 		public static string Title
 		{
 #pragma warning disable CA1416
@@ -69,6 +73,9 @@ namespace SMPL
 #pragma warning restore CA1416
 			set { TryCreate(); System.Console.Title = value; }
 		}
+		/// <summary>
+		/// Whether the <see cref="Console"/>'s window is visible.
+		/// </summary>
 		public static bool IsVisible
 		{
 			get => isCreated && isVisible;
@@ -81,6 +88,11 @@ namespace SMPL
 			}
 		}
 
+		/// <summary>
+		/// Enables typing in the <see cref="Console"/> and retrieves the entire line inside <see cref="RequiredInput"/> after something is typed.
+		/// The waiting for input is done in the background and does not stop the main <see cref="Game"/> loop from executing (unlike with
+		/// <see cref="System.Console.ReadLine"/>).
+		/// </summary>
 		public static void RequireInput()
 		{
 			inputRequired = true;
@@ -96,23 +108,23 @@ namespace SMPL
 		}
 		/// <summary>
 		/// Display an error on the <see cref="Console"/> with <paramref name="description"/>.
-		/// Some information about where the error has occurred is also included through <paramref name="depth"/> and <see cref="Debug"/> methods.
-		/// The <paramref name="description"/> is skipped if <paramref name="depth"/> is -1.
+		/// Some information about where the error has occurred is also included through <paramref name="callChainIndex"/> and the <see cref="Debug"/>
+		/// properties. The <paramref name="description"/> is skipped if <paramref name="callChainIndex"/> is -1.
 		/// </summary>
-		public static void LogError(int depth, string description)
+		public static void LogError(int callChainIndex, string description)
 		{
-			if (Debug.IsRunningInVisualStudio == false || depth < -1)
+			if (Debug.IsRunningInVisualStudio == false || callChainIndex < -1)
 				return;
 
 			var methods = new List<string>();
 			var actions = new List<string>();
 
-			if (depth >= 0)
+			if (callChainIndex >= 0)
 				for (int i = 0; i < 50; i++)
-					Add(depth + i + 1);
+					Add(callChainIndex + i + 1);
 
 			Log($"[!] Error: {description}");
-         if (depth > -1)
+         if (callChainIndex > -1)
 				Log($"[!] Method chain call:");
 			for (int i = methods.Count - 1; i >= 0; i--)
 				Log($"[!] - {methods[i]}{actions[i]}");
@@ -122,14 +134,19 @@ namespace SMPL
 			{
 				if (depth < 0)
 					return;
-				var action = Debug.GetMethodName(depth);
+
+				var prevDepth = Debug.CallChainIndex;
+				Debug.CallChainIndex = (uint)depth;
+				var action = Debug.MethodName;
 				if (string.IsNullOrEmpty(action))
 					return;
 
-				var file = $"{Debug.GetFileName(depth + 1)}.cs/";
-				var method = $"{Debug.GetMethodName(depth + 1)}()";
-				var line = $"{Debug.GetLineNumber(depth + 1)}";
+				Debug.CallChainIndex = (uint)depth + 1;
+				var file = $"{Debug.FileName}.cs/";
+				var method = $"{Debug.MethodName}()";
+				var line = $"{Debug.LineNumber}";
 				var methodName = file == ".cs/" ? "" : $"{file}{method}";
+				Debug.CallChainIndex = prevDepth;
 
 				if (methodName != "")
 				{

@@ -1,52 +1,31 @@
 ﻿using System.Diagnostics;
+using System.IO;
 
 namespace SMPL
 {
+	/// <summary>
+	/// Accesses information about where the code is currently executing and where it was called from.
+	/// </summary>
 	public static class Debug
 	{
 		/// <summary>
 		/// Returns whether this application is started from a standalone .exe or through Visual Studio.
 		/// </summary>
 		public static bool IsRunningInVisualStudio => Debugger.IsAttached;
+		/// <summary>
+		/// The offset on the stack call chain going from the current method (index 0) up to Main().
+		/// </summary>
+		public static uint CallChainIndex { get; set; }
+		/// <summary>
+		/// Returns the current line number based on <see cref="CallChainIndex"/> and 0 if it fails to retrieve it.
+		/// </summary>
+		public static int LineNumber => new StackFrame((int)CallChainIndex + 1, true)?.GetFileLineNumber() ?? 0;
 
-		public static uint GetLineNumber(int depth = 0)
-		{
-			var info = new StackFrame(depth + 1, true);
-			return (uint)info.GetFileLineNumber();
-		}
-		public static string GetMethodName(int depth = 0)
-		{
-			var info = new StackFrame(depth + 1, true);
-			return info?.GetMethod()?.Name;
-		}
-		public static string GetFileName(int depth = 0)
-		{
-			var pathRaw = GetFilePath(depth + 1);
-			if (pathRaw == null) return null;
-			var path = pathRaw.Split('\\');
-			var name = path[^1].Split('.');
-			return name[0];
-		}
-		public static string GetFilePath(int depth = 0)
-		{
-			var info = new StackFrame(depth + 1, true);
-			return info.GetFileName();
-		}
-		public static string GetFileDirectory(int depth = 0)
-		{
-			var fileName = new StackFrame(depth + 1, true).GetFileName();
-			if (fileName == default)
-				return default;
-			var path = fileName.Split('\\');
-			var dir = "";
-			for (int i = 0; i < path.Length - 1; i++)
-			{
-				dir += path[i];
-				if (i == path.Length - 2)
-					continue;
-				dir += "\\";
-			}
-			return dir;
-		}
+		public static string MethodName => new StackFrame((int)CallChainIndex + 1, true)?.GetMethod()?.Name;
+		public static string ClassName => new StackFrame((int)CallChainIndex + 1, true)?.GetMethod()?.DeclaringType?.Name;
+		public static string Namespace => new StackFrame((int)CallChainIndex + 1, true)?.GetMethod()?.DeclaringType?.Namespace;
+		public static string FilePath => new StackFrame((int)CallChainIndex + 1, true)?.GetFileName();
+		public static string FileName => Path.GetFileNameWithoutExtension(new StackFrame((int)CallChainIndex + 1, true)?.GetFileName());
+		public static string FileDirectory => Path.GetDirectoryName(new StackFrame((int)CallChainIndex + 1, true)?.GetFileName());
 	}
 }

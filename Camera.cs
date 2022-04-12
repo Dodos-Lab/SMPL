@@ -92,8 +92,15 @@ namespace SMPL
 			get => MapPixelToCoords(new(0, (int)Game.Window.Size.Y)).ToSystem();
 		}
 
-		public Camera(Vector2 size) : base((uint)size.X.Limit(0, Texture.MaximumSize), (uint)size.Y.Limit(0, Texture.MaximumSize)) { }
-		public Camera(uint x, uint y) : base((uint)((int)x).Limit(0, (int)Texture.MaximumSize), (uint)((int)y).Limit(0, (int)Texture.MaximumSize)) { }
+		/// <summary>
+		/// Create the <see cref="Camera"/> with a certain <paramref name="resolution"/>.
+		/// </summary>
+		public Camera(Vector2 resolution) : base((uint)resolution.X.Limit(0, Texture.MaximumSize), (uint)resolution.Y.Limit(0, Texture.MaximumSize)) { }
+		/// <summary>
+		/// Create the <see cref="Camera"/> with a certain size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
+		/// </summary>
+		public Camera(uint resolutionX, uint resolutionY) :
+			base((uint)((int)resolutionX).Limit(0, (int)Texture.MaximumSize), (uint)((int)resolutionY).Limit(0, (int)Texture.MaximumSize)) { }
 
 		/// <summary>
 		/// Returns whether the <see cref="Camera"/> can "see" <paramref name="hitbox"/>. This uses <see cref="Hitbox.ConvexContains(Hitbox)"/>

@@ -15,10 +15,23 @@ namespace SMPL
 	/// </summary>
 	public static class Extensions
 	{
-		public enum Limits { ClosestBound, Overflow }
+		/// <summary>
+		/// The type of limitation used by <see cref="Limit(float, float, float, Limitation)"/> and <see cref="Limit(int, int, int, Limitation)"/>.
+		/// </summary>
+		public enum Limitation { ClosestBound, Overflow }
+		/// <summary>
+		/// The type of rounding direction used by <see cref="Round"/>.
+		/// </summary>
 		public enum RoundWay { Closest, Up, Down }
-		public enum RoundWhen5 { TowardEven, AwayFromZero, TowardZero, TowardNegativeInfinity, TowardPositiveInfinity }
-		public enum SizeToSize
+		/// <summary>
+		/// The prefered case when the number is in the middle (ends on '5' or on '.5') and the direction is <see cref="RoundWay.Closest"/>.
+		/// This is used by <see cref="Round"/>.
+		/// </summary>
+		public enum RoundWhenMiddle { TowardEven, AwayFromZero, TowardZero, TowardNegativeInfinity, TowardPositiveInfinity }
+		/// <summary>
+		/// The type of size convertion from one size unit to another.
+		/// </summary>
+		public enum SizeConvertion
 		{
 			Bit_Byte, Bit_KB,
 			Byte_Bit, Byte_KB, Byte_MB,
@@ -27,6 +40,9 @@ namespace SMPL
 			GB_KB, GB_MB, GB_TB,
 			TB_MB, TB_GB
 		}
+		/// <summary>
+		/// The type of number animations used by <see cref="AnimateUnit(float, Animations, AnimationWay)"/>. Also known as 'easing functions'.
+		/// </summary>
 		public enum Animations
 		{
 			BendWeak, // Sine
@@ -37,7 +53,10 @@ namespace SMPL
 			Swing, // Back
 			Bounce // Bounce
 		}
-		public enum AnimationCurves { In, Out, InOut }
+		/// <summary>
+		/// The type of number animation direction used by <see cref="AnimateUnit(float, Animations, AnimationWay)"/>
+		/// </summary>
+		public enum AnimationWay { Backward, Forward, BackwardThenForward }
 
 		private static readonly Dictionary<string, int> gateEntries = new();
 		private static readonly Dictionary<string, bool> gates = new();
@@ -54,7 +73,11 @@ namespace SMPL
 		/// </summary>
 		public static bool Once(this bool condition, uint max = uint.MaxValue, string uniqueness = default)
 		{
-			var uniqueID = $"{Debug.GetFilePath(1)}-{Debug.GetLineNumber(1)}-{uniqueness}";
+			var prev = Debug.CallChainIndex;
+			Debug.CallChainIndex = 1;
+			var uniqueID = $"{Debug.FilePath}-{Debug.LineNumber}-{uniqueness}";
+			Debug.CallChainIndex = prev;
+
 			if (gates.ContainsKey(uniqueID) == false && condition == false) return false;
 			else if (gates.ContainsKey(uniqueID) == false && condition == true)
 			{
@@ -216,48 +239,56 @@ namespace SMPL
 			return ((number % 360) + 360) % 360;
 		}
 		/// <summary>
-		/// Converts a unit <paramref name="progress"/> [0 - 1] to a value calculated according to
-		/// <paramref name="animationType"/> and <paramref name="animationCurve"/> then returns it.
+		/// Converts a unit <paramref name="progress"/> ranged [0 - 1] to a value calculated according to
+		/// <paramref name="animationType"/> and <paramref name="animationCurve"/>. May also be <paramref name="repeated"/> 
+		/// if outside of the range.<br></br>
+		/// The animation result starts at 0 and settles on 1 at the end (may go outside during the animation but never ends outside).
+		/// The result is then returned. These calculations are also known as 'easing functions'.<br></br><br></br>
+		/// - Example: An animation of rotating a <see cref="Sprite"/> for 3 seconds would look something like this:<code>
+		/// step += Time.Delta / 3f;
+		/// var result = step.AnimateUnit(Animations.Bounce, AnimationWay.Forward, repeated: false);
+		/// sprite.Angle = result * 360f;
+		/// </code>
 		/// </summary>
-		public static float AnimateUnit(this float progress, Animations animationType, AnimationCurves animationCurve)
+		public static float AnimateUnit(this float progress, Animations animationType, AnimationWay animationCurve, bool repeated = false)
 		{
 			var result = 0f;
-			var x = progress;
+			var x = progress.Limit(0, 1, repeated ? Limitation.Overflow : Limitation.ClosestBound);
 			switch (animationType)
 			{
 				case Animations.BendWeak:
 					{
-						result = animationCurve == AnimationCurves.In ? 1 - MathF.Cos(x * MathF.PI / 2) :
-							animationCurve == AnimationCurves.Out ? 1 - MathF.Sin(x * MathF.PI / 2) :
+						result = animationCurve == AnimationWay.Backward ? 1 - MathF.Cos(x * MathF.PI / 2) :
+							animationCurve == AnimationWay.Forward ? 1 - MathF.Sin(x * MathF.PI / 2) :
 							-(MathF.Cos(MathF.PI * x) - 1) / 2;
 						break;
 					}
 				case Animations.Bend:
 					{
-						result = animationCurve == AnimationCurves.In ? x * x * x :
-							animationCurve == AnimationCurves.Out ? 1 - MathF.Pow(1 - x, 3) :
+						result = animationCurve == AnimationWay.Backward ? x * x * x :
+							animationCurve == AnimationWay.Forward ? 1 - MathF.Pow(1 - x, 3) :
 							(x < 0.5 ? 4 * x * x * x : 1 - MathF.Pow(-2 * x + 2, 3) / 2);
 						break;
 					}
 				case Animations.BendStrong:
 					{
-						result = animationCurve == AnimationCurves.In ? x * x * x * x :
-							animationCurve == AnimationCurves.Out ? 1 - MathF.Pow(1 - x, 5) :
+						result = animationCurve == AnimationWay.Backward ? x * x * x * x :
+							animationCurve == AnimationWay.Forward ? 1 - MathF.Pow(1 - x, 5) :
 							(x < 0.5 ? 16 * x * x * x * x * x : 1 - MathF.Pow(-2 * x + 2, 5) / 2);
 						break;
 					}
 				case Animations.Circle:
 					{
-						result = animationCurve == AnimationCurves.In ? 1 - MathF.Sqrt(1 - MathF.Pow(x, 2)) :
-							animationCurve == AnimationCurves.Out ? MathF.Sqrt(1 - MathF.Pow(x - 1, 2)) :
+						result = animationCurve == AnimationWay.Backward ? 1 - MathF.Sqrt(1 - MathF.Pow(x, 2)) :
+							animationCurve == AnimationWay.Forward ? MathF.Sqrt(1 - MathF.Pow(x - 1, 2)) :
 							(x < 0.5 ? (1 - MathF.Sqrt(1 - MathF.Pow(2 * x, 2))) / 2 : (MathF.Sqrt(1 - MathF.Pow(-2 * x + 2, 2)) + 1) / 2);
 						break;
 					}
 				case Animations.Elastic:
 					{
-						result = animationCurve == AnimationCurves.In ?
+						result = animationCurve == AnimationWay.Backward ?
 							(x == 0 ? 0 : x == 1 ? 1 : -MathF.Pow(2, 10 * x - 10) * MathF.Sin((x * 10 - 10.75f) * ((2 * MathF.PI) / 3))) :
-							animationCurve == AnimationCurves.Out ?
+							animationCurve == AnimationWay.Forward ?
 							(x == 0 ? 0 : x == 1 ? 1 : MathF.Pow(2, -10 * x) * MathF.Sin((x * 10 - 0.75f) * (2 * MathF.PI) / 3) + 1) :
 							(x == 0 ? 0 : x == 1 ? 1 : x < 0.5f ? -(MathF.Pow(2, 20 * x - 10) * MathF.Sin((20f * x - 11.125f) *
 							(2 * MathF.PI) / 4.5f)) / 2 :
@@ -266,21 +297,21 @@ namespace SMPL
 					}
 				case Animations.Swing:
 					{
-						result = animationCurve == AnimationCurves.In ? 2.70158f * x * x * x - 1.70158f * x * x :
-							animationCurve == AnimationCurves.Out ? 1 + 2.70158f * MathF.Pow(x - 1, 3) + 1.70158f * MathF.Pow(x - 1, 2) :
+						result = animationCurve == AnimationWay.Backward ? 2.70158f * x * x * x - 1.70158f * x * x :
+							animationCurve == AnimationWay.Forward ? 1 + 2.70158f * MathF.Pow(x - 1, 3) + 1.70158f * MathF.Pow(x - 1, 2) :
 							(x < 0.5 ? (MathF.Pow(2 * x, 2) * ((2.59491f + 1) * 2 * x - 2.59491f)) / 2 :
 							(MathF.Pow(2 * x - 2, 2) * ((2.59491f + 1) * (x * 2 - 2) + 2.59491f) + 2) / 2);
 						break;
 					}
 				case Animations.Bounce:
 					{
-						result = animationCurve == AnimationCurves.In ? 1 - easeOutBounce(1 - x) :
-							animationCurve == AnimationCurves.Out ? easeOutBounce(x) :
+						result = animationCurve == AnimationWay.Backward ? 1 - easeOutBounce(1 - x) :
+							animationCurve == AnimationWay.Forward ? easeOutBounce(x) :
 							(x < 0.5f ? (1 - easeOutBounce(1 - 2 * x)) / 2 : (1 + easeOutBounce(2 * x - 1)) / 2);
 						break;
 					}
 			}
-			return result * 100;
+			return result;
 
 			float easeOutBounce(float x)
 			{
@@ -289,15 +320,17 @@ namespace SMPL
 			}
 		}
 		/// <summary>
-		/// Restricts a <paramref name="number"/> in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with a
-		/// <paramref name="limitation"/> and returns it. Also known as Clamping.
+		/// Restricts a <paramref name="number"/> in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with a certain type of
+		/// <paramref name="limitation"/> and returns it. Also known as Clamping.<br></br><br></br>
+		/// - Note when using <see cref="Limitation.Overflow"/>: Any <paramref name="number"/> that is overflowing millions
+		/// of times (is way outside of the range) may have inacurate results.
 		/// </summary>
-		public static float Limit(this float number, float rangeA, float rangeB, Limits limitation = Limits.ClosestBound)
+		public static float Limit(this float number, float rangeA, float rangeB, Limitation limitation = Limitation.ClosestBound)
 		{
 			if (rangeA > rangeB)
 				Swap(ref rangeA, ref rangeB);
 
-			if (limitation == Limits.ClosestBound)
+			if (limitation == Limitation.ClosestBound)
 			{
 				if (number < rangeA)
 					return rangeA;
@@ -305,20 +338,16 @@ namespace SMPL
 					return rangeB;
 				return number;
 			}
-			else
+			else if (limitation == Limitation.Overflow)
 			{
-				rangeB += 1;
-				var a = number;
-				a = Map(a);
-				while (a < rangeA) a = Map(a);
-				return a;
-				float Map(float b)
-				{
-					b = ((b % rangeB) + rangeB) % rangeB;
-					if (b < rangeA) b = rangeB - (rangeA - b);
-					return b;
-				}
+				var input = Map(number, rangeA, rangeB, 0, uint.MaxValue);
+				var n = (uint)input;
+				var output = Map(n, 0, uint.MaxValue, rangeA, rangeB);
+				return ((float)output).Round(2);
+
+				double Map(double number, double a1, double a2, double b1, double b2) => (number - a1) / (a2 - a1) * (b2 - b1) + b1;
 			}
+			return float.NaN;
 		}
 		/// <summary>
 		/// Ensures a <paramref name="number"/> is <paramref name="signed"/> and returns the result.
@@ -341,7 +370,7 @@ namespace SMPL
 		/// May take into account a certain <paramref name="priority"/>.
 		/// </summary>
 		public static float Round(this float number, float precision = 0, RoundWay toward = RoundWay.Closest,
-			RoundWhen5 priority = RoundWhen5.AwayFromZero)
+			RoundWhenMiddle priority = RoundWhenMiddle.AwayFromZero)
 		{
 			precision = (int)precision.Limit(0, 5);
 
@@ -361,30 +390,30 @@ namespace SMPL
 			return MathF.Round(number, (int)precision, (MidpointRounding)priority);
 		}
 		/// <summary>
-		/// Converts a <paramref name="number"/> from <paramref name="sizeToSize"/> and returns it.
+		/// Converts a <paramref name="number"/> from <paramref name="sizeConvertion"/> and returns it.
 		/// </summary>
-		public static float ToDataSize(this float number, SizeToSize sizeToSize)
+		public static float ToDataSize(this float number, SizeConvertion sizeConvertion)
 		{
-			return sizeToSize switch
+			return sizeConvertion switch
 			{
-				SizeToSize.Bit_Byte => number / 8,
-				SizeToSize.Bit_KB => number / 8000,
-				SizeToSize.Byte_Bit => number * 8,
-				SizeToSize.Byte_KB => number / 1024,
-				SizeToSize.Byte_MB => number / 1_048_576,
-				SizeToSize.KB_Bit => number * 8000,
-				SizeToSize.KB_Byte => number * 1024,
-				SizeToSize.KB_MB => number / 1024,
-				SizeToSize.KB_GB => number / 1_048_576,
-				SizeToSize.MB_Byte => number * 1_048_576,
-				SizeToSize.MB_KB => number * 1024,
-				SizeToSize.MB_GB => number / 1024,
-				SizeToSize.MB_TB => number / 1_048_576,
-				SizeToSize.GB_KB => number * 1_048_576,
-				SizeToSize.GB_MB => number * 1024,
-				SizeToSize.GB_TB => number / 1024,
-				SizeToSize.TB_MB => number * 1_048_576,
-				SizeToSize.TB_GB => number * 1024,
+				SizeConvertion.Bit_Byte => number / 8,
+				SizeConvertion.Bit_KB => number / 8000,
+				SizeConvertion.Byte_Bit => number * 8,
+				SizeConvertion.Byte_KB => number / 1024,
+				SizeConvertion.Byte_MB => number / 1_048_576,
+				SizeConvertion.KB_Bit => number * 8000,
+				SizeConvertion.KB_Byte => number * 1024,
+				SizeConvertion.KB_MB => number / 1024,
+				SizeConvertion.KB_GB => number / 1_048_576,
+				SizeConvertion.MB_Byte => number * 1_048_576,
+				SizeConvertion.MB_KB => number * 1024,
+				SizeConvertion.MB_GB => number / 1024,
+				SizeConvertion.MB_TB => number / 1_048_576,
+				SizeConvertion.GB_KB => number * 1_048_576,
+				SizeConvertion.GB_MB => number * 1024,
+				SizeConvertion.GB_TB => number / 1024,
+				SizeConvertion.TB_MB => number * 1_048_576,
+				SizeConvertion.TB_GB => number * 1024,
 				_ => default,
 			};
 		}
@@ -426,6 +455,7 @@ namespace SMPL
 				return targetNumber;
 			return result;
 		}
+		/// <summary>
 		/// Maps a <paramref name="number"/> from [<paramref name="a1"/> - <paramref name="b1"/>] to
 		/// [<paramref name="b1"/> - <paramref name="b2"/>] and returns it. Similar to Lerping (linear interpolation).<br></br>
 		/// Example: 50 mapped from [0 - 100] and [0 - 1] results to 0.5<br></br>
@@ -495,62 +525,64 @@ namespace SMPL
 		/// <summary>
 		/// Converts a <paramref name="number"/> from one time unit to another (chosen by <paramref name="convertType"/>). Then returns the result.
 		/// </summary>
-		public static float ToTime(this float number, Time.ChoiceConvertion convertType)
+		public static float ToTime(this float number, Time.Convertion convertType)
 		{
 			return convertType switch
 			{
-				Time.ChoiceConvertion.MillisecondsToSeconds => number / 1000,
-				Time.ChoiceConvertion.MillisecondsToMinutes => number / 1000 / 60,
-				Time.ChoiceConvertion.SecondsToMilliseconds => number * 1000,
-				Time.ChoiceConvertion.SecondsToMinutes => number / 60,
-				Time.ChoiceConvertion.SecondsToHours => number / 3600,
-				Time.ChoiceConvertion.MinutesToMilliseconds => number * 60000,
-				Time.ChoiceConvertion.MinutesToSeconds => number * 60,
-				Time.ChoiceConvertion.MinutesToHours => number / 60,
-				Time.ChoiceConvertion.MinutesToDays => number / 1440,
-				Time.ChoiceConvertion.HoursToSeconds => number * 3600,
-				Time.ChoiceConvertion.HoursToMinutes => number * 60,
-				Time.ChoiceConvertion.HoursToDays => number / 24,
-				Time.ChoiceConvertion.HoursToWeeks => number / 168,
-				Time.ChoiceConvertion.DaysToMinutes => number * 1440,
-				Time.ChoiceConvertion.DaysToHours => number * 24,
-				Time.ChoiceConvertion.DaysToWeeks => number / 7,
-				Time.ChoiceConvertion.WeeksToHours => number * 168,
-				Time.ChoiceConvertion.WeeksToDays => number * 7,
+				Time.Convertion.MillisecondsToSeconds => number / 1000,
+				Time.Convertion.MillisecondsToMinutes => number / 1000 / 60,
+				Time.Convertion.SecondsToMilliseconds => number * 1000,
+				Time.Convertion.SecondsToMinutes => number / 60,
+				Time.Convertion.SecondsToHours => number / 3600,
+				Time.Convertion.MinutesToMilliseconds => number * 60000,
+				Time.Convertion.MinutesToSeconds => number * 60,
+				Time.Convertion.MinutesToHours => number / 60,
+				Time.Convertion.MinutesToDays => number / 1440,
+				Time.Convertion.HoursToSeconds => number * 3600,
+				Time.Convertion.HoursToMinutes => number * 60,
+				Time.Convertion.HoursToDays => number / 24,
+				Time.Convertion.HoursToWeeks => number / 168,
+				Time.Convertion.DaysToMinutes => number * 1440,
+				Time.Convertion.DaysToHours => number * 24,
+				Time.Convertion.DaysToWeeks => number / 7,
+				Time.Convertion.WeeksToHours => number * 168,
+				Time.Convertion.WeeksToDays => number * 7,
 				_ => 0,
 			};
 		}
 		/// <summary>
 		/// Converts <paramref name="seconds"/> into a <see cref="string"/> following a <paramref name="format"/>. Then returns the result.
 		/// </summary>
-		public static string SecondsToTimeText(this float seconds, Time.Format format = new())
+		public static string SecondsToText(this float seconds, Time.Format format = new())
 		{
+			if (float.IsNaN(seconds) || float.IsInfinity(seconds))
+				return null;
+
 			seconds = seconds.Sign(false);
-			var secondsStr = $"{seconds:F0}";
 			var ms = 0;
-			if (secondsStr.Contains('.'))
+			if (seconds.ToString().Contains('.'))
 			{
-				var spl = secondsStr.Split('.');
+				var spl = seconds.ToString().Split('.');
 				ms = int.Parse(spl[1]) * 100;
 				seconds = seconds.Round(toward: RoundWay.Down);
 			}
 			var sec = seconds % 60;
-			var min = ToTime(seconds, Time.ChoiceConvertion.SecondsToMinutes) % 60;
-			var hr = ToTime(seconds, Time.ChoiceConvertion.SecondsToHours);
+			var min = ToTime(seconds, Time.Convertion.SecondsToMinutes) % 60;
+			var hr = ToTime(seconds, Time.Convertion.SecondsToHours);
 			var msShow = !format.Milliseconds.IsSkipped;
 			var secShow = !format.Seconds.IsSkipped;
 			var minShow = !format.Minutes.IsSkipped;
 			var hrShow = !format.Hours.IsSkipped;
 
-			var sep = format.Separator == null || format.Separator == "" ? ":" : format.Separator;
+			var sep = format.Separator ?? " ";
 			var msStr = msShow ? $"{ms:D2}" : "";
 			var secStr = secShow ? $"{(int)sec:D2}" : "";
 			var minStr = minShow ? $"{(int)min:D2}" : "";
 			var hrStr = hrShow ? $"{(int)hr:D2}" : "";
-			var msF = msShow ? $"{format.Milliseconds.Display}" : "";
-			var secF = secShow ? $"{format.Seconds.Display}" : "";
-			var minF = minShow ? $"{format.Minutes.Display}" : "";
-			var hrF = hrShow ? $"{format.Hours.Display}" : "";
+			var msF = msShow ? $"{format.Milliseconds.Suffix}" : "";
+			var secF = secShow ? $"{format.Seconds.Suffix}" : "";
+			var minF = minShow ? $"{format.Minutes.Suffix}" : "";
+			var hrF = hrShow ? $"{format.Hours.Suffix}" : "";
 			var secMsSep = msShow && (secShow || minShow || hrShow) ? $"{sep}" : "";
 			var minSecSep = secShow && (minShow || hrShow) ? $"{sep}" : "";
 			var hrMinSep = minShow && hrShow ? $"{sep}" : "";
@@ -790,6 +822,13 @@ namespace SMPL
 		}
 
 		/// <summary>
+		/// Converts <paramref name="seconds"/> into a <see cref="string"/> following a <paramref name="format"/>. Then returns the result.
+		/// </summary>
+		public static string SecondsToText(this int seconds, Time.Format format = new())
+		{
+			return SecondsToText((float)seconds, format);
+		}
+		/// <summary>
 		/// Generates a random <see cref="int"/> number in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with an
 		/// optional <paramref name="seed"/>. Then returns the result.
 		/// </summary>
@@ -808,7 +847,7 @@ namespace SMPL
 		/// Restricts a <paramref name="number"/> in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with a
 		/// <paramref name="limitation"/> and returns it. Also known as Clamping.
 		/// </summary>
-		public static int Limit(this int number, int rangeA, int rangeB, Limits limitation = Limits.ClosestBound)
+		public static int Limit(this int number, int rangeA, int rangeB, Limitation limitation = Limitation.ClosestBound)
 		{
 			return (int)Limit((float)number, rangeA, rangeB, limitation);
 		}
