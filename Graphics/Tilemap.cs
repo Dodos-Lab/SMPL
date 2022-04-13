@@ -82,23 +82,22 @@ namespace SMPL
          foreach (var kvp in map)
             foreach (var kvp2 in kvp.Value)
             {
-               var worldPos = kvp.Key;
-               var posA = worldPos * CellSize * Scale;
-               var posB = posA + CellSize * Scale;
+               var localPos = kvp.Key * CellSize;
+               var topLeft = GetPositionFromSelf(localPos).ToSFML();
+               var topRight = GetPositionFromSelf(localPos + new Vector2(CellSize.X, 0)).ToSFML();
+               var botRight = GetPositionFromSelf(localPos + CellSize).ToSFML();
+               var botLeft = GetPositionFromSelf(localPos + new Vector2(0, CellSize.Y)).ToSFML();
                var txCrdsA = kvp2.Value.IndeciesTexCoords * CellSize;
                var txCrdsB = txCrdsA + kvp2.Value.IndeciesSize * CellSize;
                var c = kvp2.Value.Color;
 
-               vertsArr.Append(new(new(posA.X, posA.Y), c, new(txCrdsA.X, txCrdsA.Y)));
-               vertsArr.Append(new(new(posB.X, posA.Y), c, new(txCrdsB.X, txCrdsA.Y)));
-               vertsArr.Append(new(new(posB.X, posB.Y), c, new(txCrdsB.X, txCrdsB.Y)));
-               vertsArr.Append(new(new(posA.X, posB.Y), c, new(txCrdsA.X, txCrdsB.Y)));
+               vertsArr.Append(new(topLeft, c, new(txCrdsA.X, txCrdsA.Y)));
+               vertsArr.Append(new(topRight, c, new(txCrdsB.X, txCrdsA.Y)));
+               vertsArr.Append(new(botRight, c, new(txCrdsB.X, txCrdsB.Y)));
+               vertsArr.Append(new(botLeft, c, new(txCrdsA.X, txCrdsB.Y)));
             }
 
-         var tr = Transform.Identity;
-         tr.Translate(0, 1);
-
-         Camera?.Draw(vertsArr, new(BlendMode, tr, Texture, Shader));
+         Camera.Draw(vertsArr, new(BlendMode, Transform.Identity, Texture, Shader));
          vertsArr.Dispose();
       }
       /// <summary>
@@ -141,13 +140,28 @@ namespace SMPL
       /// Returns a <see cref="List{T}"/> of all the <see cref="Tile"/>s at a particular world <paramref name="position"/> sorted by their
       /// <see cref="Tile.Layer"/>.
       /// </summary>
-      public List<Tile> GetTiles(Vector2 position)
+      public List<Tile> GetTilesFromPosition(Vector2 position)
       {
-         var pos = position.PointToGrid(CellSize * Scale) / Scale / CellSize;
+         var pos = GetTileIndecies(position);
          return map.ContainsKey(pos) == false ? new() : map[pos].Values.ToList();
 		}
       /// <summary>
-      /// Returns the world position of a <see cref="Tile"/> by its <paramref name="tileIndecies"/>.
+      /// Returns a <see cref="List{T}"/> of all the <see cref="Tile"/>s at the particular <paramref name="tileIndecies"/> sorted by their
+      /// <see cref="Tile.Layer"/>.
+      /// </summary>
+      public List<Tile> GetTilesFromIndecies(Vector2 tileIndecies)
+      {
+         return map.ContainsKey(tileIndecies) == false ? new() : map[tileIndecies].Values.ToList();
+      }
+      /// <summary>
+      /// Returns the tile indecies of a world <paramref name="position"/>.
+      /// </summary>
+      public Vector2 GetTileIndecies(Vector2 position)
+      {
+         return (GetLocalPositionFromSelf(position) / CellSize).PointToGrid(CellSize) / CellSize;
+      }
+      /// <summary>
+      /// Returns the world position of some <paramref name="tileIndecies"/>.
       /// </summary>
 		public Vector2 GetTilePosition(Vector2 tileIndecies)
       {
