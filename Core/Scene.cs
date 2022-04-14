@@ -105,6 +105,9 @@ namespace SMPL
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		private static Thread assetsLoading;
 
+		/// <summary>
+		/// The initial <see cref="Camera"/> accessible from everywhere.
+		/// </summary>
 		public static Camera MainCamera { get; internal set; }
 		/// <summary>
 		/// A shortcut toward the <see cref="MainCamera"/>'s <see cref="Camera.MouseCursorPosition"/>.
@@ -137,10 +140,6 @@ namespace SMPL
 		/// The percentage of loaded assets whenever this scene is the <see cref="CurrentScene"/>.
 		/// </summary>
 		public float LoadingPercent { get; private set; }
-		/// <summary>
-		/// The initial color of the world whenever this scene needs to be displayed to the <see cref="Game.Window"/>.
-		/// </summary>
-		public Color BackgroundColor { get; set; }
 
 		/// <summary>
 		/// The loaded textures whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.

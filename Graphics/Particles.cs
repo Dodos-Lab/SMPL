@@ -5,8 +5,10 @@ using System.Numerics;
 namespace SMPL
 {
 	/// <summary>
-	/// A particle controlled by the <see cref="ParticleManager"/> manger (check it for more info). Some May be inherited
-	/// to further extend and use the data it holds. Make sure to cast it to the child class beforehand like so:<code>
+	/// A particle controlled by the <see cref="ParticleManager"/> (check it for more info). No <see cref="Particle"/> references should be
+	/// saved outside the scopes of <see cref="ParticleManager.OnParticleSpawn"/> and <see cref="ParticleManager.OnParticleUpdate"/>
+	/// because it would be impossible for the <see cref="ParticleManager"/> to destroy said <see cref="Particle"/>s. This class may be inherited
+	/// to further extend the data it holds but it should be cast to the child class in order to be used:<code>
 	/// protected override void OnParticleUpdate(Particle particle)
 	/// {
 	/// var myBloodParticle = (BloodParticle)particle;
@@ -36,14 +38,13 @@ namespace SMPL
 	}
 
 	/// <summary>
-	/// Inherit chain: <see cref="Object"/> : <see cref="Visual"/> : <see cref="ParticleManager"/><br></br><br></br>
-	/// A <see cref="Particle"/> manager. In order to use it: <br></br>
-	/// - Create a child class that inherits this.<br></br>
-	/// - <see cref="Spawn"/> a certain amount of <see cref="Particle"/>s from the game logic.<br></br>
-	/// - Override <see cref="OnParticleSpawn"/> in the child class to initialize each setting of each <see cref="Particle"/>.<br></br>
-	/// - Override <see cref="OnParticleUpdate(Particle)"/> in the child class to continuously update each <see cref="Particle"/> however needed.
-	/// This event happens before the actual drawing upon calling <see cref="Draw"/>.<br></br>
-	/// - Some logic in <see cref="OnParticleUpdate(Particle)"/> might lead up to <see cref="DestroyParticle(Particle)"/>.
+	/// Inherit chain: <see cref="ParticleManager"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
+	/// A class that spawns, updates and destroys <see cref="Particle"/>s. Here is how it is used:<br></br>
+	/// - A child class that inherits <see cref="ParticleManager"/> is created.<br></br>
+	/// - A certain amount of <see cref="Particle"/>s are spawned from the game logic by calling <see cref="Spawn"/>.<br></br>
+	/// - <see cref="OnParticleSpawn"/> is overriden in the child class to initialize each setting of each <see cref="Particle"/>.<br></br>
+	/// - <see cref="OnParticleUpdate(Particle)"/> is overriden in the child class to continuously update each
+	/// <see cref="Particle"/> however needed.<br></br>Some logic in here might lead up to <see cref="DestroyParticle(Particle)"/>.
 	/// </summary>
 	public abstract class ParticleManager : Visual
 	{
@@ -79,7 +80,7 @@ namespace SMPL
 		protected abstract void OnParticleUpdate(Particle particle);
 
 		/// <summary>
-		/// Draws each <see cref="Particle"/> tracked by this <see cref="ParticleManager"/> on the <see cref="Visual.Camera"/> according
+		/// Draws each <see cref="Particle"/> tracked by this <see cref="ParticleManager"/> on the <see cref="Visual.DrawTarget"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Particle"/> parameters.
 		/// </summary>
 		public override void Draw()
@@ -87,7 +88,7 @@ namespace SMPL
 			if (particles == null || particles.Count == 0)
 				return;
 
-			Camera ??= Scene.MainCamera;
+			DrawTarget ??= Scene.MainCamera;
 
 			var ps = new List<Particle>(particles);
 			var verts = new Vertex[ps.Count * 4];
@@ -124,7 +125,7 @@ namespace SMPL
 				verts[i + 3] = new(botLeft.ToSFML(), c, new(txA.X, txB.Y));
 			}
 
-			Camera.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 	}
 }

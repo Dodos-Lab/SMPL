@@ -86,14 +86,14 @@ namespace SMPL
 		/// </summary>
 		public bool ConvexContains(Vector2 point)
 		{
-			if (LocalLines == null || LocalLines.Count < 3)
+			if (Lines == null || Lines.Count < 3)
 				return false;
 
 			var crosses = 0;
-			var outsidePoint = LocalLines[0].A.PercentTowardTarget(LocalLines[0].B, new(-500, -500));
+			var outsidePoint = Lines[0].A.PercentTowardTarget(Lines[0].B, new(-500, -500));
 
-			for (int i = 0; i < LocalLines.Count; i++)
-				if (LocalLines[i].Crosses(new(point, outsidePoint)))
+			for (int i = 0; i < Lines.Count; i++)
+				if (Lines[i].Crosses(new(point, outsidePoint)))
 					crosses++;
 
 			return crosses % 2 == 1;
@@ -103,9 +103,9 @@ namespace SMPL
 		/// </summary>
 		public bool Crosses(Hitbox hitbox)
 		{
-			for (int i = 0; i < LocalLines.Count; i++)
-				for (int j = 0; j < hitbox.LocalLines.Count; j++)
-					if (LocalLines[i].Crosses(hitbox.LocalLines[j]))
+			for (int i = 0; i < Lines.Count; i++)
+				for (int j = 0; j < hitbox.Lines.Count; j++)
+					if (Lines[i].Crosses(hitbox.Lines[j]))
 						return true;
 
 			return false;
@@ -117,8 +117,8 @@ namespace SMPL
 		/// </summary>
 		public bool ConvexContains(Hitbox hitbox)
 		{
-			for (int i = 0; i < hitbox.LocalLines.Count; i++)
-				if (ConvexContains(hitbox.LocalLines[i].A) == false || ConvexContains(hitbox.LocalLines[i].B) == false)
+			for (int i = 0; i < hitbox.Lines.Count; i++)
+				if (ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false)
 					return false;
 			return true;
 		}

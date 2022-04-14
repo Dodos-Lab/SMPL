@@ -39,15 +39,12 @@ namespace SMPL
 
 			Scene.Init(startingScene, loadingScene);
 			Scene.MainCamera = new(mainCameraWidth, mainCameraHeight);
-			Scene.MainCamera.ViewPosition = new();
 
 			while (Window.IsOpen)
 			{
-				var bgColor = GetActiveSceneBgColor();
-
 				Window.DispatchEvents();
-				Window.Clear(bgColor);
-				Scene.MainCamera.Clear(bgColor);
+				Window.Clear();
+				Scene.MainCamera.Fill(Color.Black);
 
 				Time.Update();
 				Scene.UpdateCurrentScene();
@@ -66,11 +63,6 @@ namespace SMPL
 				var view = Window.GetView();
 				view.Center = new();
 				Window.SetView(view);
-			}
-			Color GetActiveSceneBgColor()
-			{
-				var col = (Scene.CurrentScene?.LoadingPercent < 100 ? Scene.LoadingScene?.BackgroundColor : Scene.CurrentScene?.BackgroundColor);
-				return col ?? Color.Black;
 			}
 		}
 		/// <summary>

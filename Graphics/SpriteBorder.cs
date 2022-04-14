@@ -5,7 +5,7 @@ using System.Numerics;
 namespace SMPL
 {
 	/// <summary>
-	/// Inherit chain: <see cref="Object"/> : <see cref="Visual"/> : <see cref="Sprite"/> : <see cref="SpriteBorder"/><br></br><br></br>
+	/// Inherit chain:  <see cref="SpriteBorder"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
 	/// A <see cref="Sprite"/> surrounded by 8 square fragments acting as a border. Resizing the sprite will keep the border untouched in most cases.
 	/// </summary>
 	public class SpriteBorder : Sprite
@@ -38,7 +38,7 @@ namespace SMPL
 		public float BorderSize { get; set; } = 16;
 
 		/// <summary>
-		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.Camera"/> according
+		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.DrawTarget"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Sprite"/> and <see cref="SpriteBorder"/> parameters.
 		/// </summary>
 		public override void Draw()
@@ -46,7 +46,7 @@ namespace SMPL
 			if (IsHidden)
 				return;
 
-			Camera ??= Scene.MainCamera;
+			DrawTarget ??= Scene.MainCamera;
 
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
@@ -113,7 +113,7 @@ namespace SMPL
 				new(BottomRight.MovePointAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
 			};
 
-			Camera.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 		/// <summary>
 		/// Sets a rectangular <see cref="Hitbox"/> in <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="Sprite.OriginUnit"/>,

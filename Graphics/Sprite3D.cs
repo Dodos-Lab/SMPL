@@ -7,11 +7,11 @@ using System.Numerics;
 namespace SMPL
 {
 	/// <summary>
-	/// Inherit chain: <see cref="Object"/> : <see cref="Visual"/> : <see cref="Sprite"/> : <see cref="Sprite3D"/><br></br><br></br>
+	/// Inherit chain: <see cref="Sprite3D"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
 	/// A "3D" <see cref="Sprite"/> that fakes depth by stacking a set amount of textures on top of each other. Also known as
 	/// the 'sprite stacking technique'.
 	/// </summary>
-   public class Sprite3D : Sprite
+	public class Sprite3D : Sprite
    {
 		private readonly Texture[] textures;
 
@@ -161,7 +161,7 @@ namespace SMPL
 				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
 		}
 		/// <summary>
-		/// Draws all the <see cref="Sprite3D"/>'s textures on the <see cref="Visual.Camera"/> according
+		/// Draws all the <see cref="Sprite3D"/>'s textures on the <see cref="Visual.DrawTarget"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/> and <see cref="Sprite3D"/> parameters.
 		/// </summary>
 		public override void Draw()
@@ -169,7 +169,7 @@ namespace SMPL
 			if (IsHidden || textures == null || textures.Length == 0)
 				return;
 
-			Camera ??= Scene.MainCamera;
+			DrawTarget ??= Scene.MainCamera;
 
 			var h = Height * Scale / textures.Length;
          for (int i = 0; i < textures.Length; i++)
@@ -183,7 +183,7 @@ namespace SMPL
 					new(BottomLeft.MovePointAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, Texture.Size.Y)),
 				};
 
-				Camera.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+				DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 			}
 		}
    }

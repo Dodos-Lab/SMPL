@@ -52,7 +52,7 @@ namespace SMPL
    }
 
    /// <summary>
-   /// Inherit chain: <see cref="Object"/> : <see cref="Visual"/> : <see cref="Tilemap"/><br></br><br></br>
+   /// Inherit chain:  <see cref="Tilemap"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
    /// A grid with potentially infinite amount of square texture fragments configured by <see cref="Tile"/>s. Useful for building maps with tilesets
    /// (a texture containing each square cell fragment in a grid). Huge <see cref="Tilemap"/>s may need to be separated into multiple ones and
    /// managed/drawn in portions/chunks to increase performance.
@@ -67,7 +67,7 @@ namespace SMPL
       public Vector2 CellSize { get; set; } = new(32);
 
       /// <summary>
-		/// Draws all of the set <see cref="Tile"/>s on the <see cref="Visual.Camera"/> according
+		/// Draws all of the set <see cref="Tile"/>s on the <see cref="Visual.DrawTarget"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Tilemap"/> parameters.
 		/// </summary>
       public override void Draw()
@@ -75,7 +75,7 @@ namespace SMPL
          if (IsHidden)
             return;
 
-         Camera ??= Scene.MainCamera;
+         DrawTarget ??= Scene.MainCamera;
 
          var vertsArr = new VertexArray(PrimitiveType.Quads);
 
@@ -97,7 +97,7 @@ namespace SMPL
                vertsArr.Append(new(botLeft, c, new(txCrdsA.X, txCrdsB.Y)));
             }
 
-         Camera.Draw(vertsArr, new(BlendMode, Transform.Identity, Texture, Shader));
+         DrawTarget.renderTexture.Draw(vertsArr, new(BlendMode, Transform.Identity, Texture, Shader));
          vertsArr.Dispose();
       }
       /// <summary>
@@ -165,7 +165,7 @@ namespace SMPL
       /// </summary>
 		public Vector2 GetTilePosition(Vector2 tileIndecies)
       {
-         return tileIndecies / CellSize / Scale;
+         return GetPositionFromSelf(tileIndecies * CellSize);
       }
    }
 }

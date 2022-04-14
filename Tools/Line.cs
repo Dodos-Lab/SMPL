@@ -62,7 +62,7 @@ namespace SMPL
 				new(new(endRight.X, endRight.Y), color),
 				new(new(endLeft.X, endLeft.Y), color),
 			};
-			camera.Draw(vert, PrimitiveType.Quads);
+			camera.renderTexture.Draw(vert, PrimitiveType.Quads);
 		}
 		/// <summary>
 		/// Returns the point where this line and another <paramref name="line"/> cross. Returns an invalid vector

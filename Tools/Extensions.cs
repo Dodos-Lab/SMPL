@@ -64,20 +64,10 @@ namespace SMPL
 		/// <summary>
 		/// Returns true only the first time <paramref name="condition"/> is true. This is reset whenever <paramref name="condition"/> becomes false.
 		/// This process can be repeated <paramref name="max"/> amount of times, always returns false after that.
-		/// Some <paramref name="uniqueness"/> can be included if the line at which this method is called is not unique enough
-		/// (for example in a for loop or in cases where multiple instances can be checked in the same condition):<br></br>
-		/// <code>
-		/// if (unit1.Overlaps(unit2).Once(uniqueness: unit1.Name)))
-		/// ...
-		/// </code>
+		/// A <paramref name="uniqueID"/> needs to be provided that describes each type of condition in order to separate/identify them.
 		/// </summary>
-		public static bool Once(this bool condition, uint max = uint.MaxValue, string uniqueness = default)
+		public static bool Once(this bool condition, string uniqueID, uint max = uint.MaxValue)
 		{
-			var prev = Debug.CallChainIndex;
-			Debug.CallChainIndex = 1;
-			var uniqueID = $"{Debug.FilePath}-{Debug.LineNumber}-{uniqueness}";
-			Debug.CallChainIndex = prev;
-
 			if (gates.ContainsKey(uniqueID) == false && condition == false) return false;
 			else if (gates.ContainsKey(uniqueID) == false && condition == true)
 			{
@@ -759,7 +749,7 @@ namespace SMPL
 				new(new(br.X, br.Y), color),
 				new(new(bl.X, bl.Y), color),
 			};
-			camera.Draw(vert, PrimitiveType.Quads);
+			camera.renderTexture.Draw(vert, PrimitiveType.Quads);
 		}
 		/// <summary>
 		/// Converts a <see cref="Vector2f"/> into a <see cref="Vector2"/> and returns the result.
