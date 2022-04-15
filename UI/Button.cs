@@ -22,6 +22,14 @@ namespace SMPL
       public event ClickedEventHandler Clicked;
 
       /// <summary>
+      /// A way for the child classes of <see cref="Button"/> to raise the event and handle the logic around it by overriding this.
+      /// </summary>
+      protected virtual void OnClick()
+      {
+         Clicked?.Invoke();
+      }
+
+      /// <summary>
       /// Override this to handle the logic upon hovering the <see cref="Button"/>'s <see cref="Sprite.Hitbox"/> with the mouse cursor.
       /// </summary>
       protected virtual void OnHover() { }
@@ -74,7 +82,7 @@ namespace SMPL
             if (hovered)
             {
                if (isClicked)
-                  Clicked?.Invoke();
+                  OnClick();
                OnRelease();
             }
             isClicked = false;
