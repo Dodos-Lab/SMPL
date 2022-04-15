@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "YB+wlx+oil1nOYS7RGQu2GhEYdAWG9idAczaoKBMz9b1gH+xyc6kknoZClmuVlUdPCPrQb47JvgepBdSr5nGww==",
+  "dgSpecHash": "V0pDt9iqhlhgcflY/aTP8F/n8ZrQcz8YcACtJXQkKk11E3/sJhiJpfVl3H4KIqbKbiHvcq/oga/SNhpRM3DOSw==",
   "success": true,
   "projectFilePath": "G:\\SMPL\\SMPL.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\GoKsTaR\\.nuget\\packages\\csfml\\2.5.0\\csfml.2.5.0.nupkg.sha512",
+    "C:\\Users\\GoKsTaR\\.nuget\\packages\\netcoreserver\\5.1.0\\netcoreserver.5.1.0.nupkg.sha512",
     "C:\\Users\\GoKsTaR\\.nuget\\packages\\sfml.audio\\2.5.0\\sfml.audio.2.5.0.nupkg.sha512",
     "C:\\Users\\GoKsTaR\\.nuget\\packages\\sfml.graphics\\2.5.0\\sfml.graphics.2.5.0.nupkg.sha512",
     "C:\\Users\\GoKsTaR\\.nuget\\packages\\sfml.net\\2.5.0\\sfml.net.2.5.0.nupkg.sha512",

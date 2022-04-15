@@ -239,6 +239,15 @@
           }
         }
       },
+      "NetCoreServer/5.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0/NetCoreServer.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/NetCoreServer.dll": {}
+        }
+      },
       "SFML.Audio/2.5.0": {
         "type": "package",
         "dependencies": {
@@ -374,6 +383,18 @@
         "runtimes/win-x86/native/openal32.dll"
       ]
     },
+    "NetCoreServer/5.1.0": {
+      "sha512": "eZZEe/nslw5MO/DL2RUHmypJruerACyYleRILJT0g6/c9BiUO2LM0RuOWiUTx/U0wBa7FrkxsyPU8/Q/M4q+EQ==",
+      "type": "package",
+      "path": "netcoreserver/5.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net5.0/NetCoreServer.dll",
+        "netcoreserver.5.1.0.nupkg.sha512",
+        "netcoreserver.nuspec"
+      ]
+    },
     "SFML.Audio/2.5.0": {
       "sha512": "M5EIksRefT3nsLT32oEpESStsnlixR+YjKS6fUMl+vDQ3gdMaV4jc84pg3kbfM9w4RYKAyH6OWV4bzDU5FNZyA==",
       "type": "package",
@@ -440,6 +461,7 @@
   },
   "projectFileDependencyGroups": {
     "net5.0": [
+      "NetCoreServer >= 5.1.0",
       "SFML.Net >= 2.5.0"
     ]
   },
@@ -484,6 +506,10 @@
       "net5.0": {
         "targetAlias": "net5.0",
         "dependencies": {
+          "NetCoreServer": {
+            "target": "Package",
+            "version": "[5.1.0, )"
+          },
           "SFML.Net": {
             "target": "Package",
             "version": "[2.5.0, )"

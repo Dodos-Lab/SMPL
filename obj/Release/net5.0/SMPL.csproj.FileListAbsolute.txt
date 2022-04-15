@@ -1,0 +1,14 @@
+G:\SMPL\bin\Release\net5.0\SMPL.deps.json
+G:\SMPL\bin\Release\net5.0\SMPL.dll
+G:\SMPL\bin\Release\net5.0\ref\SMPL.dll
+G:\SMPL\bin\Release\net5.0\SMPL.pdb
+G:\SMPL\obj\Release\net5.0\SMPL.csproj.AssemblyReference.cache
+G:\SMPL\obj\Release\net5.0\Interop.NetFwTypeLib.dll
+G:\SMPL\obj\Release\net5.0\SMPL.csproj.ResolveComReference.cache
+G:\SMPL\obj\Release\net5.0\SMPL.GeneratedMSBuildEditorConfig.editorconfig
+G:\SMPL\obj\Release\net5.0\SMPL.AssemblyInfoInputs.cache
+G:\SMPL\obj\Release\net5.0\SMPL.AssemblyInfo.cs
+G:\SMPL\obj\Release\net5.0\SMPL.csproj.CoreCompileInputs.cache
+G:\SMPL\obj\Release\net5.0\SMPL.dll
+G:\SMPL\obj\Release\net5.0\ref\SMPL.dll
+G:\SMPL\obj\Release\net5.0\SMPL.pdb
