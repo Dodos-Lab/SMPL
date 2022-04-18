@@ -5,7 +5,7 @@ namespace SMPL
 {
 	/// <summary>
 	/// Inherit chain: <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
-	/// The №1 used <see cref="Visual"/> in games. A simple image with some extra effects accompanying it.
+	/// The №1 used <see cref="Visual"/> in games. A simple texture with some extra effects accompanying it.
 	/// </summary>
 	public class Sprite : Visual
 	{

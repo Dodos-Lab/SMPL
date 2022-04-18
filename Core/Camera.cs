@@ -143,6 +143,8 @@ namespace SMPL
 			Position = new();
 		}
 
+      ~Camera() => renderTexture.Dispose();
+
 		/// <summary>
 		/// Returns whether the <see cref="Camera"/> can "see" a <paramref name="hitbox"/>. This uses <see cref="Hitbox.ConvexContains(Hitbox)"/>
 		/// so concave <see cref="Hitbox"/>es may give wrong results.

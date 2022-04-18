@@ -12,7 +12,6 @@ namespace SMPL
 {
 	public static class Multiplayer
 	{
-		public enum Action { ServerStart, ServerStop, ClientConnect, ClientDisconnect, ClientTakenUID }
 		public struct Message
 		{
 			internal enum Type
@@ -58,7 +57,7 @@ namespace SMPL
 					$"Content: {Content}";
 			}
 		}
-		internal class Session : TcpSession
+		private class Session : TcpSession
 		{
 			public Session(TcpServer server) : base(server) { }
 
@@ -82,7 +81,7 @@ namespace SMPL
 			}
 			protected override void OnError(SocketError error) => Log($"[!] {error}");
 		}
-		internal class Server : TcpServer
+		private class Server : TcpServer
 		{
 			public Server(IPAddress address, int port) : base(address, port) { }
 			protected override TcpSession CreateSession() { return new Session(this); }
@@ -93,7 +92,7 @@ namespace SMPL
 				ServerStopped?.Invoke();
 			}
 		}
-		internal class Client : TcpClient
+		private class Client : TcpClient
 		{
 			private bool stop;
 
@@ -152,8 +151,8 @@ namespace SMPL
 		private static readonly List<string> clientIDs = new();
 		private static readonly int serverPort = 1234;
 		private static string ConnectedClients => $"Connected clients: {clientIDs.Count}.";
-		internal static Server server;
-		internal static Client client;
+		private static Server server;
+		private static Client client;
 
 		public delegate void ClientEventHandler(string clientUniqueID);
 		public delegate void ServerEventHandler();
