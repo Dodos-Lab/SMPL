@@ -22,7 +22,8 @@ namespace SMPL
 	/// - The result is ready to be used in <see cref="Texture"/>. It may be saved into a file with <see cref="Snap"/> or
 	/// used by a <see cref="Visual"/> and drawn onto another <see cref="Camera"/>
 	/// achieving the effects of a minimap, an ingame camera, a scrollable UI window/chatbox/list, in <see cref="Scene.MainCamera"/>'s case:
-	/// drawn onto the <see cref="Game.Window"/> etc.
+	/// drawn onto the <see cref="Game.Window"/> etc.<br></br><br></br>
+	/// - Note: The <see cref="Camera"/> is an expensive class performance-wise and it shouldn't be recreated frequently if at all.
 	/// </summary>
 	public class Camera : Object
 	{

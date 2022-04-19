@@ -162,9 +162,10 @@ namespace SMPL
 		/// <summary>
 		/// Adds <paramref name="text"/> to itself a certain amount of <paramref name="times"/> and returns it.
 		/// </summary>
-		public static string Repeat(this string text, uint times)
+		public static string Repeat(this string text, int times)
 		{
 			var result = "";
+			times = times.Limit(0, 999999);
 			for (int i = 0; i < times; i++)
 				result = $"{result}{text}";
 			return result;

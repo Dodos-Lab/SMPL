@@ -2,6 +2,11 @@
 
 namespace SMPL
 {
+   /// <summary>
+   /// Inherit chain: <see cref="Window"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
+   /// <br></br><br></br>
+	/// - Note: The <see cref="Window"/> is an expensive class performance-wise and it shouldn't be recreated frequently if at all.
+   /// </summary>
    public class Window : Sprite
    {
       public Camera Camera { get; private set; }
