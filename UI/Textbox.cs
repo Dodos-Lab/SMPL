@@ -17,11 +17,20 @@ namespace SMPL
          BottomLeft, Bottom, BottomRight
       }
 
-      private static readonly Text text = new();
+      internal static readonly Text text = new();
       private Camera camera;
-      private string left = "Hello, World!", center = "", right = "";
+      private string left, center, right;
+      private Font font;
 
-      public Font Font { get; set; }
+      public Font Font
+      {
+         get => font;
+         set
+         {
+            font = value;
+            Text = left; // recalculate alignments
+         }
+      }
       public string Text
       {
          get => left;
@@ -35,6 +44,10 @@ namespace SMPL
             text.LineSpacing = LineSpace;
             text.Style = Style;
             text.DisplayedString = " ";
+            text.Position = new();
+            text.Rotation = 0;
+            text.Scale = new(1, 1);
+
             var spaceWidth = text.GetGlobalBounds().Width;
 
             right = "";
@@ -72,10 +85,15 @@ namespace SMPL
          camera = new(resolutionX, resolutionY);
          Texture = camera.Texture;
          LineWidth = resolutionX;
+         left = "Hello, World!";
       }
       public override void Draw()
       {
          camera.renderTexture.Clear(Color.Red);
+
+         text.Position = new();
+         text.Rotation = 0;
+         text.Scale = new(1, 1);
          text.Font = Font;
          text.CharacterSize = CharacterSize;
          text.FillColor = Color;
@@ -98,6 +116,7 @@ namespace SMPL
             case Alignments.Bottom: CenterX(); break;
          }
          var b = text.GetGlobalBounds();
+         var l = text.GetLocalBounds().Top;
          var sz = camera.renderTexture.Size;
          switch (Alignment)
          {
@@ -119,7 +138,7 @@ namespace SMPL
          void Top() => text.Position = new(-sz.X * 0.5f, -camera.renderTexture.Size.Y * 0.5f);
          void CenterX() => text.DisplayedString = center;
          void CenterY() => text.Position = new(-sz.X * 0.5f, -b.Height * 0.5f);
-         void Bottom() => text.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height);
+         void Bottom() => text.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height + l * 2);
          void Left() => text.DisplayedString = left;
          void Right() => text.DisplayedString = right;
       }

@@ -29,6 +29,24 @@ namespace SMPL
 	/// </summary>
 	public class Scene
 	{
+		public class DrawTextDetails
+      {
+			public Vector2 OriginUnit { get; set; }
+
+			public Camera Camera { get; set; } = MainCamera;
+			public Font Font { get; set; }
+			public string Text { get; set; } = "Hello, World!";
+			public Color Color { get; set; } = Color.White;
+			public uint CharacterSize { get; set; } = 32;
+			public float CharacterSpace { get; set; } = 1;
+			public float LineSpace { get; set; } = 1;
+			public Color OutlineColor { get; set; } = Color.Black;
+			public float OutlineSize { get; set; }
+			public Text.Styles Style { get; set; }
+
+			public DrawTextDetails(Font font) => Font = font;
+		}
+
 		/// <summary>
 		/// Used for loading 3D models as a set of layered textures (aka sprite stacking). An instance of this
 		/// needs to be passed inside <see cref="AssetQueue"/> in <see cref="OnRequireAssets"/>.
@@ -186,6 +204,39 @@ namespace SMPL
 		/// Called before the game is closed. See <see cref="Scene"/> for more info.
 		/// </summary>
 		protected virtual void OnGameStop() { }
+
+		/// <summary>
+		/// A quick way to draw a text onto a <see cref="Camera"/> with no <see cref="Textbox"/>. The text may be customized through
+		/// <paramref name="textDrawDetails"/> and <paramref name="originUnit"/>. It may also take the transformations of an <paramref name="obj"/>.
+		/// </summary>
+		public static void DrawText(DrawTextDetails textDrawDetails, Object obj = null, Vector2 originUnit = default)
+      {
+			if (textDrawDetails.Font == null)
+				return;
+
+			textDrawDetails.Camera ??= MainCamera;
+
+			obj ??= new();
+
+			var text = Textbox.text;
+			text.Font = textDrawDetails.Font;
+			text.CharacterSize = textDrawDetails.CharacterSize;
+			text.FillColor = textDrawDetails.Color;
+			text.LetterSpacing = textDrawDetails.CharacterSpace;
+			text.LineSpacing = textDrawDetails.LineSpace;
+			text.OutlineColor = textDrawDetails.OutlineColor;
+			text.OutlineThickness = textDrawDetails.OutlineSize;
+			text.Style = textDrawDetails.Style;
+			text.DisplayedString = textDrawDetails.Text;
+			text.Position = obj.Position.ToSFML();
+			text.Rotation = obj.Angle;
+			text.Scale = new(obj.Scale, obj.Scale);
+
+			var local = text.GetLocalBounds(); // has to be after everything
+			text.Origin = new(local.Width * originUnit.X, local.Height * originUnit.Y);
+
+			textDrawDetails.Camera.renderTexture.Draw(text);
+		}
 
       internal void LoadAssets()
 		{

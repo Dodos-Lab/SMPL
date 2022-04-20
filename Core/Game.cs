@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using SFML.Graphics;
 using SFML.Window;
 
@@ -73,6 +75,28 @@ namespace SMPL
 		{
 			Scene.CurrentScene?.GameStop();
 			Window.Close();
+		}
+
+		/// <summary>
+		/// Tries to open a web page in the browser through some <paramref name="url"/>.
+		/// </summary>
+		public static void OpenWebPage(string url)
+		{
+			try { Process.Start(url); }
+			catch
+			{
+				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+				{
+					url = url.Replace("&", "^&");
+					Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+				}
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+					Process.Start("xdg-open", url);
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+					Process.Start("open", url);
+				else
+					Console.LogError(1, $"Could not load URL '{url}'.");
+			}
 		}
 
 		private static void Main() { }
