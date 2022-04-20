@@ -5,11 +5,17 @@ namespace SMPL
 {
    /// <summary>
    /// Inherit chain: <see cref="Textbox"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
+   /// A class that draws customizable text on a hidden <see cref="Camera"/> and dispays the result on a <see cref="Sprite"/>'s <see cref="Texture"/>.
+   /// This allows for things such as cutting of text (as in a chat), aligning the text in a certain rectangle, further tying it 
+   /// to a <see cref="Visual"/> by having the same effects and  <see cref="Object"/> transformations etc.
    /// <br></br><br></br>
    /// - Note: The <see cref="Textbox"/> is an expensive class performance-wise and it shouldn't be recreated frequently if at all.
    /// </summary>
    public class Textbox : Sprite
    {
+      /// <summary>
+      /// The 9 possible text alignments: the 4 sides, the 4 corners and the center of the <see cref="Textbox"/>.
+      /// </summary>
       public enum Alignments
       {
          TopLeft, Top, TopRight,
@@ -22,6 +28,9 @@ namespace SMPL
       private string left, center, right;
       private Font font;
 
+      /// <summary>
+      /// The font used to draw the text.
+      /// </summary>
       public Font Font
       {
          get => font;
@@ -31,6 +40,9 @@ namespace SMPL
             Text = left; // recalculate alignments
          }
       }
+      /// <summary>
+      /// The <see cref="string"/> text itself used upon drawing the <see cref="Textbox"/>.
+      /// </summary>
       public string Text
       {
          get => left;
@@ -66,27 +78,54 @@ namespace SMPL
             }
          }
       }
+      /// <summary>
+      /// The character size as provided in the <see cref="Font"/>.
+      /// </summary>
       public uint CharacterSize { get; set; } = 32;
+      /// <summary>
+      /// The spacing inbetween characters.
+      /// </summary>
       public float CharacterSpace { get; set; } = 1;
+      /// <summary>
+      /// The maximum size of a line when aligning the <see cref="Text"/>. Any line that is wider than this will not be aligned.
+      /// This value is set to the X of the <see cref="Textbox"/> resolution upon creation meaning that the <see cref="Text"/> will be
+      /// aligned to the edges of the <see cref="Textbox"/>.
+      /// </summary>
       public uint LineWidth { get; set; }
+      /// <summary>
+      /// The spacing inbetween lines.
+      /// </summary>
       public float LineSpace { get; set; } = 1;
+      /// <summary>
+      /// The color of the outline of the <see cref="Text"/>. Make sure to have non-zero <see cref="OutlineSize"/>.
+      /// </summary>
       public Color OutlineColor { get; set; } = Color.Black;
+      /// <summary>
+      /// The size of the outline of the <see cref="Text"/>.
+      /// </summary>
       public float OutlineSize { get; set; }
+      /// <summary>
+      /// To which side/corner/center of this <see cref="Textbox"/> should the <see cref="Text"/> stick to.
+      /// </summary>
       public Alignments Alignment { get; set; }
+      /// <summary>
+      /// The style of the <see cref="Text"/>. May also have multiple as so:
+      /// <code>Style = Styles.Bold | Styles.Underlined;</code>
+      /// </summary>
       public Text.Styles Style { get; set; }
+      /// <summary>
+      /// The amount of lines or '\n' characters in <see cref="Text"/>.
+      /// </summary>
       public uint LineCount { get; private set; }
 
       public Textbox(uint resolutionX, uint resolutionY) => Init(resolutionX, resolutionY);
       public Textbox(Vector2 resolution) => Init((uint)resolution.X, (uint)resolution.Y);
       ~Textbox() => text.Dispose();
 
-      private void Init(uint resolutionX, uint resolutionY)
-      {
-         camera = new(resolutionX, resolutionY);
-         Texture = camera.Texture;
-         LineWidth = resolutionX;
-         left = "Hello, World!";
-      }
+      /// <summary>
+		/// Draws the <see cref="Textbox"/> on the <see cref="Visual.DrawTarget"/> according
+		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/> and <see cref="Textbox"/> parameters.
+		/// </summary>
       public override void Draw()
       {
          camera.renderTexture.Clear(Color.Red);
@@ -141,6 +180,14 @@ namespace SMPL
          void Bottom() => text.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height + l * 2);
          void Left() => text.DisplayedString = left;
          void Right() => text.DisplayedString = right;
+      }
+
+      private void Init(uint resolutionX, uint resolutionY)
+      {
+         camera = new(resolutionX, resolutionY);
+         Texture = camera.Texture;
+         LineWidth = resolutionX;
+         left = "Hello, World!";
       }
    }
 }

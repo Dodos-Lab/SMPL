@@ -48,7 +48,7 @@ namespace SMPL
 
       /// <summary>
 		/// Draws the <see cref="Button"/> on the <see cref="Visual.DrawTarget"/> according
-		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Sprite"/> parameters.
+		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/> and <see cref="Button"/> parameters.
 		/// </summary>
       public override void Draw()
       {

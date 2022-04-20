@@ -29,22 +29,62 @@ namespace SMPL
 	/// </summary>
 	public class Scene
 	{
-		public class DrawTextDetails
+		/// <summary>
+		/// Some values describing a text.
+		/// </summary>
+		public class TextDetails
       {
+			/// <summary>
+			/// This determines the positional offset from <see cref="Object.Position"/> as a vector.<br></br>
+			/// Note: [0, 0] is the top left and [1, 1] is the bottom right corner of the text.
+			/// Values can also go bellow 0 and above 1.
+			/// </summary>
 			public Vector2 OriginUnit { get; set; }
 
-			public Camera Camera { get; set; } = MainCamera;
+			/// <summary>
+			/// On which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="MainCamera"/>
+			/// if it is null upon drawing.
+			/// </summary>
+			public Camera DrawTarget { get; set; } = MainCamera;
+			/// <summary>
+			/// The font used to draw the text.
+			/// </summary>
 			public Font Font { get; set; }
+			/// <summary>
+			/// The <see cref="string"/> text itself used upon drawing.
+			/// </summary>
 			public string Text { get; set; } = "Hello, World!";
+			/// <summary>
+			/// The color of the text.
+			/// </summary>
 			public Color Color { get; set; } = Color.White;
+			/// <summary>
+			/// The character size as provided in the <see cref="Font"/>.
+			/// </summary>
 			public uint CharacterSize { get; set; } = 32;
+			/// <summary>
+			/// The spacing inbetween characters.
+			/// </summary>
 			public float CharacterSpace { get; set; } = 1;
+			/// <summary>
+			/// The spacing inbetween lines.
+			/// </summary>
 			public float LineSpace { get; set; } = 1;
+			/// <summary>
+			/// The color of the outline of the <see cref="Text"/>. Make sure to have non-zero <see cref="OutlineSize"/>.
+			/// </summary>
 			public Color OutlineColor { get; set; } = Color.Black;
+			/// <summary>
+			/// The size of the outline of the <see cref="Text"/>.
+			/// </summary>
 			public float OutlineSize { get; set; }
+			/// <summary>
+			/// The style of the <see cref="Text"/>. May also have multiple as so:
+			/// <code>Style = Styles.Bold | Styles.Underlined;</code>
+			/// </summary>
 			public Text.Styles Style { get; set; }
 
-			public DrawTextDetails(Font font) => Font = font;
+			public TextDetails(Font font) => Font = font;
 		}
 
 		/// <summary>
@@ -207,35 +247,38 @@ namespace SMPL
 
 		/// <summary>
 		/// A quick way to draw a text onto a <see cref="Camera"/> with no <see cref="Textbox"/>. The text may be customized through
-		/// <paramref name="textDrawDetails"/> and <paramref name="originUnit"/>. It may also take the transformations of an <paramref name="obj"/>.
+		/// <paramref name="textDetails"/> and <paramref name="originUnit"/>. It may also take the transformations of an <paramref name="obj"/>.
+		/// The <see cref="TextDetails.DrawTarget"/> is assumed to be the <see cref="MainCamera"/> if no
+		/// <see cref="TextDetails.DrawTarget"/> is passed.
 		/// </summary>
-		public static void DrawText(DrawTextDetails textDrawDetails, Object obj = null, Vector2 originUnit = default)
+		public static void DrawText(TextDetails textDetails, Object obj = null, Vector2 originUnit = default)
       {
-			if (textDrawDetails.Font == null)
+			if (textDetails.Font == null)
 				return;
 
-			textDrawDetails.Camera ??= MainCamera;
+			textDetails.DrawTarget ??= MainCamera;
 
 			obj ??= new();
 
 			var text = Textbox.text;
-			text.Font = textDrawDetails.Font;
-			text.CharacterSize = textDrawDetails.CharacterSize;
-			text.FillColor = textDrawDetails.Color;
-			text.LetterSpacing = textDrawDetails.CharacterSpace;
-			text.LineSpacing = textDrawDetails.LineSpace;
-			text.OutlineColor = textDrawDetails.OutlineColor;
-			text.OutlineThickness = textDrawDetails.OutlineSize;
-			text.Style = textDrawDetails.Style;
-			text.DisplayedString = textDrawDetails.Text;
+			text.Font = textDetails.Font;
+			text.CharacterSize = textDetails.CharacterSize;
+			text.FillColor = textDetails.Color;
+			text.LetterSpacing = textDetails.CharacterSpace;
+			text.LineSpacing = textDetails.LineSpace;
+			text.OutlineColor = textDetails.OutlineColor;
+			text.OutlineThickness = textDetails.OutlineSize;
+			text.Style = textDetails.Style;
+			text.DisplayedString = textDetails.Text;
 			text.Position = obj.Position.ToSFML();
 			text.Rotation = obj.Angle;
 			text.Scale = new(obj.Scale, obj.Scale);
 
 			var local = text.GetLocalBounds(); // has to be after everything
 			text.Origin = new(local.Width * originUnit.X, local.Height * originUnit.Y);
+			text.Position = text.Position.ToSystem().PointMoveAtAngle(text.Rotation - 90, local.Top, false).ToSFML();
 
-			textDrawDetails.Camera.renderTexture.Draw(text);
+			textDetails.DrawTarget.renderTexture.Draw(text);
 		}
 
       internal void LoadAssets()

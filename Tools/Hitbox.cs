@@ -90,7 +90,7 @@ namespace SMPL
 				return false;
 
 			var crosses = 0;
-			var outsidePoint = Lines[0].A.PercentTowardTarget(Lines[0].B, new(-500, -500));
+			var outsidePoint = Lines[0].A.PointPercentTowardPoint(Lines[0].B, new(-500, -500));
 
 			for (int i = 0; i < Lines.Count; i++)
 				if (Lines[i].Crosses(new(point, outsidePoint)))

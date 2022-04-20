@@ -14,22 +14,22 @@ namespace SMPL
 		/// The top left corner of the border in the world.
 		/// </summary>
 		public Vector2 BorderTopLeft
-		{ get => TopLeft.MovePointAtAngle(Angle + 270, BorderSize, false).MovePointAtAngle(Angle + 180, BorderSize, false); }
+		{ get => TopLeft.PointMoveAtAngle(Angle + 270, BorderSize, false).PointMoveAtAngle(Angle + 180, BorderSize, false); }
 		/// <summary>
 		/// The top right corner of the border in the world.
 		/// </summary>
 		public Vector2 BorderTopRight
-		{ get => TopRight.MovePointAtAngle(270 + Angle, BorderSize, false).MovePointAtAngle(Angle, BorderSize, false); }
+		{ get => TopRight.PointMoveAtAngle(270 + Angle, BorderSize, false).PointMoveAtAngle(Angle, BorderSize, false); }
 		/// <summary>
 		/// The bottom right corner of the border in the world.
 		/// </summary>
 		public Vector2 BorderBottomRight
-		{ get => BottomRight.MovePointAtAngle(Angle, BorderSize, false).MovePointAtAngle(Angle + 90, BorderSize, false); }
+		{ get => BottomRight.PointMoveAtAngle(Angle, BorderSize, false).PointMoveAtAngle(Angle + 90, BorderSize, false); }
 		/// <summary>
 		/// The bottom left corner of the border in the world.
 		/// </summary>
 		public Vector2 BorderBottomLeft
-		{ get => BottomLeft.MovePointAtAngle(Angle + 180, BorderSize, false).MovePointAtAngle(Angle + 90, BorderSize, false); }
+		{ get => BottomLeft.PointMoveAtAngle(Angle + 180, BorderSize, false).PointMoveAtAngle(Angle + 90, BorderSize, false); }
 
 		/// <summary>
 		/// The size of the border which determines each of the 8 fragment sizes and their texture coordinates
@@ -60,27 +60,27 @@ namespace SMPL
 			{
 				// top left
 				new(BorderTopLeft.ToSFML(), Color, topLeft),
-				new(BorderTopLeft.MovePointAtAngle(Angle, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(BorderSize, 0)),
+				new(BorderTopLeft.PointMoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(BorderSize, 0)),
 				new(TopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
-				new(TopLeft.MovePointAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(0, BorderSize)),
+				new(TopLeft.PointMoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(0, BorderSize)),
 
 				// top
-				new(TopLeft.MovePointAtAngle(Angle + 270, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(BorderSize, 0)),
+				new(TopLeft.PointMoveAtAngle(Angle + 270, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(BorderSize, 0)),
 				new(TopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
 				new(TopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
-				new(TopRight.MovePointAtAngle(Angle + 270, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(-BorderSize, 0)),
+				new(TopRight.PointMoveAtAngle(Angle + 270, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(-BorderSize, 0)),
 
 				// top right
 				new(BorderTopRight.ToSFML(), Color, topRight),
-				new(BorderTopRight.MovePointAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(-BorderSize, 0)),
+				new(BorderTopRight.PointMoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(-BorderSize, 0)),
 				new(TopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
-				new(TopRight.MovePointAtAngle(Angle, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(0, BorderSize)),
+				new(TopRight.PointMoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(0, BorderSize)),
 
 				// left
-				new(TopLeft.MovePointAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(0, BorderSize)),
+				new(TopLeft.PointMoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, topLeft + new Vector2f(0, BorderSize)),
 				new(TopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
 				new(BottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
-				new(BottomLeft.MovePointAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(0, -BorderSize)),
+				new(BottomLeft.PointMoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(0, -BorderSize)),
 
 				// center
 				new(TopLeft.ToSFML(), Color, topLeft + new Vector2f(BorderSize, BorderSize)),
@@ -90,27 +90,27 @@ namespace SMPL
 
 				// right
 				new(TopRight.ToSFML(), Color, topRight + new Vector2f(-BorderSize, BorderSize)),
-				new(TopRight.MovePointAtAngle(Angle, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(0, BorderSize)),
-				new(BottomRight.MovePointAtAngle(Angle, BorderSize, false).ToSFML(), Color, bottomRight + new Vector2f(0, -BorderSize)),
+				new(TopRight.PointMoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, topRight + new Vector2f(0, BorderSize)),
+				new(BottomRight.PointMoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, bottomRight + new Vector2f(0, -BorderSize)),
 				new(BottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
 
 				// bot left
-				new(BottomLeft.MovePointAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(0, -BorderSize)),
+				new(BottomLeft.PointMoveAtAngle(Angle + 180, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(0, -BorderSize)),
 				new(BottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
-				new(BottomLeft.MovePointAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, 0)),
+				new(BottomLeft.PointMoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, 0)),
 				new(BorderBottomLeft.ToSFML(), Color, bottomLeft),
 
 				// bot
 				new(BottomLeft.ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, -BorderSize)),
 				new(BottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
-				new(BottomRight.MovePointAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
-				new(BottomLeft.MovePointAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, 0)),
+				new(BottomRight.PointMoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
+				new(BottomLeft.PointMoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomLeft + new Vector2f(BorderSize, 0)),
 
 				// bot right
 				new(BottomRight.ToSFML(), Color, bottomRight - new Vector2f(BorderSize, BorderSize)),
-				new(BottomRight.MovePointAtAngle(Angle, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(0, BorderSize)),
+				new(BottomRight.PointMoveAtAngle(Angle, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(0, BorderSize)),
 				new(BorderBottomRight.ToSFML(), Color, bottomRight),
-				new(BottomRight.MovePointAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
+				new(BottomRight.PointMoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Color, bottomRight - new Vector2f(BorderSize, 0)),
 			};
 
 			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));

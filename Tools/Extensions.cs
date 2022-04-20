@@ -689,7 +689,7 @@ namespace SMPL
 		/// Moves a <paramref name="point"/> in <paramref name="direction"/> with <paramref name="speed"/>. May be <paramref name="fpsDependent"/>
 		/// (see <see cref="Time.Delta"/> for info). The result is then returned.
 		/// </summary>
-		public static Vector2 MovePointInDirection(this Vector2 point, Vector2 direction, float speed, bool fpsDependent = true)
+		public static Vector2 PointMoveInDirection(this Vector2 point, Vector2 direction, float speed, bool fpsDependent = true)
 		{
 			point.X += direction.X * speed * (fpsDependent ? Time.Delta : 1);
 			point.Y += direction.Y * speed * (fpsDependent ? Time.Delta : 1);
@@ -699,9 +699,9 @@ namespace SMPL
 		/// Moves a <paramref name="point"/> at a 360 degrees <paramref name="angle"/> with <paramref name="speed"/>. May be
 		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info). The result is then returned.
 		/// </summary>
-		public static Vector2 MovePointAtAngle(this Vector2 point, float angle, float speed, bool fpsDependent = true)
+		public static Vector2 PointMoveAtAngle(this Vector2 point, float angle, float speed, bool fpsDependent = true)
 		{
-			var result = MovePointInDirection(point, Vector2.Normalize(angle.AngleToDirection()), speed, fpsDependent);
+			var result = PointMoveInDirection(point, Vector2.Normalize(angle.AngleToDirection()), speed, fpsDependent);
 			return result;
 		}
 		/// <summary>
@@ -709,9 +709,9 @@ namespace SMPL
 		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info). The calculation ensures not to pass the
 		/// <paramref name="targetPoint"/>. The result is then returned.
 		/// </summary>
-		public static Vector2 MovePointTowardPoint(this Vector2 point, Vector2 targetPoint, float speed, bool fpsDependent = true)
+		public static Vector2 PointMoveTowardPoint(this Vector2 point, Vector2 targetPoint, float speed, bool fpsDependent = true)
 		{
-			var result = point.MovePointAtAngle(point.AngleBetweenPoints(targetPoint), speed, fpsDependent);
+			var result = point.PointMoveAtAngle(point.AngleBetweenPoints(targetPoint), speed, fpsDependent);
 
 			speed *= fpsDependent ? Time.Delta : 1;
          return Vector2.Distance(result, targetPoint) < speed * 1.1f ? targetPoint : result;
@@ -720,7 +720,7 @@ namespace SMPL
 		/// Calculates the <see cref="Vector2"/> point that is a certain <paramref name="percent"/> between <paramref name="point"/> and
 		/// <paramref name="targetPoint"/> then returns the result. Also known as Lerping (linear interpolation).
 		/// </summary>
-      public static Vector2 PercentTowardTarget(this Vector2 point, Vector2 targetPoint, Vector2 percent)
+      public static Vector2 PointPercentTowardPoint(this Vector2 point, Vector2 targetPoint, Vector2 percent)
 		{
 			point.X = percent.X.Map(0, 100, point.X, targetPoint.X);
 			point.Y = percent.Y.Map(0, 100, point.Y, targetPoint.Y);
@@ -738,10 +738,10 @@ namespace SMPL
 			color = color == default ? Color.White : color;
 
 			size /= 2;
-			var tl = point.MovePointAtAngle(270, size, false).MovePointAtAngle(180, size, false);
-			var tr = point.MovePointAtAngle(270, size, false).MovePointAtAngle(0, size, false);
-			var br = point.MovePointAtAngle(90, size, false).MovePointAtAngle(0, size, false);
-			var bl = point.MovePointAtAngle(90, size, false).MovePointAtAngle(180, size, false);
+			var tl = point.PointMoveAtAngle(270, size, false).PointMoveAtAngle(180, size, false);
+			var tr = point.PointMoveAtAngle(270, size, false).PointMoveAtAngle(0, size, false);
+			var br = point.PointMoveAtAngle(90, size, false).PointMoveAtAngle(0, size, false);
+			var bl = point.PointMoveAtAngle(90, size, false).PointMoveAtAngle(180, size, false);
 
 			var vert = new Vertex[]
 			{

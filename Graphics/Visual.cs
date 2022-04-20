@@ -13,7 +13,7 @@ namespace SMPL
 		/// </summary>
 		public Color Color { get; set; } = Color.White;
 		/// <summary>
-		/// At which <see cref="DrawTarget"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="Scene.MainCamera"/>
+		/// On which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="Scene.MainCamera"/>
 		/// if it is null upon drawing.
 		/// </summary>
 		public Camera DrawTarget { get; set; } = Scene.MainCamera;

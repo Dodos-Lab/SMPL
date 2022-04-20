@@ -50,10 +50,10 @@ namespace SMPL
 			color = color == default ? Color.White : color;
 
 			width /= 2;
-			var startLeft = A.MovePointAtAngle(Angle - 90, width, false);
-			var startRight = A.MovePointAtAngle(Angle + 90, width, false);
-			var endLeft = B.MovePointAtAngle(Angle - 90, width, false);
-			var endRight = B.MovePointAtAngle(Angle + 90, width, false);
+			var startLeft = A.PointMoveAtAngle(Angle - 90, width, false);
+			var startRight = A.PointMoveAtAngle(Angle + 90, width, false);
+			var endLeft = B.PointMoveAtAngle(Angle - 90, width, false);
+			var endRight = B.PointMoveAtAngle(Angle + 90, width, false);
 
 			var vert = new Vertex[]
 			{
@@ -118,7 +118,7 @@ namespace SMPL
 			var bestDist = double.MaxValue;
 			for (int i = 0; i < tries; i++)
 			{
-				var randPoint = A.MovePointAtAngle(i * (360 / tries), Vector2.Distance(A, B), false);
+				var randPoint = A.PointMoveAtAngle(i * (360 / tries), Vector2.Distance(A, B), false);
 				var sumDist = Vector2.Distance(A, randPoint) + Vector2.Distance(randPoint, B);
 				if (IsCrossing(A, randPoint, B) == false && sumDist < bestDist)
 				{
@@ -129,7 +129,7 @@ namespace SMPL
 
 			for (int i = 0; i < tries; i++)
 			{
-				var curP = A.PercentTowardTarget(bestPoint, new(100 / tries * i, 100 / tries * i));
+				var curP = A.PointPercentTowardPoint(bestPoint, new(100 / tries * i, 100 / tries * i));
 				if (IsCrossing(curP, B, B) == false)
 					return curP;
 			}
