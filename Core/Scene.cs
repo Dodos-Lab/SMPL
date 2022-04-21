@@ -35,15 +35,8 @@ namespace SMPL
 		public class TextDetails
       {
 			/// <summary>
-			/// This determines the positional offset from <see cref="Object.Position"/> as a vector.<br></br>
-			/// Note: [0, 0] is the top left and [1, 1] is the bottom right corner of the text.
-			/// Values can also go bellow 0 and above 1.
-			/// </summary>
-			public Vector2 OriginUnit { get; set; }
-
-			/// <summary>
 			/// On which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="MainCamera"/>
-			/// if it is null upon drawing.
+			/// if it is <see langword="null"/> upon drawing.
 			/// </summary>
 			public Camera DrawTarget { get; set; } = MainCamera;
 			/// <summary>
@@ -85,6 +78,27 @@ namespace SMPL
 			public Text.Styles Style { get; set; }
 
 			public TextDetails(Font font) => Font = font;
+
+			internal void UpdateGlobalText(Object obj, Vector2 originUnit)
+         {
+				var text = Textbox.text;
+				text.Font = Font;
+				text.CharacterSize = CharacterSize;
+				text.FillColor = Color;
+				text.LetterSpacing = CharacterSpace;
+				text.LineSpacing = LineSpace;
+				text.OutlineColor = OutlineColor;
+				text.OutlineThickness = OutlineSize;
+				text.Style = Style;
+				text.DisplayedString = Text;
+				text.Position = obj.Position.ToSFML();
+				text.Rotation = obj.Angle;
+				text.Scale = new(obj.Scale, obj.Scale);
+
+				var local = text.GetLocalBounds(); // has to be after everything
+				text.Origin = new(local.Width * originUnit.X, local.Height * originUnit.Y);
+				text.Position = text.Position.ToSystem().PointMoveAtAngle(text.Rotation - 90, local.Top, false).ToSFML();
+			}
 		}
 
 		/// <summary>
@@ -103,7 +117,7 @@ namespace SMPL
 			public string ObjModelPath { get; set; }
 			/// <summary>
 			/// An optional uniqiue ID/Name ussed for an access key when stored in <see cref="Sprites3D"/>. The <see cref="ObjModelPath"/>
-			/// is used if null.
+			/// is used if <see langword="null"/>.
 			/// </summary>
 			public string UniqueName { get; set; }
 			/// <summary>
@@ -257,28 +271,10 @@ namespace SMPL
 				return;
 
 			textDetails.DrawTarget ??= MainCamera;
-
 			obj ??= new();
 
-			var text = Textbox.text;
-			text.Font = textDetails.Font;
-			text.CharacterSize = textDetails.CharacterSize;
-			text.FillColor = textDetails.Color;
-			text.LetterSpacing = textDetails.CharacterSpace;
-			text.LineSpacing = textDetails.LineSpace;
-			text.OutlineColor = textDetails.OutlineColor;
-			text.OutlineThickness = textDetails.OutlineSize;
-			text.Style = textDetails.Style;
-			text.DisplayedString = textDetails.Text;
-			text.Position = obj.Position.ToSFML();
-			text.Rotation = obj.Angle;
-			text.Scale = new(obj.Scale, obj.Scale);
-
-			var local = text.GetLocalBounds(); // has to be after everything
-			text.Origin = new(local.Width * originUnit.X, local.Height * originUnit.Y);
-			text.Position = text.Position.ToSystem().PointMoveAtAngle(text.Rotation - 90, local.Top, false).ToSFML();
-
-			textDetails.DrawTarget.renderTexture.Draw(text);
+			textDetails.UpdateGlobalText(obj, originUnit);
+			textDetails.DrawTarget.renderTexture.Draw(Textbox.text);
 		}
 
       internal void LoadAssets()

@@ -10,9 +10,9 @@ namespace SMPL
 	public class Sprite : Visual
 	{
 		/// <summary>
-		/// <see cref="Draw"/> uses this vector and <see cref="TexCoordsUnitB"/> to determine the visible square on <see cref="Visual.Texture"/>.<br></br>
-		/// - Note: [0, 0] is the top left and [1, 1] is the bottom right of the <see cref="Visual.Texture"/>
-		/// no matter the <see cref="Texture.Size"/>.<br></br>
+		/// <see cref="Draw"/> uses this vector and <see cref="TexCoordsUnitB"/> to determine the visible square on <see cref="Visual.Texture"/>.
+		/// [0, 0] is the top left and [1, 1] is the bottom right of the <see cref="Visual.Texture"/>
+		/// no matter the <see cref="Texture.Size"/>.<br></br><br></br>
 		/// - Example: Switching the X values will flip the texture on the X axis, negative values and values bigger than 1 will wrap around etc.
 		/// </summary>
 		public Vector2 TexCoordsUnitA { get; set; }
@@ -35,9 +35,8 @@ namespace SMPL
 		}
 
 		/// <summary>
-		/// This determines the positional offset from <see cref="Object.Position"/> as a vector.<br></br>
-		/// Note: [0, 0] is the top left and [1, 1] is the bottom right corner of the <see cref="Sprite"/> (no matter the <see cref="Size"/>).
-		/// Values can also go bellow 0 and above 1.
+		/// This determines the positional offset from <see cref="Object.Position"/> as a vector. [0, 0] is the top left and [1, 1] is
+		/// the bottom right corner of the <see cref="Sprite"/> (no matter the <see cref="Size"/>). Values can also go bellow 0 and above 1.
 		/// </summary>
 		public Vector2 OriginUnit { get; set; } = new(0.5f, 0.5f);
 		/// <summary>
@@ -64,9 +63,8 @@ namespace SMPL
 		public Vector2 BottomLeft => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin);
 
 		/// <summary>
-		/// A set of <see cref="Hitbox.Lines"/> that determine if and where this <see cref="Sprite"/> interacts with other <see cref="SMPL.Hitbox"/>es.
-		/// Useful for collision detection, checking whether it is hovered by the mouse cursor etc.<br></br>
-		/// - Note: Use <see cref="Hitbox.UpdateLines(Object)"/> by passing this <see cref="Sprite"/> in order for the <see cref="Object"/>
+		/// Useful for collision detection, checking whether this <see cref="Sprite"/> is hovered by the mouse cursor etc.
+		/// <see cref="Hitbox.TransformLocalLines"/> should be called by passing this <see cref="Sprite"/> in order for the <see cref="Object"/>
 		/// transformations to affect this <see cref="Hitbox"/>.
 		/// </summary>
 		public Hitbox Hitbox { get; set; } = new();

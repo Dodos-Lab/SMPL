@@ -78,7 +78,7 @@ namespace SMPL
 		/// This also  means that some users with low-end hardware will appear to play the game in slow motion
 		/// (when the FPS drops bellow 40, 30, 20).<br></br>
 		/// The step value of that <see cref="Object"/> (in this case the speed of '1 pixel per frame/tick/update') should be multiplied with
-		/// <see cref="Delta"/> to prevent it from messing with the gameplay.<br></br>
+		/// <see cref="Delta"/> to prevent it from messing with the gameplay.<br></br><br></br>
 		/// - Note: The continuous movement methods in <see cref="Extensions"/> are already accounting the delta time
 		/// in their calculations with an argument determining whether they are FPS dependent.
 		/// </summary>

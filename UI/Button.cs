@@ -69,7 +69,7 @@ namespace SMPL
             else
                OnHover();
          }
-         else if ((hovered == false).Once($"{id}-unhovered"))
+         if ((hovered == false).Once($"{id}-unhovered"))
             OnUnhover();
 
          if (leftClicked.Once($"{id}-press") && hovered)

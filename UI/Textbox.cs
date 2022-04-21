@@ -118,7 +118,13 @@ namespace SMPL
       /// </summary>
       public uint LineCount { get; private set; }
 
+      /// <summary>
+		/// Create the <see cref="Textbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
+		/// </summary>
       public Textbox(uint resolutionX, uint resolutionY) => Init(resolutionX, resolutionY);
+      /// <summary>
+		/// Create the <see cref="Textbox"/> with a certain <paramref name="resolution"/>.
+		/// </summary>
       public Textbox(Vector2 resolution) => Init((uint)resolution.X, (uint)resolution.Y);
       ~Textbox() => text.Dispose();
 

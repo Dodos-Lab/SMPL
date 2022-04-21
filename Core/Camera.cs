@@ -134,7 +134,7 @@ namespace SMPL
 			Position = new();
 		}
 		/// <summary>
-		/// Create the <see cref="Camera"/> with a certain size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
+		/// Create the <see cref="Camera"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
 		/// </summary>
 		public Camera(uint resolutionX, uint resolutionY)
 		{

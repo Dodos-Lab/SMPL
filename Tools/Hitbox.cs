@@ -32,8 +32,7 @@ namespace SMPL
 
 		/// <summary>
 		/// Takes <see cref="LocalLines"/>, applies <paramref name="obj"/>'s transformations on them and puts the result into <see cref="Lines"/>
-		/// for the rest of the methods to use.<br></br>
-		/// - Note: Any previous changes to the <see cref="Lines"/> list will be erased.
+		/// for the rest of the methods to use. Any previous changes to the <see cref="Lines"/> list will be erased.
 		/// </summary>
 		public void TransformLocalLines(Object obj)
 		{
@@ -81,8 +80,8 @@ namespace SMPL
 		}
 		/// <summary>
 		/// Whether <see cref="Lines"/> surround <paramref name="point"/>.
-		/// Or in other words: whether this <see cref="Hitbox"/> contains <paramref name="point"/>.<br></br>
-		/// - Note: Some of the results will be wrong if <see cref="Lines"/> are forming a concave shape.
+		/// Or in other words: whether this <see cref="Hitbox"/> contains <paramref name="point"/>. Some of the results will
+		/// be wrong if <see cref="Lines"/> are forming a concave shape.
 		/// </summary>
 		public bool ConvexContains(Vector2 point)
 		{
@@ -112,8 +111,8 @@ namespace SMPL
 		}
 		/// <summary>
 		/// Whether <see cref="Lines"/> completely surround <paramref name="hitbox"/>'s <see cref="Lines"/>.
-		/// Or in other words: whether this <see cref="Hitbox"/> contains <paramref name="hitbox"/>.<br></br>
-		/// - Note: Some of the results will be wrong if <see cref="Lines"/> or <paramref name="hitbox"/>'s <see cref="Lines"/> are forming a concave shape.
+		/// Or in other words: whether this <see cref="Hitbox"/> contains <paramref name="hitbox"/>. Some of the results will be wrong
+		/// if <see cref="Lines"/> or <paramref name="hitbox"/>'s <see cref="Lines"/> are forming a concave shape.
 		/// </summary>
 		public bool ConvexContains(Hitbox hitbox)
 		{
