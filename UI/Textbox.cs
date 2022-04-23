@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace SMPL
@@ -24,6 +25,7 @@ namespace SMPL
       }
 
       internal static readonly Text text = new();
+      private readonly List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
       private Camera camera;
       private string left, center, right;
       private Font font;
@@ -55,13 +57,15 @@ namespace SMPL
             text.LetterSpacing = CharacterSpace;
             text.LineSpacing = LineSpace;
             text.Style = Style;
-            text.DisplayedString = " ";
             text.Position = new();
             text.Rotation = 0;
             text.Scale = new(1, 1);
 
+            text.DisplayedString = " ";
             var spaceWidth = text.GetGlobalBounds().Width;
 
+            formatSpaceRangesCenter.Clear();
+            formatSpaceRangesRight.Clear();
             right = "";
             center = "";
 
@@ -71,10 +75,18 @@ namespace SMPL
             {
                var line = lines[i];
                text.DisplayedString = line;
-               var spaces = (int)((LineWidth - text.GetGlobalBounds().Width) / spaceWidth).Limit(0, 9999).Round() - 1;
+               var width = LineWidth - text.GetGlobalBounds().Width;
+               var spaces = spaceWidth == 0 ? 0 : (int)(width / spaceWidth).Limit(0, 9999).Round() - 1;
+               var centerLeft = (int)(((float)spaces) / 2).Round(priority: Extensions.RoundWhenMiddle.TowardZero);
+               var centerRight = (int)(((float)spaces) / 2).Round(priority: Extensions.RoundWhenMiddle.AwayFromZero);
 
+               formatSpaceRangesRight.Add((right.Length, right.Length - 1 + spaces));
                right += $"{" ".Repeat(spaces)}{line}\n";
-               center += $"{" ".Repeat(spaces / 2)}{line}{" ".Repeat(spaces / 2)}\n";
+
+               formatSpaceRangesCenter.Add((center.Length, center.Length - 1 + centerLeft));
+               center += $"{" ".Repeat(centerLeft)}{line}";
+               formatSpaceRangesCenter.Add((center.Length, center.Length - 1 + centerRight));
+               center += $"{" ".Repeat(centerRight)}\n";
             }
          }
       }
@@ -117,15 +129,20 @@ namespace SMPL
       /// The amount of lines or '\n' characters in <see cref="Text"/>.
       /// </summary>
       public uint LineCount { get; private set; }
+      /// <summary>
+      /// The size of the "window" the <see cref="Text"/> is "viewed" through.
+      /// </summary>
+      public Vector2 Resolution => new(camera.renderTexture.Size.X, camera.renderTexture.Size.Y);
 
       /// <summary>
-		/// Create the <see cref="Textbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
+		/// Create the <see cref="Textbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>]
+      /// and a <paramref name="font"/>.
 		/// </summary>
-      public Textbox(uint resolutionX, uint resolutionY) => Init(resolutionX, resolutionY);
+      public Textbox(uint resolutionX, uint resolutionY, Font font) => Init(resolutionX, resolutionY, font);
       /// <summary>
-		/// Create the <see cref="Textbox"/> with a certain <paramref name="resolution"/>.
+		/// Create the <see cref="Textbox"/> with a certain <paramref name="resolution"/> and a <paramref name="font"/>.
 		/// </summary>
-      public Textbox(Vector2 resolution) => Init((uint)resolution.X, (uint)resolution.Y);
+      public Textbox(Vector2 resolution, Font font) => Init((uint)resolution.X, (uint)resolution.Y, font);
       ~Textbox() => text.Dispose();
 
       /// <summary>
@@ -135,7 +152,53 @@ namespace SMPL
       public override void Draw()
       {
          camera.renderTexture.Clear(Color.Red);
+         Update();
+         camera.renderTexture.Draw(text, new(BlendMode, Transform.Identity, Texture, Shader));
+         camera.Display();
+         base.Draw();
+      }
 
+      public List<Vector2> GetCharacterCorners(uint characterIndex)
+      {
+         var result = new List<Vector2>();
+         Update();
+         var prevIndex = (int)characterIndex;
+         characterIndex = GetNextNonFormatChar(characterIndex);
+
+         var resScale = Size / Resolution;
+         var tl = (text.Position.ToSystem() + text.FindCharacterPos(characterIndex).ToSystem()) * resScale;
+         var tr = (text.Position.ToSystem() + text.FindCharacterPos(characterIndex + 1).ToSystem()) * resScale;
+
+         if (prevIndex < left.Length && left[prevIndex] == '\n') // end of line
+            tr = new(Resolution.X, tl.Y);
+
+         var y = tl.PointMoveAtAngle(90, CharacterSize * resScale.Y, false).Y;
+         var boundTop = text.GetLocalBounds().Top;
+         var bl = new Vector2(tl.X, y + boundTop);
+         var br = new Vector2(tr.X, y + boundTop);
+
+         tl.Y += boundTop;
+         tr.Y += boundTop;
+
+         result.Add(tl);
+         result.Add(tr);
+         result.Add(br);
+         result.Add(bl);
+
+         return result;
+      }
+
+      private void Init(uint resolutionX, uint resolutionY, Font font)
+      {
+         camera = new(resolutionX, resolutionY);
+         Texture = camera.Texture;
+         LineWidth = resolutionX;
+         Alignment = Alignments.Center;
+         left = "Hello, World!";
+         Font = font;
+      }
+      private void Update()
+      {
          text.Position = new();
          text.Rotation = 0;
          text.Scale = new(1, 1);
@@ -176,24 +239,45 @@ namespace SMPL
             case Alignments.Bottom: Bottom(); break;
          }
 
-         camera.renderTexture.Draw(text, new(BlendMode, Transform.Identity, Texture, Shader));
-         camera.Display();
-         base.Draw();
-
-         void Top() => text.Position = new(-sz.X * 0.5f, -camera.renderTexture.Size.Y * 0.5f);
+         void Top() => text.Position = new(-sz.X * 0.5f, -camera.renderTexture.Size.Y * 0.5f - l * 0.5f);
          void CenterX() => text.DisplayedString = center;
-         void CenterY() => text.Position = new(-sz.X * 0.5f, -b.Height * 0.5f);
-         void Bottom() => text.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height + l * 2);
+         void CenterY() => text.Position = new(-sz.X * 0.5f, -b.Height * 0.5f - (Alignment == Alignments.Left ? l : 0));
+         void Bottom() => text.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height + l);
          void Left() => text.DisplayedString = left;
          void Right() => text.DisplayedString = right;
       }
-
-      private void Init(uint resolutionX, uint resolutionY)
+      private uint GetNextNonFormatChar(uint charIndex)
       {
-         camera = new(resolutionX, resolutionY);
-         Texture = camera.Texture;
-         LineWidth = resolutionX;
-         left = "Hello, World!";
+         if (charIndex > left.Length - 1)
+            charIndex = (uint)left.Length - 1;
+
+         if (Alignment == Alignments.TopRight || Alignment == Alignments.Right || Alignment == Alignments.BottomRight)
+            return Execute(formatSpaceRangesRight, true);
+         else if (Alignment == Alignments.Top || Alignment == Alignments.Center || Alignment == Alignments.Bottom)
+            return Execute(formatSpaceRangesCenter);
+
+         return charIndex;
+
+         uint Execute(List<(int, int)> ranges, bool isRight = false)
+         {
+            var realIndex = (uint)0;
+            for (uint i = 0; i < text.DisplayedString.Length; i++)
+            {
+               var lastRange = (0, 0);
+               for (int j = 0; j < ranges.Count; j++)
+                  if (((int)i).IsBetween(ranges[j].Item1, ranges[j].Item2, true, true))
+                  {
+                     i = (uint)ranges[j].Item2 + 1;
+                     lastRange = ranges[j];
+                     break;
+                  }
+               if (realIndex == charIndex)
+                  return text.DisplayedString[(int)i] == '\n' && isRight == false ? (uint)lastRange.Item1 : i;
+
+               realIndex++;
+            }
+            return charIndex;
+         }
       }
    }
 }

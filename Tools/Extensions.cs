@@ -410,14 +410,14 @@ namespace SMPL
 		}
 		/// <summary>
 		/// Returns whether <paramref name="number"/> is in range [<paramref name="rangeA"/> - <paramref name="rangeB"/>].
-		/// The ranges may be <paramref name="inclusiveLower"/> or <paramref name="inclusiveUpper"/>.
+		/// The ranges may be <paramref name="inclusiveA"/> or <paramref name="inclusiveB"/>.
 		/// </summary>
-		public static bool IsBetween(this float number, float rangeA, float rangeB, bool inclusiveLower = false, bool inclusiveUpper = false)
+		public static bool IsBetween(this float number, float rangeA, float rangeB, bool inclusiveA = false, bool inclusiveB = false)
 		{
 			if (rangeA > rangeB)
 				Swap(ref rangeA, ref rangeB);
-			var l = inclusiveLower ? rangeA <= number : rangeA < number;
-			var u = inclusiveUpper ? rangeB >= number : rangeB > number;
+			var l = inclusiveA ? rangeA <= number : rangeA < number;
+			var u = inclusiveB ? rangeB >= number : rangeB > number;
 			return l && u;
 		}
 		/// <summary>
@@ -848,10 +848,10 @@ namespace SMPL
 		public static int Sign(this int number, bool signed) => (int)Sign((float)number, signed);
 		/// <summary>
 		/// Returns whether <paramref name="number"/> is in range [<paramref name="rangeA"/> - <paramref name="rangeB"/>].
-		/// The ranges may be <paramref name="inclusiveLower"/> or <paramref name="inclusiveUpper"/>.
+		/// The ranges may be <paramref name="inclusiveA"/> or <paramref name="inclusiveB"/>.
 		/// </summary>
-		public static bool IsBetween(this int number, int rangeA, int rangeB, bool inclusiveLower = false,
-			bool inclusiveUpper = false) => IsBetween((float)number, rangeA, rangeB, inclusiveLower, inclusiveUpper);
+		public static bool IsBetween(this int number, int rangeA, int rangeB, bool inclusiveA = false,
+			bool inclusiveB = false) => IsBetween((float)number, rangeA, rangeB, inclusiveA, inclusiveB);
 		/// <summary>
 		/// Maps a <paramref name="number"/> from [<paramref name="A1"/> - <paramref name="B1"/>] to
 		/// [<paramref name="B1"/> - <paramref name="B2"/>] and returns it. Similar to Lerping (linear interpolation).<br></br>
