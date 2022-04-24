@@ -158,6 +158,9 @@ namespace SMPL
          base.Draw();
       }
 
+      /// <summary>
+      /// Calculates all four corners in the world of a symbol in the <see cref="Text"/> with a certain <paramref name="characterIndex"/>.
+      /// </summary>
       public List<Vector2> GetCharacterCorners(uint characterIndex)
       {
          var result = new List<Vector2>();
