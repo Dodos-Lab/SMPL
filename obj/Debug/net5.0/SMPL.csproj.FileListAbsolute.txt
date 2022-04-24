@@ -23,3 +23,5 @@ G:\SMPL\obj\Debug\net5.0\SMPL.csproj.CoreCompileInputs.cache
 G:\SMPL\obj\Debug\net5.0\SMPL.dll
 G:\SMPL\obj\Debug\net5.0\ref\SMPL.dll
 G:\SMPL\obj\Debug\net5.0\SMPL.pdb
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net5.0\Interop.NetFwTypeLib.dll
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net5.0\SMPL.csproj.ResolveComReference.cache

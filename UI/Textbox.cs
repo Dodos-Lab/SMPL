@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -23,6 +24,10 @@ namespace SMPL
          Left, Center, Right,
          BottomLeft, Bottom, BottomRight
       }
+      /// <summary>
+      /// Used by <see cref="GetSymbols"/>. See that for more info.
+      /// </summary>
+      public enum Symbols { Character, Word, Line }
 
       internal static readonly Text text = new();
       private readonly List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
@@ -77,8 +82,12 @@ namespace SMPL
                text.DisplayedString = line;
                var width = LineWidth - text.GetGlobalBounds().Width;
                var spaces = spaceWidth == 0 ? 0 : (int)(width / spaceWidth).Limit(0, 9999).Round() - 1;
-               var centerLeft = (int)(((float)spaces) / 2).Round(priority: Extensions.RoundWhenMiddle.TowardZero);
-               var centerRight = (int)(((float)spaces) / 2).Round(priority: Extensions.RoundWhenMiddle.AwayFromZero);
+               var centerLeft = (int)(((float)spaces) / 2).Round();
+               var centerRight = (int)(((float)spaces) / 2).Round();
+
+               spaces = Math.Max(spaces, 1);
+               centerLeft = Math.Max(centerLeft, 1);
+               centerRight = Math.Max(centerRight, 1);
 
                formatSpaceRangesRight.Add((right.Length, right.Length - 1 + spaces));
                right += $"{" ".Repeat(spaces)}{line}\n";
@@ -133,6 +142,10 @@ namespace SMPL
       /// The size of the "window" the <see cref="Text"/> is "viewed" through.
       /// </summary>
       public Vector2 Resolution => new(camera.renderTexture.Size.X, camera.renderTexture.Size.Y);
+      /// <summary>
+      /// The color behind the <see cref="Text"/> that is filling the entirety of the <see cref="Textbox"/>.
+      /// </summary>
+      public Color BackgroundColor { get; set; }
 
       /// <summary>
 		/// Create the <see cref="Textbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>]
@@ -151,7 +164,7 @@ namespace SMPL
 		/// </summary>
       public override void Draw()
       {
-         camera.renderTexture.Clear(Color.Red);
+         camera.renderTexture.Clear(BackgroundColor);
          Update();
          camera.renderTexture.Draw(text, new(BlendMode, Transform.Identity, Texture, Shader));
          camera.Display();
@@ -159,36 +172,135 @@ namespace SMPL
       }
 
       /// <summary>
-      /// Calculates all four corners in the world of a symbol in the <see cref="Text"/> with a certain <paramref name="characterIndex"/>.
+      /// Calculates all four corners in the world of a symbol in the <see cref="Text"/> with a certain <paramref name="characterIndex"/> then returns them.
       /// </summary>
       public List<Vector2> GetCharacterCorners(uint characterIndex)
       {
          var result = new List<Vector2>();
+
+         if (characterIndex > left.Length - 1)
+            return result;
+
          Update();
          var prevIndex = (int)characterIndex;
          characterIndex = GetNextNonFormatChar(characterIndex);
 
-         var resScale = Size / Resolution;
-         var tl = (text.Position.ToSystem() + text.FindCharacterPos(characterIndex).ToSystem()) * resScale;
-         var tr = (text.Position.ToSystem() + text.FindCharacterPos(characterIndex + 1).ToSystem()) * resScale;
+         var tl = (text.Position + text.FindCharacterPos(characterIndex)).ToSystem();
+         var tr = (text.Position + text.FindCharacterPos(characterIndex + 1)).ToSystem();
 
          if (prevIndex < left.Length && left[prevIndex] == '\n') // end of line
             tr = new(Resolution.X, tl.Y);
 
-         var y = tl.PointMoveAtAngle(90, CharacterSize * resScale.Y, false).Y;
+         var sc = Resolution / Size * Scale;
          var boundTop = text.GetLocalBounds().Top;
-         var bl = new Vector2(tl.X, y + boundTop);
-         var br = new Vector2(tr.X, y + boundTop);
+         var y = new Vector2(0, CharacterSize + boundTop);
+         var bl = tl + y;
+         var br = tr + y;
 
          tl.Y += boundTop;
          tr.Y += boundTop;
 
-         result.Add(tl);
-         result.Add(tr);
-         result.Add(br);
-         result.Add(bl);
+         var view = camera.renderTexture.GetView();
+         var camA = view.Center - view.Size * 0.5f;
+         var camB = view.Center + view.Size * 0.5f;
+
+         Limit(ref tl);
+         Limit(ref tr);
+         Limit(ref br);
+         Limit(ref bl);
+
+         if (tl.X == tr.X || tl.Y == bl.Y)
+            return result;
+
+         result.Add(GetPositionFromSelf(tl / sc));
+         result.Add(GetPositionFromSelf(tr / sc));
+         result.Add(GetPositionFromSelf(br / sc));
+         result.Add(GetPositionFromSelf(bl / sc));
 
          return result;
+
+         void Limit(ref Vector2 corner) => corner = new(corner.X.Limit(camA.X, camB.X), corner.Y.Limit(camA.Y, camB.Y));
+      }
+      /// <summary>
+      /// Returns the <see cref="Text"/> <paramref name="symbols"/> that contain <paramref name="worldPoint"/> if any, <see langword="null"/> otherwise.
+      /// <br></br><br></br>
+      /// - Note: A <see cref="Symbols.Word"/> is considered to be multiple consecutive letters and anything inbetween them is considered a separator.<br></br>
+      /// - Note: A <see cref="Symbols.Line"/> is considered to be anything inbetween the start of <see cref="Text"/>, new lines ('<see langword="\n"/>') and the
+      /// end of the <see cref="Text"/>.<br></br>
+      /// </summary>
+      public string GetSymbols(Vector2 worldPoint, Symbols symbols)
+      {
+         for (uint i = 0; i < Text.Length; i++)
+         {
+            var corners = GetCharacterCorners(i);
+            if (corners.Count == 0)
+               continue;
+
+            corners.Add(corners[0]);
+            var hitbox = new Hitbox(corners.ToArray());
+            if (hitbox.ConvexContains(worldPoint))
+            {
+               var left = "";
+               var right = "";
+
+               if (symbols == Symbols.Character)
+                  return Text[(int)i].ToString();
+               else if (symbols == Symbols.Word)
+               {
+                  if (Text[(int)i].ToString().IsLetters() == false)
+                     return null;
+
+                  for (int l = (int)i; l >= 0; l--)
+                  {
+                     var symbol = $"{Text[l]}";
+                     if (symbol.IsLetters())
+                        left = $"{symbol}{left}";
+                     else
+                        break;
+                     if (Text.Contains(left) == false)
+                        break;
+                  }
+                  for (int r = (int)i + 1; r < Text.Length; r++)
+                  {
+                     var symbol = $"{Text[r]}";
+                     if (symbol.IsLetters())
+                        right = $"{right}{symbol}";
+                     else
+                        break;
+                     if (Text.Contains(right) == false)
+                        break;
+                  }
+               }
+               else
+               {
+                  if (Text[(int)i] == '\n')
+                     return null;
+
+                  for (int l = (int)i; l >= 0; l--)
+                  {
+                     var symbol = $"{Text[l]}";
+                     if (symbol != '\n'.ToString())
+                        left = $"{symbol}{left}";
+                     else
+                        break;
+                     if (Text.Contains(left) == false)
+                        break;
+                  }
+                  for (int r = (int)i + 1; r < Text.Length; r++)
+                  {
+                     var symbol = $"{Text[r]}";
+                     if (symbol != '\n'.ToString())
+                        right = $"{right}{symbol}";
+                     else
+                        break;
+                     if (Text.Contains(right) == false)
+                        break;
+                  }
+               }
+               return $"{left}{right}";
+            }
+         }
+         return null;
       }
 
       private void Init(uint resolutionX, uint resolutionY, Font font)
@@ -226,8 +338,7 @@ namespace SMPL
             case Alignments.BottomRight: Right(); break;
             case Alignments.Bottom: CenterX(); break;
          }
-         var b = text.GetGlobalBounds();
-         var l = text.GetLocalBounds().Top;
+         var b = text.GetLocalBounds();
          var sz = camera.renderTexture.Size;
          switch (Alignment)
          {
@@ -242,18 +353,15 @@ namespace SMPL
             case Alignments.Bottom: Bottom(); break;
          }
 
-         void Top() => text.Position = new(-sz.X * 0.5f, -camera.renderTexture.Size.Y * 0.5f - l * 0.5f);
+         void Top() => text.Position = new(-sz.X * 0.5f, -camera.renderTexture.Size.Y * 0.5f - b.Top * 0.5f);
          void CenterX() => text.DisplayedString = center;
-         void CenterY() => text.Position = new(-sz.X * 0.5f, -b.Height * 0.5f - (Alignment == Alignments.Left ? l : 0));
-         void Bottom() => text.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height + l);
+         void CenterY() => text.Position = new(-sz.X * 0.5f, -b.Height * 0.5f - (Alignment == Alignments.Left ? b.Top : 0));
+         void Bottom() => text.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height + b.Top);
          void Left() => text.DisplayedString = left;
          void Right() => text.DisplayedString = right;
       }
       private uint GetNextNonFormatChar(uint charIndex)
       {
-         if (charIndex > left.Length - 1)
-            charIndex = (uint)left.Length - 1;
-
          if (Alignment == Alignments.TopRight || Alignment == Alignments.Right || Alignment == Alignments.BottomRight)
             return Execute(formatSpaceRangesRight, true);
          else if (Alignment == Alignments.Top || Alignment == Alignments.Center || Alignment == Alignments.Bottom)
