@@ -90,8 +90,8 @@ namespace SMPL
 		/// </summary>
 		public Vector2 MouseCursorPosition
 		{
-			get { var p = Game.Window.MapPixelToCoords(Mouse.GetPosition(Game.Window), renderTexture.GetView()); return new(p.X, p.Y); }
-			set => Mouse.SetPosition(Game.Window.MapCoordsToPixel(value.ToSFML(), renderTexture.GetView()), Game.Window);
+			get { var p = Mouse.GetPosition(Game.Window); return PointToCamera(new(p.X, p.Y)); }
+			set { var p = PointToWorld(value); Mouse.SetPosition(new((int)p.X, (int)p.Y), Game.Window); }
 		}
 
 		/// <summary>
@@ -191,6 +191,22 @@ namespace SMPL
       {
 			renderTexture.Display();
       }
+
+		/// <summary>
+		/// Receives a <paramref name="worldPoint"/> and converts it to the corresponding point in this <see cref="Camera"/>'s coordinates.
+		/// </summary>
+		public Vector2 PointToCamera(Vector2 worldPoint)
+		{
+			return Game.Window.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
+		}
+		/// <summary>
+		/// Receives a <paramref name="cameraPoint"/> and converts it to the corresponding point in the world.
+		/// </summary>
+		public Vector2 PointToWorld(Vector2 cameraPoint)
+		{
+			var p = Game.Window.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
+			return new(p.X, p.Y);
+		}
 
 		internal static void DrawMainCameraToWindow()
       {

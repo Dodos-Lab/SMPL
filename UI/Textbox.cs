@@ -31,7 +31,7 @@ namespace SMPL
 
       internal static readonly Text text = new();
       private readonly List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
-      private Camera camera;
+      protected Camera camera;
       private string left, center, right;
       private Font font;
 
@@ -143,19 +143,19 @@ namespace SMPL
       /// </summary>
       public Vector2 Resolution => new(camera.renderTexture.Size.X, camera.renderTexture.Size.Y);
       /// <summary>
-      /// The color behind the <see cref="Text"/> that is filling the entirety of the <see cref="Textbox"/>.
+      /// The color of the <see cref="Text"/>.
       /// </summary>
-      public Color BackgroundColor { get; set; }
+      public Color CharacterColor { get; set; } = Color.White;
+      /// <summary>
+      /// The color behind the <see cref="Text"/> that fills the entire <see cref="Textbox"/>.
+      /// </summary>
+      public Color BackgroundColor { get; set; } = new(150, 150, 150);
 
       /// <summary>
 		/// Create the <see cref="Textbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>]
       /// and a <paramref name="font"/>.
 		/// </summary>
-      public Textbox(uint resolutionX, uint resolutionY, Font font) => Init(resolutionX, resolutionY, font);
-      /// <summary>
-		/// Create the <see cref="Textbox"/> with a certain <paramref name="resolution"/> and a <paramref name="font"/>.
-		/// </summary>
-      public Textbox(Vector2 resolution, Font font) => Init((uint)resolution.X, (uint)resolution.Y, font);
+      public Textbox(Font font, uint resolutionX = 100, uint resolutionY = 100) => Init(resolutionX, resolutionY, font);
       ~Textbox() => text.Dispose();
 
       /// <summary>
@@ -164,13 +164,29 @@ namespace SMPL
 		/// </summary>
       public override void Draw()
       {
-         camera.renderTexture.Clear(BackgroundColor);
+         camera.Fill(BackgroundColor);
          Update();
-         camera.renderTexture.Draw(text, new(BlendMode, Transform.Identity, Texture, Shader));
+         camera.renderTexture.Draw(text, new(BlendMode, Transform.Identity, null, Shader));
          camera.Display();
          base.Draw();
       }
 
+      /// <summary>
+      /// Returns the character index that contains <paramref name="worldPoint"/> if any, -1 otherwise.
+      /// </summary>
+      public int GetCharacterIndex(Vector2 worldPoint)
+      {
+         for (int i = 0; i < Text.Length; i++)
+         {
+            var corners = GetCharacterCorners((uint)i);
+            if (corners.Count == 4)
+               corners.Add(corners[0]);
+            var hitbox = new Hitbox(corners.ToArray());
+            if (hitbox.ConvexContains(worldPoint))
+               return i;
+         }
+         return -1;
+      }
       /// <summary>
       /// Calculates all four corners in the world of a symbol in the <see cref="Text"/> with a certain <paramref name="characterIndex"/> then returns them.
       /// </summary>
@@ -319,7 +335,7 @@ namespace SMPL
          text.Scale = new(1, 1);
          text.Font = Font;
          text.CharacterSize = CharacterSize;
-         text.FillColor = Color;
+         text.FillColor = CharacterColor;
          text.LetterSpacing = CharacterSpace;
          text.LineSpacing = LineSpace;
          text.OutlineColor = OutlineColor;
