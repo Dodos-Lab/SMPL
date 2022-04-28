@@ -151,11 +151,14 @@ namespace SMPL
       /// </summary>
       public Color BackgroundColor { get; set; } = new(150, 150, 150);
 
+      public Vector2 ShadowOffset { get; set; }
+      public Color ShadowColor { get; set; } = Color.Black;
+
       /// <summary>
 		/// Create the <see cref="Textbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>]
       /// and a <paramref name="font"/>.
 		/// </summary>
-      public Textbox(Font font, uint resolutionX = 100, uint resolutionY = 100) => Init(resolutionX, resolutionY, font);
+      public Textbox(Font font, uint resolutionX = 200, uint resolutionY = 200) => Init(resolutionX, resolutionY, font);
       ~Textbox() => text.Dispose();
 
       /// <summary>
@@ -166,7 +169,19 @@ namespace SMPL
       {
          camera.Fill(BackgroundColor);
          Update();
+
+         if (ShadowOffset != default)
+         {
+            var tr = Transform.Identity;
+            var col = text.FillColor;
+            tr.Translate(ShadowOffset.ToSFML());
+            text.FillColor = ShadowColor;
+            camera.renderTexture.Draw(text, new(BlendMode, tr, null, Shader));
+            text.FillColor = col;
+         }
          camera.renderTexture.Draw(text, new(BlendMode, Transform.Identity, null, Shader));
+
+
          camera.Display();
          base.Draw();
       }
