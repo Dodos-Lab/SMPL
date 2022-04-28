@@ -25,21 +25,21 @@ namespace SMPL
 		public float Angle3D { get; set; } = 270;
 
 		/// <summary>
-		/// The top left corner of the very top texture of this <see cref="Sprite3D"/> in the world.
+		/// Initially this is the top left corner of the very top texture of this <see cref="Sprite3D"/> in the world.
 		/// </summary>
-		public Vector2 TopLeft3D => TopLeft.PointMoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 Corner3DA => CornerA.PointMoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
 		/// <summary>
-		/// The top right corner of the very top texture of this <see cref="Sprite3D"/> in the world.
+		/// Initially this is the top right corner of the very top texture of this <see cref="Sprite3D"/> in the world.
 		/// </summary>
-		public Vector2 TopRight3D => TopRight.PointMoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 Corner3DB => CornerB.PointMoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
 		/// <summary>
-		/// The bottom left corner of the very top texture of this <see cref="Sprite3D"/> in the world.
+		/// Initially this is the bottom right corner of the very top texture of this <see cref="Sprite3D"/> in the world.
 		/// </summary>
-		public Vector2 BottomLeft3D => BottomLeft.PointMoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 Corner3DC => CornerC.PointMoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
 		/// <summary>
-		/// The bottom right corner of the very top texture of this <see cref="Sprite3D"/> in the world.
+		/// Initially this is the bottom left corner of the very top texture of this <see cref="Sprite3D"/> in the world.
 		/// </summary>
-		public Vector2 BottomRight3D => BottomRight.PointMoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
+		public Vector2 Corner3DD => CornerD.PointMoveAtAngle(Angle3D, Height * (textures?.Length ?? 1), false);
 
 		/// <summary>
 		/// Construct the <see cref="Sprite3D"/> from a 3D model .obj file and its texture with additional details.
@@ -153,7 +153,7 @@ namespace SMPL
 		/// </summary>
 		public void SetHitbox3D()
       {
-			var points = new List<Vector2>() { TopLeft, TopRight, BottomLeft, BottomRight, TopLeft3D, TopRight3D, BottomLeft3D, BottomRight3D };
+			var points = new List<Vector2>() { CornerA, CornerB, CornerD, CornerC, Corner3DA, Corner3DB, Corner3DD, Corner3DC };
 			var outline = points.OutlinePoints();
 
 			Hitbox.Lines.Clear();
@@ -177,10 +177,10 @@ namespace SMPL
 				Texture = textures[i];
 				var verts = new Vertex[]
 				{
-					new(TopLeft.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, 0)),
-					new(TopRight.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(Texture.Size.X, 0)),
-					new(BottomRight.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(Texture.Size.X, Texture.Size.Y)),
-					new(BottomLeft.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, Texture.Size.Y)),
+					new(CornerA.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, 0)),
+					new(CornerB.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(Texture.Size.X, 0)),
+					new(CornerC.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(Texture.Size.X, Texture.Size.Y)),
+					new(CornerD.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, Texture.Size.Y)),
 				};
 
 				DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));

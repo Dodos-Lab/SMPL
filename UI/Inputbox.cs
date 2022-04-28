@@ -1,11 +1,16 @@
 ﻿using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
-using System;
-using System.Numerics;
 
 namespace SMPL
 {
+   /// <summary>
+   /// Inherit chain: <see cref="Inputbox"/> : <see cref="Textbox"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
+   /// This class processes text input and displays it. It is limited to a <see cref="Textbox.Alignments.TopLeft"/> alignment to avoid weird results
+   /// (scrolling the text is not possible because of that). Therefore the <see cref="Inputbox"/> may be best used for short inputs that fit in the initial box.
+   /// <br></br><br></br>
+   /// - Note: The <see cref="Inputbox"/> is an expensive class performance-wise and it shouldn't be recreated frequently if at all.
+   /// </summary>
    public class Inputbox : Textbox
    {
       private Clock cursorBlinkTimer;
@@ -48,9 +53,12 @@ namespace SMPL
       /// Create the <see cref="Inputbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
       /// </summary>
       public Inputbox(Font font, uint resolutionX = 300, uint resolutionY = 40) : base(font, resolutionX, resolutionY) => Init();
-
+      /// <summary>
+		/// Draws the <see cref="Inputbox"/> on the <see cref="Visual.DrawTarget"/> according
+		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/>, <see cref="Textbox"/> and <see cref="Inputbox"/> parameters.
+		/// </summary>
 		public override void Draw()
-		{
+      {
          Alignment = Alignments.TopLeft;
 
          SetDefaultHitbox();
@@ -72,7 +80,11 @@ namespace SMPL
             SetIndex(Text.Length);
          if (Keyboard.IsKeyPressed(Keyboard.Key.Down).Once($"down-{GetHashCode()}"))
             SetIndex(0);
-
+         if (Keyboard.IsKeyPressed(Keyboard.Key.Delete).Once($"delete-{GetHashCode()}") && CursorPositionIndex < Text.Length)
+         {
+            ShowCursor();
+            Text = Text.Remove((int)CursorPositionIndex, 1);
+         }
 
          base.Draw();
 
@@ -125,7 +137,7 @@ namespace SMPL
             CursorPositionIndex = (uint)index;
             ShowCursor();
          }
-		}
+      }
 
       private void Init()
       {
@@ -136,7 +148,7 @@ namespace SMPL
          CursorColor = Color.White;
          Size = new(300, 40);
       }
-		private void OnInput(object sender, TextEventArgs e)
+      private void OnInput(object sender, TextEventArgs e)
       {
          if (IsFocused == false || Keyboard.IsKeyPressed(Keyboard.Key.LControl) || Keyboard.IsKeyPressed(Keyboard.Key.RControl))
             return;
@@ -171,5 +183,5 @@ namespace SMPL
          cursorBlinkTimer.Restart();
          cursorIsVisible = true;
       }
-	}
+   }
 }

@@ -64,7 +64,7 @@ namespace SMPL
 			for (int i = 0; i < Lines.Count; i++)
 				for (int j = 0; j < hitbox.Lines.Count; j++)
 				{
-					var p = Lines[i].CrossPoint(hitbox.Lines[j]);
+					var p = Lines[i].GetCrossPoint(hitbox.Lines[j]);
 					if (p.IsNaN() == false)
 						result.Add(p);
 				}

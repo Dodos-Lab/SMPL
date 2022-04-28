@@ -95,30 +95,30 @@ namespace SMPL
 		}
 
 		/// <summary>
-		/// The top left corner of the <see cref="Camera"/> in the world.
+		/// Initially this is the top left corner of the <see cref="Camera"/> in the world.
 		/// </summary>
-		public Vector2 TopLeft
+		public Vector2 CornerA
 		{
 			get => renderTexture.MapPixelToCoords(new()).ToSystem();
 		}
 		/// <summary>
-		/// The top right corner of the <see cref="Camera"/> in the world.
+		/// Initially this is the top right corner of the <see cref="Camera"/> in the world.
 		/// </summary>
-		public Vector2 TopRight
+		public Vector2 CornerB
 		{
 			get => renderTexture.MapPixelToCoords(new((int)Game.Window.Size.X, 0)).ToSystem();
 		}
 		/// <summary>
-		/// The bottom right corner of the <see cref="Camera"/> in the world.
+		/// Initially this is the bottom right corner of the <see cref="Camera"/> in the world.
 		/// </summary>
-		public Vector2 BottomRight
+		public Vector2 CornerC
 		{
 			get => renderTexture.MapPixelToCoords(new((int)Game.Window.Size.X, (int)Game.Window.Size.Y)).ToSystem();
 		}
 		/// <summary>
-		/// The bottom left corner of the <see cref="Camera"/> in the world.
+		/// Initially this is the bottom left corner of the <see cref="Camera"/> in the world.
 		/// </summary>
-		public Vector2 BottomLeft
+		public Vector2 CornerD
 		{
 			get => renderTexture.MapPixelToCoords(new(0, (int)Game.Window.Size.Y)).ToSystem();
 		}
@@ -152,7 +152,7 @@ namespace SMPL
 		/// </summary>
 		public bool Captures(Hitbox hitbox)
 		{
-			var screen = new Hitbox(TopLeft, TopRight, BottomRight, BottomLeft, TopLeft);
+			var screen = new Hitbox(CornerA, CornerB, CornerC, CornerD, CornerA);
 			return screen.ConvexContains(hitbox);
 		}
 		/// <summary>
@@ -160,7 +160,7 @@ namespace SMPL
 		/// </summary>
 		public bool Captures(Vector2 point)
 		{
-			var screen = new Hitbox(TopLeft, TopRight, BottomRight, BottomLeft, TopLeft);
+			var screen = new Hitbox(CornerA, CornerB, CornerC, CornerD, CornerA);
 			return screen.ConvexContains(point);
 		}
 		/// <summary>

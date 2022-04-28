@@ -30,9 +30,10 @@ namespace SMPL
 		/// <summary>
 		/// Boots up the <see cref="Game"/> systems that initialize the <see cref="Window"/> alongside other things.
 		/// The <paramref name="startingScene"/> is set as <see cref="Scene.CurrentScene"/> and the optional <paramref name="loadingScene"/> as
-		/// <see cref="Scene.LoadingScene"/>.
+		/// <see cref="Scene.LoadingScene"/>. An optional <paramref name="pixelSize"/> setting is present to simulate lower resolutions for the 
+		/// <see cref="Scene.MainCamera"/>.
 		/// </summary>
-		public static void Start(Scene startingScene, Scene loadingScene = null, uint mainCameraWidth = 1920, uint mainCameraHeight = 1080)
+		public static void Start(Scene startingScene, Scene loadingScene = null, float pixelSize = 1)
 		{
 			if (startingScene == null || Window != null)
 				return;
@@ -40,7 +41,8 @@ namespace SMPL
 			InitWindow();
 
 			Scene.Init(startingScene, loadingScene);
-			Scene.MainCamera = new(mainCameraWidth, mainCameraHeight);
+			var sz = VideoMode.DesktopMode;
+			Scene.MainCamera = new((uint)(sz.Width / pixelSize), (uint)(sz.Height / pixelSize));
 
 			while (Window.IsOpen)
 			{

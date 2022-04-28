@@ -46,28 +46,28 @@ namespace SMPL
 		{ get => OriginUnit * LocalSize; set => OriginUnit = value / LocalSize; }
 		
 		/// <summary>
-		/// The top left corner of the <see cref="Sprite"/> in the world.
+		/// Initially this is the top left corner of the <see cref="Sprite"/> in the world.
 		/// </summary>
-		public Vector2 TopLeft => GetPositionFromSelf(-Origin);
+		public Vector2 CornerA => GetPositionFromSelf(-Origin);
 		/// <summary>
-		/// The top right corner of the <see cref="Sprite"/> in the world.
+		/// Initially this is the top right corner of the <see cref="Sprite"/> in the world.
 		/// </summary>
-		public Vector2 TopRight => GetPositionFromSelf(new Vector2(LocalSize.X, 0) - Origin);
+		public Vector2 CornerB => GetPositionFromSelf(new Vector2(LocalSize.X, 0) - Origin);
 		/// <summary>
-		/// The bottom right corner of the <see cref="Sprite"/> in the world.
+		/// Initially this is the bottom right corner of the <see cref="Sprite"/> in the world.
 		/// </summary>
-		public Vector2 BottomRight => GetPositionFromSelf(LocalSize - Origin);
+		public Vector2 CornerC => GetPositionFromSelf(LocalSize - Origin);
 		/// <summary>
-		/// The bottom left corner of the <see cref="Sprite"/> in the world.
+		/// Initially this is the bottom left corner of the <see cref="Sprite"/> in the world.
 		/// </summary>
-		public Vector2 BottomLeft => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin);
+		public Vector2 CornerD => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin);
 
 		/// <summary>
 		/// Useful for collision detection, checking whether this <see cref="Sprite"/> is hovered by the mouse cursor etc.
 		/// <see cref="Hitbox.TransformLocalLines"/> should be called by passing this <see cref="Sprite"/> in order for the <see cref="Object"/>
 		/// transformations to affect this <see cref="Hitbox"/>.
 		/// </summary>
-		public Hitbox Hitbox { get; set; } = new();
+		public Hitbox Hitbox { get; } = new();
 
 		/// <summary>
 		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.DrawTarget"/> according
@@ -89,10 +89,10 @@ namespace SMPL
 
 			var verts = new Vertex[]
 			{
-				new(TopLeft.ToSFML(), Color, new(w0, h0)),
-				new(TopRight.ToSFML(), Color, new(ww, h0)),
-				new(BottomRight.ToSFML(), Color, new(ww, hh)),
-				new(BottomLeft.ToSFML(), Color, new(w0, hh)),
+				new(CornerA.ToSFML(), Color, new(w0, h0)),
+				new(CornerB.ToSFML(), Color, new(ww, h0)),
+				new(CornerC.ToSFML(), Color, new(ww, hh)),
+				new(CornerD.ToSFML(), Color, new(w0, hh)),
 			};
 
 			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));

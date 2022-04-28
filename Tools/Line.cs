@@ -68,7 +68,7 @@ namespace SMPL
 		/// Returns the point where this line and another <paramref name="line"/> cross. Returns an invalid vector
 		/// (<see cref="Extensions.NaN(Vector2)"/>) if there is no such point.
 		/// </summary>
-		public Vector2 CrossPoint(Line line)
+		public Vector2 GetCrossPoint(Line line)
 		{
 			var p = CrossPoint(A, B, line.A, line.B);
 			return Contains(p) && line.Contains(p) ? p : new(float.NaN, float.NaN);
@@ -78,7 +78,7 @@ namespace SMPL
 		/// </summary>
 		public bool Crosses(Line line)
 		{
-			var result = CrossPoint(line);
+			var result = GetCrossPoint(line);
 			return float.IsNaN(result.X) == false && float.IsNaN(result.Y) == false;
 		}
 		/// <summary>
@@ -106,7 +106,7 @@ namespace SMPL
 		/// - Otherwise move toward the result.<br></br>
 		/// - Move directly toward <see cref="B"/> once the path is clear.
 		/// </summary>
-		public Vector2 Pathfind(uint tries, Hitbox hitbox)
+		public Vector2 GetPathfindResult(uint tries, Hitbox hitbox)
 		{
 			if (tries == 0)
 				return new Vector2().NaN();
@@ -147,6 +147,22 @@ namespace SMPL
 				}
 				return false;
 			}
+		}
+		/// <summary>
+		/// Returns the closest point on the line to a <paramref name="point"/>.
+		/// </summary>
+		public Vector2 GetClosestPoint(Vector2 point)
+		{
+			var AP = point - A;
+			var AB = B - A;
+
+			float magnitudeAB = AB.LengthSquared();
+			float ABAPproduct = Vector2.Dot(AP, AB);
+			float distance = ABAPproduct / magnitudeAB;
+
+			return distance < 0 ?
+				A : distance > 1 ?
+				B : A + AB * distance;
 		}
 
 		private static Vector2 CrossPoint(Vector2 A, Vector2 B, Vector2 C, Vector2 D)
