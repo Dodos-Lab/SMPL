@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace SMPL
+namespace SMPL.Tools
 {
 	/// <summary>
 	/// A wrapper class for the <see cref="System.Console"/>. Mainly used for debugging by logging messages during runtime. This class

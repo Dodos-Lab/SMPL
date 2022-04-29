@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
+using SMPL.Core;
+using SMPL.Tools;
 
-namespace SMPL
+namespace SMPL.Graphics
 {
    /// <summary>
    /// A square fragment configuration used by a <see cref="Tilemap"/> for building a textured grid from a single <see cref="Texture"/>.

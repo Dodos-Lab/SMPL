@@ -1,8 +1,10 @@
 ﻿using SFML.Graphics;
 using SFML.System;
+using SMPL.Core;
+using SMPL.Tools;
 using System.Numerics;
 
-namespace SMPL
+namespace SMPL.Graphics
 {
 	/// <summary>
 	/// Inherit chain:  <see cref="SpriteBorder"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>

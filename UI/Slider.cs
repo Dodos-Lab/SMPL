@@ -1,7 +1,9 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
+using SMPL.Core;
+using SMPL.Tools;
 
-namespace SMPL
+namespace SMPL.UI
 {
 	/// <summary>
 	/// Inherit chain: <see cref="Slider"/> : <see cref="ProgressBar"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
@@ -14,7 +16,7 @@ namespace SMPL
 		/// <summary>
 		/// The length of the <see cref="Slider"/> in range [0 - 1] with 1 being the <see cref="Sprite.Size"/>.
 		/// </summary>
-		public float LengthUnit { get; set; } = 0.2f;
+		public float LengthUnit { get; set; }
 		/// <summary>
 		/// The length of the <see cref="Slider"/> in the world.
 		/// </summary>
@@ -22,6 +24,11 @@ namespace SMPL
 		{
 			get => LengthUnit.Map(0, 1, 0, LengthMax);
 			set => LengthUnit = value.Map(0, LengthMax, 0, 1);
+		}
+
+		public Slider()
+		{
+			LengthUnit = 0.2f;
 		}
 
 		/// <summary>
@@ -48,6 +55,17 @@ namespace SMPL
 			var tr = CornerA.PointPercentTowardPoint(CornerB, new(ProgressUnit * 100 + LengthUnit * 50));
 			var bl = CornerD.PointPercentTowardPoint(CornerC, new(ProgressUnit * 100 - LengthUnit * 50));
 			var br = CornerD.PointPercentTowardPoint(CornerC, new(ProgressUnit * 100 + LengthUnit * 50));
+
+			if (ProgressUnit < LengthUnit * 0.5f)
+			{
+				tl = CornerA;
+				bl = CornerD;
+			}
+			else if (ProgressUnit > 1 - LengthUnit * 0.5f)
+			{
+				tr = CornerB;
+				br = CornerC;
+			}
 
 			var verts = new Vertex[]
 			{

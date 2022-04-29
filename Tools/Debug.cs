@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 
-namespace SMPL
+namespace SMPL.Tools
 {
 	/// <summary>
 	/// Accesses information about where the code is currently executing and where it was called from.

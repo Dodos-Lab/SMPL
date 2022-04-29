@@ -1,6 +1,7 @@
 ﻿using SFML.Graphics;
+using SMPL.Core;
 
-namespace SMPL
+namespace SMPL.Graphics
 {
 	/// <summary>
 	/// Inherit chain: <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>

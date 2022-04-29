@@ -1,9 +1,13 @@
 ﻿using SFML.Graphics;
+using SMPL.Graphics;
+using SMPL.Core;
+using SMPL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Sprite = SMPL.Graphics.Sprite;
 
-namespace SMPL
+namespace SMPL.UI
 {
    /// <summary>
    /// Inherit chain: <see cref="Textbox"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>

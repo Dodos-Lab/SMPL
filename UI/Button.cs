@@ -1,6 +1,9 @@
 ﻿using SFML.Window;
+using SMPL.Core;
+using SMPL.Graphics;
+using SMPL.Tools;
 
-namespace SMPL
+namespace SMPL.UI
 {
    /// <summary>
    /// Inherit chain: <see cref="Button"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>

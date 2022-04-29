@@ -1,8 +1,10 @@
 ﻿using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+using SMPL.Core;
+using SMPL.Tools;
 
-namespace SMPL
+namespace SMPL.UI
 {
    /// <summary>
    /// Inherit chain: <see cref="Inputbox"/> : <see cref="Textbox"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>

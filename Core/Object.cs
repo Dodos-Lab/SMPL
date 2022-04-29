@@ -1,9 +1,10 @@
-﻿using System;
+﻿using SMPL.Tools;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Numerics;
 
-namespace SMPL
+namespace SMPL.Core
 {
 	/// <summary>
 	/// The base class for most <see cref="Game"/> objects. Useful for handling their orientation/positioning/area in the world, making parent-child relationships

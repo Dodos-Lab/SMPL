@@ -1,10 +1,12 @@
 ﻿using SFML.Graphics;
+using SMPL.Core;
+using SMPL.Tools;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 
-namespace SMPL
+namespace SMPL.Graphics
 {
 	/// <summary>
 	/// Inherit chain: <see cref="Sprite3D"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>

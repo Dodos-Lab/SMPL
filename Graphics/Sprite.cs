@@ -1,7 +1,9 @@
 ﻿using SFML.Graphics;
+using SMPL.Tools;
 using System.Numerics;
+using SMPL.Core;
 
-namespace SMPL
+namespace SMPL.Graphics
 {
 	/// <summary>
 	/// Inherit chain: <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
@@ -98,9 +100,11 @@ namespace SMPL
 			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 		/// <summary>
-		/// Sets a rectangular <see cref="SMPL.Hitbox"/> in <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="OriginUnit"/> and
+		/// Sets a rectangular <see cref="Tools.Hitbox"/> in <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="OriginUnit"/> and
 		/// <see cref="Size"/> so this should be called after each change on these in order to maintain the proper shape of
-		/// the default <see cref="Hitbox"/>.
+		/// the default <see cref="Hitbox"/>.<br></br><br></br>
+		/// - Note: Keep in mind these are the <see cref="Hitbox.LocalLines"/> and they need to be transformed by an <see cref="Object"/> with
+		/// <see cref="Hitbox.TransformLocalLines"/> in order to get them into the global <see cref="Hitbox.Lines"/> used by everything else.
 		/// </summary>
 		public virtual void SetDefaultHitbox()
 		{

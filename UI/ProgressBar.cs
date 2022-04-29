@@ -1,6 +1,8 @@
-﻿using System.Numerics;
+﻿using SMPL.Graphics;
+using SMPL.Tools;
+using System.Numerics;
 
-namespace SMPL
+namespace SMPL.UI
 {
    /// <summary>
    /// Inherit chain: <see cref="ProgressBar"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
@@ -8,20 +10,32 @@ namespace SMPL
    /// </summary>
    public class ProgressBar : Sprite
    {
-      private float val;
+      private float val, max, rangeA, rangeB;
 
       /// <summary>
       /// The first bound of the range of the <see cref="Value"/>.
       /// </summary>
-      public float RangeA { get; set; }
+      public float RangeA
+      {
+         get => rangeA;
+         set { rangeA = value; Value = val; Update(); }
+      }
       /// <summary>
       /// The first bound of the range of the <see cref="Value"/>.
       /// </summary>
-      public float RangeB { get; set; } = 1;
+      public float RangeB
+      {
+         get => rangeB;
+         set { rangeB = value; Value = val; Update(); }
+      }
       /// <summary>
       /// The maximum <see cref="Sprite.Size"/>.X in the world. In other words: the maximum size (width) of the <see cref="ProgressBar"/>.
       /// </summary>
-      public float LengthMax { get; set; } = 400;
+      public float LengthMax
+      {
+         get => max;
+         set { max = value; Update(); }
+      }
 
       /// <summary>
       /// The current progress of the <see cref="ProgressBar"/> in range [0 - 1].
@@ -43,7 +57,9 @@ namespace SMPL
       public ProgressBar()
       {
          Size = new Vector2(LengthMax, 40) * Scale;
+         RangeB = 1;
          OriginUnit = new(0, 0.5f);
+         LengthMax = 400;
          ProgressUnit = 0.5f;
       }
       private void Update()

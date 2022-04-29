@@ -1,8 +1,9 @@
 ﻿using SFML.Graphics;
+using SMPL.Core;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace SMPL
+namespace SMPL.Tools
 {
 	/// <summary>
 	/// A <see cref="Line"/> collection used to determine whether it interacts in any way with other hitboxes/points in the world.
@@ -56,9 +57,9 @@ namespace SMPL
 				Lines[i].Draw(camera, color, width);
 		}
 		/// <summary>
-		/// Gets all the cross points (if any) produced between <see cref="Lines"/> and <paramref name="hitbox"/>'s <see cref="Lines"/>.
+		/// Calculates and then returns all the cross points (if any) produced between <see cref="Lines"/> and <paramref name="hitbox"/>'s <see cref="Lines"/>.
 		/// </summary>
-		public List<Vector2> CrossPoints(Hitbox hitbox)
+		public List<Vector2> GetCrossPoints(Hitbox hitbox)
 		{
 			var result = new List<Vector2>();
 			for (int i = 0; i < Lines.Count; i++)
@@ -120,6 +121,28 @@ namespace SMPL
 				if (ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false)
 					return false;
 			return true;
+		}
+		/// <summary>
+		/// Returns the closest point on the <see cref="Hitbox.Lines"/> to a certain <paramref name="point"/>.
+		/// </summary>
+		public Vector2 GetClosestPoint(Vector2 point)
+		{
+			var points = new List<Vector2>();
+			var result = new Vector2();
+			var bestDist = float.MaxValue;
+
+			for (int i = 0; i < Lines.Count; i++)
+				points.Add(Lines[i].GetClosestPoint(point));
+			for (int i = 0; i < points.Count; i++)
+			{
+				var dist = points[i].DistanceBetweenPoints(point);
+				if (dist < bestDist)
+				{
+					bestDist = dist;
+					result = points[i];
+				}
+			}
+			return result;
 		}
 	}
 }

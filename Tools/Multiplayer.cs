@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using TcpClient = NetCoreServer.TcpClient;
 
-namespace SMPL
+namespace SMPL.Tools
 {
 	public static class Multiplayer
 	{

@@ -1,6 +1,7 @@
-﻿using System.Numerics;
+﻿using SMPL.Core;
+using System.Numerics;
 
-namespace SMPL
+namespace SMPL.UI
 {
    /// <summary>
    /// Inherit chain: <see cref="TextButton"/> : <see cref="Button"/> : <see cref="Sprite"/> : <see cref="Visual"/> :
@@ -17,13 +18,11 @@ namespace SMPL
       /// are called upon drawing if this is <see langword="true"/> (meaning the entire text becomes the button).
       /// </summary>
       public bool IsHyperlink { get; set; }
-
       /// <summary>
 		/// This determines the positional offset from <see cref="Object.Position"/> as a vector. [0, 0] is the top left and [1, 1]
       /// is the bottom right corner of the text. Values can also go bellow 0 and above 1.
 		/// </summary>
       public Vector2 TextOriginUnit { get; set; } = new(0.5f);
-
       /// <summary>
       /// The customizable settings of the <see cref="TextButton"/> text.
       /// </summary>

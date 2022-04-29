@@ -1,8 +1,10 @@
 ﻿using SFML.Graphics;
+using SMPL.Core;
+using SMPL.Tools;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace SMPL
+namespace SMPL.Graphics
 {
 	/// <summary>
 	/// A particle controlled by the <see cref="ParticleManager"/> (check it for more info). No <see cref="Particle"/> references should be

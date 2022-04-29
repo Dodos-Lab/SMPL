@@ -1,7 +1,8 @@
 ﻿using SFML.Graphics;
+using SMPL.Core;
 using System.Numerics;
 
-namespace SMPL
+namespace SMPL.Tools
 {
 	/// <summary>
 	/// Lines are useful for collision detection, debugging, raycasting and much more.

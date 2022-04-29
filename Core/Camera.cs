@@ -3,8 +3,10 @@ using System.Numerics;
 using System;
 using SFML.System;
 using SFML.Window;
+using SMPL.Tools;
+using Console = SMPL.Tools.Console;
 
-namespace SMPL
+namespace SMPL.Core
 {
 	/// <summary>
 	/// Inherit chain: <see cref="Camera"/> : <see cref="Object"/><br></br><br></br>

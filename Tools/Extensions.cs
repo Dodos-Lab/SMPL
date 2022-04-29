@@ -1,5 +1,6 @@
 ﻿using SFML.Graphics;
 using SFML.System;
+using SMPL.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,7 +9,7 @@ using System.IO.Compression;
 using System.Numerics;
 using System.Text;
 
-namespace SMPL
+namespace SMPL.Tools
 {
 	/// <summary>
 	/// Various methods that extend the primitive types and collections aiming to be a shortcut for longer calculations/systems.

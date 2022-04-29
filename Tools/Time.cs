@@ -1,7 +1,7 @@
 ﻿using SFML.System;
 using System;
 
-namespace SMPL
+namespace SMPL.Tools
 {
 	/// <summary>
 	/// A class that tracks time and calculates time related values.
