@@ -1,7 +1,9 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
 using SMPL.Core;
+using SMPL.Graphics;
 using SMPL.Tools;
+using SMPL.UI;
 
 namespace SMPL.UI
 {
@@ -25,10 +27,15 @@ namespace SMPL.UI
 			get => LengthUnit.Map(0, 1, 0, LengthMax);
 			set => LengthUnit = value.Map(0, LengthMax, 0, 1);
 		}
+		/// <summary>
+		/// Whether this UI element is currently interactive.
+		/// </summary>
+		public bool IsDisabled { get; set; }
 
 		public Slider()
 		{
 			LengthUnit = 0.2f;
+			OriginUnit = new(0.5f);
 		}
 
 		/// <summary>
@@ -84,6 +91,9 @@ namespace SMPL.UI
 
 			SetDefaultHitbox();
 			Hitbox.TransformLocalLines(this);
+
+			if (IsDisabled)
+				return;
 
 			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
 			if (left.Once($"slider-click-{GetHashCode()}") && Hitbox.ConvexContains(Scene.MouseCursorPosition))

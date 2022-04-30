@@ -1,4 +1,9 @@
-﻿namespace SMPL.Tools
+﻿using SMPL.Core;
+using SMPL.Graphics;
+using SMPL.Tools;
+using SMPL.UI;
+
+namespace SMPL.Tools
 {
 	/// <summary>
 	/// A class for continuously going over set data overtime.

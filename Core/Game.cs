@@ -4,7 +4,10 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using SFML.Graphics;
 using SFML.Window;
+using SMPL.Core;
+using SMPL.Graphics;
 using SMPL.Tools;
+using SMPL.UI;
 using Console = SMPL.Tools.Console;
 
 namespace SMPL.Core

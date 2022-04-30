@@ -1,5 +1,8 @@
 ﻿using SFML.Graphics;
 using SMPL.Core;
+using SMPL.Graphics;
+using SMPL.Tools;
+using SMPL.UI;
 
 namespace SMPL.Graphics
 {

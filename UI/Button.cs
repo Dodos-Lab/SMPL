@@ -2,6 +2,7 @@
 using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
+using SMPL.UI;
 
 namespace SMPL.UI
 {
@@ -25,13 +26,17 @@ namespace SMPL.UI
       public event ClickedEventHandler Clicked;
 
       /// <summary>
+      /// Whether this UI element is currently interactive.
+      /// </summary>
+      public bool IsDisabled { get; set; }
+
+      /// <summary>
       /// A way for the child classes of <see cref="Button"/> to raise the event and handle the logic around it by overriding this.
       /// </summary>
       protected virtual void OnClick()
       {
          Clicked?.Invoke();
       }
-
       /// <summary>
       /// Override this to handle the logic upon hovering the <see cref="Button"/>'s <see cref="Sprite.Hitbox"/> with the mouse cursor.
       /// </summary>
@@ -60,6 +65,9 @@ namespace SMPL.UI
       }
       private void Update()
       {
+         if (IsDisabled)
+            return;
+
          var mousePos = Scene.MouseCursorPosition;
          var hovered = Hitbox.ConvexContains(mousePos);
          var leftClicked = Mouse.IsButtonPressed(Mouse.Button.Left);

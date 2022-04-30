@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
+using SMPL.Core;
+using SMPL.Graphics;
+using SMPL.Tools;
+using SMPL.UI;
 
 namespace SMPL.Tools
 {

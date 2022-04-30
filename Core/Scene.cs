@@ -1,6 +1,7 @@
 ﻿using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
+using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;

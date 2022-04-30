@@ -1,5 +1,9 @@
 ﻿using SFML.System;
 using System;
+using SMPL.Core;
+using SMPL.Graphics;
+using SMPL.Tools;
+using SMPL.UI;
 
 namespace SMPL.Tools
 {

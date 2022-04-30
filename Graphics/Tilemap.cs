@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
 using SMPL.Core;
+using SMPL.Graphics;
 using SMPL.Tools;
+using SMPL.UI;
 
 namespace SMPL.Graphics
 {

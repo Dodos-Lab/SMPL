@@ -1,4 +1,7 @@
 ﻿using SMPL.Core;
+using SMPL.Graphics;
+using SMPL.Tools;
+using SMPL.UI;
 using System.Numerics;
 
 namespace SMPL.UI
@@ -54,7 +57,6 @@ namespace SMPL.UI
          }
          base.Draw();
          Scene.DrawText(TextDetails, this, TextOriginUnit);
-
       }
    }
 }

@@ -1,4 +1,9 @@
-﻿namespace SMPL.UI
+﻿using SMPL.Core;
+using SMPL.Graphics;
+using SMPL.Tools;
+using SMPL.UI;
+
+namespace SMPL.UI
 {
    /// <summary>
    /// Inherit chain: <see cref="Tick"/> : <see cref="Button"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>

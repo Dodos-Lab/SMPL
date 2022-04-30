@@ -1,7 +1,9 @@
 ﻿using SFML.Graphics;
 using SFML.System;
 using SMPL.Core;
+using SMPL.Graphics;
 using SMPL.Tools;
+using SMPL.UI;
 using System.Numerics;
 
 namespace SMPL.Graphics

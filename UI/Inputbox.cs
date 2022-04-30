@@ -2,7 +2,9 @@
 using SFML.System;
 using SFML.Window;
 using SMPL.Core;
+using SMPL.Graphics;
 using SMPL.Tools;
+using SMPL.UI;
 
 namespace SMPL.UI
 {
@@ -19,6 +21,9 @@ namespace SMPL.UI
       private bool cursorIsVisible;
       private uint cursorIndex;
 
+      /// <summary>
+      /// The collection of methods called by <see cref="Submitted"/>.
+      /// </summary>
       public delegate void SubmitEventHandler();
       /// <summary>
       /// Triggered whenever the player submits their input with <see cref="Keyboard.Key.Enter"/>.
@@ -26,17 +31,13 @@ namespace SMPL.UI
       public event SubmitEventHandler Submitted;
 
       /// <summary>
-      /// A way for the child classes of <see cref="Inputbox"/> to raise the event and handle the logic around it by overriding this.
-      /// </summary>
-      protected void OnSubmit()
-      {
-         Submitted?.Invoke();
-      }
-
-      /// <summary>
       /// Whether an <see cref="Inputbox"/> is ready to receive input. This is also set automatically upon <see cref="Mouse.Button.Left"/> click on a <see cref="Textbox"/>.
       /// </summary>
       public static bool IsFocused { get; set; }
+      /// <summary>
+      /// Whether this UI element is currently interactive.
+      /// </summary>
+      public bool IsDisabled { get; set; }
 
       /// <summary>
       /// The color of the blinking text cursor.
@@ -66,31 +67,34 @@ namespace SMPL.UI
          SetDefaultHitbox();
          Hitbox.TransformLocalLines(this);
 
-         if (Mouse.IsButtonPressed(Mouse.Button.Left).Once($"press-{GetHashCode()}"))
+         if (IsDisabled == false)
          {
-            IsFocused = Hitbox.ConvexContains(Scene.MouseCursorPosition);
-            ShowCursor();
+            if (Mouse.IsButtonPressed(Mouse.Button.Left).Once($"press-{GetHashCode()}"))
+            {
+               IsFocused = Hitbox.ConvexContains(Scene.MouseCursorPosition);
+               ShowCursor();
 
-            var index = GetCharacterIndex(Scene.MouseCursorPosition);
-            CursorPositionIndex = (uint)(index == -1 ? Text.Length : index);
-         }
-         if (Keyboard.IsKeyPressed(Keyboard.Key.Left).Once($"left-{GetHashCode()}"))
-            SetIndex((int)CursorPositionIndex - 1);
-         if (Keyboard.IsKeyPressed(Keyboard.Key.Right).Once($"right-{GetHashCode()}"))
-            SetIndex((int)CursorPositionIndex + 1);
-         if (Keyboard.IsKeyPressed(Keyboard.Key.Up).Once($"up-{GetHashCode()}"))
-            SetIndex(Text.Length);
-         if (Keyboard.IsKeyPressed(Keyboard.Key.Down).Once($"down-{GetHashCode()}"))
-            SetIndex(0);
-         if (Keyboard.IsKeyPressed(Keyboard.Key.Delete).Once($"delete-{GetHashCode()}") && CursorPositionIndex < Text.Length)
-         {
-            ShowCursor();
-            Text = Text.Remove((int)CursorPositionIndex, 1);
+               var index = GetCharacterIndex(Scene.MouseCursorPosition);
+               CursorPositionIndex = (uint)(index == -1 ? Text.Length : index);
+            }
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Left).Once($"left-{GetHashCode()}"))
+               SetIndex((int)CursorPositionIndex - 1);
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Right).Once($"right-{GetHashCode()}"))
+               SetIndex((int)CursorPositionIndex + 1);
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Up).Once($"up-{GetHashCode()}"))
+               SetIndex(Text.Length);
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Down).Once($"down-{GetHashCode()}"))
+               SetIndex(0);
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Delete).Once($"delete-{GetHashCode()}") && CursorPositionIndex < Text.Length)
+            {
+               ShowCursor();
+               Text = Text.Remove((int)CursorPositionIndex, 1);
+            }
          }
 
          base.Draw();
 
-         if (IsFocused == false)
+         if (IsFocused == false || IsDisabled)
             return;
 
          if (cursorBlinkTimer.ElapsedTime.AsSeconds() >= CursorBlinksPerSecond)
@@ -139,6 +143,14 @@ namespace SMPL.UI
             CursorPositionIndex = (uint)index;
             ShowCursor();
          }
+      }
+
+      /// <summary>
+      /// A way for the child classes of <see cref="Inputbox"/> to raise the event and handle the logic around it by overriding this.
+      /// </summary>
+      protected void OnSubmit()
+      {
+         Submitted?.Invoke();
       }
 
       private void Init()
