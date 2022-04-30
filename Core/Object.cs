@@ -142,9 +142,7 @@ namespace SMPL.Core
 		{
 			var m = Matrix3x2.Identity;
 			m *= Matrix3x2.CreateTranslation(position);
-			m *= Matrix3x2.CreateTranslation(-Position);
-			m *= Matrix3x2.CreateRotation(-Angle.DegreesToRadians());
-			m *= Matrix3x2.CreateScale(Scale);
+			m *= Matrix3x2.CreateTranslation(Position);
 
 			return GetPosition(m);
 		}

@@ -43,7 +43,11 @@ namespace SMPL.Tools
 			Lines.Clear();
 
 			for (int i = 0; i < LocalLines.Count; i++)
-				Lines.Add(new(obj.GetPositionFromSelf(LocalLines[i].A), obj.GetPositionFromSelf(LocalLines[i].B)));
+			{
+				var a = obj.GetPositionFromSelf(LocalLines[i].A);
+				var b = obj.GetPositionFromSelf(LocalLines[i].B);
+				Lines.Add(new(a, b));
+			}
 		}
 		/// <summary>
 		/// Draws all <see cref="Lines"/> onto <paramref name="camera"/> with <paramref name="color"/> and <paramref name="width"/> for each line.

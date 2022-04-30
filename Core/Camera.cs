@@ -80,6 +80,11 @@ namespace SMPL.Core
 		}
 
 		/// <summary>
+		/// The resolution that this <see cref="Camera"/> was created with.
+		/// </summary>
+		public Vector2 Resolution { get; private set; }
+
+		/// <summary>
 		/// Whether the jagged edges are smoothed out. This is good for high resolution non-pixel art games.
 		/// </summary>
 		public bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
@@ -104,50 +109,38 @@ namespace SMPL.Core
 		/// </summary>
 		public Vector2 CornerA
 		{
-			get => renderTexture.MapPixelToCoords(new()).ToSystem();
+			get => GetPositionFromSelf(new(-renderTexture.GetView().Size.X * 0.5f, -renderTexture.GetView().Size.Y * 0.5f));
 		}
 		/// <summary>
 		/// Initially this is the top right corner of the <see cref="Camera"/> in the world.
 		/// </summary>
 		public Vector2 CornerB
 		{
-			get => renderTexture.MapPixelToCoords(new((int)Game.Window.Size.X, 0)).ToSystem();
+			get => GetPositionFromSelf(new(renderTexture.GetView().Size.X * 0.5f, -renderTexture.GetView().Size.Y * 0.5f));
 		}
 		/// <summary>
 		/// Initially this is the bottom right corner of the <see cref="Camera"/> in the world.
 		/// </summary>
 		public Vector2 CornerC
 		{
-			get => renderTexture.MapPixelToCoords(new((int)Game.Window.Size.X, (int)Game.Window.Size.Y)).ToSystem();
+			get => GetPositionFromSelf(new(renderTexture.GetView().Size.X * 0.5f, renderTexture.GetView().Size.Y * 0.5f));
 		}
 		/// <summary>
 		/// Initially this is the bottom left corner of the <see cref="Camera"/> in the world.
 		/// </summary>
 		public Vector2 CornerD
 		{
-			get => renderTexture.MapPixelToCoords(new(0, (int)Game.Window.Size.Y)).ToSystem();
+			get => GetPositionFromSelf(new(-renderTexture.GetView().Size.X * 0.5f, renderTexture.GetView().Size.Y * 0.5f));
 		}
 
 		/// <summary>
 		/// Create the <see cref="Camera"/> with a certain <paramref name="resolution"/>.
 		/// </summary>
-		public Camera(Vector2 resolution)
-		{
-			resolution.X = resolution.X.Limit(0, Texture.MaximumSize);
-			resolution.Y = resolution.Y.Limit(0, Texture.MaximumSize);
-			renderTexture = new((uint)resolution.X, (uint)resolution.Y);
-			Position = new();
-		}
+		public Camera(Vector2 resolution) => Init((uint)resolution.X.Limit(0, Texture.MaximumSize), (uint)resolution.Y.Limit(0, Texture.MaximumSize));
 		/// <summary>
 		/// Create the <see cref="Camera"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
 		/// </summary>
-		public Camera(uint resolutionX, uint resolutionY)
-		{
-			resolutionX = (uint)((int)resolutionX).Limit(0, (int)Texture.MaximumSize);
-			resolutionY = (uint)((int)resolutionY).Limit(0, (int)Texture.MaximumSize);
-			renderTexture = new(resolutionX, resolutionY);
-			Position = new();
-		}
+		public Camera(uint resolutionX, uint resolutionY) => Init(resolutionX, resolutionY);
 
       ~Camera() => renderTexture.Dispose();
 
@@ -185,12 +178,12 @@ namespace SMPL.Core
 		/// <summary>
 		/// Fill the <see cref="Texture"/> with a <paramref name="color"/>.
 		/// </summary>
-		public void Fill(Color color)
+		public void Fill(Color color = default)
       {
 			renderTexture.Clear(color);
       }
 		/// <summary>
-		/// This updates the <see cref="Texture"/> and should be called after all of the drawing is done for this frame.
+		/// This updates the <see cref="Texture"/> and should be called after all of the drawing is done to this <see cref="Camera"/> for this frame.
 		/// </summary>
 		public void Display()
       {
@@ -202,17 +195,25 @@ namespace SMPL.Core
 		/// </summary>
 		public Vector2 PointToCamera(Vector2 worldPoint)
 		{
-			return Game.Window.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
+			return renderTexture.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
 		}
 		/// <summary>
 		/// Receives a <paramref name="cameraPoint"/> and converts it to the corresponding point in the world.
 		/// </summary>
 		public Vector2 PointToWorld(Vector2 cameraPoint)
 		{
-			var p = Game.Window.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
+			var p = renderTexture.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
 			return new(p.X, p.Y);
 		}
 
+		private void Init(uint resolutionX, uint resolutionY)
+		{
+			resolutionX = (uint)((int)resolutionX).Limit(0, (int)Texture.MaximumSize);
+			resolutionY = (uint)((int)resolutionY).Limit(0, (int)Texture.MaximumSize);
+			renderTexture = new(resolutionX, resolutionY);
+			Position = new();
+			Resolution = new((float)resolutionX, (float)resolutionY);
+		}
 		internal static void DrawMainCameraToWindow()
       {
 			Scene.MainCamera.Display();
