@@ -190,17 +190,11 @@ namespace SMPL.Core
 			renderTexture.Display();
       }
 
-		/// <summary>
-		/// Receives a <paramref name="worldPoint"/> and converts it to the corresponding point in this <see cref="Camera"/>'s coordinates.
-		/// </summary>
-		public Vector2 PointToCamera(Vector2 worldPoint)
+		internal Vector2 PointToCamera(Vector2 worldPoint)
 		{
 			return renderTexture.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
 		}
-		/// <summary>
-		/// Receives a <paramref name="cameraPoint"/> and converts it to the corresponding point in the world.
-		/// </summary>
-		public Vector2 PointToWorld(Vector2 cameraPoint)
+		internal Vector2 PointToWorld(Vector2 cameraPoint)
 		{
 			var p = renderTexture.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
 			return new(p.X, p.Y);

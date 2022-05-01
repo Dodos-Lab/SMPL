@@ -178,7 +178,7 @@ namespace SMPL.Core
 			global = LocalToGlobal(LocalScale, LocalAngle, LocalPosition);
 		}
 
-		private Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)
+		internal Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)
 		{
 			var c = Matrix3x2.Identity;
 			c *= Matrix3x2.CreateScale(localScale);
@@ -187,7 +187,7 @@ namespace SMPL.Core
 
 			return c * GetParentMatrix();
 		}
-		private Matrix3x2 GlobalToLocal(float scale, float angle, Vector2 position)
+		internal Matrix3x2 GlobalToLocal(float scale, float angle, Vector2 position)
 		{
 			var c = Matrix3x2.Identity;
 			c *= Matrix3x2.CreateScale(scale);
@@ -196,7 +196,7 @@ namespace SMPL.Core
 
 			return c * GetInverseParentMatrix();
 		}
-		private Matrix3x2 GetParentMatrix()
+		internal Matrix3x2 GetParentMatrix()
 		{
 			var p = Matrix3x2.Identity;
 			if (parent != null)
@@ -207,7 +207,7 @@ namespace SMPL.Core
 			}
 			return p;
 		}
-		private Matrix3x2 GetInverseParentMatrix()
+		internal Matrix3x2 GetInverseParentMatrix()
 		{
 			var inverseParent = Matrix3x2.Identity;
 			if (parent != null)
@@ -224,15 +224,15 @@ namespace SMPL.Core
 			return inverseParent;
 		}
 
-		private static float GetAngle(Matrix3x2 matrix)
+		internal static float GetAngle(Matrix3x2 matrix)
 		{
 			return MathF.Atan2(matrix.M12, matrix.M11).RadiansToDegrees();
 		}
-		private static Vector2 GetPosition(Matrix3x2 matrix)
+		internal static Vector2 GetPosition(Matrix3x2 matrix)
 		{
 			return new(matrix.M31, matrix.M32);
 		}
-		private static float GetScale(Matrix3x2 matrix)
+		internal static float GetScale(Matrix3x2 matrix)
 		{
 			return MathF.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12);
 			//return new(MathF.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12),
