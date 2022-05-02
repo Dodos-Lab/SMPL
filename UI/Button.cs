@@ -77,8 +77,8 @@ namespace SMPL.UI
          {
             if (isClicked)
                OnPress();
-            else
-               OnHover();
+            
+            OnHover();
          }
          if ((hovered == false).Once($"{id}-unhovered"))
             OnUnhover();

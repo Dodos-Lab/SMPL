@@ -300,19 +300,20 @@ namespace SMPL.Tools
 
 		private static string MessageToString(Message message)
 		{
-			return
-				$"{Message.SEP}" +
+			var str = $"{Message.SEP}" +
 				$"{(int)message.type}{Message.COMP_SEP}" +
 				$"{message.SenderUniqueID}{Message.COMP_SEP}" +
 				$"{message.ReceiverUniqueID}{Message.COMP_SEP}" +
 				$"{(int)message.Receivers}{Message.COMP_SEP}" +
 				$"{message.Tag}{Message.COMP_SEP}" +
 				$"{message.Content}";
+
+			return str.Compress();
 		}
 		private static List<Message> StringToMessages(string message)
 		{
 			var result = new List<Message>();
-			var split = message.Split(Message.SEP, StringSplitOptions.RemoveEmptyEntries);
+			var split = message.Decompress().Split(Message.SEP, StringSplitOptions.RemoveEmptyEntries);
 			for (int i = 0; i < split.Length; i++)
 			{
 				if (split[i].Length < 10)

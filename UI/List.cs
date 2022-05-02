@@ -8,11 +8,11 @@ using System.Collections;
 namespace SMPL.UI
 {
 	/// <summary>
-	/// Inherit chain: <see cref="ListButton"/> : <see cref="ScrollBar"/> : <see cref="Slider"/> : <see cref="ProgressBar"/> : <see cref="Sprite"/> :
+	/// Inherit chain: <see cref="List"/> : <see cref="ScrollBar"/> : <see cref="Slider"/> : <see cref="ProgressBar"/> : <see cref="Sprite"/> :
 	/// <see cref="Visual"/> : <see cref="Object"/> <br></br><br></br>
 	/// This class takes control of multiple equally sized <see cref="Button"/>s by adding, removing, positioning and scrolling.
 	/// </summary>
-	public class ListButton : ScrollBar
+	public class List : ScrollBar
 	{
 		private int scrollIndex, visibleBtnCount = 6;
 
@@ -41,15 +41,19 @@ namespace SMPL.UI
 				return hitbox.ConvexContains(Scene.MouseCursorPosition);
 			}
 		}
+		public float ButtonWidth { get; set; } = 400;
+		public int ScrollIndex => scrollIndex;
 
-		public ListButton()
+		public List()
 		{
 			Value = 0;
-			OriginUnit = new(1);
 		}
 
 		public override void Draw()
 		{
+			if (IsHidden)
+				return;
+
 			ScrollValue = 1;
 			RangeA = 0;
 			RangeB = (Buttons.Count - VisibleButtonCount).Limit(0, Buttons.Count - 1);
@@ -65,8 +69,9 @@ namespace SMPL.UI
 				btn.Parent = this;
 				if (i >= scrollIndex && i < scrollIndex + VisibleButtonCount)
 				{
-					btn.Size = new(LengthMax, h);
-					btn.LocalPosition = new(-LengthMax * OriginUnit.X + h * (i - scrollIndex), LengthMax * (OriginUnit.Y + 0.55f) + Size.Y * 0.5f);
+					btn.Size = new(ButtonWidth, h);
+					btn.OriginUnit = new(0.5f);
+					btn.LocalPosition = new(-LengthMax * OriginUnit.X + h * (i - scrollIndex), -Size.Y * OriginUnit.Y + ButtonWidth * 0.5f + Size.Y);
 					btn.SetDefaultHitbox();
 					btn.Hitbox.TransformLocalLines(btn);
 					btn.Draw();

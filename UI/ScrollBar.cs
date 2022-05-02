@@ -52,6 +52,8 @@ namespace SMPL.UI
 
 			ScrollUp.Clicked += OnScrollUp;
 			ScrollDown.Clicked += OnScrollDown;
+
+			Update();
 		}
 
 		private void OnScrollUp()
@@ -90,6 +92,14 @@ namespace SMPL.UI
 
 			base.Draw();
 
+			Update();
+
+			ScrollUp.Draw();
+			ScrollDown.Draw();
+		}
+
+		private void Update()
+		{
 			ScrollUp.Angle = Angle;
 			ScrollDown.Angle = Angle;
 
@@ -110,9 +120,6 @@ namespace SMPL.UI
 
 			ScrollDown.SetDefaultHitbox();
 			ScrollDown.Hitbox.TransformLocalLines(ScrollDown);
-
-			ScrollUp.Draw();
-			ScrollDown.Draw();
 		}
 	}
 }
