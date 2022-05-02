@@ -93,10 +93,10 @@ namespace SMPL.Graphics
 
 			var verts = new Vertex[]
 			{
-				new(CornerA.ToSFML(), Color, new(w0, h0)),
-				new(CornerB.ToSFML(), Color, new(ww, h0)),
-				new(CornerC.ToSFML(), Color, new(ww, hh)),
-				new(CornerD.ToSFML(), Color, new(w0, hh)),
+				new(CornerA.ToSFML(), Tint, new(w0, h0)),
+				new(CornerB.ToSFML(), Tint, new(ww, h0)),
+				new(CornerC.ToSFML(), Tint, new(ww, hh)),
+				new(CornerD.ToSFML(), Tint, new(w0, hh)),
 			};
 
 			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));

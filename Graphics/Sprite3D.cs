@@ -181,10 +181,10 @@ namespace SMPL.Graphics
 				Texture = textures[i];
 				var verts = new Vertex[]
 				{
-					new(CornerA.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, 0)),
-					new(CornerB.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(Texture.Size.X, 0)),
-					new(CornerC.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(Texture.Size.X, Texture.Size.Y)),
-					new(CornerD.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Color, new(0, Texture.Size.Y)),
+					new(CornerA.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
+					new(CornerB.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(Texture.Size.X, 0)),
+					new(CornerC.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(Texture.Size.X, Texture.Size.Y)),
+					new(CornerD.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, Texture.Size.Y)),
 				};
 
 				DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));

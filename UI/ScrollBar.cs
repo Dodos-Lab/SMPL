@@ -1,4 +1,5 @@
-﻿using SMPL.Core;
+﻿using SFML.Graphics;
+using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
@@ -53,12 +54,24 @@ namespace SMPL.UI
 			ScrollDown.Clicked += OnScrollDown;
 		}
 
-		private void OnScrollUp() => Value -= ScrollValue;
-		private void OnScrollDown() => Value += ScrollValue;
+		private void OnScrollUp()
+		{
+			if (IsDisabled)
+				return;
+
+			Value -= ScrollValue;
+		}
+		private void OnScrollDown()
+		{
+			if (IsDisabled)
+				return;
+
+			Value += ScrollValue;
+		}
 
 		private void OnScroll(object sender, SFML.Window.MouseWheelScrollEventArgs e)
 		{
-			if (IsReceivingInput == false)
+			if (IsReceivingInput == false || IsDisabled)
 				return;
 
 			if (e.Delta < 0)
@@ -73,10 +86,15 @@ namespace SMPL.UI
 		/// </summary>
 		public override void Draw()
 		{
+			FillColor = Color.Transparent;
+
 			base.Draw();
 
-			ScrollUp.OriginUnit = new(1);
-			ScrollDown.OriginUnit = new(1, 0);
+			ScrollUp.Angle = Angle;
+			ScrollDown.Angle = Angle;
+
+			ScrollUp.OriginUnit = new(1, 0);
+			ScrollDown.OriginUnit = new(0);
 
 			ScrollUp.Parent = this;
 			ScrollDown.Parent = this;

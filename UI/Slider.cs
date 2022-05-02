@@ -31,9 +31,14 @@ namespace SMPL.UI
 		/// Whether this UI element is currently interactive.
 		/// </summary>
 		public bool IsDisabled { get; set; }
+		/// <summary>
+		/// The color that fills the <see cref="Slider"/> indicating the progress of the <see cref="ProgressBar.Value"/>.
+		/// </summary>
+		public Color FillColor { get; set; }
 
 		public Slider()
 		{
+			FillColor = new(150, 150, 150);
 			LengthUnit = 0.2f;
 			OriginUnit = new(0.5f);
 		}
@@ -76,12 +81,20 @@ namespace SMPL.UI
 
 			var verts = new Vertex[]
 			{
-				new(tl.ToSFML(), Color, new(w0, h0)),
-				new(tr.ToSFML(), Color, new(ww, h0)),
-				new(br.ToSFML(), Color, new(ww, hh)),
-				new(bl.ToSFML(), Color, new(w0, hh)),
+				new(tl.ToSFML(), Tint, new(w0, h0)),
+				new(tr.ToSFML(), Tint, new(ww, h0)),
+				new(br.ToSFML(), Tint, new(ww, hh)),
+				new(bl.ToSFML(), Tint, new(w0, hh)),
+			};
+			var fill = new Vertex[]
+			{
+				new(CornerA.ToSFML(), FillColor),
+				new(tl.ToSFML(), FillColor),
+				new(bl.ToSFML(), FillColor),
+				new(CornerD.ToSFML(), FillColor),
 			};
 
+			DrawTarget.renderTexture.Draw(fill, PrimitiveType.Quads, new(BlendMode, Transform.Identity, null, null));
 			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 

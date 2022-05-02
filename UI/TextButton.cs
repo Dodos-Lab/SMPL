@@ -37,7 +37,6 @@ namespace SMPL.UI
       public TextButton(Scene.TextDetails textDetails)
       {
          TextDetails = textDetails;
-         Color = SFML.Graphics.Color.Transparent;
       }
 
       /// <summary>

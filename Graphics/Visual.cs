@@ -15,7 +15,7 @@ namespace SMPL.Graphics
 		/// <summary>
 		/// The color of this <see cref="Visual"/>.
 		/// </summary>
-		public Color Color { get; set; } = Color.White;
+		public Color Tint { get; set; } = Color.White;
 		/// <summary>
 		/// On which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="Scene.MainCamera"/>
 		/// if it is null upon drawing.

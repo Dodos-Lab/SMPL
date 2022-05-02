@@ -74,7 +74,7 @@ namespace SMPL.Core
 			/// <summary>
 			/// The size of the outline of the <see cref="Text"/>.
 			/// </summary>
-			public float OutlineSize { get; set; }
+			public float OutlineSize { get; set; } = 1;
 			/// <summary>
 			/// The style of the <see cref="Text"/>. May also have multiple as so:
 			/// <code>Style = Styles.Bold | Styles.Underlined;</code>

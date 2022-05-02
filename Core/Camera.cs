@@ -192,11 +192,11 @@ namespace SMPL.Core
 
 		internal Vector2 PointToCamera(Vector2 worldPoint)
 		{
-			return renderTexture.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
+			return Game.Window.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
 		}
 		internal Vector2 PointToWorld(Vector2 cameraPoint)
 		{
-			var p = renderTexture.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
+			var p = Game.Window.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
 			return new(p.X, p.Y);
 		}
 
