@@ -95,11 +95,11 @@ namespace SMPL.Tools
 		/// <summary>
 		/// Switches the values of two variables.
 		/// </summary>
-		public static void Swap<T>(ref T A, ref T B)
+		public static void Swap<T>(ref T a, ref T b)
       {
-			var swap = A;
-			A = B;
-			B = swap;
+			var swap = a;
+			a = b;
+			b = swap;
       }
 
 		/// <summary>
@@ -317,8 +317,10 @@ namespace SMPL.Tools
 		/// <summary>
 		/// Restricts a <paramref name="number"/> in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with a certain type of
 		/// <paramref name="limitation"/> and returns it. Also known as Clamping.<br></br><br></br>
-		/// - Note when using <see cref="Limitation.Overflow"/>: Any <paramref name="number"/> that is overflowing millions
-		/// of times (is way outside of the range) may have inacurate results.
+		/// - Note when using <see cref="Limitation.Overflow"/>: <paramref name="rangeB"/> is not inclusive since <paramref name="rangeA"/> = <paramref name="rangeB"/>.
+		/// <br></br>
+		/// - Example for this: Range [0 - 10], (0 = 10). So <paramref name="number"/> = -1 would result in 9. Putting the range [0 - 11] would give the "real" inclusive
+		/// [0 - 10] range.<br></br> Therefore <paramref name="number"/> = <paramref name="rangeB"/> would result in <paramref name="rangeA"/> but not vice versa.
 		/// </summary>
 		public static float Limit(this float number, float rangeA, float rangeB, Limitation limitation = Limitation.ClosestBound)
 		{
@@ -335,12 +337,8 @@ namespace SMPL.Tools
 			}
 			else if (limitation == Limitation.Overflow)
 			{
-				var input = Map(number, rangeA, rangeB, 0, uint.MaxValue);
-				var n = (uint)input;
-				var output = Map(n, 0, uint.MaxValue, rangeA, rangeB);
-				return ((float)output).Round(2);
-
-				double Map(double number, double a1, double a2, double b1, double b2) => (number - a1) / (a2 - a1) * (b2 - b1) + b1;
+				var d = rangeB - rangeA;
+				return ((number - rangeA) % d + d) % d + rangeA;
 			}
 			return float.NaN;
 		}
@@ -839,8 +837,12 @@ namespace SMPL.Tools
 			return HasChance((float)percent);
 		}
 		/// <summary>
-		/// Restricts a <paramref name="number"/> in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with a
-		/// <paramref name="limitation"/> and returns it. Also known as Clamping.
+		/// Restricts a <paramref name="number"/> in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with a certain type of
+		/// <paramref name="limitation"/> and returns it. Also known as Clamping.<br></br><br></br>
+		/// - Note when using <see cref="Limitation.Overflow"/>: <paramref name="rangeB"/> is not inclusive since <paramref name="rangeA"/> = <paramref name="rangeB"/>.
+		/// <br></br>
+		/// - Example for this: Range [0 - 10], (0 = 10). So <paramref name="number"/> = -1 would result in 9. Putting the range [0 - 11] would give the "real" inclusive
+		/// [0 - 10] range.<br></br> Therefore <paramref name="number"/> = <paramref name="rangeB"/> would result in <paramref name="rangeA"/> but not vice versa.
 		/// </summary>
 		public static int Limit(this int number, int rangeA, int rangeB, Limitation limitation = Limitation.ClosestBound)
 		{
@@ -849,20 +851,21 @@ namespace SMPL.Tools
 		/// <summary>
 		/// Ensures a <paramref name="number"/> is <paramref name="signed"/> and returns the result.
 		/// </summary>
-		public static int Sign(this int number, bool signed) => (int)Sign((float)number, signed);
+		public static int Sign(this int number, bool signed)
+			=> (int)Sign((float)number, signed);
 		/// <summary>
 		/// Returns whether <paramref name="number"/> is in range [<paramref name="rangeA"/> - <paramref name="rangeB"/>].
 		/// The ranges may be <paramref name="inclusiveA"/> or <paramref name="inclusiveB"/>.
 		/// </summary>
-		public static bool IsBetween(this int number, int rangeA, int rangeB, bool inclusiveA = false,
-			bool inclusiveB = false) => IsBetween((float)number, rangeA, rangeB, inclusiveA, inclusiveB);
+		public static bool IsBetween(this int number, int rangeA, int rangeB, bool inclusiveA = false, bool inclusiveB = false)
+			=> IsBetween((float)number, rangeA, rangeB, inclusiveA, inclusiveB);
 		/// <summary>
 		/// Maps a <paramref name="number"/> from [<paramref name="A1"/> - <paramref name="B1"/>] to
 		/// [<paramref name="B1"/> - <paramref name="B2"/>] and returns it. Similar to Lerping (linear interpolation).<br></br>
 		/// - Example: 50 mapped from [0 - 100] and [0 - 1] results to 0.5<br></br>
 		/// - Example: 25 mapped from [30 - 20] and [1 - 5] results to 3
 		/// </summary>
-		public static int Map(this int number, int A1, int A2, int B1, int B2) =>
-			(int)Map((float)number, A1, A2, B1, B2);
+		public static int Map(this int number, int a1, int a2, int b1, int b2) =>
+			(int)Map((float)number, a1, a2, b1, b2);
 	}
 }

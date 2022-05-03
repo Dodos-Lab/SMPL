@@ -53,23 +53,28 @@ namespace SMPL.UI
 			ScrollUp.Clicked += OnScrollUp;
 			ScrollDown.Clicked += OnScrollDown;
 
+			ScrollUp.Held += OnScrollUpHold;
+			ScrollDown.Held += OnScrollDownHold;
+
 			Update();
 		}
 
-		private void OnScrollUp()
+		protected virtual void OnScrollUp()
 		{
 			if (IsDisabled)
 				return;
 
 			Value -= ScrollValue;
 		}
-		private void OnScrollDown()
+		protected virtual void OnScrollDown()
 		{
 			if (IsDisabled)
 				return;
 
 			Value += ScrollValue;
 		}
+		protected virtual void OnScrollUpHold() => OnScrollUp();
+		protected virtual void OnScrollDownHold() => OnScrollDown();
 
 		private void OnScroll(object sender, SFML.Window.MouseWheelScrollEventArgs e)
 		{

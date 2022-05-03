@@ -14,29 +14,40 @@ namespace SMPL.UI
    /// </summary>
    public class Button : Sprite
    {
+      private float holdDelayTimer, holdTriggerTimer;
       private bool isClicked;
 
       /// <summary>
-      /// The collection of methods called by <see cref="Clicked"/>.
+      /// The collection of methods called by this <see cref="Button"/> upon certain events.
       /// </summary>
-      public delegate void ClickedEventHandler();
+      public delegate void ButtonEventHandler();
       /// <summary>
-      /// Raised upon triggering the <see cref="Button"/>.
+      /// Raised upon left clicking the <see cref="Button"/>.
       /// </summary>
-      public event ClickedEventHandler Clicked;
+      public event ButtonEventHandler Clicked;
+      /// <summary>
+      /// Raised upon holiding left mouse button on this <see cref="Button"/>.
+      /// </summary>
+      public event ButtonEventHandler Held;
 
       /// <summary>
       /// Whether this UI element is currently interactive.
       /// </summary>
       public bool IsDisabled { get; set; }
 
+      public float HoldDelay { get; set; } = 0.5f;
+      public float HoldTriggerSpeed { get; set; } = 0.1f;
+
       /// <summary>
-      /// A way for the child classes of <see cref="Button"/> to raise the event and handle the logic around it by overriding this.
+      /// A way for the child classes of <see cref="Button"/> to raise the <see cref="Held"/> event and handle the logic around it by overriding this.
+      /// </summary>
+      protected virtual void OnHold()
+         => Held?.Invoke();
+      /// <summary>
+      /// A way for the child classes of <see cref="Button"/> to raise the <see cref="Clicked"/> event and handle the logic around it by overriding this.
       /// </summary>
       protected virtual void OnClick()
-      {
-         Clicked?.Invoke();
-      }
+         => Clicked?.Invoke();
       /// <summary>
       /// Override this to handle the logic upon hovering the <see cref="Button"/>'s <see cref="Sprite.Hitbox"/> with the mouse cursor.
       /// </summary>
@@ -68,10 +79,16 @@ namespace SMPL.UI
          if (IsDisabled)
             return;
 
+         holdDelayTimer -= Time.Delta;
+         holdTriggerTimer = holdTriggerTimer < 0 ? HoldTriggerSpeed : holdTriggerTimer - Time.Delta;
+
          var mousePos = Scene.MouseCursorPosition;
          var hovered = Hitbox.ConvexContains(mousePos);
          var leftClicked = Mouse.IsButtonPressed(Mouse.Button.Left);
          var id = GetHashCode();
+
+         if (holdTriggerTimer < 0 && holdDelayTimer < 0 && hovered && isClicked)
+            OnHold();
 
          if (hovered.Once($"{id}-hovered"))
          {
@@ -86,13 +103,14 @@ namespace SMPL.UI
          if (leftClicked.Once($"{id}-press") && hovered)
          {
             isClicked = true;
+            holdDelayTimer = HoldDelay;
             OnPress();
          }
          if ((leftClicked == false).Once($"{id}-release"))
          {
             if (hovered)
             {
-               if (isClicked)
+               if (isClicked && holdDelayTimer > 0) // initially clicked & not holding
                   OnClick();
                OnRelease();
             }

@@ -68,11 +68,9 @@ namespace SMPL.UI
 					var last = (ScrollIndex + VisibleButtonCount).Limit(0, Buttons.Count);
 					for (int i = first; i < last; i++)
 						if (Buttons[i].Hitbox.ConvexContains(Scene.MouseCursorPosition))
-						{
 							clicked = Buttons[i];
-						}
 
-					if (clicked == null && ShowList.Hitbox.ConvexContains(Scene.MouseCursorPosition) == false)
+					if (clicked == null && IsHovered == false && ShowList.Hitbox.ConvexContains(Scene.MouseCursorPosition) == false)
 					{
 						selectionIndex = 0;
 						clicked = null;
