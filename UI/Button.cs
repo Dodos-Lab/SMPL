@@ -99,5 +99,7 @@ namespace SMPL.UI
             isClicked = false;
          }
       }
+
+      internal void Unhover() => OnUnhover();
    }
 }

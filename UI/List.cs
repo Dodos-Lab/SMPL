@@ -4,6 +4,7 @@ using SMPL.Graphics;
 using SMPL.UI;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 namespace SMPL.UI
 {
@@ -14,26 +15,25 @@ namespace SMPL.UI
 	/// </summary>
 	public class List : ScrollBar
 	{
-		private int scrollIndex, visibleBtnCount = 6;
+		private int scrollIndex;
 
 		public List<Button> Buttons { get; } = new();
-		public int VisibleButtonCount
-		{
-			get => visibleBtnCount;
-			set => visibleBtnCount = value.Limit(1, Buttons.Count);
-		}
+		public int VisibleButtonCount { get; set; } = 5;
 		public bool IsHovered
 		{
 			get
 			{
+				if (IsHidden || IsDisabled)
+					return false;
+
 				var first = Buttons[scrollIndex.Limit(0, Buttons.Count - 1)];
 				var last = Buttons[(scrollIndex + VisibleButtonCount - 1).Limit(0, Buttons.Count - 1)];
 				var hitbox = new Hitbox(
 					first.CornerA,
+					first.CornerB,
 					ScrollUp.CornerA,
 					ScrollDown.CornerB,
 					ScrollDown.CornerC,
-					first.CornerB,
 					last.CornerC,
 					last.CornerD,
 					first.CornerA);
@@ -42,6 +42,7 @@ namespace SMPL.UI
 			}
 		}
 		public float ButtonWidth { get; set; } = 400;
+		public float ButtonHeight => (LengthMax + ScrollDown.Size.X * 2) / Math.Max(VisibleButtonCount, 1);
 		public int ScrollIndex => scrollIndex;
 
 		public List()
@@ -51,8 +52,12 @@ namespace SMPL.UI
 
 		public override void Draw()
 		{
+			OriginUnit = new(0, 0.5f);
+
 			if (IsHidden)
 				return;
+
+			VisibleButtonCount = Math.Max(VisibleButtonCount, 1);
 
 			ScrollValue = 1;
 			RangeA = 0;
@@ -62,16 +67,18 @@ namespace SMPL.UI
 
 			base.Draw();
 
-			var h = LengthMax / (VisibleButtonCount - 1);
 			for (int i = scrollIndex; i < Buttons.Count; i++)
 			{
 				var btn = Buttons[i];
 				btn.Parent = this;
 				if (i >= scrollIndex && i < scrollIndex + VisibleButtonCount)
 				{
-					btn.Size = new(ButtonWidth, h);
+					var x = ButtonHeight * 0.5f - ScrollUp.Size.X + (ButtonHeight * (i - scrollIndex));
+					var y = -Size.Y * OriginUnit.Y + ButtonWidth * 0.5f + Size.Y;
+
+					btn.Size = new(ButtonWidth, ButtonHeight);
 					btn.OriginUnit = new(0.5f);
-					btn.LocalPosition = new(-LengthMax * OriginUnit.X + h * (i - scrollIndex), -Size.Y * OriginUnit.Y + ButtonWidth * 0.5f + Size.Y);
+					btn.LocalPosition = new(x, y);
 					btn.SetDefaultHitbox();
 					btn.Hitbox.TransformLocalLines(btn);
 					btn.Draw();
