@@ -4,13 +4,12 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using SFML.Graphics;
 using SFML.Window;
-using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
 using Console = SMPL.Tools.Console;
 
-namespace SMPL.Core
+namespace SMPL
 {
 	/// <summary>
 	/// All the core systems are handled here (the <see cref="Game"/> states, the <see cref="Window"/>, the game loop etc).

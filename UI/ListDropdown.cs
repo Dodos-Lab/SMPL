@@ -1,5 +1,4 @@
 ﻿using SFML.Window;
-using SMPL.Core;
 using SMPL.Tools;
 
 namespace SMPL.UI

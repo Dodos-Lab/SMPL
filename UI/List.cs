@@ -1,5 +1,4 @@
-﻿using SMPL.Core;
-using SMPL.Tools;
+﻿using SMPL.Tools;
 using SMPL.Graphics;
 using SMPL.UI;
 using System.Collections.Generic;

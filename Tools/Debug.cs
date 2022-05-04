@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;

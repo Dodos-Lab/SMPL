@@ -3,13 +3,12 @@ using System.Numerics;
 using System;
 using SFML.System;
 using SFML.Window;
-using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
 using Console = SMPL.Tools.Console;
 
-namespace SMPL.Core
+namespace SMPL.Graphics
 {
 	/// <summary>
 	/// Inherit chain: <see cref="Camera"/> : <see cref="Object"/><br></br><br></br>

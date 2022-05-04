@@ -1,7 +1,6 @@
 ﻿using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
-using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
@@ -9,7 +8,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
 
-namespace SMPL.Core
+namespace SMPL
 {
 	/// <summary>
 	/// Used to handle multiple stages of the game (like menus, levels, loading screens etc). This class needs to be

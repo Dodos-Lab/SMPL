@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using TcpClient = NetCoreServer.TcpClient;
-using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;

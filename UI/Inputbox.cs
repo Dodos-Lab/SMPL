@@ -1,7 +1,6 @@
 ﻿using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
-using SMPL.Core;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
