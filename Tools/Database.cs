@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using Console = SMPL.Tools.Console;
 
 namespace Test
@@ -12,10 +13,9 @@ namespace Test
 	[JsonObject(MemberSerialization.Fields)]
 	public class Database
 	{
-		public class Sheet { }
-
+		private class Sheet { }
 		[JsonObject(MemberSerialization.Fields)]
-		internal class Sheet<T> : Sheet
+		private class Sheet<T> : Sheet
 		{
 #pragma warning disable CS0649
 			internal string name;
@@ -25,16 +25,22 @@ namespace Test
 			internal dynamic props;
 
 			[JsonIgnore]
-			internal List<T> linesList;
+			internal List<T> linesList = new();
 #pragma warning disable CS0649
 		}
+		private class Column
+		{
+			public string typeStr;
+			public string name;
+		}
+
 #pragma warning disable CS0649
 		internal dynamic[] sheets;
 		internal dynamic[] customTypes;
 		internal bool compress;
 #pragma warning disable CS0649
 		[JsonIgnore]
-		private Dictionary<string, Sheet> cacheSheets;
+		private Dictionary<string, Sheet> cacheSheets = new();
 		[JsonIgnore]
 		private string path;
 
@@ -49,9 +55,11 @@ namespace Test
 			catch { Console.LogError(1, $"Could not load {nameof(Database)} file with path '{cdbFilePath}'."); }
 			return db;
 		}
+		public Database(string path) => this.path = path;
 
 		public List<T> GetSheet<T>(string sheetName)
 		{
+			var msg = "";
 			try
 			{
 				if (cacheSheets == null)
@@ -71,8 +79,8 @@ namespace Test
 						return linesList;
 					}
 			}
-			catch (System.Exception) { }
-			Console.LogError(1, $"Could not load {nameof(Sheet<T>)}<{typeof(T)}> with {nameof(sheetName)} '{sheetName}' in this {nameof(Database)}.");
+			catch (Exception ex) { msg = ex.Message; }
+			Console.LogError(1, $"Could not load {nameof(Sheet<T>)}<{typeof(T)}> with {nameof(sheetName)} '{sheetName}' in this {nameof(Database)}. Info:\n{msg}");
 			return default;
 		}
 		public void AddSheet<T>(string sheetName) => cacheSheets[sheetName] = new Sheet<T>();
@@ -86,25 +94,73 @@ namespace Test
 				return;
 			}
 
-			var isNew = true;
-			for (int i = 0; i < sheets.Length; i++)
-				if (sheets[i].name == sheetName)
-				{
-					sheets[i] = cacheSheets[sheetName];
-					isNew = false;
-					break;
-				}
+			var isNew = sheets == null;
+			if (isNew == false)
+				for (int i = 0; i < sheets.Length; i++)
+					if (sheets[i].name == sheetName)
+					{
+						sheets[i] = cacheSheets[sheetName];
+						break;
+					}
 
 			if (isNew)
 			{
-				var list = sheets.ToList();
-				list.Add(cacheSheets[sheetName]);
+				var list = new List<dynamic> { cacheSheets[sheetName] };
 				sheets = list.ToArray();
 			}
+
 			var sheet = ((Sheet<T>)cacheSheets[sheetName]);
+			sheet.name = sheetName;
 			sheet.lines = sheet.linesList.ToArray();
+			sheet.columns = GetColumns();
 			var json = JsonConvert.SerializeObject(this, Formatting.Indented);
+			if (isNew)
+			{
+				json = json.Replace("\"separators\": null,", "\"separators\": [],");
+				json = json.Replace("\"props\": null", "\"props\": {}");
+				json = json.Replace("\"customTypes\": null,", "\"customTypes\": [],");
+			}
+
 			File.WriteAllText(path, json);
+
+			dynamic[] GetColumns()
+			{
+				var fields = typeof(T).GetFields();
+				var props = typeof(T).GetProperties();
+				var result = new List<Column>();
+				for (int i = 0; i < fields.Length; i++)
+					ProcessType(fields[i].FieldType, fields[i].Name);
+				for (int i = 0; i < props.Length; i++)
+					ProcessType(props[i].PropertyType, props[i].Name);
+
+				return result.ToArray();
+
+				void ProcessType(Type type, string name)
+				{
+					if (type == typeof(string)) SetColumn("1");
+					else if (type == typeof(bool)) SetColumn("2");
+					else if (type == typeof(int)) SetColumn("3");
+					else if (type == typeof(float)) SetColumn("4");
+					else if (type.IsEnum) SetColumn(type.IsDefined(typeof(FlagsAttribute), false) ? "10" : "5");
+					else SetColumn("16");
+
+					void SetColumn(string typeStr)
+					{
+						var enumNames = "";
+						if (typeStr == "5" || typeStr == "10")
+						{
+							var e = Enum.GetNames(type);
+							typeStr = $"{typeStr}:";
+							for (int j = 0; j < e.Length; j++)
+							{
+								var comma = j == 0 ? "" : ",";
+								enumNames = $"{enumNames}{comma}{e[j]}";
+							}
+						}
+						result.Add(new() { typeStr = $"{typeStr}{enumNames}", name = name });
+					}
+				}
+			}
 		}
 	}
 }
