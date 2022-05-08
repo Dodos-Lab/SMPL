@@ -1,4 +1,5 @@
-﻿using SFML.Audio;
+﻿using Newtonsoft.Json;
+using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
 using SMPL.Graphics;
@@ -37,11 +38,13 @@ namespace SMPL
 		/// </summary>
 		public class TextDetails
       {
+			[JsonIgnore]
 			/// <summary>
 			/// On which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="MainCamera"/>
 			/// if it is <see langword="null"/> upon drawing.
 			/// </summary>
 			public Camera DrawTarget { get; set; } = MainCamera;
+			[JsonIgnore]
 			/// <summary>
 			/// The font used to draw the text.
 			/// </summary>
@@ -219,23 +222,23 @@ namespace SMPL
 		/// <summary>
 		/// The loaded textures whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
 		/// </summary>
-		protected Dictionary<string, Texture> Textures { get; } = new();
+		public Dictionary<string, Texture> Textures { get; } = new();
 		/// <summary>
 		/// The loaded music whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
 		/// </summary>
-		protected Dictionary<string, Music> Music { get; } = new();
+		public Dictionary<string, Music> Music { get; } = new();
 		/// <summary>
 		/// The loaded sounds whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
 		/// </summary>
-		protected Dictionary<string, Sound> Sounds { get; } = new();
+		public Dictionary<string, Sound> Sounds { get; } = new();
 		/// <summary>
 		/// The loaded fonts whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
 		/// </summary>
-		protected Dictionary<string, Font> Fonts { get; } = new();
+		public Dictionary<string, Font> Fonts { get; } = new();
 		/// <summary>
 		/// The loaded 3D sprites whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
 		/// </summary>
-		protected Dictionary<string, Sprite3D> Sprites3D { get; } = new();
+		public Dictionary<string, Sprite3D> Sprites3D { get; } = new();
 
 		/// <summary>
 		/// Returns the required asset paths and details whenever this scene becomes the <see cref="CurrentScene"/>.

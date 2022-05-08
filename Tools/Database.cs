@@ -8,7 +8,7 @@ using System.Numerics;
 using System.Reflection;
 using Console = SMPL.Tools.Console;
 
-namespace Test
+namespace SMPL.Tools
 {
 	[JsonObject(MemberSerialization.Fields)]
 	public class Database
@@ -55,7 +55,7 @@ namespace Test
 			catch { Console.LogError(1, $"Could not load {nameof(Database)} file with path '{cdbFilePath}'."); }
 			return db;
 		}
-		public Database(string path) => this.path = path;
+		public Database(string filePath) => this.path = filePath;
 
 		public List<T> GetSheet<T>(string sheetName)
 		{
@@ -83,7 +83,11 @@ namespace Test
 			Console.LogError(1, $"Could not load {nameof(Sheet<T>)}<{typeof(T)}> with {nameof(sheetName)} '{sheetName}' in this {nameof(Database)}. Info:\n{msg}");
 			return default;
 		}
-		public void AddSheet<T>(string sheetName) => cacheSheets[sheetName] = new Sheet<T>();
+		public List<T> AddSheet<T>(string sheetName)
+		{
+			cacheSheets[sheetName] = new Sheet<T>();
+			return GetSheet<T>(sheetName);
+		}
 		public void SaveSheet<T>(string sheetName)
 		{
 			if (cacheSheets.ContainsKey(sheetName) == false)
@@ -142,6 +146,7 @@ namespace Test
 					else if (type == typeof(int)) SetColumn("3");
 					else if (type == typeof(float)) SetColumn("4");
 					else if (type.IsEnum) SetColumn(type.IsDefined(typeof(FlagsAttribute), false) ? "10" : "5");
+					else if (type.IsClass && type.GetInterface("IEnumerable") == null) return;
 					else SetColumn("16");
 
 					void SetColumn(string typeStr)

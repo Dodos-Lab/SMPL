@@ -4,6 +4,7 @@ using SMPL.UI;
 using System.Collections.Generic;
 using System.Collections;
 using System;
+using Newtonsoft.Json;
 
 namespace SMPL.UI
 {
@@ -16,6 +17,7 @@ namespace SMPL.UI
 	{
 		private int scrollIndex;
 
+		[JsonIgnore]
 		public List<Button> Buttons { get; } = new();
 		public int VisibleButtonCount { get; set; } = 5;
 		public bool IsHovered

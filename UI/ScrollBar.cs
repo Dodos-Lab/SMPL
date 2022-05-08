@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Newtonsoft.Json;
+using SFML.Graphics;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
@@ -31,10 +32,12 @@ namespace SMPL.UI
 			set => ScrollValue = value.Map(0, 1, RangeA, RangeB);
 		}
 
+		[JsonIgnore]
 		/// <summary>
 		/// A button used to bring the scroll up.
 		/// </summary>
 		public Button ScrollUp { get; }
+		[JsonIgnore]
 		/// <summary>
 		/// A button used to bring the scroll down.
 		/// </summary>

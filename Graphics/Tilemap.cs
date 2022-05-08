@@ -5,6 +5,7 @@ using System.Linq;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
+using Newtonsoft.Json;
 
 namespace SMPL.Graphics
 {
@@ -62,6 +63,7 @@ namespace SMPL.Graphics
    /// </summary>
    public class Tilemap : Visual
    {
+      [JsonProperty]
       private readonly Dictionary<Vector2, SortedDictionary<float, Tile>> map = new();
 
       /// <summary>

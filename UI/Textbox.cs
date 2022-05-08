@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Newtonsoft.Json;
+using SFML.Graphics;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
@@ -39,6 +40,7 @@ namespace SMPL.UI
       private string left, center, right;
       private Font font;
 
+      [JsonIgnore]
       /// <summary>
       /// The font used to draw the text.
       /// </summary>
@@ -341,7 +343,9 @@ namespace SMPL.UI
       private void Init(uint resolutionX, uint resolutionY, Font font)
       {
          camera = new(resolutionX, resolutionY);
-         Texture = camera.Texture;
+         var id = $"textbox-texture-{GetHashCode()}";
+         Scene.CurrentScene.Textures[id] = camera.Texture;
+         TexturePath = id;
          LineWidth = resolutionX;
          Alignment = Alignments.Center;
          left = "Hello, World!";

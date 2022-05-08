@@ -1,4 +1,5 @@
-﻿using SFML.Window;
+﻿using Newtonsoft.Json;
+using SFML.Window;
 using SMPL.Tools;
 
 namespace SMPL.UI
@@ -12,8 +13,10 @@ namespace SMPL.UI
 		public delegate void SelectedEventHandler(Button button);
 		public event SelectedEventHandler Selected;
 
+		[JsonIgnore]
 		public Tick ShowList { get; }
-		public Button Selection { get => Buttons.Count == 0 ? null : Buttons[selectionIndex]; }
+		[JsonIgnore]
+		public Button Selection => Buttons.Count == 0 ? null : Buttons[selectionIndex];
 
 		public ListDropdown(Tick showList = default)
 		{

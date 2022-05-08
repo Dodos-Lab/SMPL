@@ -1,4 +1,5 @@
-﻿using SMPL.Graphics;
+﻿using Newtonsoft.Json;
+using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
 using System;
@@ -87,6 +88,7 @@ namespace SMPL
 			set => LocalAngle = GetAngle(GlobalToLocal(Scale, value, Position));
 		}
 
+		[JsonIgnore]
 		/// <summary>
 		/// Having an <see cref="Parent"/> will make this <see cref="Object"/> move, rotate and scale as if they are one <see cref="Object"/>.
 		/// Keep in mind that it would not be possible to remove the parent and child <see cref="Object"/>s from a <see cref="Scene"/>
@@ -114,6 +116,7 @@ namespace SMPL
 				Scale = prevSc;
 			}
 		}
+		[JsonIgnore]
 		/// <summary>
 		/// See <see cref="Parent"/> for info.
 		/// </summary>

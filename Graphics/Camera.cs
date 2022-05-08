@@ -7,6 +7,7 @@ using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
 using Console = SMPL.Tools.Console;
+using Newtonsoft.Json;
 
 namespace SMPL.Graphics
 {
@@ -88,6 +89,7 @@ namespace SMPL.Graphics
 		/// </summary>
 		public bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
 
+		[JsonIgnore]
 		/// <summary>
 		/// The <see cref="SFML.Graphics.Texture"/> for drawing <see cref="Visual"/>s, may be used by <see cref="Visual"/>s and may be drawn onto
 		/// another <see cref="Texture"/>.

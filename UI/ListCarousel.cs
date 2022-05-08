@@ -1,11 +1,14 @@
-﻿using SFML.Window;
+﻿using Newtonsoft.Json;
+using SFML.Window;
 using SMPL.Tools;
 
 namespace SMPL.UI
 {
 	public class ListCarousel : List
 	{
+		[JsonIgnore]
 		public Button Previous { get; }
+		[JsonIgnore]
 		public Button Next { get; }
 
 		public new bool IsHovered
@@ -31,6 +34,7 @@ namespace SMPL.UI
 			get => (int)Value;
 			set => Value = value.Limit(0, Buttons.Count, SelectionIsRepeating ? Extensions.Limitation.Overflow : Extensions.Limitation.ClosestBound);
 		}
+		[JsonIgnore]
 		public Button Selection => Buttons.Count == 0 ? null : Buttons[SelectionIndex];
 
 		public ListCarousel(Button previous = null, Button next = null)
