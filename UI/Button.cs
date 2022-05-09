@@ -73,6 +73,11 @@ namespace SMPL.UI
          Update();
          base.Draw();
       }
+
+      /// <summary>
+      /// A way to "click" the <see cref="Button"/> through code.
+      /// </summary>
+      public void Trigger() => OnClick();
       private void Update()
       {
          if (IsDisabled)
@@ -116,7 +121,6 @@ namespace SMPL.UI
             isClicked = false;
          }
       }
-
       internal void Unhover() => OnUnhover();
    }
 }

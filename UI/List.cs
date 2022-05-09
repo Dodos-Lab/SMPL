@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System;
 using Newtonsoft.Json;
+using SFML.Window;
 
 namespace SMPL.UI
 {
@@ -16,6 +17,8 @@ namespace SMPL.UI
 	public class List : ScrollBar
 	{
 		private int scrollIndex;
+		private readonly Hitbox hitbox = new();
+		private Button clicked;
 
 		[JsonIgnore]
 		public List<Button> Buttons { get; } = new();
@@ -29,15 +32,12 @@ namespace SMPL.UI
 
 				var first = Buttons[scrollIndex.Limit(0, Buttons.Count - 1)];
 				var last = Buttons[(scrollIndex + VisibleButtonCount - 1).Limit(0, Buttons.Count - 1)];
-				var hitbox = new Hitbox(
-					first.CornerA,
-					first.CornerB,
-					ScrollUp.CornerA,
-					ScrollDown.CornerB,
-					ScrollDown.CornerC,
-					last.CornerC,
-					last.CornerD,
-					first.CornerA);
+
+				hitbox.Lines.Clear();
+				hitbox.Lines.Add(new(first.CornerA, ScrollUp.CornerA));
+				hitbox.Lines.Add(new(ScrollUp.CornerA, ScrollDown.CornerB));
+				hitbox.Lines.Add(new(ScrollDown.CornerB, last.CornerD));
+				hitbox.Lines.Add(new(last.CornerD, first.CornerA));
 
 				return hitbox.ConvexContains(Scene.MouseCursorPosition);
 			}
@@ -51,6 +51,8 @@ namespace SMPL.UI
 			Value = 0;
 		}
 
+		protected virtual void OnUnfocus() { }
+		protected virtual void OnButtonClick(Button button) { }
 		public override void Draw()
 		{
 			OriginUnit = new(0, 0.5f);
@@ -92,6 +94,32 @@ namespace SMPL.UI
 				}
 				else
 					btn.Hitbox.Lines.Clear();
+			}
+			IsReceivingInput = IsHovered;
+
+			Update();
+		}
+
+		internal void Update()
+		{
+			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
+
+			if (left.Once($"click-list-{GetHashCode()}"))
+			{
+				clicked = null;
+				var first = ScrollIndex.Limit(0, Buttons.Count);
+				var last = (ScrollIndex + VisibleButtonCount).Limit(0, Buttons.Count);
+				for (int i = first; i < last; i++)
+					if (Buttons[i].Hitbox.ConvexContains(Scene.MouseCursorPosition))
+						clicked = Buttons[i];
+
+				if (IsHovered == false)
+					OnUnfocus();
+			}
+			if ((left == false).Once($"release-list-{GetHashCode()}") && clicked != null && clicked.Hitbox.ConvexContains(Scene.MouseCursorPosition))
+			{
+				clicked.Unhover();
+				OnButtonClick(clicked);
 			}
 		}
 	}

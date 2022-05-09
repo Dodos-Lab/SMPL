@@ -57,7 +57,7 @@ namespace SMPL.UI
       /// used to draw the <see cref="Text"/>.
       /// </summary>
       [JsonIgnore]
-      public Font Font => FontPath != null && Scene.CurrentScene.Textures.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
+      public Font Font => FontPath != null && Scene.CurrentScene.Fonts.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
       /// <summary>
       /// The <see cref="string"/> text itself used upon drawing the <see cref="Textbox"/>.
       /// </summary>

@@ -8,7 +8,6 @@ namespace SMPL.UI
 	{
 		private bool isOpen;
 		private int selectionIndex;
-		private Button clicked;
 
 		public delegate void SelectedEventHandler(Button button);
 		public event SelectedEventHandler Selected;
@@ -60,44 +59,23 @@ namespace SMPL.UI
 
 			base.Draw();
 
-			if (ShowList.IsDisabled == false)
-			{
-				var left = Mouse.IsButtonPressed(Mouse.Button.Left);
-
-				if (left.Once($"click-dropdown-{GetHashCode()}") && isOpen)
-				{
-					var first = ScrollIndex.Limit(0, Buttons.Count);
-					var last = (ScrollIndex + VisibleButtonCount).Limit(0, Buttons.Count);
-					for (int i = first; i < last; i++)
-						if (Buttons[i].Hitbox.ConvexContains(Scene.MouseCursorPosition))
-							clicked = Buttons[i];
-
-					if (clicked == null && IsHovered == false && ShowList.Hitbox.ConvexContains(Scene.MouseCursorPosition) == false)
-					{
-						selectionIndex = 0;
-						clicked = null;
-						isOpen = false;
-					}
-				}
-				if ((left == false).Once($"release-dropdown-{GetHashCode()}") && clicked != null)
-				{
-					if (clicked.Hitbox.ConvexContains(Scene.MouseCursorPosition))
-					{
-						selectionIndex = Buttons.IndexOf(clicked);
-						isOpen = false;
-						clicked.Unhover();
-						OnSelect(clicked);
-					}
-					else
-						clicked = null;
-				}
-			}
-
 			IsHidden = isOpen == false;
 			IsDisabled = isOpen == false;
 		}
 
 		protected virtual void OnSelect(Button button) => Selected?.Invoke(button);
+		protected override void OnUnfocus()
+		{
+			if (ShowList.Hitbox.ConvexContains(Scene.MouseCursorPosition))
+				return;
+			isOpen = false;
+		}
+		protected override void OnButtonClick(Button button)
+		{
+			selectionIndex = Buttons.IndexOf(button);
+			isOpen = false;
+			OnSelect(button);
+		}
 
 		private void OnShow()
 		{

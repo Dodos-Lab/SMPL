@@ -1,63 +1,48 @@
 ﻿using SFML.Window;
 using SMPL.Tools;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace SMPL.UI
 {
 	public class ListMultiselect : List
 	{
-		private List<Button> selected = new();
-		private Button clicked;
-
-		public delegate void MultiselectEventHandler(Button button);
-		public event MultiselectEventHandler Selected;
-		public event MultiselectEventHandler Unselected;
-
-		public ListMultiselect()
-		{
-
-		}
+		public List<Tick> Ticks { get; } = new();
+		public List<int> SelectionIndexes { get; } = new();
 
 		public override void Draw()
 		{
-			OriginUnit = new(0, 0.5f);
-
 			base.Draw();
-
-			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
-
-			if (left.Once($"click-dropdown-{GetHashCode()}"))
+			for (int i = ScrollIndex; i < ScrollIndex + VisibleButtonCount; i++)
 			{
-				var first = ScrollIndex.Limit(0, Buttons.Count);
-				var last = (ScrollIndex + VisibleButtonCount).Limit(0, Buttons.Count);
-				for (int i = first; i < last; i++)
-					if (Buttons[i].Hitbox.ConvexContains(Scene.MouseCursorPosition))
-						clicked = Buttons[i];
+				if (Ticks.Count <= i)
+					continue;
 
-				if (clicked == null && IsHovered == false)
-					clicked = null;
+				var tick = Ticks[i];
+
+				var btn = Buttons[i];
+				tick.OriginUnit = new(1, 0);
+				tick.Parent = this;
+				tick.Position = btn.CornerA;
+				tick.Size = new(ButtonHeight);
+				tick.SetDefaultHitbox();
+				tick.Hitbox.TransformLocalLines(tick);
+				tick.Draw();
 			}
-			if ((left == false).Once($"release-dropdown-{GetHashCode()}") && clicked != null)
-			{
-				if (clicked.Hitbox.ConvexContains(Scene.MouseCursorPosition))
-				{
-					if (selected.Contains(clicked))
-					{
-						selected.Remove(clicked);
-						OnUnselect(clicked);
-					}
-					else
-					{
-						selected.Add(clicked);
-						OnSelect(clicked);
-					}
-				}
-				else
-					clicked = null;
-			}
+
+			SelectionIndexes.Clear();
+			for (int i = 0; i < Ticks.Count; i++)
+				if (Ticks[i] != null && Ticks[i].IsActive)
+					SelectionIndexes.Add(i);
 		}
 
-		protected virtual void OnSelect(Button button) => Selected?.Invoke(button);
-		protected virtual void OnUnselect(Button button) => Unselected?.Invoke(button);
+		protected override void OnButtonClick(Button button)
+		{
+			var index = Buttons.IndexOf(button);
+			if (Ticks.Count <= index)
+				return;
+
+			Ticks[index].Trigger();
+		}
 	}
 }

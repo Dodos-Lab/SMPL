@@ -88,7 +88,7 @@ namespace SMPL
 			/// used to draw the <see cref="Text"/>.
 			/// </summary>
 			[JsonIgnore]
-			public Font Font => FontPath != null && Scene.CurrentScene.Textures.ContainsKey(FontPath) ? CurrentScene.Fonts[FontPath] : null;
+			public Font Font => FontPath != null && CurrentScene.Fonts.ContainsKey(FontPath) ? CurrentScene.Fonts[FontPath] : null;
 
 			public TextDetails(string fontPath) => FontPath = fontPath;
 
