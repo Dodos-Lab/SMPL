@@ -52,9 +52,10 @@ namespace SMPL.UI
       public uint CursorPositionIndex { get => cursorIndex; set => cursorIndex = (uint)((int)value).Limit(0, Text.Length); }
 
       /// <summary>
-      /// Create the <see cref="Inputbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
+      /// Create the <see cref="Inputbox"/> with a <paramref name="fontPath"/> and a certain resolution size of
+      /// [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>].
       /// </summary>
-      public Inputbox(Font font, uint resolutionX = 300, uint resolutionY = 40) : base(font, resolutionX, resolutionY) => Init();
+      public Inputbox(string fontPath, uint resolutionX = 300, uint resolutionY = 40) : base(fontPath, resolutionX, resolutionY) => Init();
       /// <summary>
 		/// Draws the <see cref="Inputbox"/> on the <see cref="Visual.DrawTarget"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/>, <see cref="Textbox"/> and <see cref="Inputbox"/> parameters.

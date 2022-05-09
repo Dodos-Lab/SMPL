@@ -37,14 +37,13 @@ namespace SMPL.UI
       internal static readonly Text text = new();
       private readonly List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
       protected Camera camera;
-      private string left, center, right;
-      private Font font;
+      private string left, center, right, font;
 
-      [JsonIgnore]
       /// <summary>
-      /// The font used to draw the text.
+      /// See <see cref="Font"/> for info.
       /// </summary>
-      public Font Font
+      [JsonIgnore]
+      public string FontPath
       {
          get => font;
          set
@@ -53,6 +52,12 @@ namespace SMPL.UI
             Text = left; // recalculate alignments
          }
       }
+      /// <summary>
+      /// The <see cref="SFML.Graphics.Font"/> is retrieved by the <see cref="FontPath"/> from the <see cref="Scene.CurrentScene"/>'s loaded fonts and is
+      /// used to draw the <see cref="Text"/>.
+      /// </summary>
+      [JsonIgnore]
+      public Font Font => FontPath != null && Scene.CurrentScene.Textures.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
       /// <summary>
       /// The <see cref="string"/> text itself used upon drawing the <see cref="Textbox"/>.
       /// </summary>
@@ -162,9 +167,9 @@ namespace SMPL.UI
 
       /// <summary>
 		/// Create the <see cref="Textbox"/> with a certain resolution size of [<paramref name="resolutionX"/>, <paramref name="resolutionY"/>]
-      /// and a <paramref name="font"/>.
+      /// and a <paramref name="fontPath"/>.
 		/// </summary>
-      public Textbox(Font font, uint resolutionX = 200, uint resolutionY = 200) => Init(resolutionX, resolutionY, font);
+      public Textbox(string fontPath, uint resolutionX = 200, uint resolutionY = 200) => Init(resolutionX, resolutionY, fontPath);
       ~Textbox() => text.Dispose();
 
       /// <summary>
@@ -340,7 +345,7 @@ namespace SMPL.UI
          return null;
       }
 
-      private void Init(uint resolutionX, uint resolutionY, Font font)
+      private void Init(uint resolutionX, uint resolutionY, string fontPath)
       {
          camera = new(resolutionX, resolutionY);
          var id = $"textbox-texture-{GetHashCode()}";
@@ -349,7 +354,7 @@ namespace SMPL.UI
          LineWidth = resolutionX;
          Alignment = Alignments.Center;
          left = "Hello, World!";
-         Font = font;
+         FontPath = fontPath;
       }
       private void Update()
       {

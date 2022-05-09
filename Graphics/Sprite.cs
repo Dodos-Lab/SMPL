@@ -66,12 +66,12 @@ namespace SMPL.Graphics
 		/// </summary>
 		public Vector2 CornerD => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin);
 
-		[JsonIgnore]
 		/// <summary>
 		/// Useful for collision detection, checking whether this <see cref="Sprite"/> is hovered by the mouse cursor etc.
 		/// <see cref="Hitbox.TransformLocalLines"/> should be called by passing this <see cref="Sprite"/> in order for the <see cref="Object"/>
 		/// transformations to affect this <see cref="Hitbox"/>.
 		/// </summary>
+		[JsonIgnore]
 		public Hitbox Hitbox { get; } = new();
 
 		/// <summary>
@@ -85,7 +85,6 @@ namespace SMPL.Graphics
 
 			DrawTarget ??= Scene.MainCamera;
 
-			var Texture = TexturePath != null && Scene.CurrentScene.Textures.ContainsKey(TexturePath) ? Scene.CurrentScene.Textures[TexturePath] : null;
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
 			var w0 = w * TexCoordsUnitA.X;

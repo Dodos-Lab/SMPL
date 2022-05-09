@@ -16,11 +16,11 @@ namespace SMPL.Graphics
 		/// The color of this <see cref="Visual"/>.
 		/// </summary>
 		public Color Tint { get; set; } = Color.White;
-		[JsonIgnore]
 		/// <summary>
 		/// On which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="Scene.MainCamera"/>
 		/// if it is null upon drawing.
 		/// </summary>
+		[JsonIgnore]
 		public Camera DrawTarget { get; set; } = Scene.MainCamera;
 		/// <summary>
 		/// The type of drawing as to whether it should include the <see cref="BlendMode.Alpha"/> channel, whether it should
@@ -38,18 +38,18 @@ namespace SMPL.Graphics
 		/// See <see cref="Texture"/> for info.
 		/// </summary>
 		public string TexturePath { get; set; }
-		[JsonIgnore]
 		/// <summary>
 		/// The shader applied to this <see cref="Visual"/> upon drawing. This is used for per pixel/per corner effects that run on the GPU
 		/// (and are extremely fast because of that). Shaders are written in the GLSL language as <see cref="string"/> and are given to the
 		/// <see cref="SFML.Graphics.Shader"/> class to be compiled and used. Check <see cref="Effect"/> for premade ones.
 		/// </summary>
-		public Shader Shader { get; set; }
 		[JsonIgnore]
+		public Shader Shader { get; set; }
 		/// <summary>
 		/// The <see cref="SFML.Graphics.Texture"/> is retrieved by the <see cref="TexturePath"/> from the <see cref="Scene.CurrentScene"/>'s loaded textures and is
 		/// used in many ways by each <see cref="Visual"/> (if at all).
 		/// </summary>
+		[JsonIgnore]
 		public Texture Texture => TexturePath != null && Scene.CurrentScene.Textures.ContainsKey(TexturePath)? Scene.CurrentScene.Textures[TexturePath] : null;
 
 		// no summary since it's covered by the classes that inherit this class & it is not visible to the user

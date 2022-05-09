@@ -32,31 +32,35 @@ namespace SMPL.UI
 			set => ScrollValue = value.Map(0, 1, RangeA, RangeB);
 		}
 
-		[JsonIgnore]
 		/// <summary>
 		/// A button used to bring the scroll up.
 		/// </summary>
-		public Button ScrollUp { get; }
 		[JsonIgnore]
+		public Button ScrollUp { get; }
 		/// <summary>
 		/// A button used to bring the scroll down.
 		/// </summary>
+		[JsonIgnore]
 		public Button ScrollDown { get; }
 
 		public ScrollBar()
 		{
 			Angle = 90;
-			Game.Window.MouseWheelScrolled += OnScroll;
+			
 			ScrollValueUnit = 0.1f;
 
 			ScrollUp = new();
 			ScrollDown = new();
-
 			ScrollUp.Clicked += OnScrollUp;
 			ScrollDown.Clicked += OnScrollDown;
-
 			ScrollUp.Held += OnScrollUpHold;
 			ScrollDown.Held += OnScrollDownHold;
+
+			if (Game.Window == null)
+				Console.LogError(1, $"The {nameof(Game.Window)} is not yet created but this {nameof(ScrollBar)} is trying to subscribe to its events.\n" +
+					$"Consider creating it after the {nameof(Scene)} starts.");
+			else
+				Game.Window.MouseWheelScrolled += OnScroll;
 
 			Update();
 		}

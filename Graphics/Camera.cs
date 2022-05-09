@@ -89,11 +89,11 @@ namespace SMPL.Graphics
 		/// </summary>
 		public bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
 
-		[JsonIgnore]
 		/// <summary>
 		/// The <see cref="SFML.Graphics.Texture"/> for drawing <see cref="Visual"/>s, may be used by <see cref="Visual"/>s and may be drawn onto
 		/// another <see cref="Texture"/>.
 		/// </summary>
+		[JsonIgnore]
 		public Texture Texture => renderTexture.Texture;
 
 		/// <summary>

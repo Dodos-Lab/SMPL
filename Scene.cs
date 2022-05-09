@@ -5,9 +5,11 @@ using SFML.Window;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
+using Console = SMPL.Tools.Console;
 
 namespace SMPL
 {
@@ -38,17 +40,16 @@ namespace SMPL
 		/// </summary>
 		public class TextDetails
       {
-			[JsonIgnore]
 			/// <summary>
 			/// On which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="MainCamera"/>
 			/// if it is <see langword="null"/> upon drawing.
 			/// </summary>
-			public Camera DrawTarget { get; set; } = MainCamera;
 			[JsonIgnore]
+			public Camera DrawTarget { get; set; } = MainCamera;
 			/// <summary>
-			/// The font used to draw the text.
+			/// See <see cref="Font"/> for info.
 			/// </summary>
-			public Font Font { get; set; }
+			public string FontPath { get; set; }
 			/// <summary>
 			/// The <see cref="string"/> text itself used upon drawing.
 			/// </summary>
@@ -82,8 +83,14 @@ namespace SMPL
 			/// <code>Style = Styles.Bold | Styles.Underlined;</code>
 			/// </summary>
 			public Text.Styles Style { get; set; }
+			/// <summary>
+			/// The <see cref="SFML.Graphics.Font"/> is retrieved by the <see cref="FontPath"/> from the <see cref="CurrentScene"/>'s loaded fonts and is
+			/// used to draw the <see cref="Text"/>.
+			/// </summary>
+			[JsonIgnore]
+			public Font Font => FontPath != null && Scene.CurrentScene.Textures.ContainsKey(FontPath) ? CurrentScene.Fonts[FontPath] : null;
 
-			public TextDetails(Font font) => Font = font;
+			public TextDetails(string fontPath) => FontPath = fontPath;
 
 			internal void UpdateGlobalText(Object obj, Vector2 originUnit)
          {

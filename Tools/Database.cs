@@ -55,7 +55,7 @@ namespace SMPL.Tools
 			catch { Console.LogError(1, $"Could not load {nameof(Database)} file with path '{cdbFilePath}'."); }
 			return db;
 		}
-		public Database(string filePath) => this.path = filePath;
+		public Database(string cdbFilePath) => path = cdbFilePath;
 
 		public List<T> GetSheet<T>(string sheetName)
 		{
@@ -146,7 +146,6 @@ namespace SMPL.Tools
 					else if (type == typeof(int)) SetColumn("3");
 					else if (type == typeof(float)) SetColumn("4");
 					else if (type.IsEnum) SetColumn(type.IsDefined(typeof(FlagsAttribute), false) ? "10" : "5");
-					else if (type.IsClass && type.GetInterface("IEnumerable") == null) return;
 					else SetColumn("16");
 
 					void SetColumn(string typeStr)

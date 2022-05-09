@@ -24,7 +24,14 @@ namespace SMPL.Tools
 		/// </summary>
 		public static int LineNumber => new StackFrame((int)CallChainIndex + 1, true)?.GetFileLineNumber() ?? 0;
 
-		public static string MethodName => new StackFrame((int)CallChainIndex + 1, true)?.GetMethod()?.Name;
+		public static string MethodName
+		{
+			get
+			{
+				var method = new StackFrame((int)CallChainIndex + 1, true)?.GetMethod();
+				return method?.Name.Replace(".ctor", $"new {method.DeclaringType.Name}");
+			}
+		}
 		public static string ClassName => new StackFrame((int)CallChainIndex + 1, true)?.GetMethod()?.DeclaringType?.Name;
 		public static string Namespace => new StackFrame((int)CallChainIndex + 1, true)?.GetMethod()?.DeclaringType?.Namespace;
 		public static string FilePath => new StackFrame((int)CallChainIndex + 1, true)?.GetFileName();

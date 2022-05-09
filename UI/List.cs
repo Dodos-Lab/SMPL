@@ -24,7 +24,7 @@ namespace SMPL.UI
 		{
 			get
 			{
-				if (IsHidden || IsDisabled)
+				if (IsHidden || IsDisabled || Buttons.Count == 0)
 					return false;
 
 				var first = Buttons[scrollIndex.Limit(0, Buttons.Count - 1)];
@@ -62,9 +62,15 @@ namespace SMPL.UI
 
 			ScrollValue = 1;
 			RangeA = 0;
-			RangeB = (Buttons.Count - VisibleButtonCount).Limit(0, Buttons.Count - 1);
+			RangeB = MathF.Max((Buttons.Count - VisibleButtonCount).Limit(0, Buttons.Count - 1), RangeA);
 
 			scrollIndex = (int)Value;
+
+			var nothingToScroll = RangeA == RangeB;
+			ScrollUp.IsHidden = nothingToScroll;
+			ScrollUp.IsDisabled = nothingToScroll;
+			ScrollDown.IsHidden = nothingToScroll;
+			ScrollDown.IsDisabled = nothingToScroll;
 
 			base.Draw();
 
