@@ -125,6 +125,7 @@ namespace SMPL.UI
                if (isClicked && holdDelayTimer > 0) // initially clicked & not holding
                   OnClick();
                OnRelease();
+               OnHover();
             }
             isClicked = false;
          }
