@@ -57,10 +57,11 @@ namespace SMPL.UI
       /// </summary>
       public Inputbox(string fontPath, uint resolutionX = 300, uint resolutionY = 40) : base(fontPath, resolutionX, resolutionY) => Init();
       /// <summary>
-		/// Draws the <see cref="Inputbox"/> on the <see cref="Visual.DrawTarget"/> according
+		/// Draws the <see cref="Inputbox"/> on the <paramref name="camera"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/>, <see cref="Textbox"/> and <see cref="Inputbox"/> parameters.
+      /// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-		public override void Draw()
+		public override void Draw(Camera camera = null)
       {
          Alignment = Alignments.TopLeft;
 
@@ -92,7 +93,7 @@ namespace SMPL.UI
             }
          }
 
-         base.Draw();
+         base.Draw(camera);
 
          if (IsFocused == false || IsDisabled)
             return;
@@ -136,13 +137,22 @@ namespace SMPL.UI
             new(br.ToSFML(), CursorColor),
             new(tr.ToSFML(), CursorColor),
          };
-         DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads);
+         camera.renderTexture.Draw(verts, PrimitiveType.Quads);
 
          void SetIndex(int index)
          {
             CursorPositionIndex = (uint)index;
             ShowCursor();
          }
+      }
+
+      protected override void OnDestroy()
+      {
+         base.OnDestroy();
+         cursorBlinkTimer.Dispose();
+         cursorBlinkTimer = null;
+         Game.Window.TextEntered -= OnInput;
+         Submitted = null;
       }
 
       /// <summary>

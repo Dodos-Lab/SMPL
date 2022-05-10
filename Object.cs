@@ -15,7 +15,7 @@ namespace SMPL
 	/// </summary>
 	public class Object
 	{
-		private readonly List<Object> children = new();
+		private List<Object> children = new();
 		private Object parent;
 		private Vector2 localPos;
 		private float localAng, localSc;
@@ -167,6 +167,17 @@ namespace SMPL
 		{
 			LocalScale = 1;
 		}
+
+		public void Destroy()
+		{
+			Parent = null;
+			for (int i = 0; i < children.Count; i++)
+				children[i].Parent = null;
+			children = null;
+
+			OnDestroy();
+		}
+		protected virtual void OnDestroy() { }
 
 		private void UpdateSelfAndChildren()
 		{

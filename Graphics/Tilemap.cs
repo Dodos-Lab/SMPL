@@ -72,15 +72,16 @@ namespace SMPL.Graphics
       public Vector2 CellSize { get; set; } = new(32);
 
       /// <summary>
-		/// Draws all of the set <see cref="Tile"/>s on the <see cref="Visual.DrawTarget"/> according
-		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Tilemap"/> parameters.
+		/// Draws all of the set <see cref="Tile"/>s on the <paramref name="camera"/> according
+		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Tilemap"/> parameters. The <paramref name="camera"/> is assumed to be
+		/// the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-      public override void Draw()
+      public override void Draw(Camera camera = null)
       {
          if (IsHidden)
             return;
 
-         DrawTarget ??= Scene.MainCamera;
+         camera ??= Scene.MainCamera;
 
          var vertsArr = new VertexArray(PrimitiveType.Quads);
 
@@ -102,7 +103,7 @@ namespace SMPL.Graphics
                vertsArr.Append(new(botLeft, c, new(txCrdsA.X, txCrdsB.Y)));
             }
 
-         DrawTarget.renderTexture.Draw(vertsArr, new(BlendMode, Transform.Identity, Texture, Shader));
+         camera.renderTexture.Draw(vertsArr, new(BlendMode, Transform.Identity, Texture, Shader));
          vertsArr.Dispose();
       }
       /// <summary>
@@ -172,5 +173,11 @@ namespace SMPL.Graphics
       {
          return GetPositionFromSelf(tileIndecies * CellSize);
       }
-   }
+
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+         map.Clear();
+		}
+	}
 }

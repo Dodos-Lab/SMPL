@@ -43,17 +43,18 @@ namespace SMPL.UI
 		}
 
 		/// <summary>
-		/// Draws the <see cref="Slider"/> on the <see cref="Visual.DrawTarget"/> according
-		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/>, <see cref="ProgressBar"/> and <see cref="Slider"/> parameters.
+		/// Draws the <see cref="Slider"/> on the <paramref name="camera"/> according to all the required <see cref="Object"/>, <see cref="Visual"/>,
+		/// <see cref="Sprite"/>, <see cref="ProgressBar"/> and <see cref="Slider"/> parameters.
+		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
 			Update();
 
 			if (IsHidden)
 				return;
 
-			DrawTarget ??= Scene.MainCamera;
+			camera ??= Scene.MainCamera;
 
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
@@ -93,8 +94,8 @@ namespace SMPL.UI
 				new(CornerD.ToSFML(), FillColor),
 			};
 
-			DrawTarget.renderTexture.Draw(fill, PrimitiveType.Quads, new(BlendMode, Transform.Identity, null, null));
-			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+			camera.renderTexture.Draw(fill, PrimitiveType.Quads, new(BlendMode, Transform.Identity, null, null));
+			camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 
 		private void Update()

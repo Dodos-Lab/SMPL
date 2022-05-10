@@ -17,11 +17,11 @@ namespace SMPL.UI
 	public class List : ScrollBar
 	{
 		private int scrollIndex;
-		private readonly Hitbox hitbox = new();
+		private Hitbox hitbox = new();
 		private Button clicked;
 
 		[JsonIgnore]
-		public List<Button> Buttons { get; } = new();
+		public List<Button> Buttons { get; private set; } = new();
 		public int VisibleButtonCount { get; set; } = 5;
 		public bool IsHovered
 		{
@@ -47,13 +47,11 @@ namespace SMPL.UI
 		public int ScrollIndex => scrollIndex;
 
 		public List()
-		{
-			Value = 0;
-		}
+			=> Value = 0;
 
 		protected virtual void OnUnfocus() { }
 		protected virtual void OnButtonClick(Button button) { }
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
 			OriginUnit = new(0, 0.5f);
 
@@ -74,7 +72,7 @@ namespace SMPL.UI
 			ScrollDown.IsHidden = nothingToScroll;
 			ScrollDown.IsDisabled = nothingToScroll;
 
-			base.Draw();
+			base.Draw(camera);
 
 			for (int i = scrollIndex; i < Buttons.Count; i++)
 			{
@@ -90,7 +88,7 @@ namespace SMPL.UI
 					btn.LocalPosition = new(x, y);
 					btn.SetDefaultHitbox();
 					btn.Hitbox.TransformLocalLines(btn);
-					btn.Draw();
+					btn.Draw(camera);
 				}
 				else
 					btn.Hitbox.Lines.Clear();
@@ -121,6 +119,17 @@ namespace SMPL.UI
 				clicked.Unhover();
 				OnButtonClick(clicked);
 			}
+		}
+
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			hitbox = null;
+			clicked = null;
+			for (int i = 0; i < Buttons.Count; i++)
+				Buttons[i].Destroy();
+			Buttons = null;
 		}
 	}
 }

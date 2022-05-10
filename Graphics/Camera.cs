@@ -16,8 +16,7 @@ namespace SMPL.Graphics
 	/// A camera under the hood is just a <see cref="SFML.Graphics.Texture"/> that can be drawn onto. The drawn things will appear as if they
 	/// were "viewed" from the <see cref="Camera"/>.<br></br><br></br>
 	/// Here is how the whole process goes:<br></br>
-	/// - The <see cref="Camera"/> and whatever <see cref="Visual"/>s are needed are initialized (usually in <see cref="Scene.OnStart"/>)
-	/// with each <see cref="Visual.DrawTarget"/> set to be the <see cref="Camera"/>.<br></br>
+	/// - The <see cref="Camera"/> and whatever <see cref="Visual"/>s are needed are initialized (usually in <see cref="Scene.OnStart"/>).<br></br>
 	/// Each frame:<br></br>
 	/// - <see cref="Fill"/> is called to erase what was on the <see cref="Camera"/> last frame
 	/// (done in the background for <see cref="Scene.MainCamera"/>).<br></br>
@@ -143,7 +142,8 @@ namespace SMPL.Graphics
 		/// </summary>
 		public Camera(uint resolutionX, uint resolutionY) => Init(resolutionX, resolutionY);
 
-      ~Camera() => renderTexture.Dispose();
+		protected override void OnDestroy()
+			=> renderTexture.Dispose();
 
 		/// <summary>
 		/// Returns whether the <see cref="Camera"/> can "see" a <paramref name="hitbox"/>. This uses <see cref="Hitbox.ConvexContains(Hitbox)"/>

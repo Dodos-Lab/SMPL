@@ -146,10 +146,6 @@ namespace SMPL.Graphics
 		/// <summary>
 		/// Construct the <see cref="Sprite3D"/> from some <paramref name="textures"/>.
 		/// </summary>
-      public Sprite3D(params string[] texturePaths) => this.texturePaths = texturePaths;
-		/// <summary>
-		/// Construct the <see cref="Sprite3D"/> from some <paramref name="textures"/>.
-		/// </summary>
 		public Sprite3D(ICollection<string> texturePaths) => this.texturePaths = texturePaths.ToArray();
 
 		/// <summary>
@@ -166,15 +162,16 @@ namespace SMPL.Graphics
 				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
 		}
 		/// <summary>
-		/// Draws all the <see cref="Sprite3D"/>'s textures on the <see cref="Visual.DrawTarget"/> according
+		/// Draws all the <see cref="Sprite3D"/>'s textures on the <paramref name="camera"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/> and <see cref="Sprite3D"/> parameters.
+		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-		public override void Draw()
+		public override void Draw(Camera camera = null)
       {
 			if (IsHidden || textureCount == 0)
 				return;
 
-			DrawTarget ??= Scene.MainCamera;
+			camera ??= Scene.MainCamera;
 
 			var h = Height * Scale / textureCount;
          for (int i = 0; i < textureCount; i++)
@@ -188,7 +185,7 @@ namespace SMPL.Graphics
 					new(CornerD.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
 				};
 
-				DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, tex, Shader));
+				camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, tex, Shader));
 			}
 		}
 

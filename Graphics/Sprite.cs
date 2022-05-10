@@ -71,19 +71,19 @@ namespace SMPL.Graphics
 		/// <see cref="Hitbox.TransformLocalLines"/> should be called by passing this <see cref="Sprite"/> in order for the <see cref="Object"/>
 		/// transformations to affect this <see cref="Hitbox"/>.
 		/// </summary>
-		[JsonIgnore]
 		public Hitbox Hitbox { get; } = new();
 
 		/// <summary>
-		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.DrawTarget"/> according
-		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Sprite"/> parameters.
+		/// Draws the <see cref="Sprite"/> on the <paramref name="camera"/> according
+		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Sprite"/> parameters. The <paramref name="camera"/> is assumed to be
+		/// the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
 			if (IsHidden)
 				return;
 
-			DrawTarget ??= Scene.MainCamera;
+			camera ??= Scene.MainCamera;
 
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
@@ -100,7 +100,7 @@ namespace SMPL.Graphics
 				new(CornerD.ToSFML(), Tint, new(w0, hh)),
 			};
 
-			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+			camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 		/// <summary>
 		/// Sets a rectangular <see cref="Tools.Hitbox"/> in <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="OriginUnit"/> and

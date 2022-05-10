@@ -41,24 +41,23 @@ namespace SMPL.Graphics
 		public float BorderSize { get; set; } = 16;
 
 		/// <summary>
-		/// Draws the <see cref="Sprite"/> on the <see cref="Visual.DrawTarget"/> according
+		/// Draws the <see cref="Sprite"/> on the <paramref name="camera"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Sprite"/> and <see cref="SpriteBorder"/> parameters.
+		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
 			if (IsHidden)
 				return;
 
-			DrawTarget ??= Scene.MainCamera;
+			camera ??= Scene.MainCamera;
 
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
-
 			var topLeft = new Vector2f(w * TexCoordsUnitA.X, h * TexCoordsUnitA.Y);
 			var bottomRight = new Vector2f(w * TexCoordsUnitB.X, h * TexCoordsUnitB.Y);
 			var topRight = new Vector2f(bottomRight.X, topLeft.Y);
 			var bottomLeft = new Vector2f(topLeft.X, bottomRight.Y);
-
 			var verts = new Vertex[]
 			{
 				// top left
@@ -116,7 +115,7 @@ namespace SMPL.Graphics
 				new(CornerC.PointMoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Tint, bottomRight - new Vector2f(BorderSize, 0)),
 			};
 
-			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+			camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 		/// <summary>
 		/// Sets a rectangular <see cref="Hitbox"/> in <see cref="Hitbox.LocalLines"/>. This takes into account <see cref="Sprite.OriginUnit"/>,

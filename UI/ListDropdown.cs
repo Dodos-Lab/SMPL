@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SFML.Window;
+using SMPL.Graphics;
 using SMPL.Tools;
 
 namespace SMPL.UI
@@ -13,7 +14,7 @@ namespace SMPL.UI
 		public event SelectedEventHandler Selected;
 
 		[JsonIgnore]
-		public Tick ShowList { get; }
+		public Tick ShowList { get; private set; }
 		[JsonIgnore]
 		public Button Selection => Buttons.Count == 0 ? null : Buttons[selectionIndex];
 
@@ -26,7 +27,7 @@ namespace SMPL.UI
 			ShowList.OriginUnit = new(0, 1);
 		}
 
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
 			OriginUnit = new(0, 0.5f);
 
@@ -36,11 +37,11 @@ namespace SMPL.UI
 				Selection.Size = new(ButtonWidth, ButtonHeight);
 				Selection.LocalPosition = new(-ButtonHeight * 0.5f - ScrollUp.Size.X, ButtonWidth * 0.5f + ScrollUp.Size.Y * 0.5f);
 				Selection.IsDisabled = isOpen == false;
-				Selection.Draw();
+				Selection.Draw(camera);
 			}
 
 			ShowList.Position = ScrollUp.CornerD;
-			ShowList.Size = new(ShowList.Size.X, Selection.Size.Y);
+			ShowList.Size = new(ShowList.Size.X, Selection == null ? ShowList.Size.Y : Selection.Size.Y);
 			ShowList.SetDefaultHitbox();
 			ShowList.Hitbox.TransformLocalLines(ShowList);
 
@@ -55,18 +56,27 @@ namespace SMPL.UI
 				ShowList.Hitbox.Lines[3] = new(bot.B, top.A);
 			}
 
-			ShowList.Draw();
+			ShowList.Draw(camera);
 
-			base.Draw();
+			base.Draw(camera);
 
 			IsHidden = isOpen == false;
 			IsDisabled = isOpen == false;
+		}
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			ShowList.Clicked -= OnShow;
+			ShowList.Destroy();
+			ShowList = null;
+			Selected = null;
 		}
 
 		protected virtual void OnSelect(Button button) => Selected?.Invoke(button);
 		protected override void OnUnfocus()
 		{
-			if (ShowList.Hitbox.ConvexContains(Scene.MouseCursorPosition))
+			if (ShowList == null || ShowList.Hitbox.ConvexContains(Scene.MouseCursorPosition))
 				return;
 			isOpen = false;
 		}

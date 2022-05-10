@@ -34,15 +34,14 @@ namespace SMPL.UI
       /// Create the <see cref="TextButton"/> with some <paramref name="textDetails"/>.
       /// </summary>
       public TextButton(Scene.TextDetails textDetails)
-      {
-         TextDetails = textDetails;
-      }
+         => TextDetails = textDetails;
 
       /// <summary>
-		/// Draws the <see cref="TextButton"/> on the <see cref="Visual.DrawTarget"/> according to all the required
+		/// Draws the <see cref="TextButton"/> on the <paramref name="camera"/> according to all the required
       /// <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/>, <see cref="Button"/> and <see cref="TextButton"/> parameters.
+      /// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-      public override void Draw()
+      public override void Draw(Camera camera = null)
       {
          if (IsHyperlink)
          {
@@ -53,8 +52,14 @@ namespace SMPL.UI
             SetDefaultHitbox();
             Hitbox.TransformLocalLines(this);
          }
-         base.Draw();
+         base.Draw(camera);
          Scene.DrawText(TextDetails, this, TextOriginUnit);
       }
-   }
+
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+         TextDetails = null;
+		}
+	}
 }

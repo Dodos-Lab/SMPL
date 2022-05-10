@@ -1,4 +1,5 @@
 ﻿using SFML.Window;
+using SMPL.Graphics;
 using SMPL.Tools;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,12 +8,12 @@ namespace SMPL.UI
 {
 	public class ListMultiselect : List
 	{
-		public List<Tick> Ticks { get; } = new();
-		public List<int> SelectionIndexes { get; } = new();
+		public List<Tick> Ticks { get; private set; } = new();
+		public List<int> SelectionIndexes { get; private set; } = new();
 
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
-			base.Draw();
+			base.Draw(camera);
 			for (int i = ScrollIndex; i < ScrollIndex + VisibleButtonCount; i++)
 			{
 				if (Ticks.Count <= i)
@@ -27,7 +28,7 @@ namespace SMPL.UI
 				tick.Size = new(ButtonHeight);
 				tick.SetDefaultHitbox();
 				tick.Hitbox.TransformLocalLines(tick);
-				tick.Draw();
+				tick.Draw(camera);
 			}
 
 			SelectionIndexes.Clear();
@@ -43,6 +44,15 @@ namespace SMPL.UI
 				return;
 
 			Ticks[index].Trigger();
+		}
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			for (int i = 0; i < Ticks.Count; i++)
+				Ticks[i].Destroy();
+			Ticks = null;
+			SelectionIndexes = null;
 		}
 	}
 }

@@ -34,8 +34,8 @@ namespace SMPL.UI
       /// </summary>
       public enum Symbols { Character, Word, Line }
 
-      internal static readonly Text text = new();
-      private readonly List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
+      internal static Text text = new();
+      private List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
       protected Camera camera;
       private string left, center, right, font;
 
@@ -170,14 +170,15 @@ namespace SMPL.UI
       /// and a <paramref name="fontPath"/>.
 		/// </summary>
       public Textbox(string fontPath, uint resolutionX = 200, uint resolutionY = 200) => Init(resolutionX, resolutionY, fontPath);
-      ~Textbox() => text.Dispose();
 
       /// <summary>
-		/// Draws the <see cref="Textbox"/> on the <see cref="Visual.DrawTarget"/> according
-		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/> and <see cref="Textbox"/> parameters.
+		/// Draws the <see cref="Textbox"/> on the <paramref name="camera"/> according to all the required <see cref="Object"/>, <see cref="Visual"/>,
+      /// <see cref="Sprite"/> and <see cref="Textbox"/> parameters. The <paramref name="camera"/> is assumed to be
+		/// the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-      public override void Draw()
+      public override void Draw(Camera camera = null)
       {
+         camera ??= Scene.MainCamera;
          camera.Fill(BackgroundColor);
          Update();
 
@@ -194,13 +195,22 @@ namespace SMPL.UI
 
 
          camera.Display();
-         base.Draw();
+         base.Draw(camera);
       }
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
 
-      /// <summary>
-      /// Returns the character index that contains <paramref name="worldPoint"/> if any, -1 otherwise.
-      /// </summary>
-      public int GetCharacterIndex(Vector2 worldPoint)
+         camera.Destroy();
+         camera = null;
+         formatSpaceRangesCenter = null;
+         formatSpaceRangesRight = null;
+		}
+
+		/// <summary>
+		/// Returns the character index that contains <paramref name="worldPoint"/> if any, -1 otherwise.
+		/// </summary>
+		public int GetCharacterIndex(Vector2 worldPoint)
       {
          for (int i = 0; i < Text.Length; i++)
          {

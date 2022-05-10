@@ -41,12 +41,6 @@ namespace SMPL
 		public class TextDetails
       {
 			/// <summary>
-			/// On which <see cref="Camera"/> this <see cref="Visual"/> should be drawn. This value is set to <see cref="MainCamera"/>
-			/// if it is <see langword="null"/> upon drawing.
-			/// </summary>
-			[JsonIgnore]
-			public Camera DrawTarget { get; set; } = MainCamera;
-			/// <summary>
 			/// See <see cref="Font"/> for info.
 			/// </summary>
 			public string FontPath { get; set; }
@@ -90,6 +84,9 @@ namespace SMPL
 			[JsonIgnore]
 			public Font Font => FontPath != null && CurrentScene.Fonts.ContainsKey(FontPath) ? CurrentScene.Fonts[FontPath] : null;
 
+			/// <summary>
+			/// Create the <see cref="TextDetails"/> with a certain <paramref name="fontPath"/>.
+			/// </summary>
 			public TextDetails(string fontPath) => FontPath = fontPath;
 
 			internal void UpdateGlobalText(Object obj, Vector2 originUnit)
@@ -185,6 +182,10 @@ namespace SMPL
 			/// All the paths and details of the required <see cref="Sprite3D"/>s in the <see cref="CurrentScene"/>.
 			/// </summary>
 			public List<TexturedModel3D> TexturedModels3D { get; set; }
+			/// <summary>
+			/// All the paths of the required shaders in the <see cref="CurrentScene"/>.
+			/// </summary>
+			public List<string> Shaders { get; set; }
 		}
 
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
@@ -246,6 +247,10 @@ namespace SMPL
 		/// The loaded 3D sprites whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
 		/// </summary>
 		public Dictionary<string, Sprite3D> Sprites3D { get; } = new();
+		/// <summary>
+		/// The loaded shaders whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
+		/// </summary>
+		public Dictionary<string, Shader> Shaders { get; } = new();
 
 		/// <summary>
 		/// Returns the required asset paths and details whenever this scene becomes the <see cref="CurrentScene"/>.
@@ -275,19 +280,18 @@ namespace SMPL
 		/// <summary>
 		/// A quick way to draw a text onto a <see cref="Camera"/> with no <see cref="Textbox"/>. The text may be customized through
 		/// <paramref name="textDetails"/> and <paramref name="originUnit"/>. It may also take the transformations of an <paramref name="obj"/>.
-		/// The <see cref="TextDetails.DrawTarget"/> is assumed to be the <see cref="MainCamera"/> if no
-		/// <see cref="TextDetails.DrawTarget"/> is passed.
+		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-		public static void DrawText(TextDetails textDetails, Object obj = null, Vector2 originUnit = default)
+		public static void DrawText(TextDetails textDetails, Object obj = null, Vector2 originUnit = default, Camera camera = null)
       {
 			if (textDetails.Font == null)
 				return;
 
-			textDetails.DrawTarget ??= MainCamera;
+			camera ??= MainCamera;
 			obj ??= new();
 
 			textDetails.UpdateGlobalText(obj, originUnit);
-			textDetails.DrawTarget.renderTexture.Draw(Textbox.text);
+			camera.renderTexture.Draw(Textbox.text);
 		}
 
       internal void LoadAssets()

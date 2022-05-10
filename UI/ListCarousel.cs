@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SFML.Window;
+using SMPL.Graphics;
 using SMPL.Tools;
 
 namespace SMPL.UI
@@ -7,9 +8,9 @@ namespace SMPL.UI
 	public class ListCarousel : List
 	{
 		[JsonIgnore]
-		public Button Previous { get; }
+		public Button Previous { get; private set; }
 		[JsonIgnore]
-		public Button Next { get; }
+		public Button Next { get; private set; }
 
 		public new bool IsHovered
 		{
@@ -75,7 +76,7 @@ namespace SMPL.UI
 			SelectionIndex--;
 		}
 
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
 			ScrollValue = 1;
 			RangeA = 0;
@@ -96,8 +97,8 @@ namespace SMPL.UI
 			Previous.LocalPosition = new(-ButtonWidth * 0.5f - Previous.Size.X * 0.5f, 0);
 			Next.LocalPosition = new(ButtonWidth * 0.5f + Next.Size.X * 0.5f, 0);
 
-			Previous.Draw();
-			Next.Draw();
+			Previous.Draw(camera);
+			Next.Draw(camera);
 
 			if (Selection == null)
 				return;
@@ -108,7 +109,23 @@ namespace SMPL.UI
 			Selection.SetDefaultHitbox();
 			Selection.Hitbox.TransformLocalLines(Selection);
 
-			Selection.Draw();
+			Selection.Draw(camera);
+		}
+
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			Previous.Clicked -= OnPrevious;
+			Next.Clicked -= OnNext;
+			Previous.Held -= OnPreviousHold;
+			Next.Held -= OnNextHold;
+
+			Previous.Destroy();
+			Next.Destroy();
+
+			Previous = null;
+			Next = null;
 		}
 	}
 }

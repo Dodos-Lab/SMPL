@@ -36,12 +36,12 @@ namespace SMPL.UI
 		/// A button used to bring the scroll up.
 		/// </summary>
 		[JsonIgnore]
-		public Button ScrollUp { get; }
+		public Button ScrollUp { get; private set; }
 		/// <summary>
 		/// A button used to bring the scroll down.
 		/// </summary>
 		[JsonIgnore]
-		public Button ScrollDown { get; }
+		public Button ScrollDown { get; private set; }
 
 		public ScrollBar()
 		{
@@ -94,19 +94,37 @@ namespace SMPL.UI
 		}
 
 		/// <summary>
-		/// Draws the <see cref="ScrollBar"/> on the <see cref="Visual.DrawTarget"/> according to all the required
+		/// Draws the <see cref="ScrollBar"/> on the <paramref name="camera"/> according to all the required
 		/// <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/>, <see cref="ProgressBar"/>, <see cref="Slider"/> and <see cref="ScrollBar"/> parameters.
+		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
 			FillColor = Color.Transparent;
 
-			base.Draw();
+			base.Draw(camera);
 
 			Update();
 
-			ScrollUp.Draw();
-			ScrollDown.Draw();
+			ScrollUp.Draw(camera);
+			ScrollDown.Draw(camera);
+		}
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			Game.Window.MouseWheelScrolled -= OnScroll;
+
+			ScrollUp.Clicked -= OnScrollUp;
+			ScrollDown.Clicked -= OnScrollDown;
+			ScrollUp.Held -= OnScrollUpHold;
+			ScrollDown.Held -= OnScrollDownHold;
+
+			ScrollUp.Destroy();
+			ScrollDown.Destroy();
+
+			ScrollUp = null;
+			ScrollDown = null;
 		}
 
 		private void Update()

@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using Console = SMPL.Tools.Console;
 
 namespace SMPL.Tools
@@ -125,17 +127,23 @@ namespace SMPL.Tools
 				json = json.Replace("\"customTypes\": null,", "\"customTypes\": [],");
 			}
 
+			var dir = Path.GetDirectoryName(path);
+			if (string.IsNullOrWhiteSpace(dir) == false)
+				Directory.CreateDirectory(dir);
 			File.WriteAllText(path, json);
 
 			dynamic[] GetColumns()
 			{
-				var fields = typeof(T).GetFields();
-				var props = typeof(T).GetProperties();
+				var fields = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				var props = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 				var result = new List<Column>();
 				for (int i = 0; i < fields.Length; i++)
-					ProcessType(fields[i].FieldType, fields[i].Name);
+					if (ShouldSkipFieldOrProperty(fields[i], fields[i].IsPrivate) == false)
+						ProcessType(fields[i].FieldType, fields[i].Name);
+
 				for (int i = 0; i < props.Length; i++)
-					ProcessType(props[i].PropertyType, props[i].Name);
+					if (ShouldSkipFieldOrProperty(props[i], false) == false)
+						ProcessType(props[i].PropertyType, props[i].Name);
 
 				return result.ToArray();
 
@@ -163,6 +171,16 @@ namespace SMPL.Tools
 						}
 						result.Add(new() { typeStr = $"{typeStr}{enumNames}", name = name });
 					}
+				}
+				bool ShouldSkipFieldOrProperty(MemberInfo memberInfo, bool isPrivate)
+				{
+					var ignore = memberInfo.GetCustomAttribute<JsonIgnoreAttribute>() != null ||
+						memberInfo.GetCustomAttribute<CompilerGeneratedAttribute>() != null ||
+						memberInfo.GetCustomAttribute<NonSerializedAttribute>() != null ||
+						isPrivate;
+					var force = memberInfo.GetCustomAttribute<JsonPropertyAttribute>() != null ||
+						memberInfo.GetCustomAttribute<DataMemberAttribute>() != null;
+					return ignore && force == false;
 				}
 			}
 		}

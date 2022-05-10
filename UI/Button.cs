@@ -63,21 +63,29 @@ namespace SMPL.UI
       /// Override this to handle the logic upon releasing the <see cref="Mouse.Button.Left"/> over the <see cref="Button"/>.
       /// </summary>
       protected virtual void OnRelease() { }
+		public void Trigger() => OnClick();
 
       /// <summary>
-		/// Draws the <see cref="Button"/> on the <see cref="Visual.DrawTarget"/> according
+		/// Draws the <see cref="Button"/> on the <paramref name="camera"/> according
 		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/> and <see cref="Button"/> parameters.
+      /// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-      public override void Draw()
+      public override void Draw(Camera camera = null)
       {
          Update();
-         base.Draw();
+         base.Draw(camera);
       }
 
-      /// <summary>
-      /// A way to "click" the <see cref="Button"/> through code.
-      /// </summary>
-      public void Trigger() => OnClick();
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+         Clicked = null;
+         Held = null;
+		}
+
+		/// <summary>
+		/// A way to "click" the <see cref="Button"/> through code.
+		/// </summary>
       private void Update()
       {
          if (IsDisabled)

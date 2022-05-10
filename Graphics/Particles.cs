@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Newtonsoft.Json;
+using SFML.Graphics;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
@@ -49,6 +50,7 @@ namespace SMPL.Graphics
 	/// - <see cref="OnParticleUpdate(Particle)"/> is overriden in the child class to continuously update each
 	/// <see cref="Particle"/> however needed.<br></br>Some logic in here might lead up to <see cref="DestroyParticle(Particle)"/>.
 	/// </summary>
+	[JsonObject(MemberSerialization = MemberSerialization.OptIn)]
 	public abstract class ParticleManager : Visual
 	{
 		private readonly List<Particle> particles = new();
@@ -67,6 +69,12 @@ namespace SMPL.Graphics
 				particles.Add(OnParticleSpawn());
 		}
 
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+			particles.Clear();
+		}
+
 		/// <summary>
 		/// End the life of a <paramref name="particle"/> immediately.
 		/// </summary>
@@ -83,15 +91,16 @@ namespace SMPL.Graphics
 		protected abstract void OnParticleUpdate(Particle particle);
 
 		/// <summary>
-		/// Draws each <see cref="Particle"/> tracked by this <see cref="ParticleManager"/> on the <see cref="Visual.DrawTarget"/> according
-		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Particle"/> parameters.
+		/// Draws each <see cref="Particle"/> tracked by this <see cref="ParticleManager"/> on the <paramref name="camera"/> according
+		/// to all the required <see cref="Object"/>, <see cref="Visual"/> and <see cref="Particle"/> parameters. The <paramref name="camera"/> is assumed to be
+		/// the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
 		/// </summary>
-		public override void Draw()
+		public override void Draw(Camera camera = null)
 		{
 			if (particles == null || particles.Count == 0)
 				return;
 
-			DrawTarget ??= Scene.MainCamera;
+			camera ??= Scene.MainCamera;
 
 			var ps = new List<Particle>(particles);
 			var verts = new Vertex[ps.Count * 4];
@@ -128,7 +137,7 @@ namespace SMPL.Graphics
 				verts[i + 3] = new(botLeft.ToSFML(), c, new(txA.X, txB.Y));
 			}
 
-			DrawTarget.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
+			camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, Texture, Shader));
 		}
 	}
 }
