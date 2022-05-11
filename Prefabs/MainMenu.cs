@@ -1,9 +1,11 @@
 ﻿using SFML.Graphics;
 using SMPL.Graphics;
+using SMPL.Tools;
 using SMPL.UI;
 using System.Collections.Generic;
 using System.Numerics;
 using Sprite = SMPL.Graphics.Sprite;
+using SFML.Window;
 
 namespace SMPL.Prefabs
 {
@@ -11,8 +13,9 @@ namespace SMPL.Prefabs
 	{
 		private Button settings, exit, audio, graphics;
 		private Sprite background = new(), panel = new();
-		private bool isAudioVisible;
-		private Object volumeSound = new() { Scale = 1.82f }, volumeMusic = new() { Scale = 1.82f };
+		private bool audioVisible, graphicsVisible;
+		private Object volumeSound = new() { Scale = 1.82f }, volumeMusic = new() { Scale = 1.82f }, pixelSize = new() { Scale = 1.75f },
+			resolution = new() { Scale = 1.5f };
 
 		public bool PanelIsShown { get; set; }
 		public string LogoTexturePath { get; set; }
@@ -36,6 +39,8 @@ namespace SMPL.Prefabs
 		public List SettingsButtons { get; private set; }
 		public Slider VolumeSound { get; set; }
 		public Slider VolumeMusic { get; set; }
+		public Slider Resolution { get; set; }
+		public Tick VSync { get; set; }
 		public Button Audio
 		{
 			get => audio;
@@ -123,17 +128,35 @@ namespace SMPL.Prefabs
 
 			TryDrawAudioSlider(VolumeMusic, -hs * 0.75f);
 			TryDrawAudioSlider(VolumeSound, hs * 0.75f);
-			TryShowAudioSliders(VolumeMusic, isAudioVisible);
-			TryShowAudioSliders(VolumeSound, isAudioVisible);
-			if (VolumeSound != null && isAudioVisible)
+			TryShowSlider(VolumeMusic, audioVisible);
+			TryShowSlider(VolumeSound, audioVisible);
+			if (VolumeSound != null && audioVisible)
 			{
 				volumeSound.Position = VolumeSound.CornerA;
 				DrawText(new(FontPath) { Text = "Sound" }, volumeSound, new(1.1f, 0));
 			}
-			if (VolumeMusic != null && isAudioVisible)
+			if (VolumeMusic != null && audioVisible)
 			{
 				volumeMusic.Position = VolumeMusic.CornerA;
 				DrawText(new(FontPath) { Text = "Music" }, volumeMusic, new(1.1f, 0));
+			}
+
+			TryDrawGraphicSlider(Resolution, -hs * 2);
+			TryShowSlider(Resolution, graphicsVisible);
+			if (Resolution != null && graphicsVisible)
+			{
+				pixelSize.Position = Resolution.CornerA;
+				resolution.Position = Resolution.CornerA.PointPercentTowardPoint(Resolution.CornerB, new(50));
+				Resolution.RangeA = 0.1f;
+				var v = (int)(Resolution.Value * 30) / 30f;
+				var resW = VideoMode.DesktopMode.Width * v;
+				var resH = VideoMode.DesktopMode.Height * v;
+				DrawText(new(FontPath) { Text = "Resolution" }, pixelSize, new(1.1f, 0));
+				DrawText(new(FontPath) { OutlineSize = 2, Text = $"{resW}x{resH}" }, resolution, new(0.5f, -0.2f));
+			}
+			if (VSync != null && graphicsVisible)
+			{
+
 			}
 		}
 		protected override void OnStop()
@@ -155,7 +178,8 @@ namespace SMPL.Prefabs
 
 		public void HideEverythingInSettings()
 		{
-			isAudioVisible = false;
+			audioVisible = false;
+			graphicsVisible = false;
 
 			OnHideEverythingInSettings();
 		}
@@ -174,11 +198,13 @@ namespace SMPL.Prefabs
 
 		private void OnAudioClick()
 		{
-			isAudioVisible = true;
+			HideEverythingInSettings();
+			audioVisible = true;
 		}
 		private void OnGraphicsClick()
 		{
-
+			HideEverythingInSettings();
+			graphicsVisible = true;
 		}
 		private void OnSettingsClick()
 		{
@@ -188,7 +214,7 @@ namespace SMPL.Prefabs
 			TryShowSettingsButton(Graphics);
 		}
 		private void OnExitClick() => Game.Stop();
-		private static void TryShowAudioSliders(Slider slider, bool show = true)
+		private static void TryShowSlider(Slider slider, bool show = true)
 		{
 			if (slider == null)
 				return;
@@ -235,6 +261,17 @@ namespace SMPL.Prefabs
 			slider.Size = new(0, MainCamera.Texture.Size.Y * 0.06f);
 			slider.LengthMax = MainCamera.Texture.Size.X * 0.25f;
 			slider.Position = panel.Position + new Vector2(-MainCamera.Texture.Size.X * 0.02f, y);
+			slider.Draw();
+		}
+		private void TryDrawGraphicSlider(Slider slider, float y)
+		{
+			if (slider == null)
+				return;
+
+			slider.LengthUnit = 0.1f;
+			slider.Size = new(0, MainCamera.Texture.Size.Y * 0.06f);
+			slider.LengthMax = MainCamera.Texture.Size.X * 0.2f;
+			slider.Position = panel.Position + new Vector2(MainCamera.Texture.Size.X * 0.005f, y);
 			slider.Draw();
 		}
 
