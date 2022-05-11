@@ -33,11 +33,16 @@ namespace SMPL.UI
 		/// <summary>
 		/// The color that fills the <see cref="Slider"/> indicating the progress of the <see cref="ProgressBar.Value"/>.
 		/// </summary>
-		public Color FillColor { get; set; }
+		public Color ProgressColor { get; set; }
+		/// <summary>
+		/// The color that fills the <see cref="Slider"/> indicating the progress left of the <see cref="ProgressBar.Value"/>.
+		/// </summary>
+		public Color EmptyColor { get; set; }
 
 		public Slider()
 		{
-			FillColor = new(150, 150, 150);
+			ProgressColor = new(255, 255, 255, 100);
+			EmptyColor = new(0, 0, 0, 100);
 			LengthUnit = 0.2f;
 			OriginUnit = new(0.5f);
 		}
@@ -55,6 +60,7 @@ namespace SMPL.UI
 				return;
 
 			camera ??= Scene.MainCamera;
+			TexCoordsUnitB = new(1);
 
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
@@ -88,10 +94,15 @@ namespace SMPL.UI
 			};
 			var fill = new Vertex[]
 			{
-				new(CornerA.ToSFML(), FillColor),
-				new(tl.ToSFML(), FillColor),
-				new(bl.ToSFML(), FillColor),
-				new(CornerD.ToSFML(), FillColor),
+				new(CornerA.ToSFML(), ProgressColor),
+				new(tl.ToSFML(), ProgressColor),
+				new(bl.ToSFML(), ProgressColor),
+				new(CornerD.ToSFML(), ProgressColor),
+
+				new(tr.ToSFML(), EmptyColor),
+				new(CornerB.ToSFML(), EmptyColor),
+				new(CornerC.ToSFML(), EmptyColor),
+				new(br.ToSFML(), EmptyColor),
 			};
 
 			camera.renderTexture.Draw(fill, PrimitiveType.Quads, new(BlendMode, Transform.Identity, null, null));
@@ -121,11 +132,9 @@ namespace SMPL.UI
 				var dist = CornerA.DistanceBetweenPoints(CornerB);
 				var value = CornerA.DistanceBetweenPoints(closest).Map(0, dist, RangeA, RangeB);
 				var sz = Size;
-				var txB = TexCoordsUnitB;
 
 				Value = value;
 				Size = sz;
-				TexCoordsUnitB = txB;
 			}
 		}
 	}

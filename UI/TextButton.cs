@@ -53,7 +53,8 @@ namespace SMPL.UI
             Hitbox.TransformLocalLines(this);
          }
          base.Draw(camera);
-         Scene.DrawText(TextDetails, this, TextOriginUnit);
+			if (IsHidden == false)
+            Scene.DrawText(TextDetails, this, TextOriginUnit);
       }
 
 		protected override void OnDestroy()

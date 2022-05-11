@@ -100,7 +100,7 @@ namespace SMPL.UI
 		/// </summary>
 		public override void Draw(Camera camera = null)
 		{
-			FillColor = Color.Transparent;
+			ProgressColor = Color.Transparent;
 
 			base.Draw(camera);
 
