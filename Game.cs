@@ -3,11 +3,12 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 using SMPL.Graphics;
 using SMPL.Tools;
-using SMPL.UI;
 using Console = SMPL.Tools.Console;
+using Time = SMPL.Tools.Time;
 
 namespace SMPL
 {
@@ -62,7 +63,9 @@ namespace SMPL
 
 			void InitWindow()
 			{
-				Window = new(new(1280, 720), "SMPL Game");
+				var w = VideoMode.DesktopMode.Width;
+				var h = VideoMode.DesktopMode.Height;
+				Window = new(new(w, h), "SMPL Game");
 				Window.Clear();
 				Window.Display();
 				Window.Closed += OnClose;
@@ -71,6 +74,8 @@ namespace SMPL
 				var view = Window.GetView();
 				view.Center = new();
 				Window.SetView(view);
+
+				CenterWindow();
 			}
 		}
 		/// <summary>
@@ -103,6 +108,16 @@ namespace SMPL
 				else
 					Console.LogError(1, $"Could not load URL '{url}'.");
 			}
+		}
+		/// <summary>
+		/// Centers the <see cref="Window"/> on  the user's screen.
+		/// </summary>
+		public static void CenterWindow()
+		{
+			var w = VideoMode.DesktopMode.Width;
+			var h = VideoMode.DesktopMode.Height;
+			Window.Size = new((uint)(w / 1.5f), (uint)(h / 1.5f));
+			Window.Position = new Vector2i((int)(w / 2f), (int)(h / 2f)) - new Vector2i((int)(Window.Size.X / 2), (int)(Window.Size.Y / 2));
 		}
 
 		private static void Main() { }

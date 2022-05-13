@@ -28,6 +28,10 @@ namespace SMPL.UI
       /// Raised upon holiding left mouse button on this <see cref="Button"/>.
       /// </summary>
       public event ButtonEventHandler Held;
+      public event ButtonEventHandler Hovered;
+      public event ButtonEventHandler Unhovered;
+      public event ButtonEventHandler Pressed;
+      public event ButtonEventHandler Released;
 
       /// <summary>
       /// Whether this UI element is currently interactive.
@@ -47,22 +51,14 @@ namespace SMPL.UI
       /// </summary>
       protected virtual void OnClick()
          => Clicked?.Invoke();
-      /// <summary>
-      /// Override this to handle the logic upon hovering the <see cref="Button"/>'s <see cref="Sprite.Hitbox"/> with the mouse cursor.
-      /// </summary>
-      protected virtual void OnHover() { }
-      /// <summary>
-      /// Override this to handle the logic upon unhovering the <see cref="Button"/>'s <see cref="Sprite.Hitbox"/> with the mouse cursor.
-      /// </summary>
-      protected virtual void OnUnhover() { }
-      /// <summary>
-      /// Override this to handle the logic upon pressing the <see cref="Mouse.Button.Left"/> over the <see cref="Button"/>.
-      /// </summary>
-      protected virtual void OnPress() { }
-      /// <summary>
-      /// Override this to handle the logic upon releasing the <see cref="Mouse.Button.Left"/> over the <see cref="Button"/>.
-      /// </summary>
-      protected virtual void OnRelease() { }
+      protected virtual void OnHover()
+         => Hovered?.Invoke();
+      protected virtual void OnUnhover()
+         => Unhovered?.Invoke();
+      protected virtual void OnPress()
+         => Pressed?.Invoke();
+      protected virtual void OnRelease()
+         => Released?.Invoke();
 		public void Trigger() => OnClick();
 
       /// <summary>
