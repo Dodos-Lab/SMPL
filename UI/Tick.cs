@@ -18,10 +18,10 @@ namespace SMPL.UI
       /// <summary>
       /// A way for the child classes of <see cref="Tick"/> to raise the event and handle the logic around it by overriding this.
       /// </summary>
-      protected override void OnClick()
+      protected override void OnClick(Button button)
       {
          IsActive = !IsActive;
-         base.OnClick();
+         base.OnClick(button);
       }
    }
 }

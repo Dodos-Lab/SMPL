@@ -20,21 +20,17 @@ namespace SMPL.UI
       /// are called upon drawing if this is <see langword="true"/> (meaning the entire text becomes the button).
       /// </summary>
       public bool IsHyperlink { get; set; }
-      /// <summary>
-		/// This determines the positional offset from <see cref="Object.Position"/> as a vector. [0, 0] is the top left and [1, 1]
-      /// is the bottom right corner of the text. Values can also go bellow 0 and above 1.
-		/// </summary>
-      public Vector2 TextOriginUnit { get; set; } = new(0.5f);
-      /// <summary>
-      /// The customizable settings of the <see cref="TextButton"/> text.
-      /// </summary>
-      public Scene.TextDetails TextDetails { get; set; }
+      
+      public QuickText QuickText { get; set; }
 
       /// <summary>
-      /// Create the <see cref="TextButton"/> with some <paramref name="textDetails"/>.
+      /// Create the <see cref="TextButton"/> with some <paramref name="quickText"/>.
       /// </summary>
-      public TextButton(Scene.TextDetails textDetails)
-         => TextDetails = textDetails;
+      public TextButton(QuickText quickText)
+      {
+         Size = new(250, 60);
+         QuickText = quickText;
+      }
 
       /// <summary>
 		/// Draws the <see cref="TextButton"/> on the <paramref name="camera"/> according to all the required
@@ -43,24 +39,26 @@ namespace SMPL.UI
 		/// </summary>
       public override void Draw(Camera camera = null)
       {
+         QuickText?.UpdateGlobalText();
          if (IsHyperlink)
          {
-            TextDetails.UpdateGlobalText(this, TextOriginUnit);
-            var b = Textbox.text.GetLocalBounds();
+            var b = QuickText.textInstance.GetLocalBounds();
             Size = new(b.Width * Scale, b.Height * Scale);
 
             SetDefaultHitbox();
             Hitbox.TransformLocalLines(this);
          }
          base.Draw(camera);
-			if (IsHidden == false)
-            Scene.DrawText(TextDetails, this, TextOriginUnit);
+
+         if (IsHidden == false)
+            QuickText.Draw(camera);
       }
 
 		protected override void OnDestroy()
 		{
 			base.OnDestroy();
-         TextDetails = null;
+         QuickText.Destroy();
+         QuickText = null;
 		}
 	}
 }

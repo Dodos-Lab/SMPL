@@ -19,7 +19,7 @@ namespace SMPL.UI
       /// <summary>
       /// The collection of methods called by this <see cref="Button"/> upon certain events.
       /// </summary>
-      public delegate void ButtonEventHandler();
+      public delegate void ButtonEventHandler(Button button);
       /// <summary>
       /// Raised upon left clicking the <see cref="Button"/>.
       /// </summary>
@@ -44,22 +44,22 @@ namespace SMPL.UI
       /// <summary>
       /// A way for the child classes of <see cref="Button"/> to raise the <see cref="Held"/> event and handle the logic around it by overriding this.
       /// </summary>
-      protected virtual void OnHold()
-         => Held?.Invoke();
+      protected virtual void OnHold(Button button)
+         => Held?.Invoke(this);
       /// <summary>
       /// A way for the child classes of <see cref="Button"/> to raise the <see cref="Clicked"/> event and handle the logic around it by overriding this.
       /// </summary>
-      protected virtual void OnClick()
-         => Clicked?.Invoke();
-      protected virtual void OnHover()
-         => Hovered?.Invoke();
-      protected virtual void OnUnhover()
-         => Unhovered?.Invoke();
-      protected virtual void OnPress()
-         => Pressed?.Invoke();
-      protected virtual void OnRelease()
-         => Released?.Invoke();
-		public void Trigger() => OnClick();
+      protected virtual void OnClick(Button button)
+         => Clicked?.Invoke(this);
+      protected virtual void OnHover(Button button)
+         => Hovered?.Invoke(this);
+      protected virtual void OnUnhover(Button button)
+         => Unhovered?.Invoke(this);
+      protected virtual void OnPress(Button button)
+         => Pressed?.Invoke(this);
+      protected virtual void OnRelease(Button button)
+         => Released?.Invoke(this);
+		public void Trigger() => OnClick(this);
 
       /// <summary>
 		/// Draws the <see cref="Button"/> on the <paramref name="camera"/> according
@@ -96,36 +96,36 @@ namespace SMPL.UI
          var id = GetHashCode();
 
          if (holdTriggerTimer < 0 && holdDelayTimer < 0 && hovered && isClicked)
-            OnHold();
+            OnHold(this);
 
          if (hovered.Once($"{id}-hovered"))
          {
             if (isClicked)
-               OnPress();
+               OnPress(this);
             
-            OnHover();
+            OnHover(this);
          }
          if ((hovered == false).Once($"{id}-unhovered"))
-            OnUnhover();
+            OnUnhover(this);
 
          if (leftClicked.Once($"{id}-press") && hovered)
          {
             isClicked = true;
             holdDelayTimer = HoldDelay;
-            OnPress();
+            OnPress(this);
          }
          if ((leftClicked == false).Once($"{id}-release"))
          {
             if (hovered)
             {
                if (isClicked && holdDelayTimer > 0) // initially clicked & not holding
-                  OnClick();
-               OnRelease();
-               OnHover();
+                  OnClick(this);
+               OnRelease(this);
+               OnHover(this);
             }
             isClicked = false;
          }
       }
-      internal void Unhover() => OnUnhover();
+      internal void Unhover() => OnUnhover(this);
    }
 }

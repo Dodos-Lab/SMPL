@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Sprite = SMPL.Graphics.Sprite;
+using static SMPL.Graphics.QuickText;
 
 namespace SMPL.UI
 {
@@ -34,7 +35,6 @@ namespace SMPL.UI
       /// </summary>
       public enum Symbols { Character, Word, Line }
 
-      internal static Text text = new();
       private List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
       protected Camera camera;
       private string left, center, right, font;
@@ -68,17 +68,17 @@ namespace SMPL.UI
          {
             left = value;
 
-            text.Font = Font;
-            text.CharacterSize = CharacterSize;
-            text.LetterSpacing = CharacterSpace;
-            text.LineSpacing = LineSpace;
-            text.Style = Style;
-            text.Position = new();
-            text.Rotation = 0;
-            text.Scale = new(1, 1);
+            textInstance.Font = Font;
+            textInstance.CharacterSize = CharacterSize;
+            textInstance.LetterSpacing = CharacterSpace;
+            textInstance.LineSpacing = LineSpace;
+            textInstance.Style = Style;
+            textInstance.Position = new();
+            textInstance.Rotation = 0;
+            textInstance.Scale = new(1, 1);
 
-            text.DisplayedString = " ";
-            var spaceWidth = text.GetGlobalBounds().Width;
+            textInstance.DisplayedString = " ";
+            var spaceWidth = textInstance.GetGlobalBounds().Width;
 
             formatSpaceRangesCenter.Clear();
             formatSpaceRangesRight.Clear();
@@ -90,8 +90,8 @@ namespace SMPL.UI
             for (int i = 0; i < lines.Length; i++)
             {
                var line = lines[i];
-               text.DisplayedString = line;
-               var width = LineWidth - text.GetGlobalBounds().Width;
+               textInstance.DisplayedString = line;
+               var width = LineWidth - textInstance.GetGlobalBounds().Width;
                var spaces = spaceWidth == 0 ? 0 : (int)(width / spaceWidth).Limit(0, 9999).Round() - 1;
                var centerLeft = (int)(((float)spaces) / 2).Round();
                var centerRight = (int)(((float)spaces) / 2).Round();
@@ -185,13 +185,13 @@ namespace SMPL.UI
          if (ShadowOffset != default)
          {
             var tr = Transform.Identity;
-            var col = text.FillColor;
+            var col = textInstance.FillColor;
             tr.Translate(ShadowOffset.ToSFML());
-            text.FillColor = ShadowColor;
-            camera.renderTexture.Draw(text, new(BlendMode, tr, null, Shader));
-            text.FillColor = col;
+            textInstance.FillColor = ShadowColor;
+            camera.renderTexture.Draw(textInstance, new(BlendMode, tr, null, Shader));
+            textInstance.FillColor = col;
          }
-         camera.renderTexture.Draw(text, new(BlendMode, Transform.Identity, null, Shader));
+         camera.renderTexture.Draw(textInstance, new(BlendMode, Transform.Identity, null, Shader));
 
 
          camera.Display();
@@ -237,14 +237,14 @@ namespace SMPL.UI
          var prevIndex = (int)characterIndex;
          characterIndex = GetNextNonFormatChar(characterIndex);
 
-         var tl = (text.Position + text.FindCharacterPos(characterIndex)).ToSystem();
-         var tr = (text.Position + text.FindCharacterPos(characterIndex + 1)).ToSystem();
+         var tl = (textInstance.Position + textInstance.FindCharacterPos(characterIndex)).ToSystem();
+         var tr = (textInstance.Position + textInstance.FindCharacterPos(characterIndex + 1)).ToSystem();
 
          if (prevIndex < left.Length && left[prevIndex] == '\n') // end of line
             tr = new(Resolution.X, tl.Y);
 
          var sc = Resolution / Size * Scale;
-         var boundTop = text.GetLocalBounds().Top;
+         var boundTop = textInstance.GetLocalBounds().Top;
          var y = new Vector2(0, CharacterSize + boundTop);
          var bl = tl + y;
          var br = tr + y;
@@ -368,17 +368,17 @@ namespace SMPL.UI
       }
       private void Update()
       {
-         text.Position = new();
-         text.Rotation = 0;
-         text.Scale = new(1, 1);
-         text.Font = Font;
-         text.CharacterSize = CharacterSize;
-         text.FillColor = CharacterColor;
-         text.LetterSpacing = CharacterSpace;
-         text.LineSpacing = LineSpace;
-         text.OutlineColor = OutlineColor;
-         text.OutlineThickness = OutlineSize;
-         text.Style = Style;
+         textInstance.Position = new();
+         textInstance.Rotation = 0;
+         textInstance.Scale = new(1, 1);
+         textInstance.Font = Font;
+         textInstance.CharacterSize = CharacterSize;
+         textInstance.FillColor = CharacterColor;
+         textInstance.LetterSpacing = CharacterSpace;
+         textInstance.LineSpacing = LineSpace;
+         textInstance.OutlineColor = OutlineColor;
+         textInstance.OutlineThickness = OutlineSize;
+         textInstance.Style = Style;
 
          switch (Alignment)
          {
@@ -392,7 +392,7 @@ namespace SMPL.UI
             case Alignments.BottomRight: Right(); break;
             case Alignments.Bottom: CenterX(); break;
          }
-         var b = text.GetLocalBounds();
+         var b = textInstance.GetLocalBounds();
          var sz = camera.renderTexture.Size;
          switch (Alignment)
          {
@@ -407,12 +407,12 @@ namespace SMPL.UI
             case Alignments.Bottom: Bottom(); break;
          }
 
-         void Top() => text.Position = new(-sz.X * 0.5f, -camera.renderTexture.Size.Y * 0.5f - b.Top * 0.5f);
-         void CenterX() => text.DisplayedString = center;
-         void CenterY() => text.Position = new(-sz.X * 0.5f, -b.Height * 0.5f - (Alignment == Alignments.Left ? b.Top : 0));
-         void Bottom() => text.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height + b.Top);
-         void Left() => text.DisplayedString = left;
-         void Right() => text.DisplayedString = right;
+         void Top() => textInstance.Position = new(-sz.X * 0.5f, -camera.renderTexture.Size.Y * 0.5f - b.Top * 0.5f);
+         void CenterX() => textInstance.DisplayedString = center;
+         void CenterY() => textInstance.Position = new(-sz.X * 0.5f, -b.Height * 0.5f - (Alignment == Alignments.Left ? b.Top : 0));
+         void Bottom() => textInstance.Position = new(-sz.X * 0.5f, camera.renderTexture.Size.Y * 0.5f - b.Height + b.Top);
+         void Left() => textInstance.DisplayedString = left;
+         void Right() => textInstance.DisplayedString = right;
       }
       private uint GetNextNonFormatChar(uint charIndex)
       {
@@ -426,7 +426,7 @@ namespace SMPL.UI
          uint Execute(List<(int, int)> ranges, bool isRight = false)
          {
             var realIndex = (uint)0;
-            for (uint i = 0; i < text.DisplayedString.Length; i++)
+            for (uint i = 0; i < textInstance.DisplayedString.Length; i++)
             {
                var lastRange = (0, 0);
                for (int j = 0; j < ranges.Count; j++)
@@ -437,7 +437,7 @@ namespace SMPL.UI
                      break;
                   }
                if (realIndex == charIndex)
-                  return text.DisplayedString[(int)i] == '\n' && isRight == false ? (uint)lastRange.Item1 : i;
+                  return textInstance.DisplayedString[(int)i] == '\n' && isRight == false ? (uint)lastRange.Item1 : i;
 
                realIndex++;
             }

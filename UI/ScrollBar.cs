@@ -65,22 +65,22 @@ namespace SMPL.UI
 			Update();
 		}
 
-		protected virtual void OnScrollUp()
+		protected virtual void OnScrollUp(Button button)
 		{
 			if (IsDisabled)
 				return;
 
 			Value -= ScrollValue;
 		}
-		protected virtual void OnScrollDown()
+		protected virtual void OnScrollDown(Button button)
 		{
 			if (IsDisabled)
 				return;
 
 			Value += ScrollValue;
 		}
-		protected virtual void OnScrollUpHold() => OnScrollUp();
-		protected virtual void OnScrollDownHold() => OnScrollDown();
+		protected virtual void OnScrollUpHold(Button button) => OnScrollUp(button);
+		protected virtual void OnScrollDownHold(Button button) => OnScrollDown(button);
 
 		private void OnScroll(object sender, SFML.Window.MouseWheelScrollEventArgs e)
 		{
@@ -88,9 +88,9 @@ namespace SMPL.UI
 				return;
 
 			if (e.Delta < 0)
-				OnScrollDown();
+				OnScrollDown(ScrollDown);
 			else
-				OnScrollUp();
+				OnScrollUp(ScrollUp);
 		}
 
 		/// <summary>

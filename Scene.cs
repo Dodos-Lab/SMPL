@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SFML;
 using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
@@ -35,82 +36,6 @@ namespace SMPL
 	/// </summary>
 	public class Scene
 	{
-		/// <summary>
-		/// Some values describing a text.
-		/// </summary>
-		public class TextDetails
-      {
-			/// <summary>
-			/// See <see cref="Font"/> for info.
-			/// </summary>
-			public string FontPath { get; set; }
-			/// <summary>
-			/// The <see cref="string"/> text itself used upon drawing.
-			/// </summary>
-			public string Text { get; set; } = "Hello, World!";
-			/// <summary>
-			/// The color of the text.
-			/// </summary>
-			public Color Color { get; set; } = Color.White;
-			/// <summary>
-			/// The character size as provided in the <see cref="Font"/>.
-			/// </summary>
-			public uint CharacterSize { get; set; } = 32;
-			/// <summary>
-			/// The spacing inbetween characters.
-			/// </summary>
-			public float CharacterSpace { get; set; } = 1;
-			/// <summary>
-			/// The spacing inbetween lines.
-			/// </summary>
-			public float LineSpace { get; set; } = 1;
-			/// <summary>
-			/// The color of the outline of the <see cref="Text"/>. Make sure to have non-zero <see cref="OutlineSize"/>.
-			/// </summary>
-			public Color OutlineColor { get; set; } = Color.Black;
-			/// <summary>
-			/// The size of the outline of the <see cref="Text"/>.
-			/// </summary>
-			public float OutlineSize { get; set; } = 1;
-			/// <summary>
-			/// The style of the <see cref="Text"/>. May also have multiple as so:
-			/// <code>Style = Styles.Bold | Styles.Underlined;</code>
-			/// </summary>
-			public Text.Styles Style { get; set; }
-			/// <summary>
-			/// The <see cref="SFML.Graphics.Font"/> is retrieved by the <see cref="FontPath"/> from the <see cref="CurrentScene"/>'s loaded fonts and is
-			/// used to draw the <see cref="Text"/>.
-			/// </summary>
-			[JsonIgnore]
-			public Font Font => FontPath != null && CurrentScene.Fonts.ContainsKey(FontPath) ? CurrentScene.Fonts[FontPath] : null;
-
-			/// <summary>
-			/// Create the <see cref="TextDetails"/> with a certain <paramref name="fontPath"/>.
-			/// </summary>
-			public TextDetails(string fontPath) => FontPath = fontPath;
-
-			internal void UpdateGlobalText(Object obj, Vector2 originUnit)
-         {
-				var text = Textbox.text;
-				text.Font = Font;
-				text.CharacterSize = CharacterSize;
-				text.FillColor = Color;
-				text.LetterSpacing = CharacterSpace;
-				text.LineSpacing = LineSpace;
-				text.OutlineColor = OutlineColor;
-				text.OutlineThickness = OutlineSize;
-				text.Style = Style;
-				text.DisplayedString = Text;
-				text.Position = obj.Position.ToSFML();
-				text.Rotation = obj.Angle;
-				text.Scale = new(obj.Scale, obj.Scale);
-
-				var local = text.GetLocalBounds(); // has to be after everything
-				text.Origin = new(local.Width * originUnit.X, local.Height * originUnit.Y);
-				text.Position = text.Position.ToSystem().PointMoveAtAngle(text.Rotation - 90, local.Top, false).ToSFML();
-			}
-		}
-
 		/// <summary>
 		/// Used for loading 3D models as a set of layered textures (aka sprite stacking). An instance of this
 		/// needs to be passed inside <see cref="AssetQueue"/> in <see cref="OnRequireAssets"/>.
@@ -277,23 +202,6 @@ namespace SMPL
 		/// </summary>
 		protected virtual void OnGameStop() { }
 
-		/// <summary>
-		/// A quick way to draw a text onto a <see cref="Camera"/> with no <see cref="Textbox"/>. The text may be customized through
-		/// <paramref name="textDetails"/> and <paramref name="originUnit"/>. It may also take the transformations of an <paramref name="obj"/>.
-		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
-		/// </summary>
-		public static void DrawText(TextDetails textDetails, Object obj = null, Vector2 originUnit = default, Camera camera = null)
-      {
-			if (textDetails.Font == null)
-				return;
-
-			camera ??= MainCamera;
-			obj ??= new();
-
-			textDetails.UpdateGlobalText(obj, originUnit);
-			camera.renderTexture.Draw(Textbox.text);
-		}
-
       internal void LoadAssets()
 		{
 			var assets = OnRequireAssets();
@@ -307,24 +215,32 @@ namespace SMPL
 
 			for (int i = 0; i < assets.Textures?.Count; i++)
 			{
+				if (assets.Textures[i] == null)
+					continue;
 				try { Textures[assets.Textures[i]] = new Texture(assets.Textures[i]); }
 				catch (System.Exception) { Textures[assets.Textures[i]] = null; Console.LogError(-1, $"Could not load texture '{assets.Textures[i]}'."); }
 				UpdateLoadingPercent();
 			}
 			for (int i = 0; i < assets.Sounds?.Count; i++)
 			{
+				if (assets.Sounds[i] == null)
+					continue;
 				try { Sounds[assets.Sounds[i]] = new Sound(new SoundBuffer(assets.Sounds[i])); }
 				catch (System.Exception) { Sounds[assets.Sounds[i]] = null; Console.LogError(-1, $"Could not load sound '{assets.Sounds[i]}'."); }
 				UpdateLoadingPercent();
 			}
 			for (int i = 0; i < assets.Music?.Count; i++)
 			{
+				if (assets.Music[i] == null)
+					continue;
 				try { Music[assets.Music[i]] = new Music(assets.Music[i]); }
 				catch (System.Exception) { Music[assets.Music[i]] = null; Console.LogError(-1, $"Could not load music '{assets.Music[i]}'."); }
 				UpdateLoadingPercent();
 			}
 			for (int i = 0; i < assets.Fonts?.Count; i++)
 			{
+				if (assets.Fonts[i] == null)
+					continue;
 				try { Fonts[assets.Fonts[i]] = new Font(assets.Fonts[i]); }
 				catch (System.Exception) { Fonts[assets.Fonts[i]] = null; Console.LogError(-1, $"Could not load font '{assets.Fonts[i]}'."); }
 				UpdateLoadingPercent();
@@ -350,10 +266,21 @@ namespace SMPL
 		}
 		internal void UnloadAssets()
 		{
-			foreach (var kvp in Textures)
-				kvp.Value.Dispose();
+			DisposeAndClear(Textures);
+			DisposeAndClear(Fonts);
+			DisposeAndClear(Music);
+			DisposeAndClear(Sounds);
+			DisposeAndClear(Shaders);
 
-			Textures.Clear();
+			Sprites3D.Clear();
+
+			void DisposeAndClear<T>(Dictionary<string, T> assets) where T : IDisposable
+			{
+				foreach (var kvp in assets)
+					kvp.Value.Dispose();
+
+				assets.Clear();
+			}
 		}
 		internal void GameStop() => OnGameStop();
 
