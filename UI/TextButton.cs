@@ -30,6 +30,7 @@ namespace SMPL.UI
       {
          Size = new(250, 60);
          QuickText = quickText;
+         QuickText.Parent = this;
       }
 
       /// <summary>
@@ -39,7 +40,8 @@ namespace SMPL.UI
 		/// </summary>
       public override void Draw(Camera camera = null)
       {
-         QuickText?.UpdateGlobalText();
+         if (QuickText != null)
+            QuickText?.UpdateGlobalText();
          if (IsHyperlink)
          {
             var b = QuickText.textInstance.GetLocalBounds();

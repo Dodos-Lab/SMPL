@@ -184,7 +184,7 @@ namespace SMPL
 			UpdateGlobalMatrix();
 
 			for (int i = 0; i < children.Count; i++)
-				children[i].UpdateGlobalMatrix();
+				children[i].UpdateSelfAndChildren();
 		}
 		private void UpdateGlobalMatrix()
 		{

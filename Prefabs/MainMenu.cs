@@ -46,7 +46,7 @@ namespace SMPL.Prefabs
 
 		protected virtual void OnSettingsClick(Button button)
 		{
-			MainCamera.Position = new(MainCamera.Texture.Size.X * 0.2f, 0);
+			MainCamera.Position = new(MainCamera.Texture.Size.X, 0);
 		}
 		protected virtual void OnExitClick(Button button) => Game.Stop();
 

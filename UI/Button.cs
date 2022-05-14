@@ -118,7 +118,7 @@ namespace SMPL.UI
          {
             if (hovered)
             {
-               if (isClicked && holdDelayTimer > 0) // initially clicked & not holding
+               if (isClicked)
                   OnClick(this);
                OnRelease(this);
                OnHover(this);
