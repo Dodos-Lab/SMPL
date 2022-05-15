@@ -215,40 +215,44 @@ namespace SMPL
 
 			for (int i = 0; i < assets.Textures?.Count; i++)
 			{
-				if (assets.Textures[i] == null)
-					continue;
-				try { Textures[assets.Textures[i]] = new Texture(assets.Textures[i]); }
-				catch (System.Exception) { Textures[assets.Textures[i]] = null; Console.LogError(-1, $"Could not load texture '{assets.Textures[i]}'."); }
+				if (assets.Textures[i] != null)
+				{
+					try { Textures[assets.Textures[i]] = new Texture(assets.Textures[i]); }
+					catch (Exception) { Textures[assets.Textures[i]] = null; Console.LogError(-1, $"Could not load texture '{assets.Textures[i]}'."); }
+				}
 				UpdateLoadingPercent();
 			}
 			for (int i = 0; i < assets.Sounds?.Count; i++)
 			{
-				if (assets.Sounds[i] == null)
-					continue;
-				try { Sounds[assets.Sounds[i]] = new Sound(new SoundBuffer(assets.Sounds[i])); }
-				catch (System.Exception) { Sounds[assets.Sounds[i]] = null; Console.LogError(-1, $"Could not load sound '{assets.Sounds[i]}'."); }
+				if (assets.Sounds[i] != null)
+				{
+					try { Sounds[assets.Sounds[i]] = new Sound(new SoundBuffer(assets.Sounds[i])); }
+					catch (Exception) { Sounds[assets.Sounds[i]] = null; Console.LogError(-1, $"Could not load sound '{assets.Sounds[i]}'."); }
+				}
 				UpdateLoadingPercent();
 			}
 			for (int i = 0; i < assets.Music?.Count; i++)
 			{
-				if (assets.Music[i] == null)
-					continue;
-				try { Music[assets.Music[i]] = new Music(assets.Music[i]); }
-				catch (System.Exception) { Music[assets.Music[i]] = null; Console.LogError(-1, $"Could not load music '{assets.Music[i]}'."); }
+				if (assets.Music[i] != null)
+				{
+					try { Music[assets.Music[i]] = new Music(assets.Music[i]); }
+					catch (Exception) { Music[assets.Music[i]] = null; Console.LogError(-1, $"Could not load music '{assets.Music[i]}'."); }
+				}
 				UpdateLoadingPercent();
 			}
 			for (int i = 0; i < assets.Fonts?.Count; i++)
 			{
-				if (assets.Fonts[i] == null)
-					continue;
-				try { Fonts[assets.Fonts[i]] = new Font(assets.Fonts[i]); }
-				catch (System.Exception) { Fonts[assets.Fonts[i]] = null; Console.LogError(-1, $"Could not load font '{assets.Fonts[i]}'."); }
+				if (assets.Fonts[i] != null)
+				{
+					try { Fonts[assets.Fonts[i]] = new Font(assets.Fonts[i]); }
+					catch (Exception) { Fonts[assets.Fonts[i]] = null; Console.LogError(-1, $"Could not load font '{assets.Fonts[i]}'."); }
+				}
 				UpdateLoadingPercent();
 			}
 			for (int i = 0; i < assets.TexturedModels3D?.Count; i++)
 			{
 				try { Sprites3D[assets.TexturedModels3D[i].UniqueName] = new Sprite3D(assets.TexturedModels3D[i]); }
-				catch (System.Exception)
+				catch (Exception)
 				{ Sprites3D[assets.TexturedModels3D[i].UniqueName] = null; Console.LogError(-1, $"Could not load textured 3D model '{assets.TexturedModels3D[i]}'."); }
 				UpdateLoadingPercent();
 			}
@@ -294,16 +298,16 @@ namespace SMPL
 		}
 		internal static void UpdateCurrentScene()
 		{
+			if (stopScene != null)
+			{
+				stopScene = null;
+				CurrentScene?.OnStop();
+			}
 			if (startScene != null)
 			{
 				LoadingScene?.OnStop();
 				startScene = null;
 				CurrentScene?.OnStart();
-			}
-			if (stopScene != null)
-			{
-				stopScene = null;
-				CurrentScene?.OnStop();
 			}
 			if (CurrentScene?.LoadingPercent < 100)
 				LoadingScene?.OnUpdate();

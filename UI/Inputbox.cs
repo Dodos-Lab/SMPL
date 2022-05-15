@@ -72,7 +72,7 @@ namespace SMPL.UI
          {
             if (Mouse.IsButtonPressed(Mouse.Button.Left).Once($"press-{GetHashCode()}"))
             {
-               IsFocused = Hitbox.ConvexContains(Scene.MouseCursorPosition);
+               IsFocused = Hitbox.IsHovered;
                ShowCursor();
 
                var index = GetCharacterIndex(Scene.MouseCursorPosition);

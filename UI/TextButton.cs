@@ -46,9 +46,6 @@ namespace SMPL.UI
          {
             var b = QuickText.textInstance.GetLocalBounds();
             Size = new(b.Width * Scale, b.Height * Scale);
-
-            SetDefaultHitbox();
-            Hitbox.TransformLocalLines(this);
          }
          base.Draw(camera);
 

@@ -1,4 +1,5 @@
-﻿using SFML.Graphics;
+﻿using Newtonsoft.Json;
+using SFML.Graphics;
 using SMPL.Graphics;
 using SMPL.Tools;
 using SMPL.UI;
@@ -20,6 +21,13 @@ namespace SMPL.Tools
 		/// This list is used by <see cref="UpdateLines(Object)"/> for writing and all the rest of the methods for reading.
 		/// </summary>
 		public List<Line> Lines { get; } = new();
+
+		/// <summary>
+		/// Returns whether this <see cref="Hitbox"/> contains the mouse cursor in the <see cref="Scene.CurrentScene"/>.
+		/// This is a shortcut for <see cref="ConvexContains"/> -> <see cref="Scene.MouseCursorPosition"/>.
+		/// </summary>
+		[JsonIgnore]
+		public bool IsHovered => ConvexContains(Scene.MouseCursorPosition);
 
 		/// <summary>
 		/// Constructs both <see cref="LocalLines"/> and <see cref="Lines"/> from between the <paramref name="points"/>.

@@ -84,14 +84,16 @@ namespace SMPL.UI
 		/// </summary>
       private void Update()
       {
+         SetDefaultHitbox();
+         Hitbox.TransformLocalLines(this);
+
          if (IsDisabled)
             return;
 
          holdDelayTimer -= Time.Delta;
          holdTriggerTimer = holdTriggerTimer < 0 ? HoldTriggerSpeed : holdTriggerTimer - Time.Delta;
 
-         var mousePos = Scene.MouseCursorPosition;
-         var hovered = Hitbox.ConvexContains(mousePos);
+         var hovered = Hitbox.IsHovered;
          var leftClicked = Mouse.IsButtonPressed(Mouse.Button.Left);
          var id = GetHashCode();
 
@@ -126,6 +128,6 @@ namespace SMPL.UI
             isClicked = false;
          }
       }
-      internal void Unhover() => OnUnhover(this);
+      internal void Hover() => OnHover(this);
    }
 }

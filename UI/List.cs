@@ -22,7 +22,8 @@ namespace SMPL.UI
 
 		[JsonIgnore]
 		public List<Button> Buttons { get; private set; } = new();
-		public int VisibleButtonCount { get; set; } = 5;
+		public int VisibleButtonCountMax { get; set; } = 5;
+		public int VisibleButtonCountCurrent => Math.Min(Buttons.Count, VisibleButtonCountMax);
 		public bool IsHovered
 		{
 			get
@@ -31,7 +32,7 @@ namespace SMPL.UI
 					return false;
 
 				var first = Buttons[scrollIndex.Limit(0, Buttons.Count - 1)];
-				var last = Buttons[(scrollIndex + VisibleButtonCount - 1).Limit(0, Buttons.Count - 1)];
+				var last = Buttons[(scrollIndex + VisibleButtonCountMax - 1).Limit(0, Buttons.Count - 1)];
 
 				hitbox.Lines.Clear();
 				hitbox.Lines.Add(new(first.CornerA, ScrollUp.CornerA));
@@ -43,7 +44,7 @@ namespace SMPL.UI
 			}
 		}
 		public float ButtonWidth { get; set; } = 400;
-		public float ButtonHeight => (LengthMax + ScrollDown.Size.X * 2) / Math.Max(VisibleButtonCount, 1);
+		public float ButtonHeight => (LengthMax + ScrollDown.Size.X * 2) / Math.Max(VisibleButtonCountMax, 1);
 		public int ScrollIndex => scrollIndex;
 
 		public List()
@@ -58,11 +59,11 @@ namespace SMPL.UI
 			if (IsHidden)
 				return;
 
-			VisibleButtonCount = Math.Max(VisibleButtonCount, 1);
+			VisibleButtonCountMax = Math.Max(VisibleButtonCountMax, 1);
 
 			ScrollValue = 1;
 			RangeA = 0;
-			RangeB = MathF.Max((Buttons.Count - VisibleButtonCount).Limit(0, Buttons.Count - 1), RangeA);
+			RangeB = MathF.Max((Buttons.Count - VisibleButtonCountMax).Limit(0, Buttons.Count - 1), RangeA);
 
 			scrollIndex = (int)Value;
 
@@ -78,7 +79,7 @@ namespace SMPL.UI
 			{
 				var btn = Buttons[i];
 				btn.Parent = this;
-				if (i >= scrollIndex && i < scrollIndex + VisibleButtonCount)
+				if (i >= scrollIndex && i < scrollIndex + VisibleButtonCountMax)
 				{
 					var x = ButtonHeight * 0.5f - ScrollUp.Size.X + (ButtonHeight * (i - scrollIndex));
 					var y = -Size.Y * OriginUnit.Y + ButtonWidth * 0.5f + Size.Y;
@@ -106,17 +107,17 @@ namespace SMPL.UI
 			{
 				clicked = null;
 				var first = ScrollIndex.Limit(0, Buttons.Count);
-				var last = (ScrollIndex + VisibleButtonCount).Limit(0, Buttons.Count);
+				var last = (ScrollIndex + VisibleButtonCountMax).Limit(0, Buttons.Count);
 				for (int i = first; i < last; i++)
-					if (Buttons[i].Hitbox.ConvexContains(Scene.MouseCursorPosition))
+					if (Buttons[i].Hitbox.IsHovered)
 						clicked = Buttons[i];
 
 				if (IsHovered == false)
 					OnUnfocus();
 			}
-			if ((left == false).Once($"release-list-{GetHashCode()}") && clicked != null && clicked.Hitbox.ConvexContains(Scene.MouseCursorPosition))
+			if ((left == false).Once($"release-list-{GetHashCode()}") && clicked != null && clicked.Hitbox.IsHovered)
 			{
-				clicked.Unhover();
+				clicked.Hover();
 				OnButtonClick(clicked);
 			}
 		}

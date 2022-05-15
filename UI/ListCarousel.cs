@@ -82,12 +82,6 @@ namespace SMPL.UI
 			RangeA = 0;
 			RangeB = Buttons.Count - 1;
 
-			Previous.SetDefaultHitbox();
-			Previous.Hitbox.TransformLocalLines(Previous);
-
-			Next.SetDefaultHitbox();
-			Next.Hitbox.TransformLocalLines(Next);
-
 			Previous.Size = new(ButtonHeight, ButtonHeight);
 			Next.Size = new(ButtonHeight, ButtonHeight);
 
@@ -106,8 +100,6 @@ namespace SMPL.UI
 			Selection.Size = new(ButtonWidth, ButtonHeight);
 			Selection.Parent = this;
 			Selection.LocalPosition = new();
-			Selection.SetDefaultHitbox();
-			Selection.Hitbox.TransformLocalLines(Selection);
 
 			Selection.Draw(camera);
 		}

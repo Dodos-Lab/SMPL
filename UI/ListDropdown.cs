@@ -42,8 +42,6 @@ namespace SMPL.UI
 
 			ShowList.Position = ScrollUp.CornerD;
 			ShowList.Size = new(ShowList.Size.X, Selection == null ? ShowList.Size.Y : Selection.Size.Y);
-			ShowList.SetDefaultHitbox();
-			ShowList.Hitbox.TransformLocalLines(ShowList);
 
 			if (Selection != null)
 			{
@@ -76,7 +74,7 @@ namespace SMPL.UI
 		protected virtual void OnSelect(Button button) => Selected?.Invoke(button);
 		protected override void OnUnfocus()
 		{
-			if (ShowList == null || ShowList.Hitbox.ConvexContains(Scene.MouseCursorPosition))
+			if (ShowList == null || ShowList.Hitbox.IsHovered)
 				return;
 			isOpen = false;
 		}

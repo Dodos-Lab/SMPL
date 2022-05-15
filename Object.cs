@@ -99,6 +99,9 @@ namespace SMPL
 			get => parent;
 			set
 			{
+				if (parent == value)
+					return;
+
 				if (parent != value && parent != null)
 					parent.children.Remove(this);
 

@@ -120,7 +120,7 @@ namespace SMPL.UI
 				return;
 
 			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
-			if (left.Once($"slider-click-{GetHashCode()}") && Hitbox.ConvexContains(Scene.MouseCursorPosition))
+			if (left.Once($"slider-click-{GetHashCode()}") && Hitbox.IsHovered)
 				isClicked = true;
 
 			if (left == false)

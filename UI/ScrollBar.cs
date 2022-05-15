@@ -49,6 +49,9 @@ namespace SMPL.UI
 			
 			ScrollValueUnit = 0.1f;
 
+			EmptyColor = new(0, 0, 0, 100);
+			ProgressColor = new(0, 0, 0, 100);
+
 			ScrollUp = new();
 			ScrollDown = new();
 			ScrollUp.Clicked += OnScrollUp;
@@ -100,8 +103,6 @@ namespace SMPL.UI
 		/// </summary>
 		public override void Draw(Camera camera = null)
 		{
-			ProgressColor = Color.Transparent;
-
 			base.Draw(camera);
 
 			Update();
@@ -143,12 +144,6 @@ namespace SMPL.UI
 
 			ScrollUp.Position = CornerA;
 			ScrollDown.Position = CornerB;
-
-			ScrollUp.SetDefaultHitbox();
-			ScrollUp.Hitbox.TransformLocalLines(ScrollUp);
-
-			ScrollDown.SetDefaultHitbox();
-			ScrollDown.Hitbox.TransformLocalLines(ScrollDown);
 		}
 	}
 }

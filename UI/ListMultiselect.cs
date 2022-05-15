@@ -14,7 +14,7 @@ namespace SMPL.UI
 		public override void Draw(Camera camera = null)
 		{
 			base.Draw(camera);
-			for (int i = ScrollIndex; i < ScrollIndex + VisibleButtonCount; i++)
+			for (int i = ScrollIndex; i < ScrollIndex + VisibleButtonCountMax; i++)
 			{
 				if (Ticks.Count <= i)
 					continue;
