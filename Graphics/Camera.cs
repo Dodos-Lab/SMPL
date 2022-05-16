@@ -34,6 +34,8 @@ namespace SMPL.Graphics
 		private float scale = 1;
 		internal RenderTexture renderTexture;
 
+		public RenderTexture RenderTexture => renderTexture;
+
 		/// <summary>
 		/// Position in the world.
 		/// </summary>
@@ -89,7 +91,7 @@ namespace SMPL.Graphics
 		public bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
 
 		/// <summary>
-		/// The <see cref="SFML.Graphics.Texture"/> for drawing <see cref="Visual"/>s, may be used by <see cref="Visual"/>s and may be drawn onto
+		/// The <see cref="SFML.Graphics.Texture"/> for drawing <see cref="Visual"/>s. May be used by <see cref="Visual"/>s and may be drawn onto
 		/// another <see cref="Texture"/>.
 		/// </summary>
 		[JsonIgnore]

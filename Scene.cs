@@ -319,17 +319,17 @@ namespace SMPL
 			while (true)
 			{
 				Thread.Sleep(1);
-				if (loadScene != null)
-				{
-					scene.LoadAssets();
-					startScene = loadScene;
-					loadScene = null;
-				}
 				if (unloadScene != null)
 				{
 					scene.UnloadAssets();
 					stopScene = unloadScene;
 					unloadScene = null;
+				}
+				if (loadScene != null)
+				{
+					scene.LoadAssets();
+					startScene = loadScene;
+					loadScene = null;
 				}
 			}
 		}
