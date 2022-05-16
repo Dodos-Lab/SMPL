@@ -16,6 +16,7 @@ namespace SMPL.UI
 	/// </summary>
 	public class List : ScrollBar
 	{
+		private float spacing = 10;
 		private int scrollIndex;
 		private Hitbox hitbox = new();
 		private Button clicked;
@@ -44,7 +45,19 @@ namespace SMPL.UI
 			}
 		}
 		public float ButtonWidth { get; set; } = 400;
-		public float ButtonHeight => (LengthMax + ScrollDown.Size.X * 2) / Math.Max(VisibleButtonCountMax, 1);
+		public float ButtonHeight
+		{
+			get
+			{
+				var max = Math.Max(VisibleButtonCountMax, 1);
+				return (LengthMax + ScrollDown.Size.X * 2) / max - (ButtonSpacing - (ButtonSpacing / max));
+			}
+		}
+		public float ButtonSpacing
+		{
+			get => spacing;
+			set => spacing = value.Limit(0, LengthMax);
+		}
 		public int ScrollIndex => scrollIndex;
 
 		public List()
@@ -81,7 +94,7 @@ namespace SMPL.UI
 				btn.Parent = this;
 				if (i >= scrollIndex && i < scrollIndex + VisibleButtonCountMax)
 				{
-					var x = ButtonHeight * 0.5f - ScrollUp.Size.X + (ButtonHeight * (i - scrollIndex));
+					var x = ButtonHeight * 0.5f - ScrollUp.Size.X + ((ButtonHeight + ButtonSpacing) * (i - scrollIndex));
 					var y = -Size.Y * OriginUnit.Y + ButtonWidth * 0.5f + Size.Y;
 
 					btn.Size = new(ButtonWidth, ButtonHeight);

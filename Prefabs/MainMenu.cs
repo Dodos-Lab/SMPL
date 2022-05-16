@@ -12,7 +12,7 @@ namespace SMPL.Prefabs
 	{
 		private bool settingsVisible;
 		private readonly string fontPath, btnTexPath, logoTexPath, bgTexPath, sliderTexPath;
-		private static Vector2 settingsPos = new(12775, 12805);
+		private static Vector2 audioPos = new(12775, 12805), gfxPos = new(7123, 45523);
 		private readonly Scene playScene;
 
 		protected Sprite Background { get; private set; }
@@ -72,19 +72,20 @@ namespace SMPL.Prefabs
 			SettingsMenu.ScrollUp.TexturePath = btnTexPath;
 			SettingsMenu.ScrollDown.TexturePath = btnTexPath;
 
-			AddSettingsButton("Audio");
+			var gfx = new TextButton(new(fontPath, "Graphics")) { TexturePath = btnTexPath };
+			var audio = new TextButton(new(fontPath, "Audio")) { TexturePath = btnTexPath };
+			gfx.Clicked += OnGfxClick;
+			audio.Clicked += OnAudioClick;
+			SettingsMenu.Buttons.Add(gfx);
+			SettingsMenu.Buttons.Add(audio);
 
 			Settings.Clicked += OnSettingsClick;
 			Exit.Clicked += OnExitClick;
-
-			void AddSettingsButton(string label)
-			{
-				var btn = new TextButton(new(fontPath, label)) { TexturePath = btnTexPath };
-				SettingsMenu.Buttons.Add(btn);
-			}
 		}
 
-		private void OnPlayClick(Button button) => CurrentScene = playScene ?? CurrentScene;
+		protected virtual void OnGfxClick(Button button) => MainCamera.Position = gfxPos;
+		protected virtual void OnAudioClick(Button button) => MainCamera.Position = audioPos;
+		protected virtual void OnPlayClick(Button button) => CurrentScene = playScene ?? CurrentScene;
 		protected virtual void OnBackClick(Button button) => MainCamera.Position = default;
 		protected virtual void OnSettingsClick(Button button) => SettingsMenuIsVisible = !SettingsMenuIsVisible;
 		protected virtual void OnExitClick(Button button) => Game.Stop();
@@ -127,7 +128,7 @@ namespace SMPL.Prefabs
 				if (SettingsMenuIsVisible)
 					SettingsMenu.Draw();
 
-				SettingsMenu.LocalPosition = new(450, -MathF.Max(SettingsMenu.VisibleButtonCountCurrent - 1, 0) * SettingsMenu.ButtonHeight);
+				SettingsMenu.LocalPosition = new(450, -MathF.Max(SettingsMenu.VisibleButtonCountCurrent - 1, 0) * (SettingsMenu.ButtonHeight + SettingsMenu.ButtonSpacing));
 
 				Settings.Parent = Buttons.Count == 0 ? Play : Buttons[^1];
 				Settings.LocalSize = btnSz;
