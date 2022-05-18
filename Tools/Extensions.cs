@@ -702,7 +702,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public static Vector2 PointMoveAtAngle(this Vector2 point, float angle, float speed, bool fpsDependent = true)
 		{
-			var result = PointMoveInDirection(point, Vector2.Normalize(angle.AngleToDirection()), speed, fpsDependent);
+			var result = PointMoveInDirection(point, Vector2.Normalize(angle.AngleTo360().AngleToDirection()), speed, fpsDependent);
 			return result;
 		}
 		/// <summary>
