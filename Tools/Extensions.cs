@@ -663,7 +663,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public static float AngleBetweenPoints(this Vector2 point, Vector2 targetPoint)
 		{
-			return DirectionToAngle(targetPoint - point);
+			return DirectionToAngle(targetPoint - point).AngleTo360();
 		}
 		/// <summary>
 		/// Snaps a <paramref name="point"/> to the closest grid cell according to <paramref name="gridSize"/> and returns the result.
