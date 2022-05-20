@@ -14,14 +14,16 @@ namespace SMPL.Prefabs
 	{
 		public class Player : Object
 		{
-			internal Vector2 prevPos;
+			private const float TALLNESS = 75f, DUCK_TALLNESS = 45f, DUCK_SLOW_MULTIPLIER = 0.3f;
 			internal readonly Hitbox rays = new(), hitbox = new();
+			private float jumpVelocity, currentTallness;
 
 			public Keyboard.Key KeyForward { get; set; } = Keyboard.Key.W;
 			public Keyboard.Key KeyBackward { get; set; } = Keyboard.Key.S;
 			public Keyboard.Key KeyLeft { get; set; } = Keyboard.Key.A;
 			public Keyboard.Key KeyRight { get; set; } = Keyboard.Key.D;
 			public Keyboard.Key KeyJump { get; set; } = Keyboard.Key.Space;
+			public Keyboard.Key KeyDuck { get; set; } = Keyboard.Key.LControl;
 			public Keyboard.Key KeyFreeMouse { get; set; } = Keyboard.Key.LAlt;
 			public bool IsRotatingWithMouse { get; set; } = true;
 			public bool MouseIsFree { get; set; }
@@ -31,34 +33,58 @@ namespace SMPL.Prefabs
 			public int RayAmount { get; set; } = 640;
 			public float RotationSpeed { get; set; } = 0.2f;
 			public float MovementSpeed { get; set; } = 100;
-			public float AngleHeight { get; set; } = 0;
-			public float Height { get; set; } = 0;
+			public float AngleHeight { get; set; }
+			public float Height { get; set; }
+			public float JumpStrength { get; set; } = 4f;
+			public float Gravity { get; set; } = 1;
+			public bool IsOnGround => Height == currentTallness - TALLNESS;
 
-			internal void CheckCollision()
+			internal void CaptureAndProcessInput()
 			{
-				hitbox.LocalLines.Clear();
-				var sz = 10;
-				hitbox.LocalLines.Add(new(new(-sz, -sz), new(sz, -sz)));
-				hitbox.LocalLines.Add(new(new(sz, -sz), new(sz, sz)));
-				hitbox.LocalLines.Add(new(new(sz, sz), new(-sz, sz)));
-				hitbox.LocalLines.Add(new(new(-sz, sz), new(-sz, -sz)));
-				hitbox.TransformLocalLines(this);
+				var prevPos = Position;
 
-				for (int i = 0; i < SpriteRaycasts.Count; i++)
+				CalculateJump();
+				TryRotate();
+				TryMove();
+				UpdateHitbox();
+				CheckCollision();
+
+				void CalculateJump()
 				{
-					var spr = SpriteRaycasts[i];
-					if (spr.IsSolid && hitbox.ConvexOverlaps(spr.Hitbox))
+					jumpVelocity -= Time.Delta * Gravity * 10f;
+					Height += jumpVelocity * Time.Delta * 60f;
+					Height = MathF.Max(Height, currentTallness - TALLNESS);
+				}
+				void CheckCollision()
+				{
+					for (int i = 0; i < SpriteRaycasts.Count; i++)
 					{
-						PlayerInstance.Position = prevPos;
-						PlayerInstance.Position = PlayerInstance.Position.PointMoveTowardPoint(spr.Position, -MovementSpeed);
+						var spr = SpriteRaycasts[i];
+						var tallness = currentTallness - TALLNESS;
+						var isAbove = spr.Height + spr.Size.Y < Height - tallness;
+						var isBellow = spr.Height > Height - tallness + currentTallness;
+
+						if (spr.IsSolid && hitbox.ConvexOverlaps(spr.Hitbox) && (isAbove == false && isBellow == false))
+						{
+							var crossPoints = hitbox.GetCrossPoints(spr.Hitbox);
+							if (crossPoints.Count == 0)
+								continue;
+
+							var ang = crossPoints[0].AngleBetweenPoints(prevPos);
+							PlayerInstance.Position = prevPos.PointMoveAtAngle(ang, MovementSpeed * 0.2f);
+						}
 					}
 				}
-			}
-			internal void CaptureInput()
-			{
-				TryMove();
-				TryRotate();
-
+				void UpdateHitbox()
+				{
+					hitbox.LocalLines.Clear();
+					var sz = 8;
+					hitbox.LocalLines.Add(new(new(-sz, -sz), new(sz, -sz)));
+					hitbox.LocalLines.Add(new(new(sz, -sz), new(sz, sz)));
+					hitbox.LocalLines.Add(new(new(sz, sz), new(-sz, sz)));
+					hitbox.LocalLines.Add(new(new(-sz, sz), new(-sz, -sz)));
+					hitbox.TransformLocalLines(this);
+				}
 				void TryMove()
 				{
 					var dir = new Vector2();
@@ -66,11 +92,16 @@ namespace SMPL.Prefabs
 					if (Keyboard.IsKeyPressed(KeyBackward)) dir += new Vector2(-1, 0);
 					if (Keyboard.IsKeyPressed(KeyLeft)) dir += new Vector2(0, -1);
 					if (Keyboard.IsKeyPressed(KeyRight)) dir += new Vector2(0, 1);
-
-					prevPos = Position;
+					if (IsOnGround && Keyboard.IsKeyPressed(KeyJump).Once("player-jump-ffalskjf")) jumpVelocity = JumpStrength;
+					if (Keyboard.IsKeyPressed(KeyDuck).Once("player-duck-ffalskjf")) jumpVelocity = IsOnGround ? 0 : jumpVelocity;
+					if (IsOnGround && (Keyboard.IsKeyPressed(KeyDuck) == false).Once("player-unduck-ffalskjf")) jumpVelocity = 1;
+					currentTallness = Keyboard.IsKeyPressed(KeyDuck) ? DUCK_TALLNESS : TALLNESS;
 
 					if (dir != default)
-						Position = Position.PointMoveAtAngle(Angle + dir.DirectionToAngle(), MovementSpeed);
+					{
+						var ms = MovementSpeed * (currentTallness != TALLNESS ? DUCK_SLOW_MULTIPLIER : 1);
+						Position = Position.PointMoveAtAngle(Angle + dir.DirectionToAngle(), ms);
+					}
 				}
 				void TryRotate()
 				{
@@ -187,7 +218,7 @@ namespace SMPL.Prefabs
 		}
 		protected override void OnUpdate()
 		{
-			PlayerInstance.CaptureInput();
+			PlayerInstance.CaptureAndProcessInput();
 			PlayerInstance.UpdateRays();
 
 			UpdateEntities();
@@ -205,8 +236,6 @@ namespace SMPL.Prefabs
 		{
 			for (int i = 0; i < SpriteRaycasts.Count; i++)
 				SpriteRaycasts[i].Update();
-
-			PlayerInstance.CheckCollision();
 		}
 		private static void DrawSpriteRaycasts()
 		{
