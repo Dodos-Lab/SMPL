@@ -111,6 +111,10 @@ namespace SMPL
 			/// All the paths of the required shaders in the <see cref="CurrentScene"/>.
 			/// </summary>
 			public List<string> Shaders { get; set; }
+			/// <summary>
+			/// All the paths of the required databases in the <see cref="CurrentScene"/>.
+			/// </summary>
+			public List<string> Databases { get; set; }
 		}
 
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
@@ -176,6 +180,10 @@ namespace SMPL
 		/// The loaded shaders whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
 		/// </summary>
 		public Dictionary<string, Shader> Shaders { get; } = new();
+		/// <summary>
+		/// The loaded databases whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
+		/// </summary>
+		public Dictionary<string, Database> Databases { get; } = new();
 
 		/// <summary>
 		/// Returns the required asset paths and details whenever this scene becomes the <see cref="CurrentScene"/>.
@@ -256,13 +264,20 @@ namespace SMPL
 				{ Sprites3D[assets.TexturedModels3D[i].UniqueName] = null; Console.LogError(-1, $"Could not load textured 3D model '{assets.TexturedModels3D[i]}'."); }
 				UpdateLoadingPercent();
 			}
+			for (int i = 0; i < assets.Databases?.Count; i++)
+			{
+				try { Databases[assets.Databases[i]] = Database.Load(assets.Databases[i]); }
+				catch (Exception)
+				{ Databases[assets.Databases[i]] = null; Console.LogError(-1, $"Could not load database '{assets.Databases[i]}'."); }
+				UpdateLoadingPercent();
+			}
 
 			void UpdateLoadingPercent()
 			{
 				loadedCount++;
 
 				var total = GetCount(assets.Fonts) + GetCount(assets.Music) + GetCount(assets.Sounds) + GetCount(assets.Textures) +
-					GetCount(assets.TexturedModels3D);
+					GetCount(assets.TexturedModels3D) + GetCount(assets.Databases);
 				CurrentScene.LoadingPercent = loadedCount.Map(0, total, 0, 100);
 
 				int GetCount<T>(List<T> list) => list?.Count ?? 0;

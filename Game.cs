@@ -17,6 +17,8 @@ namespace SMPL
 	/// </summary>
 	public static class Game
 	{
+		public static Settings Settings { get; internal set; } = new();
+
 		/// <summary>
 		/// The raw <see cref="RenderWindow"/> instance. Useful for input events, drawing, ingame settings etc.
 		/// </summary>

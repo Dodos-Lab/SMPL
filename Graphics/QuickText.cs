@@ -58,10 +58,11 @@ namespace SMPL.Graphics
 		/// <summary>
 		/// Create the <see cref="QuickText"/> with a certain <paramref name="fontPath"/>.
 		/// </summary>
-		public QuickText(string fontPath, string text = "Hello, World!")
+		public QuickText(string fontPath, string text = "Hello, World!", Vector2 position = default)
 		{
 			Text = text;
 			FontPath = fontPath;
+			Position = position;
 		}
 
 		public void Draw(Camera camera = null)

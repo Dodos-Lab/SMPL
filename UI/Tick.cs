@@ -14,7 +14,7 @@ namespace SMPL.UI
       /// Returns whether the <see cref="Tick"/> is "ticked". This value is updated before the <see cref="Button.Clicked"/> event
       /// so that it can be used in the event logic.
       /// </summary>
-      public bool IsActive { get; private set; }
+      public bool IsActive { get; set; }
       /// <summary>
       /// A way for the child classes of <see cref="Tick"/> to raise the event and handle the logic around it by overriding this.
       /// </summary>

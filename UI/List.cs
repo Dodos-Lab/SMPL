@@ -32,14 +32,14 @@ namespace SMPL.UI
 				if (IsHidden || IsDisabled || Buttons.Count == 0)
 					return false;
 
-				var first = Buttons[scrollIndex.Limit(0, Buttons.Count - 1)];
-				var last = Buttons[(scrollIndex + VisibleButtonCountMax - 1).Limit(0, Buttons.Count - 1)];
+				var topLeft = ScrollUp.CornerA.PointMoveAtAngle(180, ScrollUp.Size.X + ButtonWidth, false);
+				var bottomLeft = ScrollDown.CornerB.PointMoveAtAngle(180, ScrollDown.Size.X + ButtonWidth, false);
 
 				hitbox.Lines.Clear();
-				hitbox.Lines.Add(new(first.CornerA, ScrollUp.CornerA));
+				hitbox.Lines.Add(new(topLeft, ScrollUp.CornerA));
 				hitbox.Lines.Add(new(ScrollUp.CornerA, ScrollDown.CornerB));
-				hitbox.Lines.Add(new(ScrollDown.CornerB, last.CornerD));
-				hitbox.Lines.Add(new(last.CornerD, first.CornerA));
+				hitbox.Lines.Add(new(ScrollDown.CornerB, bottomLeft));
+				hitbox.Lines.Add(new(bottomLeft, topLeft));
 
 				return hitbox.ConvexContains(Scene.MouseCursorPosition);
 			}
