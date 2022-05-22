@@ -266,9 +266,8 @@ namespace SMPL
 			}
 			for (int i = 0; i < assets.Databases?.Count; i++)
 			{
-				try { Databases[assets.Databases[i]] = Database.Load(assets.Databases[i]); }
-				catch (Exception)
-				{ Databases[assets.Databases[i]] = null; Console.LogError(-1, $"Could not load database '{assets.Databases[i]}'."); }
+				if (assets.Databases[i] != null)
+					Databases[assets.Databases[i]] = Database.Load(assets.Databases[i]);
 				UpdateLoadingPercent();
 			}
 

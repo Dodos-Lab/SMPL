@@ -23,8 +23,8 @@ namespace SMPL.UI
 		/// </summary>
 		public float Length
 		{
-			get => LengthUnit.Map(0, 1, 0, LengthMax);
-			set => LengthUnit = value.Map(0, LengthMax, 0, 1);
+			get => LengthUnit.Map(0, 1, 0, MaxLength);
+			set => LengthUnit = value.Map(0, MaxLength, 0, 1);
 		}
 		/// <summary>
 		/// Whether this UI element is currently interactive.
@@ -111,7 +111,7 @@ namespace SMPL.UI
 
 		private void Update()
 		{
-			Size = new(LengthMax * Scale, Size.Y);
+			Size = new(MaxLength * Scale, Size.Y);
 
 			SetDefaultHitbox();
 			Hitbox.TransformLocalLines(this);

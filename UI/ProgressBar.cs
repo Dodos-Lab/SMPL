@@ -32,7 +32,7 @@ namespace SMPL.UI
       /// <summary>
       /// The maximum <see cref="Sprite.Size"/>.X in the world. In other words: the maximum size (width) of the <see cref="ProgressBar"/>.
       /// </summary>
-      public float LengthMax
+      public float MaxLength
       {
          get => max;
          set { max = value; Update(); }
@@ -57,15 +57,15 @@ namespace SMPL.UI
 
       public ProgressBar()
       {
-         Size = new Vector2(LengthMax, 40) * Scale;
+         Size = new Vector2(MaxLength, 40) * Scale;
          RangeB = 1;
          OriginUnit = new(0, 0.5f);
-         LengthMax = 400;
+         MaxLength = 400;
          ProgressUnit = 0.5f;
       }
       private void Update()
       {
-         Size = new(Value.Map(RangeA, RangeB, 0, LengthMax) * Scale, Size.Y);
+         Size = new(Value.Map(RangeA, RangeB, 0, MaxLength) * Scale, Size.Y);
          TexCoordsUnitB = new(ProgressUnit, TexCoordsUnitB.Y);
       }
    }

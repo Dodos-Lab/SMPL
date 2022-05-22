@@ -102,7 +102,7 @@ namespace SMPL
 				if (parent == value)
 					return;
 
-				if (parent != value && parent != null)
+				if (parent != value && parent != null && parent.children != null)
 					parent.children.Remove(this);
 
 				var prevPos = Position;

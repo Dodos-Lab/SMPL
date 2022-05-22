@@ -32,8 +32,8 @@ namespace SMPL.UI
 				if (IsHidden || IsDisabled || Buttons.Count == 0)
 					return false;
 
-				var topLeft = ScrollUp.CornerA.PointMoveAtAngle(180, ScrollUp.Size.X + ButtonWidth, false);
-				var bottomLeft = ScrollDown.CornerB.PointMoveAtAngle(180, ScrollDown.Size.X + ButtonWidth, false);
+				var topLeft = ScrollUp.CornerA.PointMoveAtAngle(180, (ScrollUp.LocalSize.X + ButtonWidth) * Scale, false);
+				var bottomLeft = ScrollDown.CornerB.PointMoveAtAngle(180, (ScrollDown.LocalSize.X + ButtonWidth) * Scale, false);
 
 				hitbox.Lines.Clear();
 				hitbox.Lines.Add(new(topLeft, ScrollUp.CornerA));
@@ -50,13 +50,13 @@ namespace SMPL.UI
 			get
 			{
 				var max = Math.Max(VisibleButtonCountMax, 1);
-				return (LengthMax + ScrollDown.Size.X * 2) / max - (ButtonSpacing - (ButtonSpacing / max));
+				return (MaxLength + ScrollDown.LocalSize.X * 2) / max - (ButtonSpacing - (ButtonSpacing / max));
 			}
 		}
 		public float ButtonSpacing
 		{
 			get => spacing;
-			set => spacing = value.Limit(0, LengthMax);
+			set => spacing = value.Limit(0, MaxLength);
 		}
 		public int ScrollIndex => scrollIndex;
 
@@ -94,10 +94,11 @@ namespace SMPL.UI
 				btn.Parent = this;
 				if (i >= scrollIndex && i < scrollIndex + VisibleButtonCountMax)
 				{
-					var x = ButtonHeight * 0.5f - ScrollUp.Size.X + ((ButtonHeight + ButtonSpacing) * (i - scrollIndex));
-					var y = -Size.Y * OriginUnit.Y + ButtonWidth * 0.5f + Size.Y;
+					var x = ButtonHeight * 0.5f - ScrollUp.LocalSize.X + ((ButtonHeight + ButtonSpacing) * (i - scrollIndex));
+					var y = -LocalSize.Y * OriginUnit.Y + ButtonWidth * 0.5f + LocalSize.Y;
 
-					btn.Size = new(ButtonWidth, ButtonHeight);
+					btn.LocalSize = new(ButtonWidth, ButtonHeight);
+					btn.Scale = Scale;
 					btn.OriginUnit = new(0.5f);
 					btn.LocalPosition = new(x, y);
 					btn.SetDefaultHitbox();
