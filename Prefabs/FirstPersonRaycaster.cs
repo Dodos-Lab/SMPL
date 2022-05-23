@@ -1,12 +1,15 @@
 ﻿using Newtonsoft.Json;
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 using SMPL.Graphics;
 using SMPL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Console = SMPL.Tools.Console;
 using Sprite = SMPL.Graphics.Sprite;
+using Time = SMPL.Tools.Time;
 
 namespace SMPL.Prefabs
 {
@@ -166,16 +169,26 @@ namespace SMPL.Prefabs
 			public Color HeightShadowColor { get; set; }
 
 			public override void Draw(Camera camera = null) { }
-			internal void Update()
+			internal virtual void OnUpdate()
 			{
-				OnUpdate();
-
 				Hitbox.Lines.Clear();
 				Hitbox.Lines.Add(Line);
 			}
-			internal virtual void OnUpdate() { }
 		}
 		public class Wall : SpriteRaycast { }
+		public class Surface : SpriteRaycast
+		{
+			public new Vector2 CornerA => GetPositionFromSelf(-Origin);
+			public new Vector2 CornerB => GetPositionFromSelf(new Vector2(LocalSize.X, 0) - Origin);
+			public new Vector2 CornerC => GetPositionFromSelf(LocalSize - Origin);
+			public new Vector2 CornerD => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin);
+
+			internal override void OnUpdate()
+			{
+				SetDefaultHitbox();
+				Hitbox.TransformLocalLines(this);
+			}
+		}
 		public class Entity : SpriteRaycast
 		{
 			public Entity()
@@ -235,72 +248,107 @@ namespace SMPL.Prefabs
 		private static void UpdateEntities()
 		{
 			for (int i = 0; i < SpriteRaycasts.Count; i++)
-				SpriteRaycasts[i].Update();
+				SpriteRaycasts[i].OnUpdate();
 		}
 		private static void DrawSpriteRaycasts()
 		{
 			if (SpriteRaycasts == null)
 				return;
 
+			var wt = SpriteRaycast.Texture == null ? 0 : SpriteRaycast.Texture.Size.X;
+			var ht = SpriteRaycast.Texture == null ? 0 : SpriteRaycast.Texture.Size.Y;
+			var rays = PlayerInstance.rays.Lines;
+			var w = ColumnWidth;
+			var camW = MainCamera.Resolution.X * 0.5f;
+			var y = -PlayerInstance.AngleHeight;
 			var columns = new SortedDictionary<float, List<Vertex[]>>();
+			var surfaces = new VertexArray(PrimitiveType.Quads);
+			var halfFov = PlayerInstance.FieldOfView * 0.5f;
+
 			for (int j = 0; j < SpriteRaycasts.Count; j++)
 			{
 				var spr = SpriteRaycasts[j];
-				var rays = PlayerInstance.rays.Lines;
-				var w = ColumnWidth;
-				var camW = MainCamera.Resolution.X * 0.5f;
-				var y = -PlayerInstance.AngleHeight;
+				var isWall = spr is Wall;
 
-				for (int i = 0; i < rays.Count; i++)
-				{
-					var ray = rays[i];
-					var crossPoint = ray.GetCrossPoint(spr.Line);
-
-					if (crossPoint.IsNaN())
-						continue;
-
-					var l = i * w - camW;
-					var r = (i + 1) * w - camW;
-					var rayAng = ray.Angle - PlayerInstance.Angle;
-					var h = new Line(ray.A, crossPoint).Length;
-					var wt = SpriteRaycast.Texture == null ? 0 : SpriteRaycast.Texture.Size.X;
-					var ht = SpriteRaycast.Texture == null ? 0 : SpriteRaycast.Texture.Size.Y;
-					var rawLength = spr.Line.A.DistanceBetweenPoints(crossPoint);
-					var texX = rawLength.Map(0, spr.Line.Length, spr.TexCoordsUnitA.X, spr.TexCoordsUnitB.X) * wt;
-					var texY1 = spr.TexCoordsUnitA.Y * ht;
-					var texY2 = spr.TexCoordsUnitB.Y * ht;
-
-					h = FixFisheye(h, rayAng).Map(0, 1, 0, MainCamera.Resolution.Y) * 20;
-
-					var top = y - h;
-					var bot = y + h;
-					var t = (spr.Height + spr.Size.Y - PlayerInstance.Height).Map(0, 100, bot, top);
-					var b = (spr.Height - PlayerInstance.Height).Map(0, 100, bot, top);
-					var shadowB = (-PlayerInstance.Height).Map(0, 100, bot, top);
-
-					var c = (h * SpriteRaycast.FadeDistance).Limit(0, MainCamera.Resolution.Y).Map(0, MainCamera.Resolution.Y, 0, 1);
-					var color = new Vector3(spr.Tint.R, spr.Tint.G, spr.Tint.B) * c;
-					var tint = new Color((byte)color.X, (byte)color.Y, (byte)color.Z);
-					var verts = new Vertex[4];
-					var shadowVerts = new Vertex[4];
-
-					verts[0] = new(new(l, t), tint, new(texX, texY1));
-					verts[1] = new(new(r, t), tint, new(texX, texY1));
-					verts[2] = new(new(r, b), tint, new(texX, texY2));
-					verts[3] = new(new(l, b), tint, new(texX, texY2));
-
-					shadowVerts[0] = new(new(l, shadowB + 1), new Color(0, 0, 0, 100));
-					shadowVerts[1] = new(new(r, shadowB + 1), new Color(0, 0, 0, 100));
-					shadowVerts[2] = new(new(r, shadowB - 1), new Color(0, 0, 0, 100));
-					shadowVerts[3] = new(new(l, shadowB - 1), new Color(0, 0, 0, 100));
-
-					if (columns.ContainsKey(h))
+				if (isWall)
+					for (int i = 0; i < rays.Count; i++)
 					{
-						columns[h].Add(shadowVerts);
-						columns[h].Add(verts);
+						var ray = rays[i];
+						var rayAng = ray.Angle - PlayerInstance.Angle;
+						var verts = new Vertex[4];
+						var shadowVerts = new Vertex[4];
+
+						var crossPoint = ray.GetCrossPoint(spr.Line);
+						if (crossPoint.IsNaN())
+							continue;
+
+						var l = i * w - camW;
+						var r = (i + 1) * w - camW;
+						var dist = new Line(ray.A, crossPoint).Length;
+						var rawLength = spr.Line.A.DistanceBetweenPoints(crossPoint);
+						var texX = rawLength.Map(0, spr.Line.Length, spr.TexCoordsUnitA.X, spr.TexCoordsUnitB.X) * wt;
+						var texY1 = spr.TexCoordsUnitA.Y * ht;
+						var texY2 = spr.TexCoordsUnitB.Y * ht;
+
+						dist = FixFisheye(rayAng, dist);
+
+						var top = y - dist;
+						var bot = y + dist;
+						var t = (spr.Height + spr.Size.Y - PlayerInstance.Height).Map(0, 100, bot, top);
+						var b = (spr.Height - PlayerInstance.Height).Map(0, 100, bot, top);
+						var shadowB = (-PlayerInstance.Height).Map(0, 100, bot, top);
+						var tint = GetColor(dist);
+
+						verts[0] = new(new(l, t), tint, new(texX, texY1));
+						verts[1] = new(new(r, t), tint, new(texX, texY1));
+						verts[2] = new(new(r, b), tint, new(texX, texY2));
+						verts[3] = new(new(l, b), tint, new(texX, texY2));
+
+						shadowVerts[0] = new(new(l, shadowB + 1), new Color(0, 0, 0, 100));
+						shadowVerts[1] = new(new(r, shadowB + 1), new Color(0, 0, 0, 100));
+						shadowVerts[2] = new(new(r, shadowB - 1), new Color(0, 0, 0, 100));
+						shadowVerts[3] = new(new(l, shadowB - 1), new Color(0, 0, 0, 100));
+
+						if (columns.ContainsKey(dist))
+						{
+							columns[dist].Add(shadowVerts);
+							columns[dist].Add(verts);
+						}
+						else
+							columns[dist] = new() { shadowVerts, verts };
+
+						Color GetColor(float dist)
+						{
+							var c = (dist * SpriteRaycast.FadeDistance).Limit(0, MainCamera.Resolution.Y).Map(0, MainCamera.Resolution.Y, 0, 1);
+							var color = new Vector3(spr.Tint.R, spr.Tint.G, spr.Tint.B) * c;
+							return new Color((byte)color.X, (byte)color.Y, (byte)color.Z);
+						}
 					}
-					else
-						columns[h] = new() { shadowVerts, verts };
+				else if (spr is Surface surface)
+				{
+					var rayA = new Line(PlayerInstance.Position, surface.CornerA);
+					var rayB = new Line(PlayerInstance.Position, surface.CornerB);
+					var rayC = new Line(PlayerInstance.Position, surface.CornerC);
+					var rayD = new Line(PlayerInstance.Position, surface.CornerD);
+
+					surfaces.Append(RayToVertex(rayA, 0, 0));
+					surfaces.Append(RayToVertex(rayB, 1, 0));
+					surfaces.Append(RayToVertex(rayC, 1, 1));
+					surfaces.Append(RayToVertex(rayD, 0, 1));
+
+					Vertex RayToVertex(Line ray, float texX, float texY)
+					{
+						var rayAng = (ray.Angle - PlayerInstance.Angle).AngleTo360();
+
+						var rightX = rayAng.Map(0, halfFov, 0, camW);
+						var leftX = rayAng.Map(360, 360 - halfFov, 0, -camW);
+						var yy = (y - surface.Height) + FixFisheye(rayAng, ray.Length - PlayerInstance.Height);
+
+						var resultX = (rayAng.IsBetween(270, 360) ? leftX : rightX).Limit(-MainCamera.Resolution.X, MainCamera.Resolution.X);
+						var resultY = yy.Limit(-MainCamera.Resolution.Y, MainCamera.Resolution.Y);
+
+						return new Vertex(new Vector2f(resultX, resultY), surface.Tint, new Vector2f(wt * texX, ht * texY));
+					}
 				}
 			}
 
@@ -316,8 +364,9 @@ namespace SMPL.Prefabs
 				}
 
 			MainCamera.RenderTexture.Draw(resultVerts, new(SpriteRaycast.BlendMode, Transform.Identity, SpriteRaycast.Texture, null));
+			MainCamera.RenderTexture.Draw(surfaces, new(SpriteRaycast.BlendMode, Transform.Identity, SpriteRaycast.Texture, null));
 
-			float FixFisheye(float rayLength, float rayAngle) => 1 / (rayLength * MathF.Cos(rayAngle.DegreesToRadians()));
+			float FixFisheye(float rayAng, float dist) => (1 / (dist * MathF.Cos(rayAng.DegreesToRadians()))).Map(0, 1, 0, MainCamera.Resolution.Y) * 20;
 		}
 		private static void DrawBackground()
 		{
