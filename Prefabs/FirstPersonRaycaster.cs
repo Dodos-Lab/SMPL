@@ -17,9 +17,9 @@ namespace SMPL.Prefabs
 	{
 		public class Player : Object
 		{
-			private const float TALLNESS = 75f, DUCK_TALLNESS = 45f, DUCK_SLOW_MULTIPLIER = 0.3f;
+			internal const float TALLNESS = 75f, DUCK_TALLNESS = 45f, DUCK_SLOW_MULTIPLIER = 0.3f;
 			internal readonly Hitbox rays = new(), hitbox = new();
-			private float jumpVelocity, currentTallness;
+			internal float jumpVelocity, currentTallness;
 
 			public Keyboard.Key KeyForward { get; set; } = Keyboard.Key.W;
 			public Keyboard.Key KeyBackward { get; set; } = Keyboard.Key.S;
@@ -67,7 +67,7 @@ namespace SMPL.Prefabs
 						var isAbove = spr.Height + spr.Size.Y < Height - tallness;
 						var isBellow = spr.Height > Height - tallness + currentTallness;
 
-						if (spr.IsSolid && hitbox.ConvexOverlaps(spr.Hitbox) && (isAbove == false && isBellow == false))
+						if (spr is Wall && spr.IsSolid && hitbox.ConvexOverlaps(spr.Hitbox) && (isAbove == false && isBellow == false))
 						{
 							var crossPoints = hitbox.GetCrossPoints(spr.Hitbox);
 							if (crossPoints.Count == 0)
@@ -242,6 +242,7 @@ namespace SMPL.Prefabs
 			{
 				SpriteRaycasts[i].Hitbox.Draw();
 				PlayerInstance.hitbox.Draw();
+				PlayerInstance.rays.Draw(color: new(255, 255, 255, 2));
 			}
 		}
 
@@ -260,31 +261,37 @@ namespace SMPL.Prefabs
 			var rays = PlayerInstance.rays.Lines;
 			var w = ColumnWidth;
 			var camW = MainCamera.Resolution.X * 0.5f;
+			var camH = MainCamera.Resolution.Y * 0.5f;
 			var y = -PlayerInstance.AngleHeight;
 			var columns = new SortedDictionary<float, List<Vertex[]>>();
 			var surfaces = new VertexArray(PrimitiveType.Quads);
-			var halfFov = PlayerInstance.FieldOfView * 0.5f;
+			var texCoordCorners = new List<Vector2[]>()
+			{
+				new Vector2[] { new(0, 0), new(1, 0) },
+				new Vector2[] { new(1, 0), new(1, 1) },
+				new Vector2[] { new(1, 1), new(0, 1) },
+				new Vector2[] { new(0, 1), new(0, 0) }
+			};
 
 			for (int j = 0; j < SpriteRaycasts.Count; j++)
 			{
 				var spr = SpriteRaycasts[j];
 				var isWall = spr is Wall;
 
-				if (isWall)
-					for (int i = 0; i < rays.Count; i++)
-					{
-						var ray = rays[i];
-						var rayAng = ray.Angle - PlayerInstance.Angle;
-						var verts = new Vertex[4];
-						var shadowVerts = new Vertex[4];
+				for (int i = 0; i < rays.Count; i++)
+				{
+					var ray = rays[i];
+					var rayAng = ray.Angle - PlayerInstance.Angle;
+					var l = i * w - camW;
+					var r = (i + 1) * w - camW;
 
+					if (isWall)
+					{
 						var crossPoint = ray.GetCrossPoint(spr.Line);
 						if (crossPoint.IsNaN())
 							continue;
 
-						var l = i * w - camW;
-						var r = (i + 1) * w - camW;
-						var dist = new Line(ray.A, crossPoint).Length;
+						var dist = ray.A.DistanceBetweenPoints(crossPoint);
 						var rawLength = spr.Line.A.DistanceBetweenPoints(crossPoint);
 						var texX = rawLength.Map(0, spr.Line.Length, spr.TexCoordsUnitA.X, spr.TexCoordsUnitB.X) * wt;
 						var texY1 = spr.TexCoordsUnitA.Y * ht;
@@ -299,6 +306,9 @@ namespace SMPL.Prefabs
 						var shadowB = (-PlayerInstance.Height).Map(0, 100, bot, top);
 						var tint = GetColor(dist);
 
+						var verts = new Vertex[4];
+						var shadowVerts = new Vertex[4];
+
 						verts[0] = new(new(l, t), tint, new(texX, texY1));
 						verts[1] = new(new(r, t), tint, new(texX, texY1));
 						verts[2] = new(new(r, b), tint, new(texX, texY2));
@@ -309,45 +319,89 @@ namespace SMPL.Prefabs
 						shadowVerts[2] = new(new(r, shadowB - 1), new Color(0, 0, 0, 100));
 						shadowVerts[3] = new(new(l, shadowB - 1), new Color(0, 0, 0, 100));
 
-						if (columns.ContainsKey(dist))
+						AddVerts(dist, verts, shadowVerts);
+					}
+					else
+					{
+						var crossPoints = spr.Hitbox.GetCrossPoints(new(ray.A, ray.B));
+						var isInside = spr.Hitbox.ConvexContains(PlayerInstance.Position);
+						if (isInside == false)
 						{
-							columns[dist].Add(shadowVerts);
-							columns[dist].Add(verts);
+							if (crossPoints.Count == 0)
+								continue;
+
+							if (crossPoints.Count == 1)
+								crossPoints.Add(crossPoints[0]);
+
+							var distA = FixFisheye(rayAng, ray.A.DistanceBetweenPoints(crossPoints[0]));
+							var distB = FixFisheye(rayAng, ray.A.DistanceBetweenPoints(crossPoints[1]));
+							var colA = GetColor(distA);
+							var colB = GetColor(distB);
+							var top = (spr.Height - PlayerInstance.Height).Map(0, 100, y + distA, y - distA);
+							var bot = (spr.Height - PlayerInstance.Height).Map(0, 100, y + distB, y - distB);
+
+							var lineA = GetLine(crossPoints[0], out var lineIndexA);
+							var lineB = GetLine(crossPoints[1], out var lineIndexB);
+							var texCoordsA = texCoordCorners[lineIndexA];
+							var texCoordsB = texCoordCorners[lineIndexB];
+							var percentA = lineA.A.DistanceBetweenPoints(crossPoints[0]).Map(0, lineA.Length, 0, 100);
+							var percentB = lineB.A.DistanceBetweenPoints(crossPoints[1]).Map(0, lineB.Length, 0, 100);
+
+							var texA = texCoordsA[0].PointPercentTowardPoint(texCoordsA[1], new(percentA));
+							var texB = texCoordsB[0].PointPercentTowardPoint(texCoordsA[1], new(percentB));
+							var resultTexA = new Vector2f(texA.X * wt, texA.Y * ht);
+							var resultTexB = new Vector2f(texB.X * wt, texB.Y * ht);
+
+							var verts = new Vertex[4];
+							verts[0] = new(new(l, top), colA, resultTexA);
+							verts[1] = new(new(r, top), colA, resultTexA);
+							verts[2] = new(new(r, bot), colB, resultTexB);
+							verts[3] = new(new(l, bot), colB, resultTexB);
+
+							AddVerts(float.NegativeInfinity, null, verts);
 						}
 						else
-							columns[dist] = new() { shadowVerts, verts };
-
-						Color GetColor(float dist)
 						{
-							var c = (dist * SpriteRaycast.FadeDistance).Limit(0, MainCamera.Resolution.Y).Map(0, MainCamera.Resolution.Y, 0, 1);
-							var color = new Vector3(spr.Tint.R, spr.Tint.G, spr.Tint.B) * c;
-							return new Color((byte)color.X, (byte)color.Y, (byte)color.Z);
+							if (crossPoints.Count == 0)
+								continue;
+
+							var dist = FixFisheye(rayAng, ray.A.DistanceBetweenPoints(crossPoints[0]));
+							var col = GetColor(dist);
+							var value = (spr.Height - PlayerInstance.Height).Map(0, 100, y + dist, y - dist);
+							var top = value;
+							var bot = value;
+							var viewY = MathF.Max(0, PlayerInstance.Height) + PlayerInstance.currentTallness - 25;
+
+							if (spr.Height < viewY)
+								bot = camH;
+							else if (spr.Height > viewY)
+								top = -camH;
+							else
+								continue;
+
+							var verts = new Vertex[4];
+							verts[0] = new(new(l, top), col);//, new(texX, texY1));
+							verts[1] = new(new(r, top), col);//, new(texX, texY1));
+							verts[2] = new(new(r, bot), col);//, new(texX, texY2));
+							verts[3] = new(new(l, bot), col);//, new(texX, texY2));
+
+							AddVerts(float.NegativeInfinity, null, verts);
+						}
+
+						Line GetLine(Vector2 crossPoint, out int i)
+						{
+							for (i = 0; i < spr.Hitbox.Lines.Count; i++)
+								if (spr.Hitbox.Lines[i].Contains(crossPoint))
+									return spr.Hitbox.Lines[i];
+							return default;
 						}
 					}
-				else if (spr is Surface surface)
-				{
-					var rayA = new Line(PlayerInstance.Position, surface.CornerA);
-					var rayB = new Line(PlayerInstance.Position, surface.CornerB);
-					var rayC = new Line(PlayerInstance.Position, surface.CornerC);
-					var rayD = new Line(PlayerInstance.Position, surface.CornerD);
 
-					surfaces.Append(RayToVertex(rayA, 0, 0));
-					surfaces.Append(RayToVertex(rayB, 1, 0));
-					surfaces.Append(RayToVertex(rayC, 1, 1));
-					surfaces.Append(RayToVertex(rayD, 0, 1));
-
-					Vertex RayToVertex(Line ray, float texX, float texY)
+					Color GetColor(float dist)
 					{
-						var rayAng = (ray.Angle - PlayerInstance.Angle).AngleTo360();
-
-						var rightX = rayAng.Map(0, halfFov, 0, camW);
-						var leftX = rayAng.Map(360, 360 - halfFov, 0, -camW);
-						var yy = (y - surface.Height) + FixFisheye(rayAng, ray.Length - PlayerInstance.Height);
-
-						var resultX = (rayAng.IsBetween(270, 360) ? leftX : rightX).Limit(-MainCamera.Resolution.X, MainCamera.Resolution.X);
-						var resultY = yy.Limit(-MainCamera.Resolution.Y, MainCamera.Resolution.Y);
-
-						return new Vertex(new Vector2f(resultX, resultY), surface.Tint, new Vector2f(wt * texX, ht * texY));
+						var c = (dist * SpriteRaycast.FadeDistance).Limit(0, MainCamera.Resolution.Y).Map(0, MainCamera.Resolution.Y, 0, 1);
+						var color = new Vector3(spr.Tint.R, spr.Tint.G, spr.Tint.B) * c;
+						return new Color((byte)color.X, (byte)color.Y, (byte)color.Z);
 					}
 				}
 			}
@@ -366,6 +420,15 @@ namespace SMPL.Prefabs
 			MainCamera.RenderTexture.Draw(resultVerts, new(SpriteRaycast.BlendMode, Transform.Identity, SpriteRaycast.Texture, null));
 			MainCamera.RenderTexture.Draw(surfaces, new(SpriteRaycast.BlendMode, Transform.Identity, SpriteRaycast.Texture, null));
 
+			void AddVerts(float dist, Vertex[] shadowVerts, Vertex[] verts)
+			{
+				if (columns.ContainsKey(dist) == false)
+					columns[dist] = new();
+
+				if (shadowVerts != null)
+					columns[dist].Add(shadowVerts);
+				columns[dist].Add(verts);
+			}
 			float FixFisheye(float rayAng, float dist) => (1 / (dist * MathF.Cos(rayAng.DegreesToRadians()))).Map(0, 1, 0, MainCamera.Resolution.Y) * 20;
 		}
 		private static void DrawBackground()
