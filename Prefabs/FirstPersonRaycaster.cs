@@ -213,8 +213,8 @@ namespace SMPL.Prefabs
 		[JsonIgnore]
 		public static Texture SkyTexture => SkyTexturePath != null && CurrentScene.Textures.ContainsKey(SkyTexturePath) ? CurrentScene.Textures[SkyTexturePath] : null;
 
-		public static Color SkyColorNear { get; set; }
-		public static Color SkyColorFar { get; set; }
+		public static Color SkyColorNear { get; set; } = new(69, 179, 224);
+		public static Color SkyColorFar { get; set; } = new(53, 81, 92);
 		public static Color GroundColorNear { get; set; } = new(150, 150, 150);
 		public static Color GroundColorFar { get; set; } = new(50, 50, 50);
 
@@ -348,7 +348,7 @@ namespace SMPL.Prefabs
 							var percentB = lineB.A.DistanceBetweenPoints(crossPoints[1]).Map(0, lineB.Length, 0, 100);
 
 							var texA = texCoordsA[0].PointPercentTowardPoint(texCoordsA[1], new(percentA));
-							var texB = texCoordsB[0].PointPercentTowardPoint(texCoordsA[1], new(percentB));
+							var texB = texCoordsB[0].PointPercentTowardPoint(texCoordsB[1], new(percentB));
 							var resultTexA = new Vector2f(texA.X * wt, texA.Y * ht);
 							var resultTexB = new Vector2f(texB.X * wt, texB.Y * ht);
 
