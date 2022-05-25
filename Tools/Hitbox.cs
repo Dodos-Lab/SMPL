@@ -132,7 +132,9 @@ namespace SMPL.Tools
 		public bool ConvexContains(Hitbox hitbox)
 		{
 			for (int i = 0; i < hitbox.Lines.Count; i++)
-				if (ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false)
+				for (int j = 0; j < Lines.Count; j++)
+					if ((ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false) &&
+						(hitbox.ConvexContains(Lines[j].A) == false || hitbox.ConvexContains(Lines[j].B) == false))
 					return false;
 			return true;
 		}

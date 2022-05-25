@@ -225,7 +225,12 @@ namespace SMPL
 			{
 				if (assets.Textures[i] != null)
 				{
-					try { Textures[assets.Textures[i]] = new Texture(assets.Textures[i]); }
+					try
+					{
+						var t = new Texture(assets.Textures[i]);
+						Textures[assets.Textures[i]] = t;
+						t.Repeated = true;
+					}
 					catch (Exception) { Textures[assets.Textures[i]] = null; Console.LogError(-1, $"Could not load texture '{assets.Textures[i]}'."); }
 				}
 				UpdateLoadingPercent();

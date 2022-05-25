@@ -19,7 +19,7 @@ namespace SMPL.Prefabs
 		{
 			internal const float TALLNESS = 75f, DUCK_TALLNESS = 45f, DUCK_SLOW_MULTIPLIER = 0.3f;
 			internal readonly Hitbox rays = new(), hitbox = new();
-			internal float jumpVelocity, currentTallness;
+			internal float jumpVelocity, currentTallness, groundHeight;
 
 			public Keyboard.Key KeyForward { get; set; } = Keyboard.Key.W;
 			public Keyboard.Key KeyBackward { get; set; } = Keyboard.Key.S;
@@ -38,25 +38,29 @@ namespace SMPL.Prefabs
 			public float MovementSpeed { get; set; } = 100;
 			public float AngleHeight { get; set; }
 			public float Height { get; set; }
+			public float ViewHeight => Height + 50;
 			public float JumpStrength { get; set; } = 4f;
 			public float Gravity { get; set; } = 1;
-			public bool IsOnGround => Height == currentTallness - TALLNESS;
+			public bool IsOnGround { get; private set; }
 
 			internal void CaptureAndProcessInput()
 			{
 				var prevPos = Position;
+				groundHeight = 0;
 
-				CalculateJump();
 				TryRotate();
 				TryMove();
 				UpdateHitbox();
 				CheckCollision();
+				CalculateJump();
+
+				IsOnGround = Height == groundHeight + currentTallness - TALLNESS;
 
 				void CalculateJump()
 				{
 					jumpVelocity -= Time.Delta * Gravity * 10f;
 					Height += jumpVelocity * Time.Delta * 60f;
-					Height = MathF.Max(Height, currentTallness - TALLNESS);
+					Height = MathF.Max(Height, groundHeight + currentTallness - TALLNESS);
 				}
 				void CheckCollision()
 				{
@@ -67,14 +71,21 @@ namespace SMPL.Prefabs
 						var isAbove = spr.Height + spr.Size.Y < Height - tallness;
 						var isBellow = spr.Height > Height - tallness + currentTallness;
 
-						if (spr is Wall && spr.IsSolid && hitbox.ConvexOverlaps(spr.Hitbox) && (isAbove == false && isBellow == false))
+						if (spr.IsSolid && hitbox.ConvexOverlaps(spr.Hitbox) && (isAbove == false && isBellow == false))
 						{
-							var crossPoints = hitbox.GetCrossPoints(spr.Hitbox);
-							if (crossPoints.Count == 0)
-								continue;
+							if (spr is Wall)
+							{
+								var crossPoints = hitbox.GetCrossPoints(spr.Hitbox);
+								if (crossPoints.Count == 0)
+									continue;
 
-							var ang = crossPoints[0].AngleBetweenPoints(prevPos);
-							PlayerInstance.Position = prevPos.PointMoveAtAngle(ang, MovementSpeed * 0.2f);
+								var ang = crossPoints[0].AngleBetweenPoints(prevPos);
+								PlayerInstance.Position = prevPos.PointMoveAtAngle(ang, MovementSpeed * 0.2f);
+							}
+							else if (spr is Surface)
+							{
+								groundHeight = spr.Height;
+							}
 						}
 					}
 				}
@@ -145,7 +156,7 @@ namespace SMPL.Prefabs
 				get
 				{
 					var p1 = Position;
-					var p2 = Position.PointMoveAtAngle(Angle, Size.X * 0.3f, false);
+					var p2 = Position.PointMoveAtAngle(Angle, Size.X, false);
 					var resultP1 = p1.PointPercentTowardPoint(p2, -new Vector2(OriginUnit.X * 100));
 					var resultP2 = p2.PointPercentTowardPoint(p1, new Vector2(OriginUnit.X * 100));
 					return new(resultP1, resultP2);
@@ -240,9 +251,9 @@ namespace SMPL.Prefabs
 
 			for (int i = 0; i < SpriteRaycasts.Count; i++)
 			{
-				SpriteRaycasts[i].Hitbox.Draw();
-				PlayerInstance.hitbox.Draw();
-				PlayerInstance.rays.Draw(color: new(255, 255, 255, 2));
+				PlayerInstance.rays.Draw(color: new(0, 0, 255, 2));
+				SpriteRaycasts[i].Hitbox.Draw(color: Color.Red);
+				PlayerInstance.hitbox.Draw(color: Color.Green);
 			}
 		}
 
@@ -265,13 +276,13 @@ namespace SMPL.Prefabs
 			var y = -PlayerInstance.AngleHeight;
 			var columns = new SortedDictionary<float, List<Vertex[]>>();
 			var surfaces = new VertexArray(PrimitiveType.Quads);
-			var texCoordCorners = new List<Vector2[]>()
-			{
-				new Vector2[] { new(0, 0), new(1, 0) },
-				new Vector2[] { new(1, 0), new(1, 1) },
-				new Vector2[] { new(1, 1), new(0, 1) },
-				new Vector2[] { new(0, 1), new(0, 0) }
-			};
+			//var texCoordCorners = new List<Vector2[]>()
+			//{
+			//	new Vector2[] { new(0, 0), new(1, 0) },
+			//	new Vector2[] { new(1, 0), new(1, 1) },
+			//	new Vector2[] { new(1, 1), new(0, 1) },
+			//	new Vector2[] { new(0, 1), new(0, 0) }
+			//};
 
 			for (int j = 0; j < SpriteRaycasts.Count; j++)
 			{
@@ -340,25 +351,26 @@ namespace SMPL.Prefabs
 							var top = (spr.Height - PlayerInstance.Height).Map(0, 100, y + distA, y - distA);
 							var bot = (spr.Height - PlayerInstance.Height).Map(0, 100, y + distB, y - distB);
 
-							var lineA = GetLine(crossPoints[0], out var lineIndexA);
-							var lineB = GetLine(crossPoints[1], out var lineIndexB);
-							var texCoordsA = texCoordCorners[lineIndexA];
-							var texCoordsB = texCoordCorners[lineIndexB];
-							var percentA = lineA.A.DistanceBetweenPoints(crossPoints[0]).Map(0, lineA.Length, 0, 100);
-							var percentB = lineB.A.DistanceBetweenPoints(crossPoints[1]).Map(0, lineB.Length, 0, 100);
-
-							var texA = texCoordsA[0].PointPercentTowardPoint(texCoordsA[1], new(percentA));
-							var texB = texCoordsB[0].PointPercentTowardPoint(texCoordsB[1], new(percentB));
-							var resultTexA = new Vector2f(texA.X * wt, texA.Y * ht);
-							var resultTexB = new Vector2f(texB.X * wt, texB.Y * ht);
+							//var lineA = GetLine(crossPoints[0], out var lineIndexA);
+							//var lineB = GetLine(crossPoints[1], out var lineIndexB);
+							//var texCoordsA = texCoordCorners[lineIndexA];
+							//var texCoordsB = texCoordCorners[lineIndexB];
+							//var percentA = lineA.A.DistanceBetweenPoints(crossPoints[0]).Map(0, lineA.Length, 0, 100);
+							//var percentB = lineB.A.DistanceBetweenPoints(crossPoints[1]).Map(0, lineB.Length, 0, 100);
+							//
+							//var texA = texCoordsA[0].PointPercentTowardPoint(texCoordsA[1], new(percentA));
+							//var texB = texCoordsB[0].PointPercentTowardPoint(texCoordsB[1], new(percentB));
+							//
+							//var resultTexA = new Vector2f(texA.X * wt, texA.Y * ht);
+							//var resultTexB = new Vector2f(texB.X * wt, texB.Y * ht);
 
 							var verts = new Vertex[4];
-							verts[0] = new(new(l, top), colA, resultTexA);
-							verts[1] = new(new(r, top), colA, resultTexA);
-							verts[2] = new(new(r, bot), colB, resultTexB);
-							verts[3] = new(new(l, bot), colB, resultTexB);
+							verts[0] = new(new(l, top), colA);//, resultTexA);
+							verts[1] = new(new(r, top), colA);//, resultTexA);
+							verts[2] = new(new(r, bot), colB);//, resultTexB);
+							verts[3] = new(new(l, bot), colB);//, resultTexB);
 
-							AddVerts(float.NegativeInfinity, null, verts);
+							AddVerts(float.PositiveInfinity, null, verts);
 						}
 						else
 						{
@@ -370,7 +382,7 @@ namespace SMPL.Prefabs
 							var value = (spr.Height - PlayerInstance.Height).Map(0, 100, y + dist, y - dist);
 							var top = value;
 							var bot = value;
-							var viewY = MathF.Max(0, PlayerInstance.Height) + PlayerInstance.currentTallness - 25;
+							var viewY = PlayerInstance.ViewHeight;
 
 							if (spr.Height < viewY)
 								bot = camH;
@@ -385,7 +397,7 @@ namespace SMPL.Prefabs
 							verts[2] = new(new(r, bot), col);//, new(texX, texY2));
 							verts[3] = new(new(l, bot), col);//, new(texX, texY2));
 
-							AddVerts(float.NegativeInfinity, null, verts);
+							AddVerts(float.PositiveInfinity, null, verts);
 						}
 
 						Line GetLine(Vector2 crossPoint, out int i)
