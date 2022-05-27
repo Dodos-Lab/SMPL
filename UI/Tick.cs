@@ -16,18 +16,16 @@ namespace SMPL.UI
       /// </summary>
       public bool IsActive { get; set; }
 
-      public Tick()
-      {
-         Size = new(50);
-      }
+      public Tick() => Size = new(50);
 
       /// <summary>
       /// A way for the child classes of <see cref="Tick"/> to raise the event and handle the logic around it by overriding this.
       /// </summary>
-      protected override void OnClick(Button button)
+      protected override void OnClick()
       {
          IsActive = !IsActive;
-         base.OnClick(button);
+         Theme?.TickClick(this);
+         base.OnClick();
       }
    }
 }

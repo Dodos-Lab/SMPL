@@ -19,7 +19,7 @@ namespace SMPL.UI
       /// <summary>
       /// The collection of methods called by this <see cref="Button"/> upon certain events.
       /// </summary>
-      public delegate void ButtonEventHandler(Button button);
+      public delegate void ButtonEventHandler();
       /// <summary>
       /// Raised upon left clicking the <see cref="Button"/>.
       /// </summary>
@@ -33,6 +33,8 @@ namespace SMPL.UI
       public event ButtonEventHandler Pressed;
       public event ButtonEventHandler Released;
 
+      public ThemeUI Theme { get; set; }
+
       /// <summary>
       /// Whether this UI element is currently interactive.
       /// </summary>
@@ -44,22 +46,41 @@ namespace SMPL.UI
       /// <summary>
       /// A way for the child classes of <see cref="Button"/> to raise the <see cref="Held"/> event and handle the logic around it by overriding this.
       /// </summary>
-      protected virtual void OnHold(Button button)
-         => Held?.Invoke(this);
+      protected virtual void OnHold()
+      {
+         Theme?.ButtonHold(this);
+         Held?.Invoke();
+      }
       /// <summary>
       /// A way for the child classes of <see cref="Button"/> to raise the <see cref="Clicked"/> event and handle the logic around it by overriding this.
       /// </summary>
-      protected virtual void OnClick(Button button)
-         => Clicked?.Invoke(this);
-      protected virtual void OnHover(Button button)
-         => Hovered?.Invoke(this);
-      protected virtual void OnUnhover(Button button)
-         => Unhovered?.Invoke(this);
-      protected virtual void OnPress(Button button)
-         => Pressed?.Invoke(this);
-      protected virtual void OnRelease(Button button)
-         => Released?.Invoke(this);
-		public void Trigger() => OnClick(this);
+      protected virtual void OnClick()
+      {
+         Theme?.ButtonClick(this);
+         Clicked?.Invoke();
+      }
+      protected virtual void OnHover()
+      {
+         Theme?.ButtonHover(this);
+         Hovered?.Invoke();
+      }
+      protected virtual void OnUnhover()
+      {
+         Theme?.ButtonUnhover(this);
+         Unhovered?.Invoke();
+      }
+      protected virtual void OnPress()
+      {
+         Theme?.ButtonPress(this);
+         Pressed?.Invoke();
+      }
+      protected virtual void OnRelease()
+      {
+         Theme?.ButtonRelease(this);
+         Released?.Invoke();
+      }
+
+		public void Trigger() => OnClick();
 
       /// <summary>
 		/// Draws the <see cref="Button"/> on the <paramref name="camera"/> according
@@ -98,36 +119,36 @@ namespace SMPL.UI
          var id = GetHashCode();
 
          if (holdTriggerTimer < 0 && holdDelayTimer < 0 && hovered && isClicked)
-            OnHold(this);
+            OnHold();
 
          if (hovered.Once($"{id}-hovered"))
          {
             if (isClicked)
-               OnPress(this);
+               OnPress();
             
-            OnHover(this);
+            OnHover();
          }
          if ((hovered == false).Once($"{id}-unhovered"))
-            OnUnhover(this);
+            OnUnhover();
 
          if (leftClicked.Once($"{id}-press") && hovered)
          {
             isClicked = true;
             holdDelayTimer = HoldDelay;
-            OnPress(this);
+            OnPress();
          }
          if ((leftClicked == false).Once($"{id}-release"))
          {
             if (hovered)
             {
                if (isClicked)
-                  OnClick(this);
-               OnRelease(this);
-               OnHover(this);
+                  OnClick();
+               OnRelease();
+               OnHover();
             }
             isClicked = false;
          }
       }
-      internal void Hover() => OnHover(this);
+      internal void Hover() => OnHover();
    }
 }

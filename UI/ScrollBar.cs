@@ -43,8 +43,14 @@ namespace SMPL.UI
 		[JsonIgnore]
 		public Button ScrollDown { get; private set; }
 
-		public ScrollBar()
+		public ScrollBar(Button scrollUp = null, Button scrollDown = null)
 		{
+			scrollUp ??= new();
+			scrollDown ??= new();
+
+			ScrollUp = scrollUp;
+			ScrollDown = scrollDown;
+
 			Angle = 90;
 			
 			ScrollValueUnit = 0.1f;
@@ -68,22 +74,22 @@ namespace SMPL.UI
 			Update();
 		}
 
-		protected virtual void OnScrollUp(Button button)
+		protected virtual void OnScrollUp()
 		{
 			if (IsDisabled)
 				return;
 
 			Value -= ScrollValue;
 		}
-		protected virtual void OnScrollDown(Button button)
+		protected virtual void OnScrollDown()
 		{
 			if (IsDisabled)
 				return;
 
 			Value += ScrollValue;
 		}
-		protected virtual void OnScrollUpHold(Button button) => OnScrollUp(button);
-		protected virtual void OnScrollDownHold(Button button) => OnScrollDown(button);
+		protected virtual void OnScrollUpHold() => OnScrollUp();
+		protected virtual void OnScrollDownHold() => OnScrollDown();
 
 		private void OnScroll(object sender, SFML.Window.MouseWheelScrollEventArgs e)
 		{
@@ -91,9 +97,9 @@ namespace SMPL.UI
 				return;
 
 			if (e.Delta < 0)
-				OnScrollDown(ScrollDown);
+				OnScrollDown();
 			else
-				OnScrollUp(ScrollUp);
+				OnScrollUp();
 		}
 
 		/// <summary>

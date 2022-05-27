@@ -38,6 +38,7 @@ namespace SMPL.UI
       private List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
       protected Camera camera;
       private string left, center, right, font;
+      internal Font Font => FontPath != null && Scene.CurrentScene.Fonts.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
 
       /// <summary>
       /// See <see cref="Font"/> for info.
@@ -52,12 +53,6 @@ namespace SMPL.UI
             Text = left; // recalculate alignments
          }
       }
-      /// <summary>
-      /// The <see cref="SFML.Graphics.Font"/> is retrieved by the <see cref="FontPath"/> from the <see cref="Scene.CurrentScene"/>'s loaded fonts and is
-      /// used to draw the <see cref="Text"/>.
-      /// </summary>
-      [JsonIgnore]
-      public Font Font => FontPath != null && Scene.CurrentScene.Fonts.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
       /// <summary>
       /// The <see cref="string"/> text itself used upon drawing the <see cref="Textbox"/>.
       /// </summary>

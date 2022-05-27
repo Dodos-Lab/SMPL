@@ -56,19 +56,19 @@ namespace SMPL.UI
 			Next.Held += OnNextHold;
 		}
 
-		private void OnPreviousHold(Button button) => OnScrollDown(button);
-		private void OnNextHold(Button button) => OnScrollUp(button);
-		private void OnPrevious(Button button) => OnScrollDown(button);
-		private void OnNext(Button button) => OnScrollUp(button);
+		private void OnPreviousHold() => OnScrollDown();
+		private void OnNextHold() => OnScrollUp();
+		private void OnPrevious() => OnScrollDown();
+		private void OnNext() => OnScrollUp();
 
-		protected override void OnScrollUp(Button button)
+		protected override void OnScrollUp()
 		{
 			if (IsDisabled)
 				return;
 
 			SelectionIndex++;
 		}
-		protected override void OnScrollDown(Button button)
+		protected override void OnScrollDown()
 		{
 			if (IsDisabled)
 				return;

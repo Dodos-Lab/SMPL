@@ -6,27 +6,17 @@ using SMPL.Tools;
 using SFML.Window;
 using System;
 using System.IO;
+using Console = SMPL.Tools.Console;
 
 namespace SMPL.Prefabs
 {
 	public class MainMenu : Scene
 	{
+		private readonly string logoTexPath, bgTexPath;
+		private readonly Scene scene;
+		private readonly ThemeUI theme;
 		private float sc, guiSc;
-
-		public class Resources
-		{
-			public Scene PlayScene { get; set; }
-			public string FontPath { get; set; }
-			public string ButtonTexturePath { get; set; }
-			public string LogoTexturePath { get; set; }
-			public string BackgroundTexturePath { get; set; }
-			public string SliderTexturePath { get; set; }
-			public string TickOnTexturePath { get; set; }
-			public string TickOffTexturePath { get; set; }
-		}
-
 		private bool settingsVisible;
-		private readonly Resources resources;
 		private static Vector2 audioPos = new(12775, 12805), gfxPos = new(7123, 45523);
 
 		protected Sprite Background { get; private set; }
@@ -57,30 +47,30 @@ namespace SMPL.Prefabs
 		protected TextButton Back { get; private set; }
 		protected TextButton Exit { get; private set; }
 
-		public MainMenu(Resources resources)
+		public MainMenu(ThemeUI themeUI, Scene playScene = null, string logoTexturePath = null, string backgroundTexturePath = null)
 		{
-			if (resources == null)
-				return;
+			if (themeUI == null)
+				Console.LogError(1, $"The {nameof(themeUI)} for this {nameof(MainMenu)} is required and cannot be 'null'.");
 
-			this.resources = resources;
+			scene = playScene;
+			theme = themeUI;
+			logoTexPath = logoTexturePath;
+			bgTexPath = backgroundTexturePath;
 		}
 
 		protected override AssetQueue OnRequireAssets()
 		{
-			var r = resources;
-			return new()
-			{
-				Textures = new() { r.ButtonTexturePath, r.BackgroundTexturePath, r.LogoTexturePath, r.SliderTexturePath, r.TickOffTexturePath, r.TickOnTexturePath },
-				Fonts = new() { r.FontPath },
-				Databases = new() { File.Exists(SMPL.Settings.DB_PATH) ? SMPL.Settings.DB_PATH : null },
-			};
+			var assets = new AssetQueue { Databases = new() { File.Exists(SMPL.Settings.DB_PATH) ? SMPL.Settings.DB_PATH : null } };
+			assets.Textures = new() { bgTexPath, logoTexPath };
+			theme?.IncludeInAssetQueue(ref assets);
+			return assets;
 		}
 		protected override void OnStart()
 		{
 			var gfx = default(TextButton);
 			var audio = default(TextButton);
 			var sz = MainCamera.Resolution;
-			var r = resources;
+			var r = theme;
 
 			TryLoadSettingsDatabase();
 			InitMenu();
@@ -89,7 +79,7 @@ namespace SMPL.Prefabs
 
 			Background = new()
 			{
-				TexturePath = r.BackgroundTexturePath,
+				TexturePath = bgTexPath,
 				Size = sz,
 				Parent = MainCamera
 			};
@@ -98,83 +88,73 @@ namespace SMPL.Prefabs
 
 			void InitMenu()
 			{
-				GameLogo = new() { TexturePath = r.LogoTexturePath, Size = new(sz.Y * 0.8f, sz.Y * 0.8f), Position = new(-sz.X * 0.2f, 0) };
+				if (theme == null)
+					return;
 
-				Back = new(new(r.FontPath, "Back"))
-				{
-					TexturePath = r.ButtonTexturePath,
-					LocalPosition = new(-sz.X * 0.4f, sz.Y * 0.4f),
-					LocalSize = new(sz.X * 0.08f, sz.Y * 0.07f),
-					Parent = MainCamera,
-				};
+				GameLogo = new() { TexturePath = logoTexPath, Size = new(sz.Y * 0.8f, sz.Y * 0.8f), Position = new(-sz.X * 0.2f, 0) };
 
-				if (r.PlayScene != null)
-					Play = new(new(r.FontPath, "Play")) { TexturePath = r.ButtonTexturePath };
+				Back = theme.CreateTextButton("Back");
+				Back.LocalPosition = new(-sz.X * 0.4f, sz.Y * 0.4f);
+				Back.LocalSize = new(sz.X * 0.08f, sz.Y * 0.07f);
+				Back.Parent = MainCamera;
 
-				Settings = new(new(r.FontPath, "Settings")) { TexturePath = r.ButtonTexturePath };
-				Exit = new(new(r.FontPath, "Exit")) { TexturePath = r.ButtonTexturePath };
+				if (scene != null)
+					Play = theme.CreateTextButton("Play");
 
-				SettingsMenu = new() { TexturePath = r.SliderTexturePath, Parent = Settings };
-				SettingsMenu.ScrollUp.TexturePath = r.ButtonTexturePath;
-				SettingsMenu.ScrollDown.TexturePath = r.ButtonTexturePath;
+				Settings = theme.CreateTextButton("Settings");
+				Exit = theme.CreateTextButton("Exit");
 
-				gfx = new TextButton(new(r.FontPath, "Graphics")) { TexturePath = r.ButtonTexturePath };
-				audio = new TextButton(new(r.FontPath, "Audio")) { TexturePath = r.ButtonTexturePath };
+				SettingsMenu = theme.CreateList();
+				SettingsMenu.Parent = Settings;
+
+				gfx = theme.CreateTextButton("Graphics");
+				audio = theme.CreateTextButton("Audio");
 				SettingsMenu.Buttons.Add(gfx);
 				SettingsMenu.Buttons.Add(audio);
 			}
 			void InitSettings()
 			{
-				var offset = 1.5f;
-				VolumeMaster = new()
-				{
-					TexturePath = r.SliderTexturePath,
-					LocalPosition = audioPos,
-					Value = Game.Settings.VolumeUnitMaster,
-				};
-				VolumeSound = new()
-				{
-					TexturePath = r.SliderTexturePath,
-					Parent = VolumeMaster,
-					LocalPosition = new(0, VolumeMaster.Size.Y * offset),
-					Value = Game.Settings.VolumeUnitSound
-				};
-				VolumeMusic = new()
-				{
-					TexturePath = r.SliderTexturePath,
-					Parent = VolumeSound,
-					LocalPosition = new(0, VolumeSound.Size.Y * offset),
-					Value = Game.Settings.VolumeUnitMusic
-				};
-				PixelSize = new()
-				{
-					TexturePath = r.SliderTexturePath,
-					LocalPosition = gfxPos,
-					Value = Game.Settings.ResolutionScale,
-					RangeA = 0.2f,
-				};
-				ScaleGUI = new()
-				{
-					TexturePath = r.SliderTexturePath,
-					Parent = PixelSize,
-					LocalPosition = new(0, PixelSize.Size.Y * offset),
-					RangeA = 0.35f,
-					RangeB = 2.5f,
-					Value = Game.Settings.ScaleGUI,
-				};
-				VSync = new()
-				{
-					TexturePath = Game.Settings.IsVSyncEnabled ? r.TickOnTexturePath : r.TickOffTexturePath,
-					Parent = ScaleGUI,
-					LocalPosition = new(0, ScaleGUI.Size.Y * offset),
-					IsActive = Game.Settings.IsVSyncEnabled
-				};
-				WindowState = new();
+				if (theme == null)
+					return;
 
-				SubscribeButton(VSync);
+				var offset = 1.5f;
+				VolumeMaster = theme.CreateSlider();
+				VolumeMaster.LocalPosition = audioPos;
+				VolumeMaster.Value = Game.Settings.VolumeUnitMaster;
+
+				VolumeSound = theme.CreateSlider();
+				VolumeSound.Parent = VolumeMaster;
+				VolumeSound.LocalPosition = new(0, VolumeMaster.Size.Y * offset);
+				VolumeSound.Value = Game.Settings.VolumeUnitSound;
+
+				VolumeMusic = theme.CreateSlider();
+				VolumeMusic.Parent = VolumeSound;
+				VolumeMusic.LocalPosition = new(0, VolumeSound.Size.Y * offset);
+				VolumeMusic.Value = Game.Settings.VolumeUnitMusic;
+
+				PixelSize = theme.CreateSlider();
+				PixelSize.LocalPosition = gfxPos;
+				PixelSize.Value = Game.Settings.ResolutionScale;
+				PixelSize.RangeA = 0.2f;
+
+				ScaleGUI = theme.CreateSlider();
+				ScaleGUI.Parent = PixelSize;
+				ScaleGUI.LocalPosition = new(0, PixelSize.Size.Y * offset);
+				ScaleGUI.RangeA = 0.35f;
+				ScaleGUI.RangeB = 2.5f;
+				ScaleGUI.Value = Game.Settings.ScaleGUI;
+
+				VSync = theme.CreateTick();
+				VSync.Parent = ScaleGUI;
+				VSync.LocalPosition = new(0, ScaleGUI.Size.Y * offset);
+				VSync.IsActive = Game.Settings.IsVSyncEnabled;
+				VSync.TexturePath = VSync.IsActive ? theme.TickOnTexturePath : theme.TickOffTexturePath;
 			}
 			void SubscribeButtons()
 			{
+				if (theme == null)
+					return;
+
 				Back.Clicked += OnBackClick;
 				gfx.Clicked += OnGfxClick;
 				audio.Clicked += OnAudioClick;
@@ -184,22 +164,17 @@ namespace SMPL.Prefabs
 				Exit.Clicked += OnExitClick;
 
 				if (Play != null)
-				{
-					SubscribeButton(Play);
 					Play.Clicked += OnPlayClick;
-				}
-
-				for (int i = 0; i < SettingsMenu.Buttons.Count; i++)
-					SubscribeButton(SettingsMenu.Buttons[i]);
-
-				SubscribeButton(Back);
-				SubscribeButton(Settings);
-				SubscribeButton(Exit);
 			}
 		}
 		protected override void OnUpdate()
 		{
-			var qText = new QuickText(resources.FontPath, "Master", VolumeMaster.Position) { OriginUnit = new(0.5f, 0.6f), Scale = 1.5f };
+			if (theme == null)
+				return;
+
+			var qText = theme.CreateQuickText("Master", VolumeMaster.Position);
+			qText.OriginUnit = new(0.5f, 0.6f);
+			qText.Scale = 1.5f;
 
 			if (Mouse.IsButtonPressed(Mouse.Button.Left).Once("close-settings-menu-asgl2kj") &&
 				SettingsMenu.IsHovered == false && Settings.Hitbox.IsHovered == false)
@@ -305,6 +280,9 @@ namespace SMPL.Prefabs
 		}
 		protected override void OnStop()
 		{
+			if (theme == null)
+				return;
+
 			Background.Destroy(); Background = null;
 			GameLogo.Destroy(); GameLogo = null;
 
@@ -316,21 +294,11 @@ namespace SMPL.Prefabs
 			Exit.Destroy(); Exit = null;
 		}
 
-		protected virtual void OnButtonHover(Button button) => button.Tint = new(255, 255, 255);
-		protected virtual void OnButtonUnhover(Button button) => button.Tint = new(220, 220, 220);
-		protected virtual void OnButtonPress(Button button) => button.Tint = new(200, 200, 200);
-		protected virtual void OnTickClick(Tick tick) => tick.TexturePath = tick.IsActive ? resources.TickOnTexturePath : resources.TickOffTexturePath;
-
-		private void OnVSyncClick(Button button)
-		{
-			var tick = (Tick)button;
-			Game.Settings.IsVSyncEnabled = (tick).IsActive;
-			OnTickClick(tick);
-		}
-		private void OnGfxClick(Button button) => MainCamera.Position = gfxPos;
-		private void OnAudioClick(Button button) => MainCamera.Position = audioPos;
-		private void OnPlayClick(Button button) => CurrentScene = resources.PlayScene ?? CurrentScene;
-		private void OnBackClick(Button button)
+		private void OnVSyncClick() => Game.Settings.IsVSyncEnabled = VSync.IsActive;
+		private void OnGfxClick() => MainCamera.Position = gfxPos;
+		private void OnAudioClick() => MainCamera.Position = audioPos;
+		private void OnPlayClick() => CurrentScene = scene ?? CurrentScene;
+		private void OnBackClick()
 		{
 			sc = Game.Settings.ResolutionScale;
 			guiSc = ScaleGUI.Value;
@@ -341,11 +309,14 @@ namespace SMPL.Prefabs
 
 			UpdateScaleGUI();
 		}
-		private void OnSettingsClick(Button button) => SettingsMenuIsVisible = !SettingsMenuIsVisible;
-		private void OnExitClick(Button button) => Game.Stop();
+		private void OnSettingsClick() => SettingsMenuIsVisible = !SettingsMenuIsVisible;
+		private void OnExitClick() => Game.Stop();
 
 		private void UpdateScaleGUI()
 		{
+			if (theme == null)
+				return;
+
 			var s = sc * guiSc;
 
 			if (Play != null)
@@ -384,12 +355,7 @@ namespace SMPL.Prefabs
 				Background.LocalPosition = new();
 			}
 		}
-		private void SubscribeButton(Button button)
-		{
-			button.Hovered += OnButtonHover;
-			button.Unhovered += OnButtonUnhover;
-			button.Pressed += OnButtonPress;
-		}
+
 		private static void UpdateSettingsDatabase()
 		{
 			var settingsDb = default(Database);

@@ -85,7 +85,7 @@ namespace SMPL.UI
 			OnSelect(button);
 		}
 
-		private void OnShow(Button button)
+		private void OnShow()
 		{
 			isOpen = !isOpen;
 		}

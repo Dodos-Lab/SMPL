@@ -7,6 +7,7 @@ namespace SMPL.Graphics
 {
 	public class QuickText : Object
 	{
+		internal Font Font => FontPath != null && Scene.CurrentScene.Fonts.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
 		internal static Text textInstance = new();
 
 		/// <summary>
@@ -46,13 +47,7 @@ namespace SMPL.Graphics
 		/// <code>Style = Styles.Bold | Styles.Underlined;</code>
 		/// </summary>
 		public Text.Styles Style { get; set; }
-		/// <summary>
-		/// The <see cref="SFML.Graphics.Font"/> is retrieved by the <see cref="FontPath"/> from the <see cref="CurrentScene"/>'s loaded fonts and is
-		/// used to draw the <see cref="Text"/>.
-		/// </summary>
-		[JsonIgnore]
-		public Font Font => FontPath != null && Scene.CurrentScene.Fonts.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
-
+		
 		public Vector2 OriginUnit { get; set; } = new(0.5f);
 
 		/// <summary>
