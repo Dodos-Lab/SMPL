@@ -400,13 +400,13 @@ namespace SMPL.Prefabs
 							AddVerts(float.PositiveInfinity, null, verts);
 						}
 
-						Line GetLine(Vector2 crossPoint, out int i)
-						{
-							for (i = 0; i < spr.Hitbox.Lines.Count; i++)
-								if (spr.Hitbox.Lines[i].Contains(crossPoint))
-									return spr.Hitbox.Lines[i];
-							return default;
-						}
+						//Line GetLine(Vector2 crossPoint, out int i)
+						//{
+						//	for (i = 0; i < spr.Hitbox.Lines.Count; i++)
+						//		if (spr.Hitbox.Lines[i].Contains(crossPoint))
+						//			return spr.Hitbox.Lines[i];
+						//	return default;
+						//}
 					}
 
 					Color GetColor(float dist)

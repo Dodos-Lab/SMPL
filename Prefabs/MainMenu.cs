@@ -52,6 +52,7 @@ namespace SMPL.Prefabs
 		protected Slider PixelSize { get; private set; }
 		protected Slider ScaleGUI { get; private set; }
 		protected Tick VSync { get; private set; }
+		protected ListCarousel WindowState { get; private set; }
 		protected TextButton Settings { get; private set; }
 		protected TextButton Back { get; private set; }
 		protected TextButton Exit { get; private set; }
@@ -163,17 +164,21 @@ namespace SMPL.Prefabs
 				};
 				VSync = new()
 				{
-					TexturePath = r.TickOffTexturePath,
+					TexturePath = Game.Settings.IsVSyncEnabled ? r.TickOnTexturePath : r.TickOffTexturePath,
 					Parent = ScaleGUI,
 					LocalPosition = new(0, ScaleGUI.Size.Y * offset),
-					IsActive = Game.Settings.IsVSyncEnabled,
+					IsActive = Game.Settings.IsVSyncEnabled
 				};
+				WindowState = new();
+
+				SubscribeButton(VSync);
 			}
 			void SubscribeButtons()
 			{
 				Back.Clicked += OnBackClick;
 				gfx.Clicked += OnGfxClick;
 				audio.Clicked += OnAudioClick;
+				VSync.Clicked += OnVSyncClick;
 
 				Settings.Clicked += OnSettingsClick;
 				Exit.Clicked += OnExitClick;
@@ -190,13 +195,6 @@ namespace SMPL.Prefabs
 				SubscribeButton(Back);
 				SubscribeButton(Settings);
 				SubscribeButton(Exit);
-
-				void SubscribeButton(Button button)
-				{
-					button.Hovered += OnButtonHover;
-					button.Unhovered += OnButtonUnhover;
-					button.Pressed += OnButtonPress;
-				}
 			}
 		}
 		protected override void OnUpdate()
@@ -290,13 +288,12 @@ namespace SMPL.Prefabs
 				VSync.Draw();
 
 				Game.Settings.ResolutionScale = PixelSize.Value;
-				Game.Settings.IsVSyncEnabled = VSync.IsActive;
 				Game.Settings.ScaleGUI = ScaleGUI.Value;
 
 				var value = (int)(PixelSize.Value * 30f) / 30f;
 				DrawText($"Resolution [{VideoMode.DesktopMode.Width * value}x{VideoMode.DesktopMode.Height * value}]", PixelSize.Position);
 				DrawText($"GUI Scale [x{ScaleGUI.Value:F2}]", ScaleGUI.Position);
-				DrawText("VSync", VSync.CornerA + new Vector2(-VSync.Size.X, VSync.Size.Y * 0.5f));
+				DrawText("VSync", VSync.CornerA + new Vector2(-VSync.Size.X * 1.1f, VSync.Size.Y * 0.5f));
 			}
 			void DrawText(string text, Vector2 position)
 			{
@@ -322,11 +319,18 @@ namespace SMPL.Prefabs
 		protected virtual void OnButtonHover(Button button) => button.Tint = new(255, 255, 255);
 		protected virtual void OnButtonUnhover(Button button) => button.Tint = new(220, 220, 220);
 		protected virtual void OnButtonPress(Button button) => button.Tint = new(200, 200, 200);
+		protected virtual void OnTickClick(Tick tick) => tick.TexturePath = tick.IsActive ? resources.TickOnTexturePath : resources.TickOffTexturePath;
 
-		protected virtual void OnGfxClick(Button button) => MainCamera.Position = gfxPos;
-		protected virtual void OnAudioClick(Button button) => MainCamera.Position = audioPos;
-		protected virtual void OnPlayClick(Button button) => CurrentScene = resources.PlayScene ?? CurrentScene;
-		protected virtual void OnBackClick(Button button)
+		private void OnVSyncClick(Button button)
+		{
+			var tick = (Tick)button;
+			Game.Settings.IsVSyncEnabled = (tick).IsActive;
+			OnTickClick(tick);
+		}
+		private void OnGfxClick(Button button) => MainCamera.Position = gfxPos;
+		private void OnAudioClick(Button button) => MainCamera.Position = audioPos;
+		private void OnPlayClick(Button button) => CurrentScene = resources.PlayScene ?? CurrentScene;
+		private void OnBackClick(Button button)
 		{
 			sc = Game.Settings.ResolutionScale;
 			guiSc = ScaleGUI.Value;
@@ -337,8 +341,8 @@ namespace SMPL.Prefabs
 
 			UpdateScaleGUI();
 		}
-		protected virtual void OnSettingsClick(Button button) => SettingsMenuIsVisible = !SettingsMenuIsVisible;
-		protected virtual void OnExitClick(Button button) => Game.Stop();
+		private void OnSettingsClick(Button button) => SettingsMenuIsVisible = !SettingsMenuIsVisible;
+		private void OnExitClick(Button button) => Game.Stop();
 
 		private void UpdateScaleGUI()
 		{
@@ -379,8 +383,12 @@ namespace SMPL.Prefabs
 				Background.Parent = MainCamera;
 				Background.LocalPosition = new();
 			}
-
-			Game.Window.SetVerticalSyncEnabled(Game.Settings.IsVSyncEnabled);
+		}
+		private void SubscribeButton(Button button)
+		{
+			button.Hovered += OnButtonHover;
+			button.Unhovered += OnButtonUnhover;
+			button.Pressed += OnButtonPress;
 		}
 		private static void UpdateSettingsDatabase()
 		{
