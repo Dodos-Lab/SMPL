@@ -2,6 +2,7 @@
 using SFML.Window;
 using SMPL.Graphics;
 using SMPL.Tools;
+using System.Numerics;
 
 namespace SMPL.UI
 {
@@ -40,6 +41,7 @@ namespace SMPL.UI
 
 		public ListCarousel(Button previous = null, Button next = null)
 		{
+			VisibleButtonCountMax = 7;
 			SelectionIsRepeating = true;
 
 			Angle = 0;
@@ -82,14 +84,17 @@ namespace SMPL.UI
 			RangeA = 0;
 			RangeB = Buttons.Count - 1;
 
-			Previous.Size = new(ButtonHeight, ButtonHeight);
-			Next.Size = new(ButtonHeight, ButtonHeight);
-
 			Previous.Parent = this;
 			Next.Parent = this;
 
-			Previous.LocalPosition = new(-ButtonWidth * 0.5f - Previous.Size.X * 0.5f, 0);
-			Next.LocalPosition = new(ButtonWidth * 0.5f + Next.Size.X * 0.5f, 0);
+			Previous.Size = new Vector2(ButtonHeight, ButtonHeight) * Scale;
+			Next.Size = new Vector2(ButtonHeight, ButtonHeight) * Scale;
+
+			Previous.LocalPosition = new(-ButtonWidth * 0.5f - ButtonHeight * 0.5f, 0);
+			Next.LocalPosition = new(ButtonWidth * 0.5f + ButtonHeight * 0.5f, 0);
+
+			TryScaleQuickText(Previous);
+			TryScaleQuickText(Next);
 
 			Previous.Draw(camera);
 			Next.Draw(camera);
@@ -97,11 +102,20 @@ namespace SMPL.UI
 			if (Selection == null)
 				return;
 
-			Selection.Size = new(ButtonWidth, ButtonHeight);
 			Selection.Parent = this;
+			Selection.Size = new Vector2(ButtonWidth, ButtonHeight) * Scale;
 			Selection.LocalPosition = new();
+			Selection.Angle = Angle;
+
+			TryScaleQuickText(Selection);
 
 			Selection.Draw(camera);
+
+			void TryScaleQuickText(Button button)
+			{
+				if (button is TextButton tb && tb.QuickText != null)
+					tb.QuickText.Scale = Scale;
+			}
 		}
 
 		protected override void OnDestroy()

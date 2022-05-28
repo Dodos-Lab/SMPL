@@ -2,6 +2,8 @@
 {
 	public class Settings
 	{
+		public enum WindowStates { Windowed, Fullscreen, Borderless }
+
 		private bool vsync;
 
 		internal const string DB_PATH = "settings.cdb";
@@ -18,5 +20,6 @@
 		}
 		public float ResolutionScale { get; set; } = 1;
 		public float ScaleGUI { get; set; } = 1;
+		public WindowStates WindowState { get; set; }
 	}
 }

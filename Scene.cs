@@ -156,6 +156,8 @@ namespace SMPL
 		/// </summary>
 		public float LoadingPercent { get; private set; }
 
+		public ThemeUI ThemeUI { get; set; }
+
 		/// <summary>
 		/// The loaded textures whenever this scene is the <see cref="CurrentScene"/>. See <see cref="Scene"/> for more info.
 		/// </summary>

@@ -57,7 +57,7 @@ namespace SMPL.UI
 
       public ProgressBar()
       {
-         Size = new Vector2(MaxLength, 40) * Scale;
+         Size = new Vector2(MaxLength, 40);
          RangeB = 1;
          OriginUnit = new(0, 0.5f);
          MaxLength = 400;

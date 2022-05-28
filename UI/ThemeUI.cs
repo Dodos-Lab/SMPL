@@ -70,8 +70,8 @@ namespace SMPL.UI
 		public Textbox CreateTextbox() => new(TextBoxFontPath);
 		public ListCarousel CreateListCarousel()
 		{
-			var prev = ListPreviousTexturePath == null ? CreateButton() : CreateTextButton();
-			var next = ListPreviousTexturePath == null ? CreateButton() : CreateTextButton();
+			var prev = ListPreviousTexturePath != null ? CreateButton() : CreateTextButton();
+			var next = ListPreviousTexturePath != null ? CreateButton() : CreateTextButton();
 
 			if (prev is TextButton p)
 				p.QuickText.Text = "<";

@@ -12,20 +12,19 @@ namespace SMPL.Prefabs
 {
 	public class MainMenu : Scene
 	{
-		private readonly string logoTexPath, bgTexPath;
-		private readonly Scene scene;
-		private readonly ThemeUI theme;
-		private float sc, guiSc;
-		private bool settingsVisible;
 		private static Vector2 audioPos = new(12775, 12805), gfxPos = new(7123, 45523);
 
-		protected Sprite Background { get; private set; }
-		protected Sprite GameLogo { get; private set; }
+		private readonly string logoTexPath, bgTexPath;
+		private float sc, guiSc;
+		private bool settingsVisible;
+		private readonly Scene scene;
+		private TextButton play;
+		private Slider volumeMaster, volumeSound, volumeMusic, pixelSize, scaleGUI;
+		private Tick vSync;
+		private ListCarousel windowState;
+		private TextButton settings, back, exit;
 
-		protected List SettingsMenu { get; private set; }
-		protected List<TextButton> Buttons { get; } = new();
-
-		protected bool SettingsMenuIsVisible
+		private bool SettingsMenuIsVisible
 		{
 			get => settingsVisible;
 			set
@@ -35,17 +34,12 @@ namespace SMPL.Prefabs
 				SettingsMenu.IsHidden = value == false;
 			}
 		}
-		protected TextButton Play { get; private set; }
-		protected Slider VolumeMaster { get; private set; }
-		protected Slider VolumeSound { get; private set; }
-		protected Slider VolumeMusic { get; private set; }
-		protected Slider PixelSize { get; private set; }
-		protected Slider ScaleGUI { get; private set; }
-		protected Tick VSync { get; private set; }
-		protected ListCarousel WindowState { get; private set; }
-		protected TextButton Settings { get; private set; }
-		protected TextButton Back { get; private set; }
-		protected TextButton Exit { get; private set; }
+
+		protected Sprite Background { get; set; }
+		protected Sprite GameLogo { get; set; }
+
+		protected List SettingsMenu { get; private set; }
+		protected List<TextButton> Buttons { get; } = new();
 
 		public MainMenu(ThemeUI themeUI, Scene playScene = null, string logoTexturePath = null, string backgroundTexturePath = null)
 		{
@@ -53,7 +47,7 @@ namespace SMPL.Prefabs
 				Console.LogError(1, $"The {nameof(themeUI)} for this {nameof(MainMenu)} is required and cannot be 'null'.");
 
 			scene = playScene;
-			theme = themeUI;
+			ThemeUI = themeUI;
 			logoTexPath = logoTexturePath;
 			bgTexPath = backgroundTexturePath;
 		}
@@ -62,7 +56,7 @@ namespace SMPL.Prefabs
 		{
 			var assets = new AssetQueue { Databases = new() { File.Exists(SMPL.Settings.DB_PATH) ? SMPL.Settings.DB_PATH : null } };
 			assets.Textures = new() { bgTexPath, logoTexPath };
-			theme?.IncludeInAssetQueue(ref assets);
+			ThemeUI?.IncludeInAssetQueue(ref assets);
 			return assets;
 		}
 		protected override void OnStart()
@@ -70,7 +64,7 @@ namespace SMPL.Prefabs
 			var gfx = default(TextButton);
 			var audio = default(TextButton);
 			var sz = MainCamera.Resolution;
-			var r = theme;
+			var r = ThemeUI;
 
 			TryLoadSettingsDatabase();
 			InitMenu();
@@ -88,96 +82,104 @@ namespace SMPL.Prefabs
 
 			void InitMenu()
 			{
-				if (theme == null)
+				if (ThemeUI == null)
 					return;
 
 				GameLogo = new() { TexturePath = logoTexPath, Size = new(sz.Y * 0.8f, sz.Y * 0.8f), Position = new(-sz.X * 0.2f, 0) };
 
-				Back = theme.CreateTextButton("Back");
-				Back.LocalPosition = new(-sz.X * 0.4f, sz.Y * 0.4f);
-				Back.LocalSize = new(sz.X * 0.08f, sz.Y * 0.07f);
-				Back.Parent = MainCamera;
+				back = ThemeUI.CreateTextButton("Back");
+				back.LocalPosition = new(-sz.X * 0.4f, sz.Y * 0.4f);
+				back.LocalSize = new(sz.X * 0.08f, sz.Y * 0.07f);
+				back.Parent = MainCamera;
 
 				if (scene != null)
-					Play = theme.CreateTextButton("Play");
+					play = ThemeUI.CreateTextButton("Play");
 
-				Settings = theme.CreateTextButton("Settings");
-				Exit = theme.CreateTextButton("Exit");
+				settings = ThemeUI.CreateTextButton("Settings");
+				exit = ThemeUI.CreateTextButton("Exit");
 
-				SettingsMenu = theme.CreateList();
-				SettingsMenu.Parent = Settings;
+				SettingsMenu = ThemeUI.CreateList();
+				SettingsMenu.Parent = settings;
 
-				gfx = theme.CreateTextButton("Graphics");
-				audio = theme.CreateTextButton("Audio");
+				gfx = ThemeUI.CreateTextButton("Graphics");
+				audio = ThemeUI.CreateTextButton("Audio");
 				SettingsMenu.Buttons.Add(gfx);
 				SettingsMenu.Buttons.Add(audio);
 			}
 			void InitSettings()
 			{
-				if (theme == null)
+				if (ThemeUI == null)
 					return;
 
 				var offset = 1.5f;
-				VolumeMaster = theme.CreateSlider();
-				VolumeMaster.LocalPosition = audioPos;
-				VolumeMaster.Value = Game.Settings.VolumeUnitMaster;
+				volumeMaster = ThemeUI.CreateSlider();
+				volumeMaster.LocalPosition = audioPos;
+				volumeMaster.Value = Game.Settings.VolumeUnitMaster;
 
-				VolumeSound = theme.CreateSlider();
-				VolumeSound.Parent = VolumeMaster;
-				VolumeSound.LocalPosition = new(0, VolumeMaster.Size.Y * offset);
-				VolumeSound.Value = Game.Settings.VolumeUnitSound;
+				volumeSound = ThemeUI.CreateSlider();
+				volumeSound.Parent = volumeMaster;
+				volumeSound.LocalPosition = new(0, volumeMaster.Size.Y * offset);
+				volumeSound.Value = Game.Settings.VolumeUnitSound;
 
-				VolumeMusic = theme.CreateSlider();
-				VolumeMusic.Parent = VolumeSound;
-				VolumeMusic.LocalPosition = new(0, VolumeSound.Size.Y * offset);
-				VolumeMusic.Value = Game.Settings.VolumeUnitMusic;
+				volumeMusic = ThemeUI.CreateSlider();
+				volumeMusic.Parent = volumeSound;
+				volumeMusic.LocalPosition = new(0, volumeSound.Size.Y * offset);
+				volumeMusic.Value = Game.Settings.VolumeUnitMusic;
 
-				PixelSize = theme.CreateSlider();
-				PixelSize.LocalPosition = gfxPos;
-				PixelSize.Value = Game.Settings.ResolutionScale;
-				PixelSize.RangeA = 0.2f;
+				pixelSize = ThemeUI.CreateSlider();
+				pixelSize.LocalPosition = gfxPos;
+				pixelSize.Value = Game.Settings.ResolutionScale;
+				pixelSize.RangeA = 0.2f;
 
-				ScaleGUI = theme.CreateSlider();
-				ScaleGUI.Parent = PixelSize;
-				ScaleGUI.LocalPosition = new(0, PixelSize.Size.Y * offset);
-				ScaleGUI.RangeA = 0.35f;
-				ScaleGUI.RangeB = 2.5f;
-				ScaleGUI.Value = Game.Settings.ScaleGUI;
+				scaleGUI = ThemeUI.CreateSlider();
+				scaleGUI.Parent = pixelSize;
+				scaleGUI.LocalPosition = new(0, pixelSize.Size.Y * offset);
+				scaleGUI.RangeA = 0.35f;
+				scaleGUI.RangeB = 2.5f;
+				scaleGUI.Value = Game.Settings.ScaleGUI;
 
-				VSync = theme.CreateTick();
-				VSync.Parent = ScaleGUI;
-				VSync.LocalPosition = new(0, ScaleGUI.Size.Y * offset);
-				VSync.IsActive = Game.Settings.IsVSyncEnabled;
-				VSync.TexturePath = VSync.IsActive ? theme.TickOnTexturePath : theme.TickOffTexturePath;
+				vSync = ThemeUI.CreateTick();
+				vSync.Parent = scaleGUI;
+				vSync.LocalPosition = new(0, scaleGUI.Size.Y * offset);
+				vSync.IsActive = Game.Settings.IsVSyncEnabled;
+				vSync.TexturePath = vSync.IsActive ? ThemeUI.TickOnTexturePath : ThemeUI.TickOffTexturePath;
+
+				windowState = ThemeUI.CreateListCarousel();
+				windowState.Parent = vSync;
+				windowState.LocalPosition = new(0, vSync.Size.Y * offset);
+				windowState.ButtonWidth = 200;
+				windowState.Buttons.Add(ThemeUI.CreateTextButton("Fullscreen"));
+				windowState.Buttons.Add(ThemeUI.CreateTextButton("Borderless"));
+				windowState.Buttons.Add(ThemeUI.CreateTextButton("Windowed"));
 			}
 			void SubscribeButtons()
 			{
-				if (theme == null)
+				if (ThemeUI == null)
 					return;
 
-				Back.Clicked += OnBackClick;
+				back.Clicked += OnBackClick;
 				gfx.Clicked += OnGfxClick;
 				audio.Clicked += OnAudioClick;
-				VSync.Clicked += OnVSyncClick;
+				vSync.Clicked += OnVSyncClick;
 
-				Settings.Clicked += OnSettingsClick;
-				Exit.Clicked += OnExitClick;
+				settings.Clicked += OnSettingsClick;
+				exit.Clicked += OnExitClick;
 
-				if (Play != null)
-					Play.Clicked += OnPlayClick;
+				if (play != null)
+					play.Clicked += OnPlayClick;
 			}
 		}
 		protected override void OnUpdate()
 		{
-			if (theme == null)
+			if (ThemeUI == null)
 				return;
 
-			var qText = theme.CreateQuickText("Master", VolumeMaster.Position);
+			var qText = ThemeUI.CreateQuickText("Master", volumeMaster.Position);
 			qText.OriginUnit = new(0.5f, 0.6f);
 			qText.Scale = 1.5f;
 
 			if (Mouse.IsButtonPressed(Mouse.Button.Left).Once("close-settings-menu-asgl2kj") &&
-				SettingsMenu.IsHovered == false && Settings.Hitbox.IsHovered == false)
+				SettingsMenu.IsHovered == false && settings.Hitbox.IsHovered == false)
 				SettingsMenuIsVisible = false;
 
 			UpdateAndDrawMenu();
@@ -198,11 +200,11 @@ namespace SMPL.Prefabs
 					Buttons[i].LocalPosition = i != 0 ? new(0, btnSz.Y * offset) : new(x, -(Buttons.Count + 1) * (btnSz.Y * offset) * 0.5f);
 					Buttons[i].Draw();
 				}
-				if (Play != null)
+				if (play != null)
 				{
-					Play.Parent = Buttons.Count == 0 ? null : Buttons[0];
-					Play.LocalSize = btnSz;
-					Play.LocalPosition = new(Buttons.Count == 0 ? x : 0, -btnSz.Y * offset);
+					play.Parent = Buttons.Count == 0 ? null : Buttons[0];
+					play.LocalSize = btnSz;
+					play.LocalPosition = new(Buttons.Count == 0 ? x : 0, -btnSz.Y * offset);
 				}
 
 				Background.Size = sz;
@@ -210,65 +212,66 @@ namespace SMPL.Prefabs
 				GameLogo.Position = new(-sz.X * 0.2f, 0);
 				GameLogo.Size = new(sz.Y * 0.8f, sz.Y * 0.8f);
 
-				Back.LocalPosition = new(-sz.X * 0.4f, sz.Y * 0.4f);
+				back.LocalPosition = new(-sz.X * 0.4f, sz.Y * 0.4f);
 
 				SettingsMenu.ButtonWidth = 150;
 				SettingsMenu.MaxLength = 300;
 				SettingsMenu.LocalPosition =
-					new(Settings.LocalSize.X * 0.65f + SettingsMenu.ButtonWidth,
+					new(settings.LocalSize.X * 0.65f + SettingsMenu.ButtonWidth,
 					-MathF.Max(SettingsMenu.VisibleButtonCountCurrent - 1, 0) * (SettingsMenu.ButtonHeight + SettingsMenu.ButtonSpacing));
 
-				Settings.Parent = Buttons.Count == 0 ? Play : Buttons[^1];
-				Settings.LocalSize = btnSz;
-				Settings.LocalPosition = Buttons.Count == 0 && Play == null ? new(x, 0) : new(0, btnSz.Y * offset);
+				settings.Parent = Buttons.Count == 0 ? play : Buttons[^1];
+				settings.LocalSize = btnSz;
+				settings.LocalPosition = Buttons.Count == 0 && play == null ? new(x, 0) : new(0, btnSz.Y * offset);
 
-				Exit.Parent = Settings;
-				Exit.LocalSize = btnSz;
-				Exit.LocalPosition = new(0, Settings.LocalSize.Y * offset);
+				exit.Parent = settings;
+				exit.LocalSize = btnSz;
+				exit.LocalPosition = new(0, settings.LocalSize.Y * offset);
 
 				Background.Draw();
 				GameLogo.Draw();
-				Settings.Draw();
-				Exit.Draw();
+				settings.Draw();
+				exit.Draw();
 
 				if (SettingsMenuIsVisible)
 					SettingsMenu.Draw();
 
 				if (MainCamera.Position != default)
 				{
-					Back.Parent = MainCamera;
-					Back.Draw();
+					back.Parent = MainCamera;
+					back.Draw();
 				}
 
-				if (Play != null)
-					Play.Draw();
+				if (play != null)
+					play.Draw();
 			}
 			void UpdateAndDrawAudio()
 			{
-				VolumeMaster.Draw();
-				VolumeSound.Draw();
-				VolumeMusic.Draw();
-				Game.Settings.VolumeUnitMaster = VolumeMaster.Value;
-				Game.Settings.VolumeUnitSound = VolumeSound.Value;
-				Game.Settings.VolumeUnitMusic = VolumeMusic.Value;
+				volumeMaster.Draw();
+				volumeSound.Draw();
+				volumeMusic.Draw();
+				Game.Settings.VolumeUnitMaster = volumeMaster.Value;
+				Game.Settings.VolumeUnitSound = volumeSound.Value;
+				Game.Settings.VolumeUnitMusic = volumeMusic.Value;
 
-				DrawText("Master", VolumeMaster.Position);
-				DrawText("Sound", VolumeSound.Position);
-				DrawText("Music", VolumeMusic.Position);
+				DrawText("Master", volumeMaster.Position);
+				DrawText("Sound", volumeSound.Position);
+				DrawText("Music", volumeMusic.Position);
 			}
 			void UpdateAndDrawGfx()
 			{
-				PixelSize.Draw();
-				ScaleGUI.Draw();
-				VSync.Draw();
+				pixelSize.Draw();
+				scaleGUI.Draw();
+				vSync.Draw();
+				windowState.Draw();
 
-				Game.Settings.ResolutionScale = PixelSize.Value;
-				Game.Settings.ScaleGUI = ScaleGUI.Value;
+				Game.Settings.ResolutionScale = pixelSize.Value;
+				Game.Settings.ScaleGUI = scaleGUI.Value;
 
-				var value = (int)(PixelSize.Value * 30f) / 30f;
-				DrawText($"Resolution [{VideoMode.DesktopMode.Width * value}x{VideoMode.DesktopMode.Height * value}]", PixelSize.Position);
-				DrawText($"GUI Scale [x{ScaleGUI.Value:F2}]", ScaleGUI.Position);
-				DrawText("VSync", VSync.CornerA + new Vector2(-VSync.Size.X * 1.1f, VSync.Size.Y * 0.5f));
+				var value = (int)(pixelSize.Value * 30f) / 30f;
+				DrawText($"Resolution [{VideoMode.DesktopMode.Width * value}x{VideoMode.DesktopMode.Height * value}]", pixelSize.Position);
+				DrawText($"GUI Scale [x{scaleGUI.Value:F2}]", scaleGUI.Position);
+				DrawText("VSync", vSync.CornerA + new Vector2(-vSync.Size.X * 1.1f, vSync.Size.Y * 0.5f));
 			}
 			void DrawText(string text, Vector2 position)
 			{
@@ -280,7 +283,7 @@ namespace SMPL.Prefabs
 		}
 		protected override void OnStop()
 		{
-			if (theme == null)
+			if (ThemeUI == null)
 				return;
 
 			Background.Destroy(); Background = null;
@@ -290,18 +293,18 @@ namespace SMPL.Prefabs
 				Buttons[i].Destroy();
 			Buttons.Clear();
 
-			Settings.Destroy(); Settings = null;
-			Exit.Destroy(); Exit = null;
+			settings.Destroy(); settings = null;
+			exit.Destroy(); exit = null;
 		}
 
-		private void OnVSyncClick() => Game.Settings.IsVSyncEnabled = VSync.IsActive;
+		private void OnVSyncClick() => Game.Settings.IsVSyncEnabled = vSync.IsActive;
 		private void OnGfxClick() => MainCamera.Position = gfxPos;
 		private void OnAudioClick() => MainCamera.Position = audioPos;
 		private void OnPlayClick() => CurrentScene = scene ?? CurrentScene;
 		private void OnBackClick()
 		{
 			sc = Game.Settings.ResolutionScale;
-			guiSc = ScaleGUI.Value;
+			guiSc = scaleGUI.Value;
 
 			MainCamera.Position = default;
 			UpdateSettingsDatabase();
@@ -314,22 +317,23 @@ namespace SMPL.Prefabs
 
 		private void UpdateScaleGUI()
 		{
-			if (theme == null)
+			if (ThemeUI == null)
 				return;
 
 			var s = sc * guiSc;
 
-			if (Play != null)
-				Play.Scale = s;
+			if (play != null)
+				play.Scale = s;
 
-			VolumeMaster.Scale = s;
-			VolumeSound.Scale = s;
-			VolumeMusic.Scale = s;
-			PixelSize.Scale = s;
-			VSync.Scale = s;
-			Back.Scale = s;
-			Settings.Scale = s;
-			Exit.Scale = s;
+			volumeMaster.Scale = s;
+			volumeSound.Scale = s;
+			volumeMusic.Scale = s;
+			pixelSize.Scale = s;
+			vSync.Scale = s;
+			back.Scale = s;
+			settings.Scale = s;
+			exit.Scale = s;
+			//windowState.Scale = s;
 		}
 		private void TryLoadSettingsDatabase()
 		{
