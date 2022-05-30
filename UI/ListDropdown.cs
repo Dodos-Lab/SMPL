@@ -16,7 +16,17 @@ namespace SMPL.UI
 		[JsonIgnore]
 		public Button ShowList { get; private set; }
 		[JsonIgnore]
-		public Button Selection => Buttons.Count == 0 ? null : Buttons[selectionIndex];
+		public Button Selection => Buttons.Count == 0 ? null : Buttons[SelectionIndex];
+		public int SelectionIndex
+		{
+			get => selectionIndex;
+			set
+			{
+				UpdateDefaultValues();
+				selectionIndex = value.Limit(0, Buttons.Count, Extensions.Limitation.ClosestBound);
+				UpdateSelection();
+			}
+		}
 
 		public ListDropdown(Button showList = default)
 		{
@@ -29,13 +39,11 @@ namespace SMPL.UI
 
 		public override void Draw(Camera camera = null)
 		{
-			OriginUnit = new(0, 0.5f);
+			UpdateDefaultValues();
 
 			if (Selection != null)
 			{
-				Selection.Parent = this;
-				Selection.LocalSize = new(ButtonWidth, ButtonHeight);
-				Selection.LocalPosition = new(-ButtonHeight * 0.5f - ScrollUp.LocalSize.X, ButtonWidth * 0.5f + ScrollUp.LocalSize.Y * 0.5f);
+				UpdateSelection();
 				Selection.IsDisabled = isOpen == false;
 				Selection.Draw(camera);
 			}
@@ -70,7 +78,7 @@ namespace SMPL.UI
 		}
 		protected override void OnButtonClick(Button button)
 		{
-			selectionIndex = Buttons.IndexOf(button);
+			SelectionIndex = Buttons.IndexOf(button);
 			isOpen = false;
 			Selection.Unhover();
 			OnSelect(button);
@@ -79,6 +87,18 @@ namespace SMPL.UI
 		private void OnShow()
 		{
 			isOpen = !isOpen;
+		}
+		private void UpdateDefaultValues()
+		{
+			RangeA = 0;
+			RangeB = Buttons.Count - 1;
+			OriginUnit = new(0, 0.5f);
+		}
+		private void UpdateSelection()
+		{
+			Selection.Parent = this;
+			Selection.LocalSize = new(ButtonWidth, ButtonHeight);
+			Selection.LocalPosition = new(-ButtonHeight * 0.5f - ScrollUp.LocalSize.X, ButtonWidth * 0.5f + ScrollUp.LocalSize.Y * 0.5f);
 		}
 	}
 }

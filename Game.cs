@@ -46,7 +46,7 @@ namespace SMPL
 			if (startingScene == null || Window != null)
 				return;
 
-			InitWindow(Settings.WindowStates.Borderless);
+			InitWindow(Settings.WindowStates.Borderless, Settings.ScreenResolution);
 
 			Scene.Init(startingScene, loadingScene);
 			var sz = Settings.ScreenResolution;
@@ -107,13 +107,10 @@ namespace SMPL
 
 		private static void Main() { }
 		private static void OnClose(object sender, EventArgs e) => Stop();
-		internal static void InitWindow(Settings.WindowStates windowState)
+		internal static void InitWindow(Settings.WindowStates windowState, Vector2 resolution)
 		{
-			var sz = Settings.ScreenResolution;
-			var resolutions = Settings.SupportedMonitorResolutions;
-
 			currWindowStyle = windowState.ToWindowStyles();
-			Window = new(new((uint)sz.X, (uint)sz.Y), "SMPL Game", currWindowStyle);
+			Window = new(new((uint)resolution.X, (uint)resolution.Y), "SMPL Game", currWindowStyle);
 			Window.Position = new();
 			Window.Clear();
 			Window.Display();

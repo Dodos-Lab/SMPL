@@ -103,7 +103,7 @@ namespace SMPL.UI
 		protected virtual void OnScrollUpHold() => OnScrollUp();
 		protected virtual void OnScrollDownHold() => OnScrollDown();
 
-		private void OnScroll(object sender, SFML.Window.MouseWheelScrollEventArgs e)
+		internal void OnScroll(object sender, SFML.Window.MouseWheelScrollEventArgs e)
 		{
 			if (IsReceivingInput == false || IsDisabled)
 				return;

@@ -13,9 +13,10 @@ namespace SMPL.Prefabs
 	public class MainMenu : Scene
 	{
 		private static Vector2 audioPos = new(12775, 12805), gfxPos = new(7123, 45523);
+		private Vector2 prevRes = Settings.ScreenResolution;
 
 		private readonly string logoTexPath, bgTexPath;
-		private float guiSc;
+		private float guiSc = 1;
 		private bool settingsVisible, reload;
 		private readonly Scene scene;
 		private TextButton play;
@@ -114,7 +115,7 @@ namespace SMPL.Prefabs
 
 				var offset = 2f;
 				volumeMaster = ThemeUI.CreateSlider();
-				volumeMaster.LocalPosition = audioPos;
+				volumeMaster.LocalPosition = audioPos + new Vector2(0, -100);
 				volumeMaster.Value = Game.Settings.VolumeUnitMaster;
 
 				volumeSound = ThemeUI.CreateSlider();
@@ -129,12 +130,15 @@ namespace SMPL.Prefabs
 
 				var resolutions = Settings.SupportedMonitorResolutions;
 				resolution = ThemeUI.CreateListDropdown();
-				resolution.LocalPosition = gfxPos + new Vector2(MainCamera.Resolution.X * 0.4f, -MainCamera.Resolution.Y * 0.15f);
+				resolution.ButtonWidth = 200;
+				resolution.MaxLength = 200;
+				resolution.LocalPosition = gfxPos + new Vector2(-100, -100);
 				for (int i = 0; i < resolutions.Count; i++)
 					resolution.Buttons.Add(ThemeUI.CreateTextButton($"{resolutions[i].X}x{resolutions[i].Y}"));
+				resolution.SelectionIndex = resolutions.IndexOf(Game.Settings.Resolution);
 
 				scaleGUI = ThemeUI.CreateSlider();
-				scaleGUI.LocalPosition = gfxPos + new Vector2(-MainCamera.Resolution.X * 0.15f, -MainCamera.Resolution.Y * 0.15f);
+				scaleGUI.LocalPosition = gfxPos + new Vector2(100, -100);
 				scaleGUI.RangeA = 0.35f;
 				scaleGUI.RangeB = 2.5f;
 				scaleGUI.Value = Game.Settings.ScaleGUI;
@@ -188,32 +192,27 @@ namespace SMPL.Prefabs
 			UpdateAndDrawMenu();
 			UpdateAndDrawAudio();
 			UpdateAndDrawGfx();
+			UpdateScaleGUI();
 
 			void UpdateAndDrawMenu()
 			{
 				var sz = MainCamera.Resolution;
-				var x = sz.X * 0.24f;
+				var x = 0;
+				var y = 100;
 				var btnSz = Buttons.Count == 0 ? new(200, 80) : Buttons[0].LocalSize;
 				var offset = 1.2f;
 
-				for (int i = 0; i < Buttons.Count; i++)
-				{
-					Buttons[i].Parent = i == 0 ? null : Buttons[i - 1];
-					Buttons[i].LocalSize = btnSz;
-					Buttons[i].LocalPosition = i != 0 ? new(0, btnSz.Y * offset) : new(x, -(Buttons.Count + 1) * (btnSz.Y * offset) * 0.5f);
-					Buttons[i].Draw();
-				}
 				if (play != null)
 				{
 					play.Parent = Buttons.Count == 0 ? null : Buttons[0];
 					play.LocalSize = btnSz;
-					play.LocalPosition = new(Buttons.Count == 0 ? x : 0, -btnSz.Y * offset);
+					play.LocalPosition = new(x, Buttons.Count == 0 ? y : -btnSz.Y * offset);
 				}
 
 				Background.Size = sz;
 
-				GameLogo.Position = new(-sz.X * 0.2f, 0);
-				GameLogo.Size = new(sz.Y * 0.8f, sz.Y * 0.8f);
+				GameLogo.Position = new(0, -sz.Y * 0.3f);
+				GameLogo.Size = new(sz.Y * 0.3f, sz.Y * 0.3f);
 
 				back.LocalPosition = new(-sz.X * 0.4f, sz.Y * 0.4f);
 
@@ -225,7 +224,7 @@ namespace SMPL.Prefabs
 
 				settings.Parent = Buttons.Count == 0 ? play : Buttons[^1];
 				settings.LocalSize = btnSz;
-				settings.LocalPosition = Buttons.Count == 0 && play == null ? new(x, 0) : new(0, btnSz.Y * offset);
+				settings.LocalPosition = Buttons.Count == 0 && play == null ? new(x, y) : new(0, btnSz.Y * offset);
 
 				exit.Parent = settings;
 				exit.LocalSize = btnSz;
@@ -247,6 +246,14 @@ namespace SMPL.Prefabs
 
 				if (play != null)
 					play.Draw();
+
+				for (int i = 0; i < Buttons.Count; i++)
+				{
+					Buttons[i].Parent = i == 0 ? null : Buttons[i - 1];
+					Buttons[i].LocalSize = btnSz;
+					Buttons[i].LocalPosition = i == 0 ? new(x, -btnSz.Y * Buttons.Count * 0.1f) : new(0, btnSz.Y * offset);
+					Buttons[i].Draw();
+				}
 			}
 			void UpdateAndDrawAudio()
 			{
@@ -268,7 +275,6 @@ namespace SMPL.Prefabs
 				vSync.Draw();
 				windowState.Draw();
 
-				//Game.Settings.ResolutionScale = pixelSize.Value;
 				Game.Settings.ScaleGUI = scaleGUI.Value;
 				Game.Settings.WindowState = (Settings.WindowStates)windowState.SelectionIndex;
 
@@ -311,23 +317,32 @@ namespace SMPL.Prefabs
 		private void OnPlayClick() => CurrentScene = scene ?? CurrentScene;
 		private void OnBackClick()
 		{
+			prevRes = Game.Settings.Resolution;
 			guiSc = scaleGUI.Value;
-
 			MainCamera.Position = default;
+
+			UpdateResolution();
 			UpdateSettingsDatabase();
 			TryLoadSettingsDatabase();
-
-			UpdateScaleGUI();
 		}
 		private void OnSettingsClick() => SettingsMenuIsVisible = !SettingsMenuIsVisible;
 		private void OnExitClick() => Game.Stop();
 
+		private void UpdateResolution()
+		{
+			var text = ((TextButton)resolution.Selection).QuickText.Text.Split('x');
+			var res = new Vector2(text[0].ToNumber(), text[1].ToNumber());
+			Game.Settings.Resolution = res;
+		}
 		private void UpdateScaleGUI()
 		{
 			if (ThemeUI == null)
 				return;
 
 			var s = guiSc;
+
+			if (Buttons.Count > 0)
+				Buttons[0].Scale = s;
 
 			if (play != null)
 				play.Scale = s;
@@ -340,6 +355,7 @@ namespace SMPL.Prefabs
 			settings.Scale = s;
 			exit.Scale = s;
 			scaleGUI.Scale = s;
+
 			//vSync.Scale = s;
 			//windowState.Scale = s;
 		}
@@ -355,12 +371,22 @@ namespace SMPL.Prefabs
 			if (sheet.Count > 0)
 				Game.Settings = sheet[0];
 
-			UpdateWindowState();
+			if (Game.currWindowStyle.ToWindowStates() != Game.Settings.WindowState || Game.Settings.Resolution != prevRes)
+			{
+				Game.Window.Dispose();
+				Game.InitWindow(Game.Settings.WindowState, Game.Settings.Resolution);
 
-			MainCamera.Destroy();
-			var sz = Game.Settings.Resolution;
+				if (SettingsMenu != null)
+						Game.Window.MouseWheelScrolled += SettingsMenu.OnScroll;
+				if (resolution != null)
+				Game.Window.MouseWheelScrolled += resolution.OnScroll;
+
+				MainCamera.Destroy();
+				var sz = Game.Settings.Resolution;
+				MainCamera = new((uint)(sz.X), (uint)(sz.Y));
+			}
+
 			guiSc = Game.Settings.ScaleGUI;
-			MainCamera = new((uint)(sz.X), (uint)(sz.Y));
 
 			if (Background != null)
 			{
@@ -369,14 +395,6 @@ namespace SMPL.Prefabs
 			}
 		}
 
-		private static void UpdateWindowState()
-		{
-			if (Game.currWindowStyle.ToWindowStates() == Game.Settings.WindowState)
-				return;
-
-			Game.Window.Dispose();
-			Game.InitWindow(Game.Settings.WindowState);
-		}
 		private static void UpdateSettingsDatabase()
 		{
 			var settingsDb = default(Database);

@@ -75,6 +75,7 @@ namespace SMPL
       public enum WindowStates { Windowed, Borderless, Fullscreen }
 
 		private bool vsync;
+      private Vector2 res = ScreenResolution;
 
 		internal const string DB_PATH = "settings.cdb";
 		internal const string DB_SHEET_NAME = "settings";
@@ -88,9 +89,19 @@ namespace SMPL
 			get => vsync;
 			set { vsync = value; Game.Window.SetVerticalSyncEnabled(value); }
 		}
-      public Vector2 Resolution { get; set; } = ScreenResolution;
+      public Vector2 Resolution
+      {
+         get => res;
+         set
+         {
+				if (SupportedMonitorResolutions.Contains(value) == false)
+               value = ScreenResolution;
+
+            res = value;
+         }
+      }
 		public float ScaleGUI { get; set; } = 1;
-		public WindowStates WindowState { get; set; }
+      public WindowStates WindowState { get; set; } = WindowStates.Borderless;
 
 		[JsonIgnore]
 		public static Vector2 ScreenResolution => new(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
