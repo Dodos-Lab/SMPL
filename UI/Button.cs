@@ -150,5 +150,6 @@ namespace SMPL.UI
          }
       }
       internal void Hover() => OnHover();
+      internal void Unhover() => OnUnhover();
    }
 }

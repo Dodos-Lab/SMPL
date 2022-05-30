@@ -26,3 +26,8 @@ G:\SMPL\obj\Debug\net5.0\SMPL.dll
 G:\SMPL\obj\Debug\net5.0\ref\SMPL.dll
 G:\SMPL\obj\Debug\net5.0\SMPL.pdb
 G:\SMPL\obj\Debug\net5.0\SMPL.csproj.AssemblyReference.cache
+D:\code\SFML\SMPL2\SMPL\bin\Debug\net5.0\System.Windows.Forms.dll
+D:\code\SFML\SMPL2\SMPL\bin\Debug\net5.0\Accessibility.dll
+D:\code\SFML\SMPL2\SMPL\bin\Debug\net5.0\System.Deployment.dll
+D:\code\SFML\SMPL2\SMPL\bin\Debug\net5.0\System.Runtime.Serialization.Formatters.Soap.dll
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net5.0\SMPL.csproj.CopyComplete

@@ -45,8 +45,22 @@ namespace SMPL.UI
 
 		public ScrollBar(Button scrollUp = null, Button scrollDown = null)
 		{
-			scrollUp ??= new();
-			scrollDown ??= new();
+			var theme = Scene.CurrentScene.ThemeUI;
+			var noUp = scrollUp == null;
+			var noDown = scrollDown == null;
+
+			scrollUp ??= theme == null ? new Button() : (theme.ScrollUpTexturePath == null ? theme.CreateTextButton("^") : theme.CreateButton());
+			scrollDown ??= theme == null ? new Button() : (theme.ScrollDownTexturePath == null ? theme.CreateTextButton("V") : theme.CreateButton());
+
+			if (noUp && theme != null)
+				scrollUp.TexturePath = theme.ScrollUpTexturePath ?? theme.ButtonTexturePath;
+			if (noDown && theme != null)
+				scrollDown.TexturePath = theme.ScrollDownTexturePath ?? theme.ButtonTexturePath;
+
+			if (scrollUp is TextButton u)
+				u.QuickText.OriginUnit = new(1.8f, 0);
+			if (scrollDown is TextButton d)
+				d.QuickText.OriginUnit = new(-0.5f, 0);
 
 			ScrollUp = scrollUp;
 			ScrollDown = scrollDown;
@@ -58,8 +72,6 @@ namespace SMPL.UI
 			EmptyColor = new(0, 0, 0, 100);
 			ProgressColor = new(0, 0, 0, 100);
 
-			ScrollUp = new();
-			ScrollDown = new();
 			ScrollUp.Clicked += OnScrollUp;
 			ScrollDown.Clicked += OnScrollDown;
 			ScrollUp.Held += OnScrollUpHold;

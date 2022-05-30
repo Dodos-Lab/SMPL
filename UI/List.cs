@@ -61,7 +61,13 @@ namespace SMPL.UI
 		public int ScrollIndex => scrollIndex;
 
 		public List()
-			=> Value = 0;
+		{
+			Value = 0;
+			if (ScrollUp is TextButton u)
+				u.QuickText.Text = "<";
+			if (ScrollDown is TextButton d)
+				d.QuickText.Text = ">";
+		}
 
 		protected virtual void OnUnfocus() { }
 		protected virtual void OnButtonClick(Button button) { }

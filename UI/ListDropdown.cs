@@ -14,11 +14,11 @@ namespace SMPL.UI
 		public event SelectedEventHandler Selected;
 
 		[JsonIgnore]
-		public Tick ShowList { get; private set; }
+		public Button ShowList { get; private set; }
 		[JsonIgnore]
 		public Button Selection => Buttons.Count == 0 ? null : Buttons[selectionIndex];
 
-		public ListDropdown(Tick showList = default)
+		public ListDropdown(Button showList = default)
 		{
 			showList ??= new();
 			ShowList = showList;
@@ -34,25 +34,15 @@ namespace SMPL.UI
 			if (Selection != null)
 			{
 				Selection.Parent = this;
-				Selection.Size = new(ButtonWidth, ButtonHeight);
-				Selection.LocalPosition = new(-ButtonHeight * 0.5f - ScrollUp.Size.X, ButtonWidth * 0.5f + ScrollUp.Size.Y * 0.5f);
+				Selection.LocalSize = new(ButtonWidth, ButtonHeight);
+				Selection.LocalPosition = new(-ButtonHeight * 0.5f - ScrollUp.LocalSize.X, ButtonWidth * 0.5f + ScrollUp.LocalSize.Y * 0.5f);
 				Selection.IsDisabled = isOpen == false;
 				Selection.Draw(camera);
 			}
 
 			ShowList.Position = ScrollUp.CornerD;
-			ShowList.Size = new(ShowList.Size.X, Selection == null ? ShowList.Size.Y : Selection.Size.Y);
-
 			if (Selection != null)
-			{
-				var top = ShowList.Hitbox.Lines[0];
-				var bot = ShowList.Hitbox.Lines[2];
-				top.A = Selection.CornerA;
-				bot.B = Selection.CornerD;
-				ShowList.Hitbox.Lines[0] = top;
-				ShowList.Hitbox.Lines[2] = bot;
-				ShowList.Hitbox.Lines[3] = new(bot.B, top.A);
-			}
+				ShowList.LocalSize = new(Selection.LocalSize.Y);
 
 			ShowList.Draw(camera);
 
@@ -82,6 +72,7 @@ namespace SMPL.UI
 		{
 			selectionIndex = Buttons.IndexOf(button);
 			isOpen = false;
+			Selection.Unhover();
 			OnSelect(button);
 		}
 

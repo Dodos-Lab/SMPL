@@ -17,12 +17,14 @@ namespace SMPL
 	/// </summary>
 	public static class Game
 	{
+		internal static Styles currWindowStyle;
+
 		public static Settings Settings { get; internal set; } = new();
 
 		/// <summary>
 		/// The raw <see cref="RenderWindow"/> instance. Useful for input events, drawing, ingame settings etc.
 		/// </summary>
-		public static RenderWindow Window { get; private set; }
+		public static RenderWindow Window { get; internal set; }
 
 		/// <summary>
 		/// The cursor's position relative to the <see cref="Window"/>.<br></br>
@@ -31,7 +33,7 @@ namespace SMPL
 		public static Vector2 MouseCursorPosition
 		{
 			get { var p = Mouse.GetPosition(Window); return new(p.X, p.Y); }
-         set { Mouse.SetPosition(new((int)value.X, (int)value.Y), Window); }
+			set { Mouse.SetPosition(new((int)value.X, (int)value.Y), Window); }
 		}
 
 		/// <summary>
@@ -44,11 +46,11 @@ namespace SMPL
 			if (startingScene == null || Window != null)
 				return;
 
-			InitWindow();
+			InitWindow(Settings.WindowStates.Borderless);
 
 			Scene.Init(startingScene, loadingScene);
-			var sz = VideoMode.DesktopMode;
-			Scene.MainCamera = new((uint)(sz.Width), (uint)(sz.Height));
+			var sz = Settings.ScreenResolution;
+			Scene.MainCamera = new((uint)(sz.X), (uint)(sz.Y));
 
 			while (Window.IsOpen)
 			{
@@ -60,23 +62,6 @@ namespace SMPL
 				Scene.UpdateCurrentScene();
 				Camera.DrawMainCameraToWindow();
 				Window.Display();
-			}
-
-			void InitWindow()
-			{
-				var w = VideoMode.DesktopMode.Width;
-				var h = VideoMode.DesktopMode.Height;
-				Window = new(new(w, h), "SMPL Game");
-				Window.Clear();
-				Window.Display();
-				Window.Closed += OnClose;
-				Window.SetFramerateLimit(120);
-
-				var view = Window.GetView();
-				view.Center = new();
-				Window.SetView(view);
-
-				CenterWindow();
 			}
 		}
 		/// <summary>
@@ -115,13 +100,51 @@ namespace SMPL
 		/// </summary>
 		public static void CenterWindow()
 		{
-			var w = VideoMode.DesktopMode.Width;
-			var h = VideoMode.DesktopMode.Height;
-			Window.Size = new((uint)(w / 1.5f), (uint)(h / 1.5f));
-			Window.Position = new Vector2i((int)(w / 2f), (int)(h / 2f)) - new Vector2i((int)(Window.Size.X / 2), (int)(Window.Size.Y / 2));
+			var sz = Settings.ScreenResolution;
+			Window.Size = new((uint)(sz.X / 1.5f), (uint)(sz.Y / 1.5f));
+			Window.Position = new Vector2i((int)(sz.X / 2f), (int)(sz.Y / 2f)) - new Vector2i((int)(Window.Size.X / 2), (int)(Window.Size.Y / 2));
 		}
 
 		private static void Main() { }
 		private static void OnClose(object sender, EventArgs e) => Stop();
+		internal static void InitWindow(Settings.WindowStates windowState)
+		{
+			var sz = Settings.ScreenResolution;
+			var resolutions = Settings.SupportedMonitorResolutions;
+
+			currWindowStyle = windowState.ToWindowStyles();
+			Window = new(new((uint)sz.X, (uint)sz.Y), "SMPL Game", currWindowStyle);
+			Window.Position = new();
+			Window.Clear();
+			Window.Display();
+			Window.Closed += OnClose;
+			Window.SetFramerateLimit(120);
+
+			var view = Window.GetView();
+			view.Center = new();
+			Window.SetView(view);
+
+			if (windowState == Settings.WindowStates.Windowed)
+				CenterWindow();
+		}
+
+		internal static Settings.WindowStates ToWindowStates(this Styles style)
+		{
+			return style switch
+			{
+				Styles.Fullscreen => Settings.WindowStates.Fullscreen,
+				Styles.None => Settings.WindowStates.Borderless,
+				_ => Settings.WindowStates.Windowed,
+			};
+		}
+		internal static Styles ToWindowStyles(this Settings.WindowStates windowStates)
+		{
+			return windowStates switch
+			{
+				Settings.WindowStates.Borderless => Styles.None,
+				Settings.WindowStates.Fullscreen => Styles.Fullscreen,
+				_ => Styles.Default,
+			};
+		}
 	}
 }

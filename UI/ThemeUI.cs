@@ -12,6 +12,7 @@ namespace SMPL.UI
 		public string TextBoxFontPath { get; set; }
 		public string QuickTextFontPath { get; set; }
 
+		public string ListDropdownShowTexturePath { get; set; }
 		public string ListNextTexturePath { get; set; }
 		public string ListPreviousTexturePath { get; set; }
 		public string ScrollDownTexturePath { get; set; }
@@ -58,31 +59,20 @@ namespace SMPL.UI
 			var up = ScrollUpTexturePath == null ? CreateButton() : CreateTextButton();
 			var down = ScrollDownTexturePath == null ? CreateButton() : CreateTextButton();
 
-			if (up is TextButton u)
-				u.QuickText.Text = "^";
-
-			if (down is TextButton d)
-				d.QuickText.Text = "V";
-
 			return new(up, down) { TexturePath = ScrollBarTexturePath };
 		}
 		public Inputbox CreateInputbox() => new(InputboxFontPath);
 		public Textbox CreateTextbox() => new(TextBoxFontPath);
 		public ListCarousel CreateListCarousel()
 		{
-			var prev = ListPreviousTexturePath != null ? CreateButton() : CreateTextButton();
-			var next = ListPreviousTexturePath != null ? CreateButton() : CreateTextButton();
-
-			if (prev is TextButton p)
-				p.QuickText.Text = "<";
-
-			if (next is TextButton n)
-				n.QuickText.Text = ">";
-
-			return new ListCarousel(prev, next) { TexturePath = ScrollBarTexturePath };
+			return new ListCarousel() { TexturePath = ScrollBarTexturePath };
 		}
 		public List CreateList() => new() { TexturePath = ScrollBarTexturePath };
-		public ListDropdown CreateListDropdown() => new() { TexturePath = ScrollBarTexturePath };
+		public ListDropdown CreateListDropdown()
+		{
+			var showList = ListDropdownShowTexturePath != null ? CreateButton() : CreateTextButton();
+			return new ListDropdown(showList) { TexturePath = ScrollBarTexturePath };
+		}
 		public ListMultiselect CreateListMultiselect() => new() { TexturePath = ScrollBarTexturePath };
 
 		protected virtual void OnButtonClick(Button button) { }

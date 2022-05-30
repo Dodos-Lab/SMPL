@@ -34,7 +34,11 @@ namespace SMPL.UI
 		public int SelectionIndex
 		{
 			get => (int)Value;
-			set => Value = value.Limit(0, Buttons.Count, SelectionIsRepeating ? Extensions.Limitation.Overflow : Extensions.Limitation.ClosestBound);
+			set
+			{
+				UpdateDefaultValues();
+				Value = value.Limit(0, Buttons.Count, SelectionIsRepeating ? Extensions.Limitation.Overflow : Extensions.Limitation.ClosestBound);
+			}
 		}
 		[JsonIgnore]
 		public Button Selection => Buttons.Count == 0 ? null : Buttons[SelectionIndex];
@@ -45,8 +49,21 @@ namespace SMPL.UI
 			SelectionIsRepeating = true;
 
 			Angle = 0;
-			previous ??= new();
-			next ??= new();
+			var theme = Scene.CurrentScene.ThemeUI;
+			var noPrev = previous == null;
+			var noNext = next == null;
+			previous ??= theme == null ? new Button() : (theme.ListPreviousTexturePath == null ? theme.CreateTextButton("<") : theme.CreateButton());
+			next ??= theme == null ? new Button() : (theme.ListNextTexturePath == null ? theme.CreateTextButton(">") : theme.CreateButton());
+
+			if (noPrev && theme != null)
+				previous.TexturePath = theme.ListPreviousTexturePath ?? theme.ButtonTexturePath;
+			if (noNext && theme != null)
+				next.TexturePath = theme.ListNextTexturePath ?? theme.ButtonTexturePath;
+
+			if (previous is TextButton u)
+				u.QuickText.OriginUnit = new(0.5f, 0.65f);
+			if (next is TextButton d)
+				d.QuickText.OriginUnit = new(0.5f, 0.65f);
 
 			Previous = previous;
 			Next = next;
@@ -80,9 +97,7 @@ namespace SMPL.UI
 
 		public override void Draw(Camera camera = null)
 		{
-			ScrollValue = 1;
-			RangeA = 0;
-			RangeB = Buttons.Count - 1;
+			UpdateDefaultValues();
 
 			Previous.Parent = this;
 			Next.Parent = this;
@@ -132,6 +147,13 @@ namespace SMPL.UI
 
 			Previous = null;
 			Next = null;
+		}
+
+		private void UpdateDefaultValues()
+		{
+			ScrollValue = 1;
+			RangeA = 0;
+			RangeB = Buttons.Count - 1;
 		}
 	}
 }

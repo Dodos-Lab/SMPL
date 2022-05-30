@@ -140,6 +140,11 @@ namespace SMPL
 			get => scene;
 			set
 			{
+				if (value == null)
+				{
+					Game.Stop();
+					return;
+				}
 				unloadScene = scene;
 				scene = value;
 				LoadingScene?.OnStart();
