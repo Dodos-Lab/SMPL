@@ -1,12 +1,4 @@
-﻿using Newtonsoft.Json;
-using SFML.Graphics;
-using SMPL.Graphics;
-using SMPL.Tools;
-using SMPL.UI;
-using System.Collections.Generic;
-using System.Numerics;
-
-namespace SMPL.Tools
+﻿namespace SMPL.Tools
 {
 	/// <summary>
 	/// A <see cref="Line"/> collection used to determine whether it interacts in any way with other hitboxes/points in the world.
@@ -14,11 +6,11 @@ namespace SMPL.Tools
 	public class Hitbox
 	{
 		/// <summary>
-		/// This list is used by <see cref="UpdateLines(Object)"/> which transforms and moves its contents into <see cref="Lines"/>.
+		/// This list is used by <see cref="UpdateLines(Thing)"/> which transforms and moves its contents into <see cref="Lines"/>.
 		/// </summary>
 		public List<Line> LocalLines { get; } = new();
 		/// <summary>
-		/// This list is used by <see cref="UpdateLines(Object)"/> for writing and all the rest of the methods for reading.
+		/// This list is used by <see cref="UpdateLines(Thing)"/> for writing and all the rest of the methods for reading.
 		/// </summary>
 		public List<Line> Lines { get; } = new();
 
@@ -34,7 +26,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public Hitbox(params Vector2[] points)
 		{
-			for (int i = 1; i < points?.Length; i++)
+			for(int i = 1; i < points?.Length; i++)
 			{
 				LocalLines.Add(new(points[i - 1], points[i]));
 				Lines.Add(new(points[i - 1], points[i]));
@@ -45,11 +37,11 @@ namespace SMPL.Tools
 		/// Takes <see cref="LocalLines"/>, applies <paramref name="obj"/>'s transformations on them and puts the result into <see cref="Lines"/>
 		/// for the rest of the methods to use. Any previous changes to the <see cref="Lines"/> list will be erased.
 		/// </summary>
-		public void TransformLocalLines(Object obj)
+		internal void TransformLocalLines(Thing obj)
 		{
 			Lines.Clear();
 
-			for (int i = 0; i < LocalLines.Count; i++)
+			for(int i = 0; i < LocalLines.Count; i++)
 			{
 				var a = obj.GetPositionFromSelf(LocalLines[i].A);
 				var b = obj.GetPositionFromSelf(LocalLines[i].B);
@@ -62,25 +54,26 @@ namespace SMPL.Tools
 		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		public void Draw(Camera camera = default, Color color = default, float width = 4)
+		internal void Draw(Camera camera = default, Color color = default, float width = 4)
 		{
 			camera ??= Scene.MainCamera;
 			color = color == default ? Color.White : color;
 
-			for (int i = 0; i < Lines.Count; i++)
+			for(int i = 0; i < Lines.Count; i++)
 				Lines[i].Draw(camera, color, width);
 		}
+
 		/// <summary>
 		/// Calculates and then returns all the cross points (if any) produced between <see cref="Lines"/> and <paramref name="hitbox"/>'s <see cref="Lines"/>.
 		/// </summary>
 		public List<Vector2> GetCrossPoints(Hitbox hitbox)
 		{
 			var result = new List<Vector2>();
-			for (int i = 0; i < Lines.Count; i++)
-				for (int j = 0; j < hitbox.Lines.Count; j++)
+			for(int i = 0; i < Lines.Count; i++)
+				for(int j = 0; j < hitbox.Lines.Count; j++)
 				{
 					var p = Lines[i].GetCrossPoint(hitbox.Lines[j]);
-					if (p.IsNaN() == false)
+					if(p.IsNaN() == false)
 						result.Add(p);
 				}
 			return result;
@@ -100,14 +93,14 @@ namespace SMPL.Tools
 		/// </summary>
 		public bool ConvexContains(Vector2 point)
 		{
-			if (Lines == null || Lines.Count < 3)
+			if(Lines == null || Lines.Count < 3)
 				return false;
 
 			var crosses = 0;
 			var outsidePoint = Lines[0].A.PointPercentTowardPoint(Lines[0].B, new(-500, -500));
 
-			for (int i = 0; i < Lines.Count; i++)
-				if (Lines[i].Crosses(new(point, outsidePoint)))
+			for(int i = 0; i < Lines.Count; i++)
+				if(Lines[i].Crosses(new(point, outsidePoint)))
 					crosses++;
 
 			return crosses % 2 == 1;
@@ -117,9 +110,9 @@ namespace SMPL.Tools
 		/// </summary>
 		public bool Crosses(Hitbox hitbox)
 		{
-			for (int i = 0; i < Lines.Count; i++)
-				for (int j = 0; j < hitbox.Lines.Count; j++)
-					if (Lines[i].Crosses(hitbox.Lines[j]))
+			for(int i = 0; i < Lines.Count; i++)
+				for(int j = 0; j < hitbox.Lines.Count; j++)
+					if(Lines[i].Crosses(hitbox.Lines[j]))
 						return true;
 
 			return false;
@@ -131,11 +124,11 @@ namespace SMPL.Tools
 		/// </summary>
 		public bool ConvexContains(Hitbox hitbox)
 		{
-			for (int i = 0; i < hitbox.Lines.Count; i++)
-				for (int j = 0; j < Lines.Count; j++)
-					if ((ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false) &&
+			for(int i = 0; i < hitbox.Lines.Count; i++)
+				for(int j = 0; j < Lines.Count; j++)
+					if((ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false) &&
 						(hitbox.ConvexContains(Lines[j].A) == false || hitbox.ConvexContains(Lines[j].B) == false))
-					return false;
+						return false;
 			return true;
 		}
 		/// <summary>
@@ -147,12 +140,12 @@ namespace SMPL.Tools
 			var result = new Vector2();
 			var bestDist = float.MaxValue;
 
-			for (int i = 0; i < Lines.Count; i++)
+			for(int i = 0; i < Lines.Count; i++)
 				points.Add(Lines[i].GetClosestPoint(point));
-			for (int i = 0; i < points.Count; i++)
+			for(int i = 0; i < points.Count; i++)
 			{
 				var dist = points[i].DistanceBetweenPoints(point);
-				if (dist < bestDist)
+				if(dist < bestDist)
 				{
 					bestDist = dist;
 					result = points[i];

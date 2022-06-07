@@ -1,10 +1,4 @@
-﻿using SFML.Graphics;
-using SMPL.Graphics;
-using SMPL.Tools;
-using SMPL.UI;
-using System.Numerics;
-
-namespace SMPL.Tools
+﻿namespace SMPL.Tools
 {
 	/// <summary>
 	/// Lines are useful for collision detection, debugging, raycasting and much more.
@@ -47,7 +41,7 @@ namespace SMPL.Tools
 		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		public void Draw(Camera camera = default, Color color = default, float width = 4)
+		internal void Draw(Camera camera = default, Color color = default, float width = 4)
 		{
 			camera ??= Scene.MainCamera;
 			color = color == default ? Color.White : color;
@@ -85,7 +79,7 @@ namespace SMPL.Tools
 			return float.IsNaN(result.X) == false && float.IsNaN(result.Y) == false;
 		}
 		/// <summary>
-		/// Returns whether a <paramref name="point"/> is on top this line. The margin of error is 0.01 units.
+		/// Returns whether a <paramref name="point"/> is on top of this line. The margin of error is 0.01 units.
 		/// </summary>
 		public bool Contains(Vector2 point)
 		{
@@ -101,7 +95,7 @@ namespace SMPL.Tools
 		/// if the calculation fails to find the best point. Returns <see cref="B"/> if the path [<see cref="A"/> -> <see cref="B"/>]
 		/// has no obstacles.<br></br><br></br>
 		/// May be used as:<br></br>
-		/// - Setting <see cref="A"/> to be the position of some <see cref="Object"/>/<see cref="Sprite"/>.<br></br>
+		/// - Setting <see cref="A"/> to be the position of some <see cref="Thing"/>/<see cref="Sprite"/>.<br></br>
 		/// - Setting <see cref="B"/> to be some target point destination (for example <see cref="Scene.MouseCursorPosition"/>).<br></br>
 		/// - Checking whether there is a clear path between them by calling this method and its result being invalid or not.<br></br>
 		/// - If invalid then this means it is time to handle the case where there is no path/the path is too complex to be taken
@@ -111,29 +105,29 @@ namespace SMPL.Tools
 		/// </summary>
 		public Vector2 GetPathfindResult(uint tries, Hitbox hitbox)
 		{
-			if (tries == 0)
+			if(tries == 0)
 				return new Vector2().NaN();
 
-			if (IsCrossing(A, B, B) == false)
+			if(IsCrossing(A, B, B) == false)
 				return B;
 
 			var bestPoint = new Vector2().NaN();
 			var bestDist = double.MaxValue;
-			for (int i = 0; i < tries; i++)
+			for(int i = 0; i < tries; i++)
 			{
 				var randPoint = A.PointMoveAtAngle(i * (360 / tries), Vector2.Distance(A, B), false);
 				var sumDist = Vector2.Distance(A, randPoint) + Vector2.Distance(randPoint, B);
-				if (IsCrossing(A, randPoint, B) == false && sumDist < bestDist)
+				if(IsCrossing(A, randPoint, B) == false && sumDist < bestDist)
 				{
 					bestDist = sumDist;
 					bestPoint = randPoint;
 				}
 			}
 
-			for (int i = 0; i < tries; i++)
+			for(int i = 0; i < tries; i++)
 			{
 				var curP = A.PointPercentTowardPoint(bestPoint, new(100 / tries * i, 100 / tries * i));
-				if (IsCrossing(curP, B, B) == false)
+				if(IsCrossing(curP, B, B) == false)
 					return curP;
 			}
 
@@ -141,11 +135,11 @@ namespace SMPL.Tools
 
 			bool IsCrossing(Vector2 p1, Vector2 p2, Vector2 p3)
 			{
-				for (int i = 0; i < hitbox.Lines.Count; i++)
+				for(int i = 0; i < hitbox.Lines.Count; i++)
 				{
 					var cross1 = hitbox.Lines[i].Crosses(new(p1, p2));
 					var cross2 = hitbox.Lines[i].Crosses(new(p2, p3));
-					if (cross1 || cross2)
+					if(cross1 || cross2)
 						return true;
 				}
 				return false;
@@ -168,6 +162,7 @@ namespace SMPL.Tools
 				B : A + AB * distance;
 		}
 
+		#region Backend
 		private static Vector2 CrossPoint(Vector2 A, Vector2 B, Vector2 C, Vector2 D)
 		{
 			var a1 = B.Y - A.Y;
@@ -178,14 +173,13 @@ namespace SMPL.Tools
 			var c2 = a2 * (C.X) + b2 * (C.Y);
 			var determinant = a1 * b2 - a2 * b1;
 
-			if (determinant == 0)
+			if(determinant == 0)
 				return new Vector2(float.NaN, float.NaN);
-			else
-			{
-				var x = (b2 * c1 - b1 * c2) / determinant;
-				var y = (a1 * c2 - a2 * c1) / determinant;
-				return new Vector2(x, y);
-			}
+
+			var x = (b2 * c1 - b1 * c2) / determinant;
+			var y = (a1 * c2 - a2 * c1) / determinant;
+			return new Vector2(x, y);
 		}
+		#endregion
 	}
 }

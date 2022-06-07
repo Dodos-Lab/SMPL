@@ -1,58 +1,51 @@
-﻿using System;
-using System.Diagnostics;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
-using SMPL.Graphics;
-using SMPL.Tools;
-using Console = SMPL.Tools.Console;
-using Time = SMPL.Tools.Time;
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Collections.ObjectModel;
+global using System.Diagnostics;
+global using System.IO;
+global using System.Linq;
+global using System.Numerics;
+global using System.Reflection;
+global using System.Runtime.CompilerServices;
+global using System.Runtime.InteropServices;
+global using System.Runtime.Serialization;
+global using System.Threading;
+global using Newtonsoft.Json;
+global using SFML.Audio;
+global using SFML.Graphics;
+global using SFML.System;
+global using SFML.Window;
+global using SMPL.Graphics;
+global using SMPL.Tools;
+//global using SMPL.UI;
+global using Sprite = SMPL.Graphics.Sprite;
+global using Console = SMPL.Tools.Console;
+global using Time = SMPL.Tools.Time;
 
 namespace SMPL
 {
-	/// <summary>
-	/// All the core systems are handled here (the <see cref="Game"/> states, the <see cref="Window"/>, the game loop etc).
-	/// </summary>
 	public static class Game
 	{
-		internal static Styles currWindowStyle;
-
 		public static Settings Settings { get; internal set; } = new();
-
-		/// <summary>
-		/// The raw <see cref="RenderWindow"/> instance. Useful for input events, drawing, ingame settings etc.
-		/// </summary>
 		public static RenderWindow Window { get; internal set; }
-
-		/// <summary>
-		/// The cursor's position relative to the <see cref="Window"/>.<br></br>
-		/// - Example: [0, 0] is the top left corner of the <see cref="Window"/> and [<see cref="Window.Size"/>] is the bottom right corner
-		/// </summary>
 		public static Vector2 MouseCursorPosition
 		{
 			get { var p = Mouse.GetPosition(Window); return new(p.X, p.Y); }
 			set { Mouse.SetPosition(new((int)value.X, (int)value.Y), Window); }
 		}
 
-		/// <summary>
-		/// Boots up the <see cref="Game"/> systems that initialize the <see cref="Window"/> alongside other things.
-		/// The <paramref name="startingScene"/> is set as <see cref="Scene.CurrentScene"/> and the optional <paramref name="loadingScene"/> as
-		/// <see cref="Scene.LoadingScene"/>.
-		/// </summary>
 		public static void Start(Scene startingScene, Scene loadingScene = null)
 		{
-			if (startingScene == null || Window != null)
+			if(startingScene == null || Window != null)
 				return;
 
 			InitWindow(Settings.WindowStates.Borderless, Settings.ScreenResolution);
 
 			Scene.Init(startingScene, loadingScene);
 			var sz = Settings.ScreenResolution;
-			Scene.MainCamera = new((uint)(sz.X), (uint)(sz.Y));
+			Scene.MainCamera = new("SMPL-MainCamera", (uint)(sz.X), (uint)(sz.Y));
 
-			while (Window.IsOpen)
+			while(Window.IsOpen)
 			{
 				Window.DispatchEvents();
 				Window.Clear();
@@ -64,40 +57,29 @@ namespace SMPL
 				Window.Display();
 			}
 		}
-		/// <summary>
-		/// Notifies the <see cref="Scene.CurrentScene"/> with <see cref="Scene.OnGameStop"/> then closes out the <see cref="Window"/>
-		/// and shuts down everything.
-		/// </summary>
 		public static void Stop()
 		{
 			Scene.CurrentScene?.GameStop();
 			Window.Close();
 		}
-
-		/// <summary>
-		/// Tries to open a web page in the browser through some <paramref name="url"/>.
-		/// </summary>
 		public static void OpenWebPage(string url)
 		{
 			try { Process.Start(url); }
 			catch
 			{
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+				if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 				{
 					url = url.Replace("&", "^&");
 					Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
 				}
-				else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+				else if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 					Process.Start("xdg-open", url);
-				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+				else if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
 					Process.Start("open", url);
 				else
 					Console.LogError(1, $"Could not load URL '{url}'.");
 			}
 		}
-		/// <summary>
-		/// Centers the <see cref="Window"/> on  the user's screen.
-		/// </summary>
 		public static void CenterWindow()
 		{
 			var sz = Settings.ScreenResolution;
@@ -105,6 +87,8 @@ namespace SMPL
 			Window.Position = new Vector2i((int)(sz.X / 2f), (int)(sz.Y / 2f)) - new Vector2i((int)(Window.Size.X / 2), (int)(Window.Size.Y / 2));
 		}
 
+		#region Backend
+		internal static Styles currWindowStyle;
 		private static void Main() { }
 		private static void OnClose(object sender, EventArgs e) => Stop();
 		internal static void InitWindow(Settings.WindowStates windowState, Vector2 resolution)
@@ -121,10 +105,9 @@ namespace SMPL
 			view.Center = new();
 			Window.SetView(view);
 
-			if (windowState == Settings.WindowStates.Windowed)
+			if(windowState == Settings.WindowStates.Windowed)
 				CenterWindow();
 		}
-
 		internal static Settings.WindowStates ToWindowStates(this Styles style)
 		{
 			return style switch
@@ -143,5 +126,6 @@ namespace SMPL
 				_ => Styles.Default,
 			};
 		}
+		#endregion
 	}
 }

@@ -1,68 +1,29 @@
-﻿using Newtonsoft.Json;
-using SFML.Graphics;
-using SMPL.Tools;
-using System.Numerics;
-
-namespace SMPL.Graphics
+﻿namespace SMPL.Graphics
 {
-	public class QuickText : Object
+	internal class QuickText : Thing
 	{
-		internal Font Font => FontPath != null && Scene.CurrentScene.Fonts.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
-		internal static Text textInstance = new();
+		internal string FontPath { get; set; }
+		internal string Text { get; set; } = "Hello, World!";
+		internal Color Color { get; set; } = Color.White;
+		internal uint CharacterSize { get; set; } = 32;
+		internal float CharacterSpace { get; set; } = 1;
+		internal float LineSpace { get; set; } = 1;
+		internal Color OutlineColor { get; set; } = Color.Black;
+		internal float OutlineSize { get; set; } = 1;
+		internal Text.Styles Style { get; set; }
 
-		/// <summary>
-		/// See <see cref="Font"/> for info.
-		/// </summary>
-		public string FontPath { get; set; }
-		/// <summary>
-		/// The <see cref="string"/> text itself used upon drawing.
-		/// </summary>
-		public string Text { get; set; } = "Hello, World!";
-		/// <summary>
-		/// The color of the text.
-		/// </summary>
-		public Color Color { get; set; } = Color.White;
-		/// <summary>
-		/// The character size as provided in the <see cref="Font"/>.
-		/// </summary>
-		public uint CharacterSize { get; set; } = 32;
-		/// <summary>
-		/// The spacing inbetween characters.
-		/// </summary>
-		public float CharacterSpace { get; set; } = 1;
-		/// <summary>
-		/// The spacing inbetween lines.
-		/// </summary>
-		public float LineSpace { get; set; } = 1;
-		/// <summary>
-		/// The color of the outline of the <see cref="Text"/>. Make sure to have non-zero <see cref="OutlineSize"/>.
-		/// </summary>
-		public Color OutlineColor { get; set; } = Color.Black;
-		/// <summary>
-		/// The size of the outline of the <see cref="Text"/>.
-		/// </summary>
-		public float OutlineSize { get; set; } = 1;
-		/// <summary>
-		/// The style of the <see cref="Text"/>. May also have multiple as so:
-		/// <code>Style = Styles.Bold | Styles.Underlined;</code>
-		/// </summary>
-		public Text.Styles Style { get; set; }
-		
-		public Vector2 OriginUnit { get; set; } = new(0.5f);
+		internal Vector2 OriginUnit { get; set; } = new(0.5f);
 
-		/// <summary>
-		/// Create the <see cref="QuickText"/> with a certain <paramref name="fontPath"/>.
-		/// </summary>
-		public QuickText(string fontPath, string text = "Hello, World!", Vector2 position = default)
+		internal QuickText(string uid, string fontPath, string text = "Hello, World!", Vector2 position = default) : base(uid)
 		{
 			Text = text;
 			FontPath = fontPath;
 			Position = position;
 		}
 
-		public void Draw(Camera camera = null)
+		internal void Draw(Camera camera = null)
 		{
-			if (Font == null)
+			if(Font == null)
 				return;
 
 			camera ??= Scene.MainCamera;
@@ -70,6 +31,9 @@ namespace SMPL.Graphics
 			UpdateGlobalText();
 			camera.renderTexture.Draw(textInstance);
 		}
+
+		internal Font Font => FontPath != null && Scene.CurrentScene.Fonts.ContainsKey(FontPath) ? Scene.CurrentScene.Fonts[FontPath] : null;
+		internal static Text textInstance = new();
 
 		internal void UpdateGlobalText()
 		{

@@ -1,17 +1,10 @@
-﻿using SMPL.Graphics;
-using SMPL.Tools;
-using SMPL.UI;
-
-namespace SMPL.Tools
+﻿namespace SMPL.Tools
 {
 	/// <summary>
-	/// A class for continuously going over set data overtime.
+	/// A class for continuously iterating a set of data.
 	/// </summary>
 	public class Animation
 	{
-		private float rawIndex;
-		private const float LOWER_BOUND = -0.49f;
-
 		/// <summary>
 		/// This is calculated by rounding <see cref="RawIndex"/> and is used to retrieve the <see cref="CurrentValue"/> from <see cref="Values"/>.
 		/// </summary>
@@ -54,7 +47,6 @@ namespace SMPL.Tools
 			IsRepeating = isRepeating;
 			RawIndex = LOWER_BOUND;
 		}
-
 		/// <summary>
 		/// This updates the <see cref="Animation"/> by incrementing the <see cref="RawIndex"/> according to
 		/// <see cref="Time.Delta"/> and <see cref="FPS"/> (so that the <see cref="Animation"/> runs consistently on all systems).
@@ -62,17 +54,22 @@ namespace SMPL.Tools
 		/// </summary>
 		public void Advance()
 		{
-			if (Values == default)
+			if(Values == default)
 			{
 				CurrentValue = default;
 				return;
 			}
 
 			RawIndex += Time.Delta * FPS;
-			if (Index >= Values.Length)
+			if(Index >= Values.Length)
 				RawIndex = IsRepeating ? LOWER_BOUND : Values.Length - 1;
 
 			CurrentValue = Values[Index];
 		}
+
+		#region Backend
+		private float rawIndex;
+		private const float LOWER_BOUND = -0.49f;
+		#endregion
 	}
 }

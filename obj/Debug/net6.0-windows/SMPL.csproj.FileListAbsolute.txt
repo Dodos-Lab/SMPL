@@ -1,0 +1,14 @@
+D:\code\SFML\SMPL2\SMPL\bin\Debug\net6.0-windows\SMPL.deps.json
+D:\code\SFML\SMPL2\SMPL\bin\Debug\net6.0-windows\SMPL.dll
+D:\code\SFML\SMPL2\SMPL\bin\Debug\net6.0-windows\SMPL.pdb
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\SMPL.csproj.AssemblyReference.cache
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\Interop.NetFwTypeLib.dll
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\SMPL.csproj.ResolveComReference.cache
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\SMPL.GeneratedMSBuildEditorConfig.editorconfig
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\SMPL.AssemblyInfoInputs.cache
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\SMPL.AssemblyInfo.cs
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\SMPL.csproj.CoreCompileInputs.cache
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\SMPL.dll
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\refint\SMPL.dll
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\SMPL.pdb
+D:\code\SFML\SMPL2\SMPL\obj\Debug\net6.0-windows\ref\SMPL.dll

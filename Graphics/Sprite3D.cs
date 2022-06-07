@@ -1,61 +1,18 @@
-﻿using SFML.Graphics;
-using SMPL.Graphics;
-using SMPL.Tools;
-using SMPL.UI;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-
-namespace SMPL.Graphics
+﻿namespace SMPL.Graphics
 {
-	/// <summary>
-	/// Inherit chain: <see cref="Sprite3D"/> : <see cref="Sprite"/> : <see cref="Visual"/> : <see cref="Object"/><br></br><br></br>
-	/// A "3D" <see cref="Sprite"/> that fakes depth by stacking a set amount of textures on top of each other. Also known as
-	/// the 'sprite stacking technique'.
-	/// </summary>
-	public class Sprite3D : Sprite
-   {
-		private readonly string[] texturePaths;
-		private readonly int textureCount;
+	internal class Sprite3D : Sprite
+	{
+		internal float Height { get; set; } = 20;
+		internal float Angle3D { get; set; } = 270;
 
-		/// <summary>
-		/// The amount of faked depth that the spacing between all textures sum up to.
-		/// </summary>
-		public float Height { get; set; } = 20;
-		/// <summary>
-		/// The angle at which the textures are stacked toward. Or in other words: the orthographic up angle of the <see cref="Sprite3D"/>.
-		/// </summary>
-		public float Angle3D { get; set; } = 270;
-
-		/// <summary>
-		/// Initially this is the top left corner of the very top texture of this <see cref="Sprite3D"/> in the world.
-		/// </summary>
-		public Vector2 Corner3DA => CornerA.PointMoveAtAngle(Angle3D, Height * (textureCount == 0 ? 1 : textureCount), false);
-		/// <summary>
-		/// Initially this is the top right corner of the very top texture of this <see cref="Sprite3D"/> in the world.
-		/// </summary>
-		public Vector2 Corner3DB => CornerB.PointMoveAtAngle(Angle3D, Height * (textureCount == 0 ? 1 : textureCount), false);
-		/// <summary>
-		/// Initially this is the bottom right corner of the very top texture of this <see cref="Sprite3D"/> in the world.
-		/// </summary>
-		public Vector2 Corner3DC => CornerC.PointMoveAtAngle(Angle3D, Height * (textureCount == 0 ? 1 : textureCount), false);
-		/// <summary>
-		/// Initially this is the bottom left corner of the very top texture of this <see cref="Sprite3D"/> in the world.
-		/// </summary>
-		public Vector2 Corner3DD => CornerD.PointMoveAtAngle(Angle3D, Height * (textureCount == 0 ? 1 : textureCount), false);
-
-		/// <summary>
-		/// Construct the <see cref="Sprite3D"/> from a 3D model .obj file and its texture with additional details.
-		/// </summary>
-		public Sprite3D(Scene.TexturedModel3D texturedModel3D)
+		internal Sprite3D(string uid, Scene.TexturedModel3D texturedModel3D) : base(uid)
 		{
-			if (texturedModel3D.ObjModelPath == null || texturedModel3D.TexturePath == null ||
+			if(texturedModel3D.ObjModelPath == null || texturedModel3D.TexturePath == null ||
 				texturedModel3D.TextureCount == 0 || File.Exists(texturedModel3D.ObjModelPath) == false || texturedModel3D.TextureDetail <= 0)
 				throw new System.Exception();
 
 			var img = default(Image);
-         if (File.Exists(texturedModel3D.TexturePath))
+			if(File.Exists(texturedModel3D.TexturePath))
 				img = new Image(texturedModel3D.TexturePath);
 			var content = File.ReadAllText(texturedModel3D.ObjModelPath).Replace('\r', ' ').Split('\n');
 			var layeredImages = new List<Image>();
@@ -66,31 +23,31 @@ namespace SMPL.Graphics
 			var boundingBoxA = new Vector3();
 			var boundingBoxB = new Vector3();
 
-			for (int i = 0; i < content.Length; i++)
+			for(int i = 0; i < content.Length; i++)
 			{
 				var split = content[i].Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
-				if (split.Length == 0)
+				if(split.Length == 0)
 					continue;
 
-				switch (split[0])
+				switch(split[0])
 				{
 					case "v":
 						{
 							var v = new Vector3(N(1), N(2), N(3)) * texturedModel3D.Scale;
 							verts.Add(v);
 
-							if (v.X < boundingBoxA.X)
+							if(v.X < boundingBoxA.X)
 								boundingBoxA.X = v.X;
-							if (v.Y < boundingBoxA.Y)
+							if(v.Y < boundingBoxA.Y)
 								boundingBoxA.Y = v.Y;
-							if (v.Z < boundingBoxA.Z)
+							if(v.Z < boundingBoxA.Z)
 								boundingBoxA.Z = v.Z;
 
-							if (v.X > boundingBoxB.X)
+							if(v.X > boundingBoxB.X)
 								boundingBoxB.X = v.X;
-							if (v.Y > boundingBoxB.Y)
+							if(v.Y > boundingBoxB.Y)
 								boundingBoxB.Y = v.Y;
-							if (v.Z > boundingBoxB.Z)
+							if(v.Z > boundingBoxB.Z)
 								boundingBoxB.Z = v.Z;
 
 							break;
@@ -98,12 +55,12 @@ namespace SMPL.Graphics
 					case "vt": texCoords.Add(new(N(1), 1 - N(2), 1)); break;
 					case "f":
 						{
-							for (int j = 1; j < split.Length; j++)
+							for(int j = 1; j < split.Length; j++)
 							{
 								var face = split[j].Split('/');
 								indexVert.Add(int.Parse(face[0]) - 1);
 
-								if (face.Length > 1 && face[1].Length != 0)
+								if(face.Length > 1 && face[1].Length != 0)
 									indexTexCoords.Add(int.Parse(face[1]) - 1);
 							}
 							break;
@@ -117,10 +74,10 @@ namespace SMPL.Graphics
 			boundingBoxB -= vertsOffset;
 			var textureSize = boundingBoxB * detail;
 
-			for (int i = 0; i < texturedModel3D.TextureCount; i++)
+			for(int i = 0; i < texturedModel3D.TextureCount; i++)
 				layeredImages.Add(new Image((uint)textureSize.X, (uint)textureSize.Z, Color.Transparent));
 
-			for (int i = 0; i < indexVert.Count; i++)
+			for(int i = 0; i < indexVert.Count; i++)
 			{
 				var p = verts[indexVert[i]];
 				var tx = i < indexTexCoords.Count ? texCoords[indexTexCoords[i]] : default;
@@ -134,7 +91,7 @@ namespace SMPL.Graphics
 
 			textureCount = layeredImages.Count;
 			texturePaths = new string[textureCount];
-			for (int i = 0; i < layeredImages.Count; i++)
+			for(int i = 0; i < layeredImages.Count; i++)
 			{
 				var id = GetTextureID(i);
 				Scene.CurrentScene.Textures[id] = new Texture(layeredImages[i]);
@@ -143,53 +100,66 @@ namespace SMPL.Graphics
 			}
 			img?.Dispose();
 		}
-		/// <summary>
-		/// Construct the <see cref="Sprite3D"/> from some <paramref name="textures"/>.
-		/// </summary>
-		public Sprite3D(ICollection<string> texturePaths) => this.texturePaths = texturePaths.ToArray();
+		internal Sprite3D(string uid, ICollection<string> texturePaths) : base(uid) => this.texturePaths = texturePaths.ToArray();
 
-		/// <summary>
-		/// Set the <see cref="Sprite.Hitbox"/> to be the outline of all the textures in this <see cref="Sprite3D"/>.
-		/// This needs to be updated frequently in order to maintain the correct shape (in <see cref="Scene.OnUpdate"/> for example).
-		/// </summary>
-		public void SetHitbox3D()
-      {
-			var points = new List<Vector2>() { CornerA, CornerB, CornerD, CornerC, Corner3DA, Corner3DB, Corner3DD, Corner3DC };
+		internal void SetHitbox3D()
+		{
+			var points = new List<Vector2>();
+
+			for(int i = 0; i < 4; i++)
+				points.Add(GetCornerClockwise(i));
+			for(int i = 0; i < 4; i++)
+				points.Add(GetCorner3DClockwise(i));
+
 			var outline = points.OutlinePoints();
 
 			Hitbox.Lines.Clear();
-			for (int i = 1; i < outline.Count; i++)
+			for(int i = 1; i < outline.Count; i++)
 				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
 		}
-		/// <summary>
-		/// Draws all the <see cref="Sprite3D"/>'s textures on the <paramref name="camera"/> according
-		/// to all the required <see cref="Object"/>, <see cref="Visual"/>, <see cref="Sprite"/> and <see cref="Sprite3D"/> parameters.
-		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if <see langword="null"/>.
-		/// </summary>
-		public override void Draw(Camera camera = null)
-      {
-			if (IsHidden || textureCount == 0)
+		internal override void Draw(Camera camera = null)
+		{
+			if(IsHidden || textureCount == 0)
 				return;
 
 			camera ??= Scene.MainCamera;
 
 			var h = Height * Scale / textureCount;
-         for (int i = 0; i < textureCount; i++)
-         {
+			for(int i = 0; i < textureCount; i++)
+			{
 				var tex = Scene.CurrentScene.Textures[texturePaths[i]];
 				var verts = new Vertex[]
 				{
-					new(CornerA.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
-					new(CornerB.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, 0)),
-					new(CornerC.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, tex.Size.Y)),
-					new(CornerD.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
+					new(GetCornerClockwise(0).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
+					new(GetCornerClockwise(1).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, 0)),
+					new(GetCornerClockwise(2).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, tex.Size.Y)),
+					new(GetCornerClockwise(3).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
 				};
 
-				camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(BlendMode, Transform.Identity, tex, Shader));
+				camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, Shader));
 			}
 		}
 
-		private string GetTextureID(int i) => $"sprite3d-texture-{i}-{GetHashCode()}";
+		internal Vector2 GetCorner3DClockwise(int index)
+		{
+			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
 
+			var h = Height * (textureCount == 0 ? 1 : textureCount);
+			return index switch
+			{
+				0 => GetCornerClockwise(0).PointMoveAtAngle(Angle3D, h, false),
+				1 => GetCornerClockwise(1).PointMoveAtAngle(Angle3D, h, false),
+				2 => GetCornerClockwise(2).PointMoveAtAngle(Angle3D, h, false),
+				3 => GetCornerClockwise(3).PointMoveAtAngle(Angle3D, h, false),
+				_ => default,
+			};
+		}
+
+		#region Backend
+		private readonly string[] texturePaths;
+		private readonly int textureCount;
+
+		private string GetTextureID(int i) => $"sprite3d-texture-{i}-{GetHashCode()}";
+		#endregion
 	}
 }

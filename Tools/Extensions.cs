@@ -1,20 +1,12 @@
-﻿using SFML.Graphics;
-using SFML.System;
-using SMPL.Graphics;
-using SMPL.Tools;
-using SMPL.UI;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
+﻿using System.Globalization;
 using System.IO.Compression;
-using System.Numerics;
 using System.Text;
 
 namespace SMPL.Tools
 {
 	/// <summary>
-	/// Various methods that extend the primitive types and collections aiming to be a shortcut for longer calculations/systems.
+	/// Various methods that extend the primitive types, structs and collections.
+	/// These serve as shortcuts for frequently used expressions/algorithms/calculations/systems.
 	/// </summary>
 	public static class Extensions
 	{
@@ -32,7 +24,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public enum RoundWhenMiddle { TowardEven, AwayFromZero, TowardZero, TowardNegativeInfinity, TowardPositiveInfinity }
 		/// <summary>
-		/// The type of size convertion from one size unit to another.
+		/// The type of size convertion from one size unit to another. This is used by <see cref="ToDataSize"/>.
 		/// </summary>
 		public enum SizeConvertion
 		{
@@ -44,7 +36,7 @@ namespace SMPL.Tools
 			TB_MB, TB_GB
 		}
 		/// <summary>
-		/// The type of number animations used by <see cref="AnimateUnit(float, Animations, AnimationWay)"/>. Also known as 'easing functions'.
+		/// The type of number animations used by <see cref="AnimateUnit"/>. Also known as 'easing functions'.
 		/// </summary>
 		public enum Animations
 		{
@@ -57,22 +49,20 @@ namespace SMPL.Tools
 			Bounce // Bounce
 		}
 		/// <summary>
-		/// The type of number animation direction used by <see cref="AnimateUnit(float, Animations, AnimationWay)"/>
+		/// The type of number animation direction used by <see cref="AnimateUnit"/>.
 		/// </summary>
 		public enum AnimationWay { Backward, Forward, BackwardThenForward }
 
-		private static readonly Dictionary<string, int> gateEntries = new();
-		private static readonly Dictionary<string, bool> gates = new();
-
 		/// <summary>
-		/// Returns true only the first time <paramref name="condition"/> is true. This is reset whenever <paramref name="condition"/> becomes false.
-		/// This process can be repeated <paramref name="max"/> amount of times, always returns false after that.
+		/// Returns true only the first time a <paramref name="condition"/> is <see langword="true"/>.
+		/// This is reset whenever the <paramref name="condition"/> becomes <see langword="false"/>.
+		/// This process can be repeated <paramref name="max"/> amount of times, always returns <see langword="false"/> after that.<br></br>
 		/// A <paramref name="uniqueID"/> needs to be provided that describes each type of condition in order to separate/identify them.
 		/// </summary>
 		public static bool Once(this bool condition, string uniqueID, uint max = uint.MaxValue)
 		{
-			if (gates.ContainsKey(uniqueID) == false && condition == false) return false;
-			else if (gates.ContainsKey(uniqueID) == false && condition == true)
+			if(gates.ContainsKey(uniqueID) == false && condition == false) return false;
+			else if(gates.ContainsKey(uniqueID) == false && condition == true)
 			{
 				gates[uniqueID] = true;
 				gateEntries[uniqueID] = 1;
@@ -80,14 +70,14 @@ namespace SMPL.Tools
 			}
 			else
 			{
-				if (gates[uniqueID] == true && condition == true) return false;
-				else if (gates[uniqueID] == false && condition == true)
+				if(gates[uniqueID] == true && condition == true) return false;
+				else if(gates[uniqueID] == false && condition == true)
 				{
 					gates[uniqueID] = true;
 					gateEntries[uniqueID]++;
 					return true;
 				}
-				else if (gateEntries[uniqueID] < max) gates[uniqueID] = false;
+				else if(gateEntries[uniqueID] < max) gates[uniqueID] = false;
 			}
 			return false;
 		}
@@ -95,11 +85,9 @@ namespace SMPL.Tools
 		/// Switches the values of two variables.
 		/// </summary>
 		public static void Swap<T>(ref T a, ref T b)
-      {
-			var swap = a;
-			a = b;
-			b = swap;
-      }
+		{
+			(b, a) = (a, b);
+		}
 
 		/// <summary>
 		/// Picks randomly a single <typeparamref name="T"/> value out of a <paramref name="list"/> and returns it.
@@ -114,7 +102,7 @@ namespace SMPL.Tools
 		public static void Shuffle<T>(this List<T> list)
 		{
 			var n = list.Count;
-			while (n > 1)
+			while(n > 1)
 			{
 				n--;
 				var k = new Random().Next(n + 1);
@@ -129,7 +117,7 @@ namespace SMPL.Tools
 		public static float Average(this List<float> list)
 		{
 			var sum = 0f;
-			for (int i = 0; i < list.Count; i++)
+			for(int i = 0; i < list.Count; i++)
 				sum += list[i];
 			return sum / list.Count;
 		}
@@ -146,10 +134,10 @@ namespace SMPL.Tools
 		/// </summary>
 		public static bool IsLetters(this string text)
 		{
-			for (int i = 0; i < text.Length; i++)
+			for(int i = 0; i < text.Length; i++)
 			{
 				var isLetter = (text[i] >= 'A' && text[i] <= 'Z') || (text[i] >= 'a' && text[i] <= 'z');
-				if (isLetter == false)
+				if(isLetter == false)
 					return false;
 			}
 			return true;
@@ -169,7 +157,7 @@ namespace SMPL.Tools
 		{
 			var result = "";
 			times = times.Limit(0, 999999);
-			for (int i = 0; i < times; i++)
+			for(int i = 0; i < times; i++)
 				result = $"{result}{text}";
 			return result;
 		}
@@ -181,7 +169,7 @@ namespace SMPL.Tools
 		{
 			var buffer = Encoding.UTF8.GetBytes(text);
 			var memoryStream = new MemoryStream();
-			using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
+			using(var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
 				gZipStream.Write(buffer, 0, buffer.Length);
 
 			memoryStream.Position = 0;
@@ -207,7 +195,7 @@ namespace SMPL.Tools
 			var buffer = new byte[dataLength];
 
 			memoryStream.Position = 0;
-			using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+			using(var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
 				gZipStream.Read(buffer, 0, buffer.Length);
 
 			return Encoding.UTF8.GetString(buffer);
@@ -248,7 +236,7 @@ namespace SMPL.Tools
 		{
 			var result = 0f;
 			var x = progress.Limit(0, 1, repeated ? Limitation.Overflow : Limitation.ClosestBound);
-			switch (animationType)
+			switch(animationType)
 			{
 				case Animations.BendWeak:
 					{
@@ -323,18 +311,18 @@ namespace SMPL.Tools
 		/// </summary>
 		public static float Limit(this float number, float rangeA, float rangeB, Limitation limitation = Limitation.ClosestBound)
 		{
-			if (rangeA > rangeB)
+			if(rangeA > rangeB)
 				Swap(ref rangeA, ref rangeB);
 
-			if (limitation == Limitation.ClosestBound)
+			if(limitation == Limitation.ClosestBound)
 			{
-				if (number < rangeA)
+				if(number < rangeA)
 					return rangeA;
-				else if (number > rangeB)
+				else if(number > rangeB)
 					return rangeB;
 				return number;
 			}
-			else if (limitation == Limitation.Overflow)
+			else if(limitation == Limitation.Overflow)
 			{
 				var d = rangeB - rangeA;
 				return ((number - rangeA) % d + d) % d + rangeA;
@@ -366,11 +354,11 @@ namespace SMPL.Tools
 		{
 			precision = (int)precision.Limit(0, 5);
 
-			if (toward == RoundWay.Down || toward == RoundWay.Up)
+			if(toward == RoundWay.Down || toward == RoundWay.Up)
 			{
 				var numStr = number.ToString();
 				var prec = Precision(number);
-				if (prec > 0 && prec > precision)
+				if(prec > 0 && prec > precision)
 				{
 					var digit = toward == RoundWay.Down ? "1" : "9";
 					numStr = numStr.Remove(numStr.Length - 1);
@@ -415,7 +403,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public static bool IsBetween(this float number, float rangeA, float rangeB, bool inclusiveA = false, bool inclusiveB = false)
 		{
-			if (rangeA > rangeB)
+			if(rangeA > rangeB)
 				Swap(ref rangeA, ref rangeB);
 			var l = inclusiveA ? rangeA <= number : rangeA < number;
 			var u = inclusiveB ? rangeB >= number : rangeB > number;
@@ -427,7 +415,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public static float Move(this float number, float speed, bool fpsDependent = true)
 		{
-			if (fpsDependent)
+			if(fpsDependent)
 				speed *= Time.Delta;
 			return number + speed;
 		}
@@ -441,9 +429,9 @@ namespace SMPL.Tools
 			var goingPos = number < targetNumber;
 			var result = Move(number, goingPos ? Sign(speed, false) : Sign(speed, true), fpsDependent);
 
-			if (goingPos && result > targetNumber)
+			if(goingPos && result > targetNumber)
 				return targetNumber;
-			else if (goingPos == false && result < targetNumber)
+			else if(goingPos == false && result < targetNumber)
 				return targetNumber;
 			return result;
 		}
@@ -472,16 +460,16 @@ namespace SMPL.Tools
 			// stops the rotation with an else when close enough
 			// prevents the rotation from staying behind after the stop
 			var checkedSpeed = speed;
-			if (fpsDependent) checkedSpeed *= Time.Delta;
-			if (Math.Abs(difference) < checkedSpeed) angle = targetAngle;
-			else if (difference >= 0 && difference < 180) angle = Move(angle, -speed, fpsDependent);
-			else if (difference >= -180 && difference < 0) angle = Move(angle, speed, fpsDependent);
-			else if (difference >= -360 && difference < -180) angle = Move(angle, -speed, fpsDependent);
-			else if (difference >= 180 && difference < 360) angle = Move(angle, speed, fpsDependent);
+			if(fpsDependent) checkedSpeed *= Time.Delta;
+			if(Math.Abs(difference) < checkedSpeed) angle = targetAngle;
+			else if(difference >= 0 && difference < 180) angle = Move(angle, -speed, fpsDependent);
+			else if(difference >= -180 && difference < 0) angle = Move(angle, speed, fpsDependent);
+			else if(difference >= -360 && difference < -180) angle = Move(angle, -speed, fpsDependent);
+			else if(difference >= 180 && difference < 360) angle = Move(angle, speed, fpsDependent);
 
 			// detects speed greater than possible
 			// prevents jiggle when passing 0-360 & 360-0 | simple to fix yet took me half a day
-			if (Math.Abs(difference) > 360 - checkedSpeed) angle = targetAngle;
+			if(Math.Abs(difference) > 360 - checkedSpeed) angle = targetAngle;
 
 			return angle;
 		}
@@ -491,7 +479,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public static float Random(this float rangeA, float rangeB, float precision = 0, float seed = float.NaN)
 		{
-			if (rangeA > rangeB)
+			if(rangeA > rangeB)
 				Swap(ref rangeA, ref rangeB);
 
 			precision = (int)precision.Limit(0, 5);
@@ -513,73 +501,6 @@ namespace SMPL.Tools
 			percent = percent.Limit(0, 100);
 			var n = Random(1f, 100f); // should not roll 0 so it doesn't return true with 0% (outside of roll)
 			return n <= percent;
-		}
-		/// <summary>
-		/// Converts a <paramref name="number"/> from one time unit to another (chosen by <paramref name="convertType"/>). Then returns the result.
-		/// </summary>
-		public static float ToTime(this float number, Time.Convertion convertType)
-		{
-			return convertType switch
-			{
-				Time.Convertion.MillisecondsToSeconds => number / 1000,
-				Time.Convertion.MillisecondsToMinutes => number / 1000 / 60,
-				Time.Convertion.SecondsToMilliseconds => number * 1000,
-				Time.Convertion.SecondsToMinutes => number / 60,
-				Time.Convertion.SecondsToHours => number / 3600,
-				Time.Convertion.MinutesToMilliseconds => number * 60000,
-				Time.Convertion.MinutesToSeconds => number * 60,
-				Time.Convertion.MinutesToHours => number / 60,
-				Time.Convertion.MinutesToDays => number / 1440,
-				Time.Convertion.HoursToSeconds => number * 3600,
-				Time.Convertion.HoursToMinutes => number * 60,
-				Time.Convertion.HoursToDays => number / 24,
-				Time.Convertion.HoursToWeeks => number / 168,
-				Time.Convertion.DaysToMinutes => number * 1440,
-				Time.Convertion.DaysToHours => number * 24,
-				Time.Convertion.DaysToWeeks => number / 7,
-				Time.Convertion.WeeksToHours => number * 168,
-				Time.Convertion.WeeksToDays => number * 7,
-				_ => 0,
-			};
-		}
-		/// <summary>
-		/// Converts <paramref name="seconds"/> into a <see cref="string"/> following a <paramref name="format"/>. Then returns the result.
-		/// </summary>
-		public static string SecondsToText(this float seconds, Time.Format format = new())
-		{
-			if (float.IsNaN(seconds) || float.IsInfinity(seconds))
-				return null;
-
-			seconds = seconds.Sign(false);
-			var ms = 0;
-			if (seconds.ToString().Contains('.'))
-			{
-				var spl = seconds.ToString().Split('.');
-				ms = int.Parse(spl[1]) * 100;
-				seconds = seconds.Round(toward: RoundWay.Down);
-			}
-			var sec = seconds % 60;
-			var min = ToTime(seconds, Time.Convertion.SecondsToMinutes) % 60;
-			var hr = ToTime(seconds, Time.Convertion.SecondsToHours);
-			var msShow = !format.Milliseconds.IsSkipped;
-			var secShow = !format.Seconds.IsSkipped;
-			var minShow = !format.Minutes.IsSkipped;
-			var hrShow = !format.Hours.IsSkipped;
-
-			var sep = format.Separator ?? " ";
-			var msStr = msShow ? $"{ms:D2}" : "";
-			var secStr = secShow ? $"{(int)sec:D2}" : "";
-			var minStr = minShow ? $"{(int)min:D2}" : "";
-			var hrStr = hrShow ? $"{(int)hr:D2}" : "";
-			var msF = msShow ? $"{format.Milliseconds.Suffix}" : "";
-			var secF = secShow ? $"{format.Seconds.Suffix}" : "";
-			var minF = minShow ? $"{format.Minutes.Suffix}" : "";
-			var hrF = hrShow ? $"{format.Hours.Suffix}" : "";
-			var secMsSep = msShow && (secShow || minShow || hrShow) ? $"{sep}" : "";
-			var minSecSep = secShow && (minShow || hrShow) ? $"{sep}" : "";
-			var hrMinSep = minShow && hrShow ? $"{sep}" : "";
-
-			return $"{hrStr}{hrF}{hrMinSep}{minStr}{minF}{minSecSep}{secStr}{secF}{secMsSep}{msStr}{msF}";
 		}
 		/// <summary>
 		/// Converts a 360 degrees <paramref name="angle"/> into a normalized direction <see cref="Vector2"/> then returns the result.
@@ -614,24 +535,24 @@ namespace SMPL.Tools
 		/// <paramref name="surfaceNormal"/> (the direction the surface is facing) and returns it.
 		/// </summary>
 		public static Vector2 ReflectDirection(this Vector2 direction, Vector2 surfaceNormal)
-      {
+		{
 			return Vector2.Reflect(direction, surfaceNormal);
-      }
+		}
 		/// <summary>
 		/// Normalizes a <paramref name="direction"/> <see cref="Vector2"/>. Or in other words: sets the length (magnitude) of the
 		/// <paramref name="direction"/> <see cref="Vector2"/> to 1. Then the result is returned.
 		/// </summary>
 		public static Vector2 NormalizeDirection(this Vector2 direction)
-      {
+		{
 			return Vector2.Normalize(direction);
-      }
+		}
 		/// <summary>
 		/// Calculates the distance between a <paramref name="point"/> and a <paramref name="targetPoint"/> then returns it.
 		/// </summary>
 		public static float DistanceBetweenPoints(this Vector2 point, Vector2 targetPoint)
-      {
+		{
 			return Vector2.Distance(point, targetPoint);
-      }
+		}
 		/// <summary>
 		/// Returns whether this <paramref name="vector"/> is invalid.
 		/// </summary>
@@ -715,13 +636,13 @@ namespace SMPL.Tools
 			var result = point.PointMoveAtAngle(point.AngleBetweenPoints(targetPoint), speed, fpsDependent);
 
 			speed *= fpsDependent ? Time.Delta : 1;
-         return Vector2.Distance(result, targetPoint) < speed * 1.1f ? targetPoint : result;
-      }
+			return Vector2.Distance(result, targetPoint) < speed * 1.1f ? targetPoint : result;
+		}
 		/// <summary>
 		/// Calculates the <see cref="Vector2"/> point that is a certain <paramref name="percent"/> between <paramref name="point"/> and
 		/// <paramref name="targetPoint"/> then returns the result. Also known as Lerping (linear interpolation).
 		/// </summary>
-      public static Vector2 PointPercentTowardPoint(this Vector2 point, Vector2 targetPoint, Vector2 percent)
+		public static Vector2 PointPercentTowardPoint(this Vector2 point, Vector2 targetPoint, Vector2 percent)
 		{
 			point.X = percent.X.Map(0, 100, point.X, targetPoint.X);
 			point.Y = percent.Y.Map(0, 100, point.Y, targetPoint.Y);
@@ -733,7 +654,7 @@ namespace SMPL.Tools
 		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		public static void DrawPoint(this Vector2 point, Camera camera = default, Color color = default, float size = 4)
+		internal static void DrawPoint(this Vector2 point, Camera camera = default, Color color = default, float size = 4)
 		{
 			camera ??= Scene.MainCamera;
 			color = color == default ? Color.White : color;
@@ -774,25 +695,25 @@ namespace SMPL.Tools
 		public static List<Vector2> OutlinePoints(this ICollection<Vector2> points)
 		{
 			var result = new List<Vector2>();
-			foreach (var p in points)
+			foreach(var p in points)
 			{
-				if (result.Count == 0)
+				if(result.Count == 0)
 					result.Add(p);
 				else
 				{
-					if (result[0].X > p.X)
+					if(result[0].X > p.X)
 						result[0] = p;
-					else if (result[0].X == p.X)
-						if (result[0].Y > p.Y)
+					else if(result[0].X == p.X)
+						if(result[0].Y > p.Y)
 							result[0] = p;
 				}
 			}
 			var counter = 0;
-			while (counter < result.Count)
+			while(counter < result.Count)
 			{
 				var q = Next(points, result[counter]);
 				result.Add(q);
-				if (q == result[0] || result.Count > points.Count)
+				if(q == result[0] || result.Count > points.Count)
 					break;
 				counter++;
 
@@ -800,10 +721,10 @@ namespace SMPL.Tools
 				{
 					Vector2 q = p;
 					int t;
-					foreach (Vector2 r in points)
+					foreach(Vector2 r in points)
 					{
 						t = ((q.X - p.X) * (r.Y - p.Y) - (r.X - p.X) * (q.Y - p.Y)).CompareTo(0);
-						if (t == -1 || t == 0 && Vector2.Distance(p, r) > Vector2.Distance(p, q))
+						if(t == -1 || t == 0 && Vector2.Distance(p, r) > Vector2.Distance(p, q))
 							q = r;
 					}
 					return q;
@@ -813,13 +734,6 @@ namespace SMPL.Tools
 			return result;
 		}
 
-		/// <summary>
-		/// Converts <paramref name="seconds"/> into a <see cref="string"/> following a <paramref name="format"/>. Then returns the result.
-		/// </summary>
-		public static string SecondsToText(this int seconds, Time.Format format = new())
-		{
-			return SecondsToText((float)seconds, format);
-		}
 		/// <summary>
 		/// Generates a random <see cref="int"/> number in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with an
 		/// optional <paramref name="seed"/>. Then returns the result.
@@ -866,5 +780,10 @@ namespace SMPL.Tools
 		/// </summary>
 		public static int Map(this int number, int a1, int a2, int b1, int b2) =>
 			(int)Map((float)number, a1, a2, b1, b2);
+
+		#region Backend
+		private static readonly Dictionary<string, int> gateEntries = new();
+		private static readonly Dictionary<string, bool> gates = new();
+		#endregion
 	}
 }
