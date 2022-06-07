@@ -81,7 +81,7 @@
 		{
 			renderTexture.Display();
 		}
-		internal override Vector2 GetCornerClockwise(int index)
+		public override Vector2 CornerClockwise(int index)
 		{
 			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
 			var sz = renderTexture.GetView().Size * 0.5f;
@@ -110,7 +110,7 @@
 
 		private Hitbox GetScreenHitbox()
 		{
-			return new Hitbox(GetCornerClockwise(0), GetCornerClockwise(1), GetCornerClockwise(2), GetCornerClockwise(3), GetCornerClockwise(4));
+			return new Hitbox(CornerClockwise(0), CornerClockwise(1), CornerClockwise(2), CornerClockwise(3), CornerClockwise(4));
 		}
 		private void Init(uint resolutionX, uint resolutionY)
 		{

@@ -2,24 +2,44 @@
 {
 	internal class Sprite : Visual
 	{
+		public Vector2 TexCoordsUnitA { get; set; }
+		public Vector2 TexCoordsUnitB { get; set; } = new(1, 1);
 
-		internal Vector2 TexCoordsUnitA { get; set; }
-		internal Vector2 TexCoordsUnitB { get; set; } = new(1, 1);
-
-		internal Vector2 LocalSize { get; set; } = new(100, 100);
-		internal Vector2 Size
+		public Vector2 LocalSize { get; set; } = new(100, 100);
+		public Vector2 Size
 		{
 			get => LocalSize * Scale;
 			set => LocalSize = value / Scale;
 		}
 
-		internal Vector2 OriginUnit { get; set; } = new(0.5f, 0.5f);
-		internal Vector2 Origin
+		public Vector2 OriginUnit { get; set; } = new(0.5f, 0.5f);
+		public Vector2 Origin
 		{ get => OriginUnit * LocalSize; set => OriginUnit = value / LocalSize; }
 
 		public Hitbox Hitbox { get; } = new();
 
 		internal Sprite(string uid) : base(uid) { }
+
+		public override Vector2 CornerClockwise(int index)
+		{
+			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
+			return index switch
+			{
+				0 => GetPositionFromSelf(-Origin),
+				1 => GetPositionFromSelf(new Vector2(LocalSize.X, 0) - Origin),
+				2 => GetPositionFromSelf(LocalSize - Origin),
+				3 => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin),
+				_ => default,
+			};
+		}
+		public virtual void SetDefaultHitbox()
+		{
+			Hitbox.LocalLines.Clear();
+			Hitbox.LocalLines.Add(new(-Origin, new Vector2(LocalSize.X, 0) - Origin));
+			Hitbox.LocalLines.Add(new(new Vector2(LocalSize.X, 0) - Origin, LocalSize - Origin));
+			Hitbox.LocalLines.Add(new(LocalSize - Origin, new Vector2(0, LocalSize.Y) - Origin));
+			Hitbox.LocalLines.Add(new(new Vector2(0, LocalSize.Y) - Origin, -Origin));
+		}
 
 		internal override void Draw(Camera camera = null)
 		{
@@ -37,33 +57,13 @@
 
 			var verts = new Vertex[]
 			{
-				new(GetCornerClockwise(0).ToSFML(), Tint, new(w0, h0)),
-				new(GetCornerClockwise(1).ToSFML(), Tint, new(ww, h0)),
-				new(GetCornerClockwise(2).ToSFML(), Tint, new(ww, hh)),
-				new(GetCornerClockwise(3).ToSFML(), Tint, new(w0, hh)),
+				new(CornerClockwise(0).ToSFML(), Tint, new(w0, h0)),
+				new(CornerClockwise(1).ToSFML(), Tint, new(ww, h0)),
+				new(CornerClockwise(2).ToSFML(), Tint, new(ww, hh)),
+				new(CornerClockwise(3).ToSFML(), Tint, new(w0, hh)),
 			};
 
 			camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
-		}
-		internal virtual void SetDefaultHitbox()
-		{
-			Hitbox.LocalLines.Clear();
-			Hitbox.LocalLines.Add(new(-Origin, new Vector2(LocalSize.X, 0) - Origin));
-			Hitbox.LocalLines.Add(new(new Vector2(LocalSize.X, 0) - Origin, LocalSize - Origin));
-			Hitbox.LocalLines.Add(new(LocalSize - Origin, new Vector2(0, LocalSize.Y) - Origin));
-			Hitbox.LocalLines.Add(new(new Vector2(0, LocalSize.Y) - Origin, -Origin));
-		}
-		internal override Vector2 GetCornerClockwise(int index)
-		{
-			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
-			return index switch
-			{
-				0 => GetPositionFromSelf(-Origin),
-				1 => GetPositionFromSelf(new Vector2(LocalSize.X, 0) - Origin),
-				2 => GetPositionFromSelf(LocalSize - Origin),
-				3 => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin),
-				_ => default,
-			};
 		}
 	}
 }

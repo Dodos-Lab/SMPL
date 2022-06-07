@@ -52,17 +52,22 @@
 		/// <summary>
 		/// Display <paramref name="message"/> on the <see cref="Console"/>. May be followed by <paramref name="newLine"/>.
 		/// </summary>
-		public static void Log(object message, bool newLine = true)
+		public static void Log(object message, ConsoleColor messageColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black, bool newLine = true)
 		{
 			TryCreate();
+
+			System.Console.ForegroundColor = messageColor;
+			System.Console.BackgroundColor = backgroundColor;
 			System.Console.Write(message + (newLine ? "\n" : ""));
+			System.Console.ForegroundColor = ConsoleColor.White;
+			System.Console.BackgroundColor = ConsoleColor.Black;
 		}
 		/// <summary>
 		/// Display an error on the <see cref="Console"/> with <paramref name="description"/>.
 		/// Some information about where the error has occurred is also included through <paramref name="callChainIndex"/> and the <see cref="Debug"/>
 		/// properties. The <paramref name="description"/> is skipped if <paramref name="callChainIndex"/> is -1.
 		/// </summary>
-		public static void LogError(int callChainIndex, string description)
+		public static void LogError(int callChainIndex, string description, string tip = null)
 		{
 			if(Debug.IsRunningInVisualStudio == false || callChainIndex < -1)
 				return;
@@ -74,11 +79,13 @@
 				for(int i = 0; i < 50; i++)
 					Add(callChainIndex + i + 1);
 
-			Log($"[!] Error: {description}");
 			if(callChainIndex > -1)
-				Log($"[!] Method chain call:");
+				Log($"[!] Method chain call:", ConsoleColor.DarkGray);
 			for(int i = methods.Count - 1; i >= 0; i--)
-				Log($"[!] - {methods[i]}{actions[i]}");
+				Log($"[!] - {methods[i]}{actions[i]}", i == 0 ? ConsoleColor.Gray : ConsoleColor.DarkGray);
+			Log($"[!] Error: {description}", ConsoleColor.DarkRed);
+			if(tip != null)
+				Log($"[?] Tip: {tip}", ConsoleColor.Cyan);
 			Log("");
 
 			void Add(int depth)
@@ -97,9 +104,10 @@
 				var method = $"{Debug.MethodName}()";
 				var line = $"{Debug.LineNumber}";
 				var methodName = file == ".cs/" ? "" : $"{file}{method}";
+				var methodNamespace = Debug.Namespace;
 				Debug.CallChainIndex = prevDepth;
 
-				if(methodName != "")
+				if(methodName != "" && methodNamespace != nameof(SMPL))
 				{
 					methods.Add(methodName);
 					actions.Add($" {{ [{line}] {action}(); }}");

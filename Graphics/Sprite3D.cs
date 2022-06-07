@@ -107,9 +107,9 @@
 			var points = new List<Vector2>();
 
 			for(int i = 0; i < 4; i++)
-				points.Add(GetCornerClockwise(i));
+				points.Add(CornerClockwise(i));
 			for(int i = 0; i < 4; i++)
-				points.Add(GetCorner3DClockwise(i));
+				points.Add(Corner3DClockwise(i));
 
 			var outline = points.OutlinePoints();
 
@@ -130,27 +130,27 @@
 				var tex = Scene.CurrentScene.Textures[texturePaths[i]];
 				var verts = new Vertex[]
 				{
-					new(GetCornerClockwise(0).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
-					new(GetCornerClockwise(1).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, 0)),
-					new(GetCornerClockwise(2).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, tex.Size.Y)),
-					new(GetCornerClockwise(3).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
+					new(CornerClockwise(0).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
+					new(CornerClockwise(1).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, 0)),
+					new(CornerClockwise(2).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, tex.Size.Y)),
+					new(CornerClockwise(3).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
 				};
 
 				camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, Shader));
 			}
 		}
 
-		internal Vector2 GetCorner3DClockwise(int index)
+		internal Vector2 Corner3DClockwise(int index)
 		{
 			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
 
 			var h = Height * (textureCount == 0 ? 1 : textureCount);
 			return index switch
 			{
-				0 => GetCornerClockwise(0).PointMoveAtAngle(Angle3D, h, false),
-				1 => GetCornerClockwise(1).PointMoveAtAngle(Angle3D, h, false),
-				2 => GetCornerClockwise(2).PointMoveAtAngle(Angle3D, h, false),
-				3 => GetCornerClockwise(3).PointMoveAtAngle(Angle3D, h, false),
+				0 => CornerClockwise(0).PointMoveAtAngle(Angle3D, h, false),
+				1 => CornerClockwise(1).PointMoveAtAngle(Angle3D, h, false),
+				2 => CornerClockwise(2).PointMoveAtAngle(Angle3D, h, false),
+				3 => CornerClockwise(3).PointMoveAtAngle(Angle3D, h, false),
 				_ => default,
 			};
 		}

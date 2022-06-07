@@ -1,6 +1,6 @@
 ﻿namespace SMPL
 {
-	public class Thing
+	internal class Thing
 	{
 		internal readonly static Dictionary<string, Thing> objs = new();
 
@@ -11,7 +11,7 @@
 		private Matrix3x2 global;
 		private string uid;
 
-		internal string UID
+		public string UID
 		{
 			get => uid;
 			set
@@ -37,7 +37,7 @@
 				objs[uid] = this;
 			}
 		}
-		internal string ParentUID
+		public string ParentUID
 		{
 			get => parentUID;
 			set
@@ -64,59 +64,59 @@
 				Scale = prevSc;
 			}
 		}
-		internal ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
+		public ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
 
-		internal Vector2 LocalDirection
-		{
-			get => Vector2.Normalize(LocalAngle.AngleToDirection());
-			set => LocalAngle = Vector2.Normalize(value).DirectionToAngle();
-		}
-		internal Vector2 Direction
-		{
-			get => Vector2.Normalize(Angle.AngleToDirection());
-			set => Angle = Vector2.Normalize(value).DirectionToAngle();
-		}
-		internal Vector2 LocalPosition
+		public Vector2 LocalPosition
 		{
 			get => localPos;
 			set { localPos = value; UpdateSelfAndChildren(); }
 		}
-		internal float LocalScale
+		public float LocalScale
 		{
 			get => localSc;
 			set { localSc = value; UpdateSelfAndChildren(); }
 		}
-		internal float LocalAngle
+		public float LocalAngle
 		{
 			get => localAng;
 			set { localAng = value; UpdateSelfAndChildren(); }
 		}
+		public Vector2 LocalDirection
+		{
+			get => Vector2.Normalize(LocalAngle.AngleToDirection());
+			set => LocalAngle = Vector2.Normalize(value).DirectionToAngle();
+		}
 
-		internal Vector2 Position
+		public Vector2 Position
 		{
 			get => GetPosition(global);
 			set => LocalPosition = GetLocalPositionFromParent(value);
 		}
-		internal float Scale
+		public float Scale
 		{
 			get => GetScale(global);
 			set => LocalScale = GetScale(GlobalToLocal(value, Angle, Position));
 		}
-		internal float Angle
+		public float Angle
 		{
 			get => GetAngle(global);
 			set => LocalAngle = GetAngle(GlobalToLocal(Scale, value, Position));
 		}
+		public Vector2 Direction
+		{
+			get => Vector2.Normalize(Angle.AngleToDirection());
+			set => Angle = Vector2.Normalize(value).DirectionToAngle();
+		}
 
-		internal Vector2 GetLocalPositionFromParent(Vector2 position)
+		public Vector2 GetLocalPositionFromParent(Vector2 position)
 		{
 			return GetPosition(GlobalToLocal(Scale, Angle, position));
 		}
-		internal Vector2 GetPositionFromParent(Vector2 localPosition)
+		public Vector2 GetPositionFromParent(Vector2 localPosition)
 		{
 			return GetPosition(LocalToGlobal(LocalScale, LocalAngle, localPosition));
 		}
-		internal Vector2 GetLocalPositionFromSelf(Vector2 position)
+		public Vector2 GetLocalPositionFromSelf(Vector2 position)
 		{
 			var m = Matrix3x2.Identity;
 			m *= Matrix3x2.CreateTranslation(position);
@@ -124,7 +124,7 @@
 
 			return GetPosition(m);
 		}
-		internal Vector2 GetPositionFromSelf(Vector2 localPosition)
+		public Vector2 GetPositionFromSelf(Vector2 localPosition)
 		{
 			var m = Matrix3x2.Identity;
 			m *= Matrix3x2.CreateTranslation(localPosition);
@@ -135,14 +135,7 @@
 			return GetPosition(m * GetParentMatrix());
 		}
 
-		internal Thing(string uid)
-		{
-			UID = uid;
-			LocalScale = 1;
-		}
-
-		internal virtual void OnDestroy() { }
-		internal void Destroy(bool includeChildren = true)
+		public void Destroy(bool includeChildren = true)
 		{
 			if(includeChildren)
 				for(int i = 0; i < childrenUIDs.Count; i++)
@@ -153,7 +146,21 @@
 
 			OnDestroy();
 		}
-		internal virtual Vector2 GetCornerClockwise(int index) => Position;
+		public virtual Vector2 CornerClockwise(int index) => Position;
+
+		public override string ToString()
+		{
+			return uid;
+		}
+
+		#region Backend
+		internal Thing(string uid)
+		{
+			UID = uid;
+			LocalScale = 1;
+		}
+
+		internal virtual void OnDestroy() { }
 
 		internal Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)
 		{
@@ -248,5 +255,7 @@
 
 			return (T)objs[uid];
 		}
+		#endregion
+
 	}
 }
