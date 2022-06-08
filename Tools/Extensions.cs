@@ -654,9 +654,9 @@ namespace SMPL.Tools
 		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		internal static void DrawPoint(this Vector2 point, Camera camera = default, Color color = default, float size = 4)
+		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
 		{
-			camera ??= Scene.MainCamera;
+			renderTarget ??= Scene.MainCamera.renderTexture;
 			color = color == default ? Color.White : color;
 
 			size /= 2;
@@ -672,7 +672,7 @@ namespace SMPL.Tools
 				new(new(br.X, br.Y), color),
 				new(new(bl.X, bl.Y), color),
 			};
-			camera.renderTexture.Draw(vert, PrimitiveType.Quads);
+			renderTarget.Draw(vert, PrimitiveType.Quads);
 		}
 		/// <summary>
 		/// Converts a <see cref="Vector2f"/> into a <see cref="Vector2"/> and returns the result.

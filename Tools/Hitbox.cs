@@ -34,17 +34,24 @@
 		}
 
 		/// <summary>
-		/// Takes <see cref="LocalLines"/>, applies <paramref name="obj"/>'s transformations on them and puts the result into <see cref="Lines"/>
+		/// Takes <see cref="LocalLines"/>, applies <paramref name="thingUID"/>'s transformations on them and puts the result into <see cref="Lines"/>
 		/// for the rest of the methods to use. Any previous changes to the <see cref="Lines"/> list will be erased.
 		/// </summary>
-		internal void TransformLocalLines(Thing obj)
+		public void TransformLocalLines(string thingUID)
 		{
+			var thing = Thing.Get(thingUID);
+			if(thing == null)
+			{
+				ThingManager.ThingNotFoundError(thingUID);
+				return;
+			}
+
 			Lines.Clear();
 
 			for(int i = 0; i < LocalLines.Count; i++)
 			{
-				var a = obj.GetPositionFromSelf(LocalLines[i].A);
-				var b = obj.GetPositionFromSelf(LocalLines[i].B);
+				var a = thing.GetPositionFromSelf(LocalLines[i].A);
+				var b = thing.GetPositionFromSelf(LocalLines[i].B);
 				Lines.Add(new(a, b));
 			}
 		}
@@ -54,13 +61,13 @@
 		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		internal void Draw(Camera camera = default, Color color = default, float width = 4)
+		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4)
 		{
-			camera ??= Scene.MainCamera;
+			renderTarget ??= Scene.MainCamera.renderTexture;
 			color = color == default ? Color.White : color;
 
 			for(int i = 0; i < Lines.Count; i++)
-				Lines[i].Draw(camera, color, width);
+				Lines[i].Draw(renderTarget, color, width);
 		}
 
 		/// <summary>
@@ -126,8 +133,7 @@
 		{
 			for(int i = 0; i < hitbox.Lines.Count; i++)
 				for(int j = 0; j < Lines.Count; j++)
-					if((ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false) &&
-						(hitbox.ConvexContains(Lines[j].A) == false || hitbox.ConvexContains(Lines[j].B) == false))
+					if((ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false))
 						return false;
 			return true;
 		}

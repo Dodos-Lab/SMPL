@@ -132,6 +132,8 @@
 			set => Angle = Vector2.Normalize(value).DirectionToAngle();
 		}
 
+		public string TypeName => GetType().Name;
+
 		public Vector2 GetLocalPositionFromParent(Vector2 position)
 		{
 			return GetPosition(GlobalToLocal(Scale, Angle, position));

@@ -35,9 +35,67 @@ namespace SMPL
 			return cam.UID;
 		}
 
+		public static bool HasSet(string uid, string propertyName)
+		{
+			var obj = Thing.Get(uid);
+			if(obj == null)
+			{
+				ThingNotFoundError(uid);
+				return default;
+			}
+			var type = obj.GetType();
+			TryAddAllProps(type, true);
+
+			return settersAllNames.ContainsKey(type) && settersAllNames[type].Contains(propertyName);
+		}
+		public static bool HasGet(string uid, string propertyName)
+		{
+			var obj = Thing.Get(uid);
+			if(obj == null)
+			{
+				ThingNotFoundError(uid);
+				return default;
+			}
+			var type = obj.GetType();
+			TryAddAllProps(type, false);
+
+			return gettersAllNames.ContainsKey(type) && gettersAllNames[type].Contains(propertyName);
+		}
+		public static bool HasDoGet(string uid, string methodName)
+		{
+			var obj = Thing.Get(uid);
+			if(obj == null)
+			{
+				ThingNotFoundError(uid);
+				return default;
+			}
+			var type = obj.GetType();
+			TryAddAllMethods(type, false);
+
+			return returnMethodsAllNames.ContainsKey(type) && returnMethodsAllNames[type].Contains(methodName);
+		}
+		public static bool HasDo(string uid, string methodName)
+		{
+			var obj = Thing.Get(uid);
+			if(obj == null)
+			{
+				ThingNotFoundError(uid);
+				return default;
+			}
+			var type = obj.GetType();
+			TryAddAllMethods(type, true);
+
+			return voidMethodsAllNames.ContainsKey(type) && voidMethodsAllNames[type].Contains(methodName);
+		}
+
 		public static void Set(string uid, string propertyName, object value)
 		{
 			var obj = Thing.Get(uid);
+			if(obj == null)
+			{
+				ThingNotFoundError(uid);
+				return;
+			}
 			var type = obj.GetType();
 			var key = (type, propertyName);
 			var valueType = value.GetType();
@@ -67,6 +125,11 @@ namespace SMPL
 		public static object Get(string uid, string propertyName)
 		{
 			var obj = Thing.Get(uid);
+			if(obj == null)
+			{
+				ThingNotFoundError(uid);
+				return default;
+			}
 			var type = obj.GetType();
 			var key = (type, propertyName);
 
@@ -88,6 +151,11 @@ namespace SMPL
 		public static void Do(string uid, string methodName, params object[] parameters)
 		{
 			var obj = Thing.Get(uid);
+			if(obj == null)
+			{
+				ThingNotFoundError(uid);
+				return;
+			}
 			var type = obj.GetType();
 			var key = (type, methodName);
 
@@ -107,6 +175,11 @@ namespace SMPL
 		public static object DoGet(string uid, string methodName, params object[] parameters)
 		{
 			var obj = Thing.Get(uid);
+			if(obj == null)
+			{
+				ThingNotFoundError(uid);
+				return default;
+			}
 			var type = obj.GetType();
 			var key = (type, methodName);
 
@@ -130,6 +203,10 @@ namespace SMPL
 
 			return TryTypeMismatchError(obj, returnMethodParamTypes, parameters, false) || returnMethodParamTypes.ContainsKey(key) == false ?
 				default : returnMethods[key].Invoke(obj, parameters);
+		}
+		public static List<string> GetUIDs()
+		{
+			return Thing.objs.Keys.ToList();
 		}
 
 		#region Backend
@@ -182,6 +259,10 @@ namespace SMPL
 			allNames[type] = methodNames;
 		}
 
+		internal static void ThingNotFoundError(string uid)
+		{
+			Console.LogError(2, $"{{{uid}}} does not exist.");
+		}
 		private static bool TryTypeMismatchError(Thing obj, Dictionary<(Type, string), List<Type>> paramTypes, object[] parameters, bool isVoid)
 		{
 			var nth = new string[] { "st", "nd", "rd" };

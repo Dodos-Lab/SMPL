@@ -41,9 +41,9 @@
 		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		internal void Draw(Camera camera = default, Color color = default, float width = 4)
+		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4)
 		{
-			camera ??= Scene.MainCamera;
+			renderTarget ??= Scene.MainCamera.renderTexture;
 			color = color == default ? Color.White : color;
 
 			width /= 2;
@@ -59,7 +59,7 @@
 				new(new(endRight.X, endRight.Y), color),
 				new(new(endLeft.X, endLeft.Y), color),
 			};
-			camera.renderTexture.Draw(vert, PrimitiveType.Quads);
+			renderTarget.Draw(vert, PrimitiveType.Quads);
 		}
 		/// <summary>
 		/// Returns the point where this line and another <paramref name="line"/> cross. Returns an invalid vector
