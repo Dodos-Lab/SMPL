@@ -6,13 +6,14 @@
 
 		internal SpriteBorder(string uid) : base(uid) { }
 
-		internal override void Draw(Camera camera = null)
+		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			if(IsHidden)
 				return;
 
-			camera ??= Scene.MainCamera;
-
+			var camera = Get<Camera>(CameraUID);
+			if(camera != null)
+				renderTarget = camera.renderTexture;
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
 			var topLeft = new Vector2f(w * TexCoordsUnitA.X, h * TexCoordsUnitA.Y);
@@ -76,9 +77,9 @@
 				new(CornerClockwise(2).PointMoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Tint, bottomRight - new Vector2f(BorderSize, 0)),
 			};
 
-			camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
 		}
-		public override void SetDefaultHitbox()
+		public override void ApplyDefaultHitbox()
 		{
 			var borderSz = new Vector2(BorderSize, BorderSize) / Scale;
 			Hitbox.LocalLines.Clear();

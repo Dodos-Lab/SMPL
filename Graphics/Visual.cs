@@ -2,23 +2,53 @@
 {
 	internal abstract class Visual : Thing
 	{
-		internal enum BlendModes { None, Alpha, Add, Multiply }
+		private int depth;
+		internal readonly static Dictionary<int, List<Visual>> visuals = new();
 
-		internal Color Tint { get; set; } = Color.White;
-		internal bool IsAdditive { get; set; }
-		internal bool IsHidden { get; set; }
-		internal string TexturePath { get; set; }
-		internal string ShaderPath { get; set; }
-		internal BlendModes BlendMode { get; set; } = BlendModes.Alpha;
+		public enum BlendModes { None, Alpha, Add, Multiply }
+
+		public Color Tint { get; set; } = Color.White;
+		public bool IsAdditive { get; set; }
+		public bool IsHidden { get; set; }
+		public int Depth
+		{
+			get => depth;
+			set
+			{
+				TryCreateDepth(depth);
+
+				if(visuals[depth].Contains(this))
+					visuals[depth].Remove(this);
+
+				depth = value;
+
+				TryCreateDepth(depth);
+				visuals[depth].Add(this);
+
+				void TryCreateDepth(int depth)
+				{
+					if(visuals.ContainsKey(depth) == false)
+						visuals[depth] = new();
+				}
+			}
+		}
+		public string TexturePath { get; set; }
+		public string ShaderPath { get; set; }
+		public string CameraUID { get; set; }
+		public BlendModes BlendMode { get; set; } = BlendModes.Alpha;
 
 		[JsonIgnore]
 		internal Texture Texture => TexturePath != null && Scene.CurrentScene.Textures.ContainsKey(TexturePath) ? Scene.CurrentScene.Textures[TexturePath] : null;
 		[JsonIgnore]
 		internal Shader Shader => ShaderPath != null && Scene.CurrentScene.Shaders.ContainsKey(ShaderPath) ? Scene.CurrentScene.Shaders[ShaderPath] : null;
 
-		internal Visual(string uid) : base(uid) { }
+		internal Visual(string uid) : base(uid)
+		{
+			Depth = 0;
+		}
 
-		internal abstract void Draw(Camera camera = null);
+		internal void Draw(RenderTarget renderTarget) => OnDraw(renderTarget);
+		internal abstract void OnDraw(RenderTarget renderTarget);
 
 		internal BlendMode GetBlendMode()
 		{
@@ -29,6 +59,11 @@
 				BlendModes.Multiply => SFML.Graphics.BlendMode.Multiply,
 				_ => SFML.Graphics.BlendMode.None,
 			};
+		}
+		internal override void OnDestroy()
+		{
+			base.OnDestroy();
+			visuals[depth].Remove(this);
 		}
 	}
 }

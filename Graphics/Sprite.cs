@@ -18,8 +18,6 @@
 
 		public Hitbox Hitbox { get; } = new();
 
-		internal Sprite(string uid) : base(uid) { }
-
 		public override Vector2 CornerClockwise(int index)
 		{
 			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
@@ -32,7 +30,7 @@
 				_ => default,
 			};
 		}
-		public virtual void SetDefaultHitbox()
+		public virtual void ApplyDefaultHitbox()
 		{
 			Hitbox.LocalLines.Clear();
 			Hitbox.LocalLines.Add(new(-Origin, new Vector2(LocalSize.X, 0) - Origin));
@@ -41,13 +39,16 @@
 			Hitbox.LocalLines.Add(new(new Vector2(0, LocalSize.Y) - Origin, -Origin));
 		}
 
-		internal override void Draw(Camera camera = null)
+		#region Backend
+		internal Sprite(string uid) : base(uid) { }
+		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			if(IsHidden)
 				return;
 
-			camera ??= Scene.MainCamera;
-
+			var camera = Get<Camera>(CameraUID);
+			if(camera != null)
+				renderTarget = camera.renderTexture;
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
 			var w0 = w * TexCoordsUnitA.X;
@@ -63,7 +64,8 @@
 				new(CornerClockwise(3).ToSFML(), Tint, new(w0, hh)),
 			};
 
-			camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
 		}
+		#endregion
 	}
 }

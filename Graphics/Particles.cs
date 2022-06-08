@@ -41,13 +41,14 @@
 				particles.Add(OnParticleSpawn());
 		}
 
-		internal override void Draw(Camera camera = null)
+		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			if(particles == null || particles.Count == 0)
 				return;
 
-			camera ??= Scene.MainCamera;
-
+			var camera = Get<Camera>(CameraUID);
+			if(camera != null)
+				renderTarget = camera.renderTexture;
 			var ps = new List<Particle>(particles);
 			var verts = new Vertex[ps.Count * 4];
 
@@ -83,7 +84,7 @@
 				verts[i + 3] = new(botLeft.ToSFML(), c, new(txA.X, txB.Y));
 			}
 
-			camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
 		}
 		internal override void OnDestroy()
 		{

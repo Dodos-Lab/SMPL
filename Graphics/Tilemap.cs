@@ -20,12 +20,14 @@
 	{
 		public Vector2 CellSize { get; set; } = new(32);
 
-		internal override void Draw(Camera camera = null)
+		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			if(IsHidden)
 				return;
 
-			camera ??= Scene.MainCamera;
+			var camera = Get<Camera>(CameraUID);
+			if(camera != null)
+				renderTarget = camera.renderTexture;
 
 			var vertsArr = new VertexArray(PrimitiveType.Quads);
 
@@ -47,7 +49,7 @@
 					vertsArr.Append(new(botLeft, c, new(txCrdsA.X, txCrdsB.Y)));
 				}
 
-			camera.renderTexture.Draw(vertsArr, new(GetBlendMode(), Transform.Identity, Texture, Shader));
+			renderTarget.Draw(vertsArr, new(GetBlendMode(), Transform.Identity, Texture, Shader));
 			vertsArr.Dispose();
 		}
 		public void SetTile(Vector2 tilePositionIndecies, Tile tile)

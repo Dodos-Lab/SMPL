@@ -117,13 +117,14 @@
 			for(int i = 1; i < outline.Count; i++)
 				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
 		}
-		internal override void Draw(Camera camera = null)
+		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			if(IsHidden || textureCount == 0)
 				return;
 
-			camera ??= Scene.MainCamera;
-
+			var camera = Get<Camera>(CameraUID);
+			if(camera != null)
+				renderTarget = camera.renderTexture;
 			var h = Height * Scale / textureCount;
 			for(int i = 0; i < textureCount; i++)
 			{
@@ -136,7 +137,7 @@
 					new(CornerClockwise(3).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
 				};
 
-				camera.renderTexture.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, Shader));
+				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, Shader));
 			}
 		}
 

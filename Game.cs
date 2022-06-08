@@ -10,6 +10,7 @@ global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Serialization;
 global using System.Threading;
+global using System.Windows.Forms;
 global using Newtonsoft.Json;
 global using SFML.Audio;
 global using SFML.Graphics;
@@ -43,7 +44,7 @@ namespace SMPL
 
 			Scene.Init(startingScene, loadingScene);
 			var sz = Settings.ScreenResolution;
-			Scene.MainCamera = new("SMPL-MainCamera", (uint)(sz.X), (uint)(sz.Y));
+			Scene.MainCameraUID = ThingManager.CreateCamera("SMPL-MainCamera", sz);
 
 			while(Window.IsOpen)
 			{

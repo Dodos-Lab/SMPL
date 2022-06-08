@@ -2,7 +2,9 @@
 {
 	internal class Thing
 	{
+		private int order;
 		internal readonly static Dictionary<string, Thing> objs = new();
+		internal readonly static SortedDictionary<int, List<Thing>> objsOrder = new();
 
 		private readonly List<string> childrenUIDs = new();
 		private string parentUID;
@@ -65,6 +67,28 @@
 			}
 		}
 		public ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
+		public int UpdateOrder
+		{
+			get => order;
+			set
+			{
+				TryCreateOrder(order);
+
+				if(objsOrder[order].Contains(this))
+					objsOrder[order].Remove(this);
+
+				order = value;
+
+				TryCreateOrder(order);
+				objsOrder[order].Add(this);
+
+				void TryCreateOrder(int order)
+				{
+					if(objsOrder.ContainsKey(order) == false)
+						objsOrder[order] = new();
+				}
+			}
+		}
 
 		public Vector2 LocalPosition
 		{
@@ -137,14 +161,16 @@
 
 		public void Destroy(bool includeChildren = true)
 		{
+			OnDestroy();
+
 			if(includeChildren)
 				for(int i = 0; i < childrenUIDs.Count; i++)
 				{
 					var child = Get(childrenUIDs[i]);
 					child?.Destroy();
 				}
-
-			OnDestroy();
+			objs.Remove(uid);
+			objsOrder[order].Remove(this);
 		}
 		public virtual Vector2 CornerClockwise(int index) => Position;
 
@@ -157,9 +183,12 @@
 		internal Thing(string uid)
 		{
 			UID = uid;
+			UpdateOrder = 0;
 			LocalScale = 1;
 		}
 
+		internal void Update() => OnUpdate();
+		internal virtual void OnUpdate() { }
 		internal virtual void OnDestroy() { }
 
 		internal Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)

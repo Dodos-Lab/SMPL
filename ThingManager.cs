@@ -4,17 +4,20 @@ namespace SMPL
 {
 	public static class ThingManager
 	{
-		private readonly static Dictionary<Type, List<string>>
-			settersAllNames = new(), gettersAllNames = new(), voidMethodsAllNames = new(), returnMethodsAllNames = new();
-
-		private readonly static Dictionary<(Type, string), Type>
-			setterTypes = new(), getterTypes = new(), returnMethodTypes = new();
-		private readonly static Dictionary<(Type, string), List<Type>>
-			returnMethodParamTypes = new(), voidMethodParamTypes = new();
-		private readonly static Dictionary<(Type, string), MemberSetter> setters = new();
-		private readonly static Dictionary<(Type, string), MemberGetter> getters = new();
-		private readonly static Dictionary<(Type, string), Fasterflect.MethodInvoker>
-			voidMethods = new(), returnMethods = new();
+		public static void UpdateAllThings()
+		{
+			var objs = Thing.objsOrder;
+			foreach(var kvp in objs)
+				for(int i = 0; i < kvp.Value.Count; i++)
+					kvp.Value[i].Update();
+		}
+		public static void DrawAllVisuals(RenderTarget renderTarget)
+		{
+			var objs = Visual.visuals;
+			foreach(var kvp in objs)
+				for(int i = 0; i < kvp.Value.Count; i++)
+					kvp.Value[i].Draw(renderTarget);
+		}
 
 		public static string Create(string uid)
 		{
@@ -25,6 +28,11 @@ namespace SMPL
 		{
 			var spr = new Sprite(uid);
 			return spr.UID;
+		}
+		public static string CreateCamera(string uid, Vector2 resolution)
+		{
+			var cam = new Camera(uid, (uint)(resolution.X), (uint)(resolution.Y));
+			return cam.UID;
 		}
 
 		public static void Set(string uid, string propertyName, object value)
@@ -123,6 +131,19 @@ namespace SMPL
 			return TryTypeMismatchError(obj, returnMethodParamTypes, parameters, false) || returnMethodParamTypes.ContainsKey(key) == false ?
 				default : returnMethods[key].Invoke(obj, parameters);
 		}
+
+		#region Backend
+		private readonly static Dictionary<Type, List<string>>
+			settersAllNames = new(), gettersAllNames = new(), voidMethodsAllNames = new(), returnMethodsAllNames = new();
+
+		private readonly static Dictionary<(Type, string), Type>
+			setterTypes = new(), getterTypes = new(), returnMethodTypes = new();
+		private readonly static Dictionary<(Type, string), List<Type>>
+			returnMethodParamTypes = new(), voidMethodParamTypes = new();
+		private readonly static Dictionary<(Type, string), MemberSetter> setters = new();
+		private readonly static Dictionary<(Type, string), MemberGetter> getters = new();
+		private readonly static Dictionary<(Type, string), Fasterflect.MethodInvoker>
+			voidMethods = new(), returnMethods = new();
 
 		private static void TryAddAllProps(Type type, bool setter)
 		{
@@ -224,5 +245,6 @@ namespace SMPL
 
 			return result;
 		}
+		#endregion
 	}
 }

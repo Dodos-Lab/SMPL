@@ -2,87 +2,13 @@
 {
 	public class Scene
 	{
-		public struct TexturedModel3D
-		{
-			/// <summary>
-			/// The path to the texture that this .obj file uses.
-			/// </summary>
-			public string TexturePath { get; set; }
-			/// <summary>
-			/// The path to the .obj file.
-			/// </summary>
-			public string ObjModelPath { get; set; }
-			/// <summary>
-			/// An optional uniqiue ID/Name ussed for an access key when stored in <see cref="Sprites3D"/>. The <see cref="ObjModelPath"/>
-			/// is used if <see langword="null"/>.
-			/// </summary>
-			public string UniqueName { get; set; }
-			/// <summary>
-			/// The amount of detail along the depth of the <see cref="Sprite3D"/>.
-			/// </summary>
-			public uint TextureCount { get; set; }
-			/// <summary>
-			/// The amount of detail along the width and height of the <see cref="Sprite3D"/>
-			/// </summary>
-			public float TextureDetail { get; set; }
-			/// <summary>
-			/// The scaling applied to the .obj file when loading it. Useful for flipping the model with negative values as well.
-			/// </summary>
-			public Vector3 Scale { get; set; }
-
-			/// <summary>
-			/// Initializes the .obj path and the texture path. Optionally initializes the rest of the values.
-			/// </summary>
-			public TexturedModel3D(string objPath, string texturePath, string uniqueName = null, uint textureCount = 20, float textureDetail = 20,
-				float scaleX = 1, float scaleY = 1, float scaleZ = 1)
-			{
-				ObjModelPath = objPath;
-				TexturePath = texturePath;
-				UniqueName = uniqueName ?? objPath;
-				TextureCount = textureCount;
-				TextureDetail = textureDetail;
-				Scale = new(scaleX, scaleY, scaleZ);
-			}
-		}
-		public struct AssetQueue
-		{
-			/// <summary>
-			/// All the paths of the required textures in the <see cref="CurrentScene"/>.
-			/// </summary>
-			public List<string> Textures { get; set; }
-			/// <summary>
-			/// All the paths of the required music in the <see cref="CurrentScene"/>.
-			/// </summary>
-			public List<string> Music { get; set; }
-			/// <summary>
-			/// All the paths of the required sounds in the <see cref="CurrentScene"/>.
-			/// </summary>
-			public List<string> Sounds { get; set; }
-			/// <summary>
-			/// All the paths of the required fonts in the <see cref="CurrentScene"/>.
-			/// </summary>
-			public List<string> Fonts { get; set; }
-			/// <summary>
-			/// All the paths and details of the required <see cref="Sprite3D"/>s in the <see cref="CurrentScene"/>.
-			/// </summary>
-			public List<TexturedModel3D> TexturedModels3D { get; set; }
-			/// <summary>
-			/// All the paths of the required shaders in the <see cref="CurrentScene"/>.
-			/// </summary>
-			public List<string> Shaders { get; set; }
-			/// <summary>
-			/// All the paths of the required databases in the <see cref="CurrentScene"/>.
-			/// </summary>
-			public List<string> Databases { get; set; }
-		}
-
-		internal static Camera MainCamera { get; set; }
+		public static string MainCameraUID { get; set; }
 		public static Vector2 MouseCursorPosition
 		{
 			get => MainCamera.MouseCursorPosition;
 			set => MainCamera.MouseCursorPosition = value;
 		}
-		internal static Scene CurrentScene
+		public static Scene CurrentScene
 		{
 			get => scene;
 			set
@@ -98,31 +24,62 @@
 				loadScene = value;
 			}
 		}
-		internal static Scene LoadingScene { get; set; }
-		internal float LoadingPercent { get; private set; }
+		public static Scene LoadingScene { get; set; }
+		public float LoadingPercent { get; private set; }
 		//public ThemeUI ThemeUI { get; set; }
 
-		internal Dictionary<string, Texture> Textures { get; } = new();
-		internal Dictionary<string, Music> Music { get; } = new();
-		internal Dictionary<string, Sound> Sounds { get; } = new();
-		internal Dictionary<string, Font> Fonts { get; } = new();
-		internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
-		internal Dictionary<string, Shader> Shaders { get; } = new();
-		internal Dictionary<string, Database> Databases { get; } = new();
-
-		protected virtual AssetQueue OnRequireAssets() => default;
 		protected virtual void OnStart() { }
 		protected virtual void OnUpdate() { }
 		protected virtual void OnStop() { }
 		protected virtual void OnGameStop() { }
 
 		#region Backend
+		internal struct TexturedModel3D
+		{
+			public string TexturePath { get; set; }
+			public string ObjModelPath { get; set; }
+			public string UniqueName { get; set; }
+			public uint TextureCount { get; set; }
+			public float TextureDetail { get; set; }
+			public Vector3 Scale { get; set; }
+
+			public TexturedModel3D(string objPath, string texturePath, string uniqueName = null, uint textureCount = 20, float textureDetail = 20,
+				float scaleX = 1, float scaleY = 1, float scaleZ = 1)
+			{
+				ObjModelPath = objPath;
+				TexturePath = texturePath;
+				UniqueName = uniqueName ?? objPath;
+				TextureCount = textureCount;
+				TextureDetail = textureDetail;
+				Scale = new(scaleX, scaleY, scaleZ);
+			}
+		}
+		internal struct AssetQueue
+		{
+			public List<string> Textures { get; set; }
+			public List<string> Music { get; set; }
+			public List<string> Sounds { get; set; }
+			public List<string> Fonts { get; set; }
+			public List<string> Shaders { get; set; }
+			public List<string> Databases { get; set; }
+			public List<TexturedModel3D> TexturedModels3D { get; set; }
+		}
+
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		private static Thread assetsLoading;
 
+		internal static Camera MainCamera => Thing.Get<Camera>(MainCameraUID);
+		internal Dictionary<string, Texture> Textures { get; } = new();
+		internal Dictionary<string, Music> Music { get; } = new();
+		internal Dictionary<string, Sound> Sounds { get; } = new();
+		internal Dictionary<string, Font> Fonts { get; } = new();
+		internal Dictionary<string, Shader> Shaders { get; } = new();
+		internal Dictionary<string, Database> Databases { get; } = new();
+		//internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
+
 		internal void LoadAssets()
 		{
-			var assets = OnRequireAssets();
+			var assets = new AssetQueue();
 			var loadedCount = 0;
 
 			if(assets.Textures == null && assets.Sounds == null && assets.Music == null && assets.Fonts == null && assets.TexturedModels3D == null)
@@ -205,7 +162,7 @@
 			DisposeAndClear(Sounds);
 			DisposeAndClear(Shaders);
 
-			Sprites3D.Clear();
+			//Sprites3D.Clear();
 
 			void DisposeAndClear<T>(Dictionary<string, T> assets) where T : IDisposable
 			{
