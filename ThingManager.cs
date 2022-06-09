@@ -19,14 +19,18 @@ namespace SMPL
 					kvp.Value[i].Draw(renderTarget);
 		}
 
+		public static bool Exists(string uid)
+		{
+			return uid != null && Thing.objs.ContainsKey(uid);
+		}
 		public static string Create(string uid)
 		{
-			var spr = new Thing(uid);
+			var spr = new Thing(GetFreeUID(uid));
 			return spr.UID;
 		}
 		public static string CreateSprite(string uid)
 		{
-			var spr = new Sprite(uid);
+			var spr = new Sprite(GetFreeUID(uid));
 			return spr.UID;
 		}
 		public static string CreateCamera(string uid, Vector2 resolution)
@@ -91,7 +95,7 @@ namespace SMPL
 		public static void Set(string uid, string propertyName, object value)
 		{
 			var obj = Thing.Get(uid);
-			if(obj == null)
+			if(obj == null || value == null)
 			{
 				ThingNotFoundError(uid);
 				return;
@@ -207,6 +211,19 @@ namespace SMPL
 		public static List<string> GetUIDs()
 		{
 			return Thing.objs.Keys.ToList();
+		}
+
+		public static string GetFreeUID(string uid)
+		{
+			var i = 1;
+			var freeUID = uid;
+
+			while(Thing.objs.ContainsKey(freeUID))
+			{
+				freeUID = $"{uid}{i}";
+				i++;
+			}
+			return freeUID;
 		}
 
 		#region Backend

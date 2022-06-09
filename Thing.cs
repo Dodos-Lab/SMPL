@@ -18,24 +18,16 @@
 			get => uid;
 			set
 			{
-				if(string.IsNullOrWhiteSpace(value))
-					value = "";
-
-				value = value.Trim();
-
-				var i = 1;
-				var freeUID = value;
-
-				while(objs.ContainsKey(freeUID))
+				if(objs.ContainsKey(value))
 				{
-					freeUID = $"{value}{i}";
-					i++;
+					Console.LogError(1, $"Another {{{nameof(Thing)}}} already exists with the [{nameof(UID)}] '{value}'.");
+					return;
 				}
 
 				if(uid != null)
 					objs.Remove(uid);
 
-				uid = freeUID;
+				uid = value;
 				objs[uid] = this;
 			}
 		}
@@ -49,7 +41,7 @@
 
 				var parent = Get(parentUID);
 
-				if(parent != null && childrenUIDs != null)
+				if(parent != null)
 					parent.childrenUIDs.Remove(uid);
 
 				var prevPos = Position;
@@ -58,8 +50,11 @@
 
 				parentUID = value;
 
-				if(parent != null && childrenUIDs != null)
-					parent.childrenUIDs.Add(uid);
+				var newParent = Get(parentUID);
+				if(newParent == null)
+					return;
+
+				newParent.childrenUIDs.Add(uid);
 
 				Position = prevPos;
 				Angle = prevAng;

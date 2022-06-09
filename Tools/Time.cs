@@ -171,10 +171,7 @@
 		/// </summary>
 		public static uint FrameCount { get; private set; }
 
-		#region Backend
-		private static readonly Clock time = new(), delta = new(), updateFPS = new();
-
-		internal static void Update()
+		public static void Update()
 		{
 			GameClock = (float)time.ElapsedTime.AsSeconds();
 			Delta = (float)delta.ElapsedTime.AsSeconds();
@@ -188,6 +185,8 @@
 			}
 			FrameCount++;
 		}
+		#region Backend
+		private static readonly Clock time = new(), delta = new(), updateFPS = new();
 		#endregion
 	}
 }
