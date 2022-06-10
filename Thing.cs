@@ -50,15 +50,13 @@
 
 				parentUID = value;
 
-				var newParent = Get(parentUID);
-				if(newParent == null)
-					return;
-
-				newParent.childrenUIDs.Add(uid);
-
 				Position = prevPos;
 				Angle = prevAng;
 				Scale = prevSc;
+
+				var newParent = Get(parentUID);
+				if(newParent != null)
+					newParent.childrenUIDs.Add(uid);
 			}
 		}
 		public ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
@@ -160,12 +158,17 @@
 		{
 			OnDestroy();
 
-			if(includeChildren)
-				for(int i = 0; i < childrenUIDs.Count; i++)
-				{
-					var child = Get(childrenUIDs[i]);
+			for(int i = 0; i < childrenUIDs.Count; i++)
+			{
+				var child = Get(childrenUIDs[i]);
+				if(child == null)
+					continue;
+
+				if(includeChildren)
 					child?.Destroy();
-				}
+				else
+					child.ParentUID = null;
+			}
 			objs.Remove(uid);
 			objsOrder[order].Remove(this);
 		}
@@ -182,6 +185,11 @@
 			UID = uid;
 			UpdateOrder = 0;
 			LocalScale = 1;
+
+			// hello, world! do i have any children before i was even born? claim ownership if so
+			foreach(var kvp in objs)
+				if(kvp.Value.parentUID == uid)
+					childrenUIDs.Add(kvp.Key);
 		}
 
 		internal void Update() => OnUpdate();

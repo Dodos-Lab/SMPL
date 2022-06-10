@@ -591,6 +591,9 @@ namespace SMPL.Tools
 		/// </summary>
 		public static Vector2 PointToGrid(this Vector2 point, Vector2 gridSize)
 		{
+			if(gridSize == default)
+				return point;
+
 			// this prevents -0 cells
 			point.X -= point.X < 0 ? gridSize.X : 0;
 			point.Y -= point.Y < 0 ? gridSize.Y : 0;

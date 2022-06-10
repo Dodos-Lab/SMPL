@@ -23,6 +23,11 @@ namespace SMPL
 		{
 			return uid != null && Thing.objs.ContainsKey(uid);
 		}
+		public static void Destroy(string uid, bool includeChildren)
+		{
+			var obj = Thing.Get(uid);
+			obj.Destroy(includeChildren);
+		}
 		public static string Create(string uid)
 		{
 			var spr = new Thing(GetFreeUID(uid));
@@ -95,19 +100,18 @@ namespace SMPL
 		public static void Set(string uid, string propertyName, object value)
 		{
 			var obj = Thing.Get(uid);
-			if(obj == null || value == null)
+			if(obj == null)
 			{
 				ThingNotFoundError(uid);
 				return;
 			}
 			var type = obj.GetType();
 			var key = (type, propertyName);
-			var valueType = value.GetType();
+			TryAddAllProps(type, true);
+			var valueType = setterTypes[(type, propertyName)];
 
 			if(setters.ContainsKey(key) == false)
 			{
-				TryAddAllProps(type, true);
-
 				if(settersAllNames[type].Contains(propertyName))
 					setters[key] = type.DelegateForSetPropertyValue(propertyName);
 				else
