@@ -7,12 +7,13 @@
 		internal readonly static SortedDictionary<int, List<Thing>> objsOrder = new();
 
 		private readonly List<string> childrenUIDs = new();
-		private string parentUID;
+		private string parentUID, prevUID;
 		private Vector2 localPos;
 		private float localAng, localSc;
 		private Matrix3x2 global;
 		private string uid;
 
+		public string PreviousUID => prevUID;
 		public string UID
 		{
 			get => uid;
@@ -27,10 +28,26 @@
 				if(uid != null)
 					objs.Remove(uid);
 
+				prevUID = uid;
 				uid = value;
 				objs[uid] = this;
+
+				var parent = Get(parentUID, 0, false);
+				if(parent != null)
+				{
+					parent.childrenUIDs.Remove(prevUID);
+					parent.childrenUIDs.Add(uid);
+				}
+
+				for(int i = 0; i < childrenUIDs.Count; i++)
+				{
+					var child = Get(childrenUIDs[i], 0, false);
+					if(child != null)
+						child.parentUID = uid;
+				}
 			}
 		}
+
 		public string ParentUID
 		{
 			get => parentUID;
@@ -272,16 +289,16 @@
 			return MathF.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12);
 		}
 
-		internal static Thing Get(string uid, int depth = 1)
+		internal static Thing Get(string uid, int depth = 1, bool error = true)
 		{
-			return Get<Thing>(uid, depth);
+			return Get<Thing>(uid, depth, error);
 		}
-		internal static T Get<T>(string uid, int depth = 1) where T : Thing
+		internal static T Get<T>(string uid, int depth = 1, bool error = true) where T : Thing
 		{
 			if(uid == null || objs.ContainsKey(uid) == false)
 				return default;
 
-			if(objs[uid] is not T)
+			if(error && objs[uid] is not T)
 			{
 				Console.LogError(depth + 1, $"The {nameof(Thing)} with UID '{uid}' exists but is not a {typeof(T).Name} - it is a {objs[uid].GetType().Name}");
 				return default;
