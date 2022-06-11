@@ -2,6 +2,37 @@
 {
 	public class Scene
 	{
+		public struct TexturedModel3D
+		{
+			public string TexturePath { get; set; }
+			public string ObjModelPath { get; set; }
+			public string UniqueName { get; set; }
+			public uint TextureCount { get; set; }
+			public float TextureDetail { get; set; }
+			public Vector3 Scale { get; set; }
+
+			public TexturedModel3D(string objPath, string texturePath, string uniqueName = null, uint textureCount = 20, float textureDetail = 20,
+				float scaleX = 1, float scaleY = 1, float scaleZ = 1)
+			{
+				ObjModelPath = objPath;
+				TexturePath = texturePath;
+				UniqueName = uniqueName ?? objPath;
+				TextureCount = textureCount;
+				TextureDetail = textureDetail;
+				Scale = new(scaleX, scaleY, scaleZ);
+			}
+		}
+		public struct AssetQueue
+		{
+			public List<string> Textures { get; set; }
+			public List<string> Music { get; set; }
+			public List<string> Sounds { get; set; }
+			public List<string> Fonts { get; set; }
+			public List<string> Shaders { get; set; }
+			public List<string> Databases { get; set; }
+			public List<TexturedModel3D> TexturedModels3D { get; set; }
+		}
+
 		public static string MainCameraUID { get; set; }
 		public static Vector2 MouseCursorPosition
 		{
@@ -34,37 +65,6 @@
 		protected virtual void OnGameStop() { }
 
 		#region Backend
-		internal struct TexturedModel3D
-		{
-			public string TexturePath { get; set; }
-			public string ObjModelPath { get; set; }
-			public string UniqueName { get; set; }
-			public uint TextureCount { get; set; }
-			public float TextureDetail { get; set; }
-			public Vector3 Scale { get; set; }
-
-			public TexturedModel3D(string objPath, string texturePath, string uniqueName = null, uint textureCount = 20, float textureDetail = 20,
-				float scaleX = 1, float scaleY = 1, float scaleZ = 1)
-			{
-				ObjModelPath = objPath;
-				TexturePath = texturePath;
-				UniqueName = uniqueName ?? objPath;
-				TextureCount = textureCount;
-				TextureDetail = textureDetail;
-				Scale = new(scaleX, scaleY, scaleZ);
-			}
-		}
-		internal struct AssetQueue
-		{
-			public List<string> Textures { get; set; }
-			public List<string> Music { get; set; }
-			public List<string> Sounds { get; set; }
-			public List<string> Fonts { get; set; }
-			public List<string> Shaders { get; set; }
-			public List<string> Databases { get; set; }
-			public List<TexturedModel3D> TexturedModels3D { get; set; }
-		}
-
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		private static Thread assetsLoading;
 
