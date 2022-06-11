@@ -2,6 +2,22 @@
 {
 	internal abstract class Visual : Thing
 	{
+		internal const string DEFAULT_FRAG = @"
+uniform sampler2D texture;
+
+void main()
+{
+    vec4 pixel = texture2D(texture, gl_TexCoord[0].xy);
+    gl_FragColor = gl_Color * pixel;
+}";
+		internal const string DEFAULT_VERT = @"
+void main()
+{
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+    gl_FrontColor = gl_Color;
+}";
+
 		private int depth;
 		internal readonly static Dictionary<int, List<Visual>> visuals = new();
 

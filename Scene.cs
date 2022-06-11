@@ -56,105 +56,112 @@
 			}
 		}
 		public static Scene LoadingScene { get; set; }
+
 		public float LoadingPercent { get; private set; }
 		//public ThemeUI ThemeUI { get; set; }
+
+		public Scene(params string[] initialAssetPaths)
+		{
+			initialAssetPaths?.CopyTo(assets, 0);
+		}
 
 		protected virtual void OnStart() { }
 		protected virtual void OnUpdate() { }
 		protected virtual void OnStop() { }
 		protected virtual void OnGameStop() { }
 
-		#region Backend
-		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
-		private static Thread assetsLoading;
-
-		internal static Camera MainCamera => Thing.Get<Camera>(MainCameraUID);
-		internal Dictionary<string, Texture> Textures { get; } = new();
-		internal Dictionary<string, Music> Music { get; } = new();
-		internal Dictionary<string, Sound> Sounds { get; } = new();
-		internal Dictionary<string, Font> Fonts { get; } = new();
-		internal Dictionary<string, Shader> Shaders { get; } = new();
-		internal Dictionary<string, Database> Databases { get; } = new();
-		//internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
-
-		internal void LoadAssets()
+		protected void LoadAssets(string path)
 		{
-			var assets = new AssetQueue();
-			var loadedCount = 0;
-
-			if(assets.Textures == null && assets.Sounds == null && assets.Music == null && assets.Fonts == null && assets.TexturedModels3D == null)
+			if(path == null || IsValidFilename(path))
 			{
-				CurrentScene.LoadingPercent = 100;
+				Console.LogError(1, $"The path '{path}' is invalid.");
+				return;
+			}
+			var isFolder = Path.HasExtension(path) == false;
+
+			if(isFolder)
+			{
+				var folderFiles = Directory.GetFiles(path);
+				var subFolders = Directory.GetDirectories(path);
+
+				for(int i = 0; i < subFolders.Length; i++)
+					LoadAssets(subFolders[i]);
+
+				for(int i = 0; i < folderFiles.Length; i++)
+					LoadAssets(folderFiles[i]);
 				return;
 			}
 
-			for(int i = 0; i < assets.Textures?.Count; i++)
+			var extension = Path.GetExtension(path);
+
+			try
 			{
-				if(assets.Textures[i] != null)
+				if(extension == ".png" || extension == ".jpg" || extension == ".bmp")
+					Textures[path] = new Texture(path);
+				else if(extension == ".ogg" || extension == ".wav" || extension == ".flac")
 				{
-					try
+					var music = new Music(path);
+					if(music.Duration.AsSeconds() > 15)
+						Music[path] = music;
+					else
 					{
-						var t = new Texture(assets.Textures[i]);
-						Textures[assets.Textures[i]] = t;
-						t.Repeated = true;
+						Sounds[path] = new(new SoundBuffer(path));
+						music.Dispose();
 					}
-					catch(Exception) { Textures[assets.Textures[i]] = null; Console.LogError(-1, $"Could not load texture '{assets.Textures[i]}'."); }
 				}
-				UpdateLoadingPercent();
+				else if(extension == ".ttf" || extension == ".otf")
+					Fonts[path] = new(path);
+				else if(extension == ".vert")
+					Shaders[path] = new(path, null, Visual.DEFAULT_FRAG);
+				else if(extension == ".frag")
+					Shaders[path] = new(Visual.DEFAULT_VERT, null, path);
+				else if(extension == ".cdb")
+					Databases[path] = Database.Load(path);
+				else if(extension == ".obj")
+					Console.LogError(1, $"Work in progress...");
+				else
+					Files[path] = File.ReadAllText(path);
 			}
-			for(int i = 0; i < assets.Sounds?.Count; i++)
-			{
-				if(assets.Sounds[i] != null)
-				{
-					try { Sounds[assets.Sounds[i]] = new Sound(new SoundBuffer(assets.Sounds[i])); }
-					catch(Exception) { Sounds[assets.Sounds[i]] = null; Console.LogError(-1, $"Could not load sound '{assets.Sounds[i]}'."); }
-				}
-				UpdateLoadingPercent();
-			}
-			for(int i = 0; i < assets.Music?.Count; i++)
-			{
-				if(assets.Music[i] != null)
-				{
-					try { Music[assets.Music[i]] = new Music(assets.Music[i]); }
-					catch(Exception) { Music[assets.Music[i]] = null; Console.LogError(-1, $"Could not load music '{assets.Music[i]}'."); }
-				}
-				UpdateLoadingPercent();
-			}
-			for(int i = 0; i < assets.Fonts?.Count; i++)
-			{
-				if(assets.Fonts[i] != null)
-				{
-					try { Fonts[assets.Fonts[i]] = new Font(assets.Fonts[i]); }
-					catch(Exception) { Fonts[assets.Fonts[i]] = null; Console.LogError(-1, $"Could not load font '{assets.Fonts[i]}'."); }
-				}
-				UpdateLoadingPercent();
-			}
-			//for(int i = 0; i < assets.TexturedModels3D?.Count; i++)
-			//{
-			//	try { Sprites3D[assets.TexturedModels3D[i].UniqueName] = new Sprite3D(assets.TexturedModels3D[i]); }
-			//	catch(Exception)
-			//	{ Sprites3D[assets.TexturedModels3D[i].UniqueName] = null; Console.LogError(-1, $"Could not load textured 3D model '{assets.TexturedModels3D[i]}'."); }
-			//	UpdateLoadingPercent();
-			//}
-			for(int i = 0; i < assets.Databases?.Count; i++)
-			{
-				if(assets.Databases[i] != null)
-					Databases[assets.Databases[i]] = Database.Load(assets.Databases[i]);
-				UpdateLoadingPercent();
-			}
+			catch(Exception) { Console.LogError(1, $"Could not load asset at path '{path}'."); }
 
-			void UpdateLoadingPercent()
+			bool IsValidFilename(string fileName)
 			{
-				loadedCount++;
-
-				var total = GetCount(assets.Fonts) + GetCount(assets.Music) + GetCount(assets.Sounds) + GetCount(assets.Textures) +
-					GetCount(assets.TexturedModels3D) + GetCount(assets.Databases);
-				CurrentScene.LoadingPercent = loadedCount.Map(0, total, 0, 100);
-
-				int GetCount<T>(List<T> list) => list?.Count ?? 0;
+				var invalidChars = Path.GetInvalidFileNameChars();
+				for(int i = 0; i < invalidChars.Length; i++)
+					if(fileName.Contains(invalidChars[i]))
+						return true;
+				return false;
 			}
 		}
-		internal void UnloadAssets()
+		protected void UnloadAssets(string path)
+		{
+			TryDisposeAndRemove(Textures, path);
+			TryDisposeAndRemove(Fonts, path);
+			TryDisposeAndRemove(Music, path);
+			TryDisposeAndRemove(Sounds, path);
+			TryDisposeAndRemove(Shaders, path);
+
+			//TryRemove(Sprites3D, path);
+			TryRemove(Databases, path);
+			TryRemove(Files, path);
+
+			void TryDisposeAndRemove<T>(Dictionary<string, T> assets, string key) where T : IDisposable
+			{
+				if(assets.ContainsKey(key) == false)
+					return;
+
+				assets[key].Dispose();
+				assets.Remove(key);
+			}
+			void TryRemove<T>(Dictionary<string, T> assets, string key)
+			{
+				if(assets.ContainsKey(key) == false)
+					return;
+
+				assets.Remove(key);
+			}
+		}
+		protected void UnloadAssets()
 		{
 			DisposeAndClear(Textures);
 			DisposeAndClear(Fonts);
@@ -163,6 +170,8 @@
 			DisposeAndClear(Shaders);
 
 			//Sprites3D.Clear();
+			Databases.Clear();
+			Files.Clear();
 
 			void DisposeAndClear<T>(Dictionary<string, T> assets) where T : IDisposable
 			{
@@ -171,6 +180,27 @@
 
 				assets.Clear();
 			}
+		}
+
+		#region Backend
+		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
+		private static Thread assetsLoading;
+		private readonly string[] assets;
+
+		internal static Camera MainCamera => Thing.Get<Camera>(MainCameraUID);
+		internal Dictionary<string, Texture> Textures { get; } = new();
+		internal Dictionary<string, Music> Music { get; } = new();
+		internal Dictionary<string, Sound> Sounds { get; } = new();
+		internal Dictionary<string, Font> Fonts { get; } = new();
+		internal Dictionary<string, Shader> Shaders { get; } = new();
+		internal Dictionary<string, Database> Databases { get; } = new();
+		internal Dictionary<string, string> Files { get; } = new();
+		//internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
+
+		internal void LoadPreparedAssets()
+		{
+			for(int i = 0; i < assets.Length; i++)
+				LoadAssets(assets[i]);
 		}
 		internal void GameStop() => OnGameStop();
 
@@ -213,7 +243,7 @@
 				}
 				if(loadScene != null)
 				{
-					scene.LoadAssets();
+					scene.LoadPreparedAssets();
 					startScene = loadScene;
 					loadScene = null;
 				}
