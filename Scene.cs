@@ -22,18 +22,8 @@
 				Scale = new(scaleX, scaleY, scaleZ);
 			}
 		}
-		public struct AssetQueue
-		{
-			public List<string> Textures { get; set; }
-			public List<string> Music { get; set; }
-			public List<string> Sounds { get; set; }
-			public List<string> Fonts { get; set; }
-			public List<string> Shaders { get; set; }
-			public List<string> Databases { get; set; }
-			public List<TexturedModel3D> TexturedModels3D { get; set; }
-		}
 
-		public static string MainCameraUID { get; set; }
+		public static string MainCameraUID { get; internal set; }
 		public static Vector2 MouseCursorPosition
 		{
 			get => MainCamera.MouseCursorPosition;
@@ -57,12 +47,15 @@
 		}
 		public static Scene LoadingScene { get; set; }
 
-		public float LoadingPercent { get; private set; }
 		//public ThemeUI ThemeUI { get; set; }
 
 		public Scene(params string[] initialAssetPaths)
 		{
-			initialAssetPaths?.CopyTo(assets, 0);
+			initialAssets = new(initialAssetPaths);
+		}
+		public Scene(List<string> initialAssetPaths)
+		{
+			initialAssets = new(initialAssetPaths);
 		}
 
 		protected virtual void OnStart() { }
@@ -70,59 +63,63 @@
 		protected virtual void OnStop() { }
 		protected virtual void OnGameStop() { }
 
-		protected void LoadAssets(string path)
+		protected void LoadAssets(params string[] paths)
 		{
-			if(path == null || IsValidFilename(path))
+			for(int i = 0; i < paths?.Length; i++)
 			{
-				Console.LogError(1, $"The path '{path}' is invalid.");
-				return;
-			}
-			var isFolder = Path.HasExtension(path) == false;
-
-			if(isFolder)
-			{
-				var folderFiles = Directory.GetFiles(path);
-				var subFolders = Directory.GetDirectories(path);
-
-				for(int i = 0; i < subFolders.Length; i++)
-					LoadAssets(subFolders[i]);
-
-				for(int i = 0; i < folderFiles.Length; i++)
-					LoadAssets(folderFiles[i]);
-				return;
-			}
-
-			var extension = Path.GetExtension(path);
-
-			try
-			{
-				if(extension == ".png" || extension == ".jpg" || extension == ".bmp")
-					Textures[path] = new Texture(path);
-				else if(extension == ".ogg" || extension == ".wav" || extension == ".flac")
+				var path = paths[i];
+				if(path == null || IsValidFilename(path))
 				{
-					var music = new Music(path);
-					if(music.Duration.AsSeconds() > 15)
-						Music[path] = music;
-					else
-					{
-						Sounds[path] = new(new SoundBuffer(path));
-						music.Dispose();
-					}
+					Console.LogError(1, $"The path '{path}' is invalid.");
+					return;
 				}
-				else if(extension == ".ttf" || extension == ".otf")
-					Fonts[path] = new(path);
-				else if(extension == ".vert")
-					Shaders[path] = new(path, null, Visual.DEFAULT_FRAG);
-				else if(extension == ".frag")
-					Shaders[path] = new(Visual.DEFAULT_VERT, null, path);
-				else if(extension == ".cdb")
-					Databases[path] = Database.Load(path);
-				else if(extension == ".obj")
-					Console.LogError(1, $"Work in progress...");
-				else
-					Files[path] = File.ReadAllText(path);
+				var isFolder = Path.HasExtension(path) == false;
+
+				if(isFolder)
+				{
+					var folderFiles = Directory.GetFiles(path);
+					var subFolders = Directory.GetDirectories(path);
+
+					for(int j = 0; j < subFolders.Length; j++)
+						LoadAssets(subFolders[j]);
+
+					for(int j = 0; j < folderFiles.Length; j++)
+						LoadAssets(folderFiles[j]);
+					return;
+				}
+
+				var extension = Path.GetExtension(path);
+
+				try
+				{
+					if(extension == ".png" || extension == ".jpg" || extension == ".bmp")
+						Textures[path] = new Texture(path);
+					else if(extension == ".ogg" || extension == ".wav" || extension == ".flac")
+					{
+						var music = new Music(path);
+						if(music.Duration.AsSeconds() > 15)
+							Music[path] = music;
+						else
+						{
+							Sounds[path] = new(new SoundBuffer(path));
+							music.Dispose();
+						}
+					}
+					else if(extension == ".ttf" || extension == ".otf")
+						Fonts[path] = new(path);
+					else if(extension == ".vert")
+						Shaders[path] = new(path, null, Visual.DEFAULT_FRAG);
+					else if(extension == ".frag")
+						Shaders[path] = new(Visual.DEFAULT_VERT, null, path);
+					else if(extension == ".cdb")
+						Databases[path] = Database.Load(path);
+					else if(extension == ".obj")
+						Console.LogError(1, $"Work in progress...");
+					else
+						Files[path] = File.ReadAllText(path);
+				}
+				catch(Exception) { Console.LogError(1, $"Could not load asset at path '{path}'."); }
 			}
-			catch(Exception) { Console.LogError(1, $"Could not load asset at path '{path}'."); }
 
 			bool IsValidFilename(string fileName)
 			{
@@ -133,17 +130,21 @@
 				return false;
 			}
 		}
-		protected void UnloadAssets(string path)
+		protected void UnloadAssets(params string[] paths)
 		{
-			TryDisposeAndRemove(Textures, path);
-			TryDisposeAndRemove(Fonts, path);
-			TryDisposeAndRemove(Music, path);
-			TryDisposeAndRemove(Sounds, path);
-			TryDisposeAndRemove(Shaders, path);
+			for(int i = 0; i < paths?.Length; i++)
+			{
+				var path = paths[i];
+				TryDisposeAndRemove(Textures, path);
+				TryDisposeAndRemove(Fonts, path);
+				TryDisposeAndRemove(Music, path);
+				TryDisposeAndRemove(Sounds, path);
+				TryDisposeAndRemove(Shaders, path);
 
-			//TryRemove(Sprites3D, path);
-			TryRemove(Databases, path);
-			TryRemove(Files, path);
+				//TryRemove(Sprites3D, path);
+				TryRemove(Databases, path);
+				TryRemove(Files, path);
+			}
 
 			void TryDisposeAndRemove<T>(Dictionary<string, T> assets, string key) where T : IDisposable
 			{
@@ -161,7 +162,7 @@
 				assets.Remove(key);
 			}
 		}
-		protected void UnloadAssets()
+		protected void UnloadAllAssets()
 		{
 			DisposeAndClear(Textures);
 			DisposeAndClear(Fonts);
@@ -185,7 +186,8 @@
 		#region Backend
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		private static Thread assetsLoading;
-		private readonly string[] assets;
+		private readonly List<string> initialAssets;
+		private List<string> initialAssetsLoaded = new();
 
 		internal static Camera MainCamera => Thing.Get<Camera>(MainCameraUID);
 		internal Dictionary<string, Texture> Textures { get; } = new();
@@ -197,10 +199,12 @@
 		internal Dictionary<string, string> Files { get; } = new();
 		//internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
 
-		internal void LoadPreparedAssets()
+		internal void LoadInitialAssets()
 		{
-			for(int i = 0; i < assets.Length; i++)
-				LoadAssets(assets[i]);
+			for(int i = 0; i < initialAssets.Count; i++)
+				LoadAssets(initialAssets[i]);
+
+			initialAssetsLoaded = initialAssets;
 		}
 		internal void GameStop() => OnGameStop();
 
@@ -225,7 +229,7 @@
 				startScene = null;
 				CurrentScene?.OnStart();
 			}
-			if(CurrentScene?.LoadingPercent < 100)
+			if(CurrentScene.initialAssets.Count < CurrentScene.initialAssetsLoaded.Count)
 				LoadingScene?.OnUpdate();
 			else
 				CurrentScene?.OnUpdate();
@@ -237,13 +241,14 @@
 				Thread.Sleep(1);
 				if(unloadScene != null)
 				{
-					scene.UnloadAssets();
+					ThingManager.DestroyAll();
+					scene.UnloadAllAssets();
 					stopScene = unloadScene;
 					unloadScene = null;
 				}
 				if(loadScene != null)
 				{
-					scene.LoadPreparedAssets();
+					scene.LoadInitialAssets();
 					startScene = loadScene;
 					loadScene = null;
 				}

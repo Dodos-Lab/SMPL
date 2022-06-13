@@ -23,10 +23,19 @@ namespace SMPL
 		{
 			return uid != null && Thing.objs.ContainsKey(uid);
 		}
-		public static void Destroy(string uid, bool includeChildren)
+		public static void Destroy(string uid, bool destroyChildren)
 		{
+			if(uid == Scene.MainCameraUID)
+				return;
+
 			var obj = Thing.Get(uid);
-			obj.Destroy(includeChildren);
+			obj.Destroy(destroyChildren);
+		}
+		public static void DestroyAll()
+		{
+			foreach(var kvp in Thing.objs)
+				if(kvp.Value != Scene.MainCamera)
+					kvp.Value.Destroy(true);
 		}
 		public static string Create(string uid)
 		{
@@ -172,7 +181,15 @@ namespace SMPL
 				TryAddAllMethods(type, true);
 
 				if(voidMethodsAllNames[type].Contains(methodName))
-					voidMethods[key] = type.DelegateForCallMethod(methodName);
+				{
+					var p = type.GetMethod(methodName).GetParameters();
+					var paramTypes = new List<Type>();
+					for(int i = 0; i < p.Length; i++)
+						paramTypes.Add(p[i].ParameterType);
+
+					voidMethods[key] = type.DelegateForCallMethod(methodName, paramTypes.ToArray());
+					voidMethodParamTypes[key] = paramTypes;
+				}
 				else
 					MissingMethodError(type, obj, methodName, true);
 			}

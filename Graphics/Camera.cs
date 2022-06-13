@@ -2,9 +2,10 @@
 {
 	internal class Camera : Thing
 	{
-		internal RenderTexture RenderTexture => renderTexture;
+		private float scale = 1;
+		internal RenderTexture renderTexture;
 
-		internal new Vector2 Position
+		public new Vector2 Position
 		{
 			get => renderTexture.GetView().Center.ToSystem();
 			set
@@ -15,7 +16,7 @@
 				renderTexture.SetView(view);
 			}
 		}
-		internal new float Angle
+		public new float Angle
 		{
 			get => renderTexture.GetView().Rotation;
 			set
@@ -26,7 +27,7 @@
 				renderTexture.SetView(view);
 			}
 		}
-		internal new float Scale
+		public new float Scale
 		{
 			get => scale;
 			set
@@ -38,11 +39,11 @@
 				renderTexture.SetView(view);
 			}
 		}
-		internal Vector2 Resolution { get; private set; }
-		internal bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
+		public Vector2 Resolution { get; private set; }
+		public bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
 		[JsonIgnore]
 		internal Texture Texture => renderTexture.Texture;
-		internal Vector2 MouseCursorPosition
+		public Vector2 MouseCursorPosition
 		{
 			get { var p = Mouse.GetPosition(Game.Window); return PointToCamera(new(p.X, p.Y)); }
 			set { var p = PointToWorld(value); Mouse.SetPosition(new((int)p.X, (int)p.Y), Game.Window); }
@@ -56,15 +57,15 @@
 		internal override void OnDestroy()
 			=> renderTexture.Dispose();
 
-		internal bool Captures(Hitbox hitbox)
+		public bool Captures(Hitbox hitbox)
 		{
 			return GetScreenHitbox().ConvexContains(hitbox);
 		}
-		internal bool Captures(Vector2 point)
+		public bool Captures(Vector2 point)
 		{
 			return GetScreenHitbox().ConvexContains(point);
 		}
-		internal void Snap(string imagePath)
+		public void Snap(string imagePath)
 		{
 			var img = Texture.CopyToImage();
 			var result = img.SaveToFile(imagePath);
@@ -73,13 +74,9 @@
 			if(result == false)
 				Console.LogError(1, $"Could not save the image at '{imagePath}'.");
 		}
-		internal void Fill(Color color = default)
+		public void Fill(Color color)
 		{
 			renderTexture.Clear(color);
-		}
-		internal void Display()
-		{
-			renderTexture.Display();
 		}
 		public override Vector2 CornerClockwise(int index)
 		{
@@ -95,14 +92,16 @@
 			};
 		}
 
-		private float scale = 1;
-		internal RenderTexture renderTexture;
+		internal void Display()
+		{
+			renderTexture.Display();
+		}
 
-		internal Vector2 PointToCamera(Vector2 worldPoint)
+		public Vector2 PointToCamera(Vector2 worldPoint)
 		{
 			return Game.Window.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
 		}
-		internal Vector2 PointToWorld(Vector2 cameraPoint)
+		public Vector2 PointToWorld(Vector2 cameraPoint)
 		{
 			var p = Game.Window.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
 			return new(p.X, p.Y);

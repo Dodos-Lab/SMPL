@@ -171,7 +171,7 @@
 			return GetPosition(m * GetParentMatrix());
 		}
 
-		public void Destroy(bool includeChildren = true)
+		public void Destroy(bool includeChildren)
 		{
 			OnDestroy();
 
@@ -182,7 +182,7 @@
 					continue;
 
 				if(includeChildren)
-					child?.Destroy();
+					child?.Destroy(includeChildren);
 				else
 					child.ParentUID = null;
 			}
