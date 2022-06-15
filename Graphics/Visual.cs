@@ -52,12 +52,17 @@ void main()
 		public string ShaderPath { get; set; }
 		public string CameraUID { get; set; }
 		public BlendModes BlendMode { get; set; } = BlendModes.Alpha;
+		public Hitbox Hitbox { get; } = new();
 
 		[JsonIgnore]
-		internal Texture Texture => TexturePath != null && Scene.CurrentScene.Textures.ContainsKey(TexturePath) ? Scene.CurrentScene.Textures[TexturePath] : null;
+		internal Texture Texture
+			=> TexturePath != null && Scene.CurrentScene.Textures.ContainsKey(TexturePath) ? Scene.CurrentScene.Textures[TexturePath] : null;
 		[JsonIgnore]
-		internal Shader Shader => ShaderPath != null && Scene.CurrentScene.Shaders.ContainsKey(ShaderPath) ? Scene.CurrentScene.Shaders[ShaderPath] : null;
+		internal Shader Shader
+			=> ShaderPath != null && Scene.CurrentScene.Shaders.ContainsKey(ShaderPath) ? Scene.CurrentScene.Shaders[ShaderPath] : null;
 
+		[JsonConstructor]
+		internal Visual() { }
 		internal Visual(string uid) : base(uid)
 		{
 			Depth = 0;

@@ -122,21 +122,25 @@
 			set => LocalAngle = Vector2.Normalize(value).DirectionToAngle();
 		}
 
+		[JsonIgnore]
 		public Vector2 Position
 		{
 			get => GetPosition(global);
 			set => LocalPosition = GetLocalPositionFromParent(value);
 		}
+		[JsonIgnore]
 		public float Scale
 		{
 			get => GetScale(global);
 			set => LocalScale = GetScale(GlobalToLocal(value, Angle, Position));
 		}
+		[JsonIgnore]
 		public float Angle
 		{
 			get => GetAngle(global);
 			set => LocalAngle = GetAngle(GlobalToLocal(Scale, value, Position));
 		}
+		[JsonIgnore]
 		public Vector2 Direction
 		{
 			get => Vector2.Normalize(Angle.AngleToDirection());
@@ -194,7 +198,7 @@
 
 		public override string ToString()
 		{
-			return uid;
+			return $"{GetType().Name} {{{uid}}}";
 		}
 
 		#region Backend

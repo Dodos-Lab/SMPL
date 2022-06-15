@@ -27,19 +27,19 @@
 
 		public const string MAIN_CAMERA_UID = "MainCamera";
 		public string SavePath { get; protected set; }
+		public string AssetsDirectory { get; protected set; } = "Assets";
+		public bool IsLoaded { get; private set; }
 
 		//public ThemeUI ThemeUI { get; set; }
 
 		[JsonConstructor]
 		internal Scene() { }
-		public Scene(string savePath, params string[] initialAssetPaths)
+		public Scene(params string[] initialAssetPaths)
 		{
-			SavePath = savePath;
 			assetQueue = new(initialAssetPaths);
 		}
-		public Scene(string savePath, List<string> initialAssetPaths)
+		public Scene(List<string> initialAssetPaths)
 		{
-			SavePath = savePath;
 			assetQueue = new(initialAssetPaths);
 		}
 
@@ -50,17 +50,19 @@
 
 			try
 			{
-				var def = new Scene(null);
+				var def = new Scene();
+				var prevScene = scene;
 				scene = def;
 				var json = File.ReadAllText(path).Decompress();
 				var loadedScene = JsonConvert.DeserializeObject<T>(json);
 
 				loadedScene.objs = def.objs;
-				loadedScene.isLoaded = true;
+				loadedScene.IsLoaded = true;
+				scene = prevScene;
 
 				return loadedScene;
 			}
-			catch(Exception) { Console.LogError(1, $"Could not load scene from '{path}'."); }
+			catch(Exception) { Console.LogError(1, $"Could not load {nameof(Scene)} from '{path}'."); }
 			return default;
 		}
 
@@ -71,6 +73,9 @@
 
 		protected void LoadAssets(params string[] paths)
 		{
+			if(string.IsNullOrWhiteSpace(AssetsDirectory) == false)
+				Directory.CreateDirectory(AssetsDirectory);
+
 			for(int i = 0; i < paths?.Length; i++)
 			{
 				var path = paths[i];
@@ -98,36 +103,38 @@
 				}
 
 				var extension = Path.GetExtension(path);
+				var filePath = $"{AssetsDirectory}\\{path}";
 
 				try
 				{
 					if(extension == ".png" || extension == ".jpg" || extension == ".bmp")
-						Textures[path] = new Texture(path);
+						Textures[path] = new(filePath);
 					else if(extension == ".ogg" || extension == ".wav" || extension == ".flac")
 					{
-						var music = new Music(path);
+						var music = new Music(filePath);
 						if(music.Duration.AsSeconds() > 15)
 							Music[path] = music;
 						else
 						{
-							Sounds[path] = new(new SoundBuffer(path));
+							Sounds[path] = new(new SoundBuffer(filePath));
 							music.Dispose();
 						}
 					}
 					else if(extension == ".ttf" || extension == ".otf")
-						Fonts[path] = new(path);
+						Fonts[path] = new(filePath);
 					else if(extension == ".vert")
-						Shaders[path] = new(path, null, Visual.DEFAULT_FRAG);
+						Shaders[path] = new(filePath, null, Visual.DEFAULT_FRAG);
 					else if(extension == ".frag")
-						Shaders[path] = new(Visual.DEFAULT_VERT, null, path);
+						Shaders[path] = new(Visual.DEFAULT_VERT, null, filePath);
 					else if(extension == ".obj")
 						Console.LogError(1, $"Work in progress...");
 					else
-						Files[path] = File.ReadAllText(path);
+						Files[path] = File.ReadAllText(filePath);
 
+					assetQueue.Add(path);
 					loadedAssets.Add(path);
 				}
-				catch(Exception) { Console.LogError(-1, $"Could not load asset at path '{path}'."); }
+				catch(Exception) { Console.LogError(-1, $"Could not load asset at '{filePath}'."); }
 			}
 		}
 		protected void UnloadAssets(params string[] paths)
@@ -190,21 +197,24 @@
 				foreach(var kvp in objs)
 				{
 					TryAdd(cameras, kvp.Value);
+					TryAdd(sprites, kvp.Value);
 				}
 
 				var json = JsonConvert.SerializeObject(this);
 				File.WriteAllText(SavePath, json.Compress());
 			}
-			catch(Exception)
-			{
-				Console.LogError(1, $"Could not save scene at '{SavePath}'.");
-			}
+			catch(Exception) { Console.LogError(1, $"Could not save {nameof(Scene)} at '{SavePath}'."); }
 
 			void TryAdd<T>(Dictionary<string, T> dict, Thing thing) where T : Thing
 			{
-				if(thing is T t)
+				if(thing is T t && dict.ContainsKey(t.UID) == false)
 					dict[t.UID] = t;
 			}
+		}
+
+		public override string ToString()
+		{
+			return $"{nameof(Scene)} '{SavePath}'";
 		}
 
 		#region Backend
@@ -229,7 +239,6 @@
 			}
 		}
 
-		private bool isLoaded;
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		internal static Thread assetsLoading;
 		internal static Camera MainCamera => Thing.Get<Camera>(MAIN_CAMERA_UID);
@@ -238,6 +247,8 @@
 		private ConcurrentBag<string> assetQueue = new();
 		[JsonProperty]
 		private Dictionary<string, Camera> cameras = new();
+		[JsonProperty]
+		private Dictionary<string, Sprite> sprites = new();
 
 		internal Dictionary<string, Thing> objs = new();
 		private ConcurrentBag<string> loadedAssets = new();
@@ -288,7 +299,7 @@
 
 				if(unloadScene != null)
 				{
-					if(scene.isLoaded == false)
+					if(scene.IsLoaded == false)
 					{
 						ThingManager.DestroyAll();
 						scene.UnloadAllAssets();

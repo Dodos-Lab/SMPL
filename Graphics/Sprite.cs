@@ -6,6 +6,7 @@
 		public Vector2 TexCoordsUnitB { get; set; } = new(1, 1);
 
 		public Vector2 LocalSize { get; set; } = new(100, 100);
+		[JsonIgnore]
 		public Vector2 Size
 		{
 			get => LocalSize * Scale;
@@ -13,10 +14,12 @@
 		}
 
 		public Vector2 OriginUnit { get; set; } = new(0.5f, 0.5f);
+		[JsonIgnore]
 		public Vector2 Origin
-		{ get => OriginUnit * LocalSize; set => OriginUnit = value / LocalSize; }
-
-		public Hitbox Hitbox { get; } = new();
+		{
+			get => OriginUnit * LocalSize;
+			set => OriginUnit = value / LocalSize;
+		}
 
 		public override Vector2 CornerClockwise(int index)
 		{
@@ -40,6 +43,8 @@
 		}
 
 		#region Backend
+		[JsonConstructor]
+		internal Sprite() { }
 		internal Sprite(string uid) : base(uid) { }
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
