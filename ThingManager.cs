@@ -21,11 +21,11 @@ namespace SMPL
 
 		public static bool Exists(string uid)
 		{
-			return uid != null && Thing.objs.ContainsKey(uid);
+			return uid != null && Scene.CurrentScene.objs.ContainsKey(uid);
 		}
 		public static void Destroy(string uid, bool destroyChildren)
 		{
-			if(uid == Scene.MainCameraUID)
+			if(uid == Scene.MAIN_CAMERA_UID)
 				return;
 
 			var obj = Thing.Get(uid);
@@ -33,7 +33,8 @@ namespace SMPL
 		}
 		public static void DestroyAll()
 		{
-			foreach(var kvp in Thing.objs)
+			var objs = Scene.CurrentScene.objs;
+			foreach(var kvp in objs)
 				if(kvp.Value != Scene.MainCamera)
 					kvp.Value.Destroy(true);
 		}
@@ -231,7 +232,7 @@ namespace SMPL
 		}
 		public static List<string> GetUIDs()
 		{
-			return Thing.objs.Keys.ToList();
+			return Scene.CurrentScene.objs.Keys.ToList();
 		}
 
 		public static string GetFreeUID(string uid)
@@ -239,7 +240,8 @@ namespace SMPL
 			var i = 1;
 			var freeUID = uid;
 
-			while(Thing.objs.ContainsKey(freeUID))
+			var objs = Scene.CurrentScene.objs;
+			while(objs.ContainsKey(freeUID))
 			{
 				freeUID = $"{uid}{i}";
 				i++;

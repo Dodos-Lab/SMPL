@@ -1,4 +1,5 @@
 ﻿global using System;
+global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.Collections.ObjectModel;
 global using System.Diagnostics;
@@ -12,6 +13,7 @@ global using System.Runtime.Serialization;
 global using System.Threading;
 global using System.Windows.Forms;
 global using Newtonsoft.Json;
+global using Newtonsoft.Json.Serialization;
 global using SFML.Audio;
 global using SFML.Graphics;
 global using SFML.System;
@@ -40,11 +42,16 @@ namespace SMPL
 			if(startingScene == null || Window != null)
 				return;
 
-			InitWindow(Settings.WindowStates.Borderless, Settings.ScreenResolution);
+			InitWindow(Settings.WindowStates.Windowed, Settings.ScreenResolution);
 
-			Scene.Init(startingScene, loadingScene);
-			var sz = Settings.ScreenResolution;
-			Scene.MainCameraUID = ThingManager.CreateCamera("SMPL-MainCamera", sz);
+			Scene.CurrentScene = startingScene;
+			Scene.LoadingScene = loadingScene;
+
+			if(ThingManager.Exists(Scene.MAIN_CAMERA_UID) == false)
+				ThingManager.CreateCamera(Scene.MAIN_CAMERA_UID, Settings.ScreenResolution);
+
+			Scene.assetsLoading = new(Scene.ThreadLoadAssets) { IsBackground = true, Name = "AssetsLoading" };
+			Scene.assetsLoading.Start();
 
 			while(Window.IsOpen)
 			{
@@ -54,6 +61,8 @@ namespace SMPL
 
 				Time.Update();
 				Scene.UpdateCurrentScene();
+				ThingManager.UpdateAllThings();
+				ThingManager.DrawAllVisuals(Scene.MainCamera.renderTexture);
 				Camera.DrawMainCameraToWindow();
 				Window.Display();
 			}
@@ -95,8 +104,7 @@ namespace SMPL
 		internal static void InitWindow(Settings.WindowStates windowState, Vector2 resolution)
 		{
 			currWindowStyle = windowState.ToWindowStyles();
-			Window = new(new((uint)resolution.X, (uint)resolution.Y), "SMPL Game", currWindowStyle);
-			Window.Position = new();
+			Window = new(new((uint)resolution.X, (uint)resolution.Y), "SMPL Game", currWindowStyle) { Position = new() };
 			Window.Clear();
 			Window.Display();
 			Window.Closed += OnClose;

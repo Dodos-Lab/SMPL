@@ -3,7 +3,6 @@
 	internal class Thing
 	{
 		private int order;
-		internal readonly static Dictionary<string, Thing> objs = new();
 		internal readonly static SortedDictionary<int, List<Thing>> objsOrder = new();
 
 		private readonly List<string> childrenUIDs = new();
@@ -19,6 +18,7 @@
 			get => uid;
 			set
 			{
+				var objs = Scene.CurrentScene.objs;
 				if(objs.ContainsKey(value))
 				{
 					Console.LogError(1, $"Another {{{nameof(Thing)}}} already exists with the [{nameof(UID)}] '{value}'.");
@@ -76,6 +76,7 @@
 					newParent.childrenUIDs.Add(uid);
 			}
 		}
+		[JsonIgnore]
 		public ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
 		public int UpdateOrder
 		{
@@ -186,7 +187,7 @@
 				else
 					child.ParentUID = null;
 			}
-			objs.Remove(uid);
+			Scene.CurrentScene.objs.Remove(uid);
 			objsOrder[order].Remove(this);
 		}
 		public virtual Vector2 CornerClockwise(int index) => Position;
@@ -197,6 +198,9 @@
 		}
 
 		#region Backend
+		[JsonConstructor]
+		internal Thing() { }
+
 		internal Thing(string uid)
 		{
 			UID = uid;
@@ -204,6 +208,7 @@
 			LocalScale = 1;
 
 			// hello, world! do i have any children before i was even born? claim ownership if so
+			var objs = Scene.CurrentScene.objs;
 			foreach(var kvp in objs)
 				if(kvp.Value.parentUID == uid)
 					childrenUIDs.Add(kvp.Key);
@@ -295,12 +300,13 @@
 		}
 		internal static T Get<T>(string uid, int depth = 1, bool error = true) where T : Thing
 		{
+			var objs = Scene.CurrentScene.objs;
 			if(uid == null || objs.ContainsKey(uid) == false)
 				return default;
 
 			if(error && objs[uid] is not T)
 			{
-				Console.LogError(depth + 1, $"The {nameof(Thing)} with UID '{uid}' exists but is not a {typeof(T).Name} - it is a {objs[uid].GetType().Name}");
+				Console.LogError(depth + 1, $"The {{{uid}}} exists but it is not a `{typeof(T).Name}` - it is a `{objs[uid].GetType().Name}`.");
 				return default;
 			}
 

@@ -2,28 +2,6 @@
 {
 	public class Scene
 	{
-		public struct TexturedModel3D
-		{
-			public string TexturePath { get; set; }
-			public string ObjModelPath { get; set; }
-			public string UniqueName { get; set; }
-			public uint TextureCount { get; set; }
-			public float TextureDetail { get; set; }
-			public Vector3 Scale { get; set; }
-
-			public TexturedModel3D(string objPath, string texturePath, string uniqueName = null, uint textureCount = 20, float textureDetail = 20,
-				float scaleX = 1, float scaleY = 1, float scaleZ = 1)
-			{
-				ObjModelPath = objPath;
-				TexturePath = texturePath;
-				UniqueName = uniqueName ?? objPath;
-				TextureCount = textureCount;
-				TextureDetail = textureDetail;
-				Scale = new(scaleX, scaleY, scaleZ);
-			}
-		}
-
-		public static string MainCameraUID { get; internal set; }
 		public static Vector2 MouseCursorPosition
 		{
 			get => MainCamera.MouseCursorPosition;
@@ -47,15 +25,43 @@
 		}
 		public static Scene LoadingScene { get; set; }
 
+		public const string MAIN_CAMERA_UID = "MainCamera";
+		public string SavePath { get; protected set; }
+
 		//public ThemeUI ThemeUI { get; set; }
 
-		public Scene(params string[] initialAssetPaths)
+		[JsonConstructor]
+		internal Scene() { }
+		public Scene(string savePath, params string[] initialAssetPaths)
 		{
-			initialAssets = new(initialAssetPaths);
+			SavePath = savePath;
+			assetQueue = new(initialAssetPaths);
 		}
-		public Scene(List<string> initialAssetPaths)
+		public Scene(string savePath, List<string> initialAssetPaths)
 		{
-			initialAssets = new(initialAssetPaths);
+			SavePath = savePath;
+			assetQueue = new(initialAssetPaths);
+		}
+
+		public static T Load<T>(string path) where T : Scene
+		{
+			if(path == null)
+				return default;
+
+			try
+			{
+				var def = new Scene(null);
+				scene = def;
+				var json = File.ReadAllText(path).Decompress();
+				var loadedScene = JsonConvert.DeserializeObject<T>(json);
+
+				loadedScene.objs = def.objs;
+				loadedScene.isLoaded = true;
+
+				return loadedScene;
+			}
+			catch(Exception) { Console.LogError(1, $"Could not load scene from '{path}'."); }
+			return default;
 		}
 
 		protected virtual void OnStart() { }
@@ -68,9 +74,12 @@
 			for(int i = 0; i < paths?.Length; i++)
 			{
 				var path = paths[i];
-				if(path == null || IsValidFilename(path))
+				if(loadedAssets.Contains(path))
+					return;
+
+				if(path == null)
 				{
-					Console.LogError(1, $"The path '{path}' is invalid.");
+					Console.LogError(-1, "Could not load asset with its path being 'null'.");
 					return;
 				}
 				var isFolder = Path.HasExtension(path) == false;
@@ -111,23 +120,14 @@
 						Shaders[path] = new(path, null, Visual.DEFAULT_FRAG);
 					else if(extension == ".frag")
 						Shaders[path] = new(Visual.DEFAULT_VERT, null, path);
-					else if(extension == ".cdb")
-						Databases[path] = Database.Load(path);
 					else if(extension == ".obj")
 						Console.LogError(1, $"Work in progress...");
 					else
 						Files[path] = File.ReadAllText(path);
-				}
-				catch(Exception) { Console.LogError(1, $"Could not load asset at path '{path}'."); }
-			}
 
-			bool IsValidFilename(string fileName)
-			{
-				var invalidChars = Path.GetInvalidFileNameChars();
-				for(int i = 0; i < invalidChars.Length; i++)
-					if(fileName.Contains(invalidChars[i]))
-						return true;
-				return false;
+					loadedAssets.Add(path);
+				}
+				catch(Exception) { Console.LogError(-1, $"Could not load asset at path '{path}'."); }
 			}
 		}
 		protected void UnloadAssets(params string[] paths)
@@ -142,24 +142,23 @@
 				TryDisposeAndRemove(Shaders, path);
 
 				//TryRemove(Sprites3D, path);
-				TryRemove(Databases, path);
 				TryRemove(Files, path);
 			}
 
-			void TryDisposeAndRemove<T>(Dictionary<string, T> assets, string key) where T : IDisposable
+			void TryDisposeAndRemove<T>(ConcurrentDictionary<string, T> assets, string key) where T : IDisposable
 			{
 				if(assets.ContainsKey(key) == false)
 					return;
 
 				assets[key].Dispose();
-				assets.Remove(key);
+				assets.Remove(key, out _);
 			}
-			void TryRemove<T>(Dictionary<string, T> assets, string key)
+			void TryRemove<T>(ConcurrentDictionary<string, T> assets, string key)
 			{
 				if(assets.ContainsKey(key) == false)
 					return;
 
-				assets.Remove(key);
+				assets.Remove(key, out _);
 			}
 		}
 		protected void UnloadAllAssets()
@@ -171,10 +170,9 @@
 			DisposeAndClear(Shaders);
 
 			//Sprites3D.Clear();
-			Databases.Clear();
 			Files.Clear();
 
-			void DisposeAndClear<T>(Dictionary<string, T> assets) where T : IDisposable
+			void DisposeAndClear<T>(ConcurrentDictionary<string, T> assets) where T : IDisposable
 			{
 				foreach(var kvp in assets)
 					kvp.Value.Dispose();
@@ -182,40 +180,84 @@
 				assets.Clear();
 			}
 		}
+		protected void Save()
+		{
+			if(SavePath == null)
+				return;
+
+			try
+			{
+				foreach(var kvp in objs)
+				{
+					TryAdd(cameras, kvp.Value);
+				}
+
+				var json = JsonConvert.SerializeObject(this);
+				File.WriteAllText(SavePath, json.Compress());
+			}
+			catch(Exception)
+			{
+				Console.LogError(1, $"Could not save scene at '{SavePath}'.");
+			}
+
+			void TryAdd<T>(Dictionary<string, T> dict, Thing thing) where T : Thing
+			{
+				if(thing is T t)
+					dict[t.UID] = t;
+			}
+		}
 
 		#region Backend
-		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
-		private static Thread assetsLoading;
-		private readonly List<string> initialAssets;
-		private List<string> initialAssetsLoaded = new();
+		internal struct TexturedModel3D
+		{
+			public string TexturePath { get; set; }
+			public string ObjModelPath { get; set; }
+			public string UniqueName { get; set; }
+			public uint TextureCount { get; set; }
+			public float TextureDetail { get; set; }
+			public Vector3 Scale { get; set; }
 
-		internal static Camera MainCamera => Thing.Get<Camera>(MainCameraUID);
-		internal Dictionary<string, Texture> Textures { get; } = new();
-		internal Dictionary<string, Music> Music { get; } = new();
-		internal Dictionary<string, Sound> Sounds { get; } = new();
-		internal Dictionary<string, Font> Fonts { get; } = new();
-		internal Dictionary<string, Shader> Shaders { get; } = new();
-		internal Dictionary<string, Database> Databases { get; } = new();
-		internal Dictionary<string, string> Files { get; } = new();
+			public TexturedModel3D(string objPath, string texturePath, string uniqueName = null, uint textureCount = 20, float textureDetail = 20,
+				float scaleX = 1, float scaleY = 1, float scaleZ = 1)
+			{
+				ObjModelPath = objPath;
+				TexturePath = texturePath;
+				UniqueName = uniqueName ?? objPath;
+				TextureCount = textureCount;
+				TextureDetail = textureDetail;
+				Scale = new(scaleX, scaleY, scaleZ);
+			}
+		}
+
+		private bool isLoaded;
+		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
+		internal static Thread assetsLoading;
+		internal static Camera MainCamera => Thing.Get<Camera>(MAIN_CAMERA_UID);
+
+		[JsonProperty]
+		private ConcurrentBag<string> assetQueue = new();
+		[JsonProperty]
+		private Dictionary<string, Camera> cameras = new();
+
+		internal Dictionary<string, Thing> objs = new();
+		private ConcurrentBag<string> loadedAssets = new();
+		internal ConcurrentDictionary<string, Texture> Textures { get; } = new();
+		internal ConcurrentDictionary<string, Music> Music { get; } = new();
+		internal ConcurrentDictionary<string, Sound> Sounds { get; } = new();
+		internal ConcurrentDictionary<string, Font> Fonts { get; } = new();
+		internal ConcurrentDictionary<string, Shader> Shaders { get; } = new();
+		internal ConcurrentDictionary<string, string> Files { get; } = new();
 		//internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
 
 		internal void LoadInitialAssets()
 		{
-			for(int i = 0; i < initialAssets.Count; i++)
-				LoadAssets(initialAssets[i]);
+			foreach(var asset in assetQueue)
+				LoadAssets(asset);
 
-			initialAssetsLoaded = initialAssets;
+			loadedAssets = assetQueue;
 		}
 		internal void GameStop() => OnGameStop();
 
-		internal static void Init(Scene startingScene, Scene loadingScene)
-		{
-			LoadingScene = loadingScene;
-			CurrentScene = startingScene;
-
-			assetsLoading = new(ThreadLoadAssets) { IsBackground = true, Name = "AssetsLoading" };
-			assetsLoading.Start();
-		}
 		internal static void UpdateCurrentScene()
 		{
 			if(stopScene != null)
@@ -229,7 +271,7 @@
 				startScene = null;
 				CurrentScene?.OnStart();
 			}
-			if(CurrentScene.initialAssets.Count < CurrentScene.initialAssetsLoaded.Count)
+			if(CurrentScene.assetQueue.Count < CurrentScene.loadedAssets.Count)
 				LoadingScene?.OnUpdate();
 			else
 				CurrentScene?.OnUpdate();
@@ -239,10 +281,19 @@
 			while(true)
 			{
 				Thread.Sleep(1);
+
+				if(CurrentScene != null && CurrentScene.loadedAssets.Count < CurrentScene.assetQueue.Count)
+					foreach(var asset in CurrentScene.assetQueue)
+						CurrentScene.LoadAssets(asset);
+
 				if(unloadScene != null)
 				{
-					ThingManager.DestroyAll();
-					scene.UnloadAllAssets();
+					if(scene.isLoaded == false)
+					{
+						ThingManager.DestroyAll();
+						scene.UnloadAllAssets();
+					}
+
 					stopScene = unloadScene;
 					unloadScene = null;
 				}

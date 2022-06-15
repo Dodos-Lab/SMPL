@@ -143,9 +143,9 @@
 		}
 
 		#region Backend
-		private class Sheet { }
+		internal class Sheet { }
 		[JsonObject(MemberSerialization.Fields)]
-		private class Sheet<T> : Sheet
+		internal class Sheet<T> : Sheet
 		{
 #pragma warning disable CS0649
 			internal string name;
@@ -158,7 +158,7 @@
 			internal List<T> linesList = new();
 #pragma warning disable CS0649
 		}
-		private class Column
+		internal class Column
 		{
 			public string typeStr;
 			public string name;

@@ -2,8 +2,23 @@
 {
 	internal class Camera : Thing
 	{
+		private Vector2 res;
 		private float scale = 1;
-		internal RenderTexture renderTexture;
+		internal RenderTexture renderTexture = new(0, 0);
+
+		[JsonProperty]
+		public Vector2 Resolution
+		{
+			get => res;
+			private set
+			{
+				res = value;
+
+				renderTexture.Dispose();
+				renderTexture = new((uint)value.X, (uint)value.Y);
+				Position = new();
+			}
+		}
 
 		public new Vector2 Position
 		{
@@ -39,16 +54,18 @@
 				renderTexture.SetView(view);
 			}
 		}
-		public Vector2 Resolution { get; private set; }
 		public bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
 		[JsonIgnore]
 		internal Texture Texture => renderTexture.Texture;
+		[JsonIgnore]
 		public Vector2 MouseCursorPosition
 		{
 			get { var p = Mouse.GetPosition(Game.Window); return PointToCamera(new(p.X, p.Y)); }
 			set { var p = PointToWorld(value); Mouse.SetPosition(new((int)p.X, (int)p.Y), Game.Window); }
 		}
 
+		[JsonConstructor]
+		internal Camera() { }
 		internal Camera(string uid, Vector2 resolution) : base(uid) =>
 			Init((uint)resolution.X.Limit(0, Texture.MaximumSize), (uint)resolution.Y.Limit(0, Texture.MaximumSize));
 		internal Camera(string uid, uint resolutionX, uint resolutionY) : base(uid) =>
@@ -92,11 +109,6 @@
 			};
 		}
 
-		internal void Display()
-		{
-			renderTexture.Display();
-		}
-
 		public Vector2 PointToCamera(Vector2 worldPoint)
 		{
 			return Game.Window.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
@@ -121,7 +133,7 @@
 		}
 		internal static void DrawMainCameraToWindow()
 		{
-			Scene.MainCamera.Display();
+			Scene.MainCamera.renderTexture.Display();
 			var texSz = Scene.MainCamera.renderTexture.Size;
 			var viewSz = Game.Window.GetView().Size;
 			var verts = new Vertex[]
