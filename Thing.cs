@@ -6,13 +6,13 @@
 		internal readonly static SortedDictionary<int, List<Thing>> objsOrder = new();
 
 		private readonly List<string> childrenUIDs = new();
-		private string parentUID, prevUID;
+		private string parentUID, oldUID;
 		private Vector2 localPos;
 		private float localAng, localSc;
 		private Matrix3x2 global;
 		private string uid;
 
-		public string PreviousUID => prevUID;
+		public string OldUID => oldUID;
 		public string UID
 		{
 			get => uid;
@@ -28,14 +28,14 @@
 				if(uid != null)
 					objs.Remove(uid);
 
-				prevUID = uid;
+				oldUID = uid;
 				uid = value;
 				objs[uid] = this;
 
 				var parent = Get(parentUID, 0, false);
 				if(parent != null)
 				{
-					parent.childrenUIDs.Remove(prevUID);
+					parent.childrenUIDs.Remove(oldUID);
 					parent.childrenUIDs.Add(uid);
 				}
 
@@ -77,7 +77,7 @@
 			}
 		}
 		[JsonIgnore]
-		public ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
+		public List<string> ChildrenUIDs => new(childrenUIDs);
 		public int UpdateOrder
 		{
 			get => order;
@@ -180,19 +180,29 @@
 		{
 			OnDestroy();
 
-			for(int i = 0; i < childrenUIDs.Count; i++)
+			var children = new List<string>(childrenUIDs);
+			for(int i = 0; i < children.Count; i++)
 			{
-				var child = Get(childrenUIDs[i]);
+				var child = Get(children[i]);
 				if(child == null)
 					continue;
 
+				child.ParentUID = null;
+
 				if(includeChildren)
-					child?.Destroy(includeChildren);
-				else
-					child.ParentUID = null;
+					child.Destroy(includeChildren);
 			}
 			Scene.CurrentScene.objs.Remove(uid);
 			objsOrder[order].Remove(this);
+
+			for(int i = 0; i < children.Count; i++)
+			{
+				var child = Get(children[i]);
+				if(child == null)
+					continue;
+
+				child.ParentUID = uid;
+			}
 		}
 		public virtual Vector2 CornerClockwise(int index) => Position;
 
