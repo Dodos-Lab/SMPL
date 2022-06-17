@@ -147,7 +147,30 @@
 			set => Angle = Vector2.Normalize(value).DirectionToAngle();
 		}
 
-		public string TypeName => GetType().Name;
+		public List<string> Types
+		{
+			get
+			{
+				var result = new List<string>();
+				var curType = GetType();
+
+				Add(curType);
+				while(curType.BaseType != null)
+				{
+					Add(curType.BaseType);
+					curType = curType.BaseType;
+				}
+				return result;
+
+				void Add(Type type)
+				{
+					if(type.Name == nameof(Object))
+						return;
+
+					result.Add(type.Name);
+				}
+			}
+		}
 
 		public Vector2 GetLocalPositionFromParent(Vector2 position)
 		{
@@ -187,6 +210,7 @@
 				if(child == null)
 					continue;
 
+				// prevents hard jump to world coordinates
 				child.ParentUID = null;
 
 				if(includeChildren)
@@ -195,6 +219,7 @@
 			Scene.CurrentScene.objs.Remove(uid);
 			objsOrder[order].Remove(this);
 
+			// prevents hard jump to world coordinates
 			for(int i = 0; i < children.Count; i++)
 			{
 				var child = Get(children[i]);
