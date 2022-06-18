@@ -787,6 +787,14 @@ namespace SMPL.Tools
 		#region Backend
 		private static readonly Dictionary<string, int> gateEntries = new();
 		private static readonly Dictionary<string, bool> gates = new();
+
+		internal static string GetPrettyName(this Type type)
+		{
+			if(type.GetGenericArguments().Length == 0)
+				return type.Name;
+			var name = type.Name[..type.Name.IndexOf("`")];
+			return name + "<" + string.Join(",", type.GetGenericArguments().Select(GetPrettyName)) + ">";
+		}
 		#endregion
 	}
 }
