@@ -172,6 +172,50 @@ namespace SMPL
 			return voidMethodsAllNames.ContainsKey(type) && voidMethodsAllNames[type].Contains(voidMethodName);
 		}
 
+		public static List<PropertyInfo> GetPropertiesInfo(string uid)
+		{
+			var names = new List<string>();
+			var result = new List<PropertyInfo>();
+			var getters = GetGettersInfo(uid);
+			var setters = GetSettersInfo(uid);
+
+			ProcessList(getters);
+			ProcessList(setters);
+
+			return result;
+
+			void ProcessList(List<PropertyInfo> list)
+			{
+				for(int i = 0; i < list.Count; i++)
+					if(names.Contains(list[i].ToString()) == false)
+					{
+						result.Add(list[i]);
+						names.Add(list[i].ToString());
+					}
+			}
+		}
+		public static List<MethodInfo> GetMethodsInfo(string uid)
+		{
+			var names = new List<string>();
+			var result = new List<MethodInfo>();
+			var voids = GetVoidMethodsInfo(uid);
+			var returns = GetReturnMethodsInfo(uid);
+
+			ProcessList(voids);
+			ProcessList(returns);
+
+			return result;
+
+			void ProcessList(List<MethodInfo> list)
+			{
+				for(int i = 0; i < list.Count; i++)
+					if(names.Contains(list[i].ToString()) == false)
+					{
+						result.Add(list[i]);
+						names.Add(list[i].ToString());
+					}
+			}
+		}
 		public static List<PropertyInfo> GetGettersInfo(string uid)
 		{
 			return GetPropsInfo(uid, false);
@@ -191,13 +235,12 @@ namespace SMPL
 
 		public static void Set(string uid, string setPropertyName, object value)
 		{
-			var obj = Get(uid, 1);
+			var obj = Get(uid);
 			if(obj == null)
 				return;
 			var type = obj.GetType();
 			var key = (type, setPropertyName);
 			TryAddAllProps(type, true);
-			var valueType = setterTypes[(type, setPropertyName)];
 
 			if(setters.ContainsKey(key) == false)
 			{
@@ -210,6 +253,7 @@ namespace SMPL
 				}
 			}
 
+			var valueType = setterTypes[(type, setPropertyName)];
 			if(valueType != setterTypes[key])
 			{
 				PropTypeMismatchError(obj, setPropertyName, valueType, setterTypes[key], true);
@@ -221,7 +265,7 @@ namespace SMPL
 		}
 		public static object Get(string uid, string getPropertyName)
 		{
-			var obj = Get(uid, 1);
+			var obj = Get(uid);
 			if(obj == null)
 				return default;
 			var type = obj.GetType();
@@ -244,7 +288,7 @@ namespace SMPL
 		}
 		public static void CallVoid(string uid, string voidMethodName, params object[] parameters)
 		{
-			var obj = Get(uid, 1);
+			var obj = Get(uid);
 			if(obj == null)
 				return;
 			var type = obj.GetType();
@@ -273,7 +317,7 @@ namespace SMPL
 		}
 		public static object CallGet(string uid, string getMethodName, params object[] parameters)
 		{
-			var obj = Get(uid, 1);
+			var obj = Get(uid);
 			if(obj == null)
 				return default;
 			var type = obj.GetType();
@@ -371,16 +415,19 @@ namespace SMPL
 
 		internal static void ThingNotFoundError(string uid)
 		{
-			Console.LogError(2, $"{{{uid}}} does not exist.");
+			Console.LogError(0, $"{{{uid}}} does not exist.");
 		}
 		private static bool TryTypeMismatchError(Thing obj, Dictionary<(Type, string), List<Type>> paramTypes, object[] parameters, bool isVoid)
 		{
+			if(parameters == null || parameters.Length == 0)
+				return false;
+
 			var nth = new string[] { "st", "nd", "rd" };
 			var vStr = isVoid ? "Void" : "Return";
 
 			foreach(var kvp in paramTypes)
 				for(int i = 0; i < kvp.Value.Count; i++)
-					if(parameters == null || parameters.Length <= i || parameters[i].GetType() != kvp.Value[i])
+					if(parameters[i].GetType() != kvp.Value[i])
 					{
 						var nthStr = i < 4 ? nth[i] : "th";
 						Console.LogError(2, $"The {vStr}<{kvp.Key.Item2}> of {obj.GetType().Name}{{{obj.UID}}} cannot process its {i + 1}{nthStr} " +
@@ -393,15 +440,17 @@ namespace SMPL
 
 		private static void MissingPropError(Type type, Thing obj, string propertyName, bool set)
 		{
-			var setStr = set ? "Set" : "Get";
+			var setStr = set ? "setter" : "getter";
 			var objStr = $"{obj.GetType().Name}{{{obj.UID}}}";
-			Console.LogError(2, $"{objStr} does not have {setStr}[{propertyName}].", $"For {setStr}, {objStr} has:\n{GetAllProps(type, set)}");
+			Console.LogError(2, $"{objStr} does not have the {setStr} [{propertyName}].",
+				$"{objStr} has the following {setStr}s:\n{GetAllProps(obj.UID, set)}");
 		}
 		private static void MissingMethodError(Type type, Thing obj, string methodName, bool isVoid)
 		{
-			var voidStr = isVoid ? "Do" : "DoGet";
+			var voidStr = isVoid ? "void" : "return";
 			var objStr = $"{obj.GetType().Name}{{{obj.UID}}}";
-			Console.LogError(2, $"{objStr} does not have {voidStr}<{methodName}>.", $"For {voidStr}, {objStr} has:\n{GetAllMethods(type, isVoid)}");
+			Console.LogError(2, $"{objStr} does not have a {voidStr} method <{methodName}>.",
+				$"{objStr} has the following {voidStr} methods:\n{GetAllMethods(obj.UID, isVoid)}");
 		}
 		private static void PropTypeMismatchError(Thing obj, string propertyName, Type valueType, Type expectedValueType, bool set)
 		{
@@ -410,35 +459,35 @@ namespace SMPL
 				$"It expects a value of Type`{expectedValueType.Name}`.");
 		}
 
-		private static string GetAllProps(Type type, bool setter)
+		private static string GetAllProps(string uid, bool setter)
 		{
-			var all = setter ? settersAllNames[type] : gettersAllNames[type];
+			var all = setter ? GetSettersInfo(uid) : GetGettersInfo(uid);
 			var result = "";
 
 			for(int i = 0; i < all.Count; i++)
 			{
-				var sep = i == 0 ? "" : " ";
-				result += $"{sep}[{all[i]}]";
+				var sep = i == 0 ? "" : "\n";
+				result += $"{sep}{all[i]}";
 			}
 
 			return result;
 		}
-		private static string GetAllMethods(Type type, bool onlyVoid)
+		private static string GetAllMethods(string uid, bool onlyVoid)
 		{
-			var all = onlyVoid ? voidMethodsAllNames[type] : returnMethodsAllNames[type];
+			var all = onlyVoid ? GetVoidMethodsInfo(uid) : GetReturnMethodsInfo(uid);
 			var result = "";
 
 			for(int i = 0; i < all.Count; i++)
 			{
-				var sep = i == 0 ? "" : " ";
-				result += $"{sep}<{all[i]}>";
+				var sep = i == 0 ? "" : "\n";
+				result += $"{sep}{all[i]}";
 			}
 
 			return result;
 		}
-		private static Thing Get(string uid, int depth = 1)
+
+		private static Thing Get(string uid)
 		{
-			depth++;
 			var obj = Thing.Get(uid);
 			if(obj == null)
 			{

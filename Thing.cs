@@ -6,13 +6,36 @@
 		internal readonly static SortedDictionary<int, List<Thing>> objsOrder = new();
 
 		private readonly List<string> childrenUIDs = new();
-		private string parentUID, oldUID;
+		private string parentUID, oldUID, parOldUID;
 		private Vector2 localPos;
 		private float localAng, localSc;
 		private Matrix3x2 global;
 		private string uid;
 
-		public string OldUID => oldUID;
+		public List<string> Types
+		{
+			get
+			{
+				var result = new List<string>();
+				var curType = GetType();
+
+				Add(curType);
+				while(curType.BaseType != null)
+				{
+					Add(curType.BaseType);
+					curType = curType.BaseType;
+				}
+				return result;
+
+				void Add(Type type)
+				{
+					if(type.Name == nameof(Object))
+						return;
+
+					result.Add(type.Name);
+				}
+			}
+		}
 		public string UID
 		{
 			get => uid;
@@ -47,6 +70,7 @@
 				}
 			}
 		}
+		public string OldUID => oldUID;
 
 		public string ParentUID
 		{
@@ -65,6 +89,7 @@
 				var prevAng = Angle;
 				var prevSc = Scale;
 
+				parOldUID = parentUID;
 				parentUID = value;
 
 				Position = prevPos;
@@ -76,6 +101,7 @@
 					newParent.childrenUIDs.Add(uid);
 			}
 		}
+		public string ParentOldUID => parOldUID;
 		[JsonIgnore]
 		public List<string> ChildrenUIDs => new(childrenUIDs);
 		public int UpdateOrder
@@ -145,31 +171,6 @@
 		{
 			get => Vector2.Normalize(Angle.AngleToDirection());
 			set => Angle = Vector2.Normalize(value).DirectionToAngle();
-		}
-
-		public List<string> Types
-		{
-			get
-			{
-				var result = new List<string>();
-				var curType = GetType();
-
-				Add(curType);
-				while(curType.BaseType != null)
-				{
-					Add(curType.BaseType);
-					curType = curType.BaseType;
-				}
-				return result;
-
-				void Add(Type type)
-				{
-					if(type.Name == nameof(Object))
-						return;
-
-					result.Add(type.Name);
-				}
-			}
 		}
 
 		public Vector2 GetLocalPositionFromParent(Vector2 position)
