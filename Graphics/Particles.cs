@@ -65,6 +65,7 @@
 
 				OnParticleUpdate(p);
 
+				var Texture = GetTexture();
 				var txSz = Texture == null ? new Vector2() : new Vector2(Texture.Size.X, Texture.Size.Y);
 				var pos = p.Position;
 				var txA = p.TexCoordsUnitA * txSz;
@@ -84,7 +85,7 @@
 				verts[i + 3] = new(botLeft.ToSFML(), c, new(txA.X, txB.Y));
 			}
 
-			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader()));
 		}
 		internal override void OnDestroy()
 		{

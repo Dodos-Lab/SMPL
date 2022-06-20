@@ -162,6 +162,11 @@
 				B : A + AB * distance;
 		}
 
+		public override string ToString()
+		{
+			return $"A{A} B{B}";
+		}
+
 		#region Backend
 		private static Vector2 CrossPoint(Vector2 A, Vector2 B, Vector2 C, Vector2 D)
 		{

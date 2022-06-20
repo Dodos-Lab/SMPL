@@ -26,9 +26,10 @@
 			get
 			{
 				var method = new StackFrame((int)CallChainIndex + 1, true)?.GetMethod();
+				var declStr = method == null || method.DeclaringType == null ? "Unknown" : method.DeclaringType.Name;
 				return method == null || (method.IsSpecialName && method.Name.Contains(".ctor") == false)
 					? default
-					: (method?.Name.Replace(".ctor", $"new {method.DeclaringType.Name}"));
+					: (method?.Name.Replace(".ctor", $"new {declStr}"));
 			}
 		}
 		/// <summary>

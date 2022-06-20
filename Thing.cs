@@ -41,6 +41,15 @@
 			get => uid;
 			set
 			{
+				if(value == uid)
+					return;
+
+				if(string.IsNullOrWhiteSpace(value))
+				{
+					Console.LogError(1, $"The [{nameof(UID)}] '{value}' is invalid.");
+					return;
+				}
+
 				var objs = Scene.CurrentScene.objs;
 				if(objs.ContainsKey(value))
 				{
@@ -341,7 +350,7 @@
 		internal static T Get<T>(string uid, int depth = 1, bool error = true) where T : Thing
 		{
 			var objs = Scene.CurrentScene.objs;
-			if(uid == null || objs.ContainsKey(uid) == false)
+			if(string.IsNullOrWhiteSpace(uid) || objs.ContainsKey(uid) == false)
 				return default;
 
 			if(error && objs[uid] is not T)

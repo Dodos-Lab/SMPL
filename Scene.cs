@@ -114,7 +114,7 @@
 				try
 				{
 					if(extension == ".png" || extension == ".jpg" || extension == ".bmp")
-						Textures[key] = new(path);
+						Textures[key] = new(path) { Repeated = true };
 					else if(extension == ".ogg" || extension == ".wav" || extension == ".flac")
 					{
 						var music = new Music(path);

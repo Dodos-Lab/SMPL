@@ -19,12 +19,9 @@ void main()
 }";
 
 		private int depth;
-		internal readonly static Dictionary<int, List<Visual>> visuals = new();
-
-		public enum BlendModes { None, Alpha, Add, Multiply }
+		internal readonly static SortedDictionary<int, List<Visual>> visuals = new();
 
 		public Color Tint { get; set; } = Color.White;
-		public bool IsAdditive { get; set; }
 		public bool IsHidden { get; set; }
 		public int Depth
 		{
@@ -33,8 +30,7 @@ void main()
 			{
 				TryCreateDepth(depth);
 
-				if(visuals[depth].Contains(this))
-					visuals[depth].Remove(this);
+				visuals[depth].Remove(this);
 
 				depth = value;
 
@@ -51,15 +47,8 @@ void main()
 		public string TexturePath { get; set; }
 		public string ShaderPath { get; set; }
 		public string CameraUID { get; set; }
-		public BlendModes BlendMode { get; set; } = BlendModes.Alpha;
+		public ThingManager.BlendModes BlendMode { get; set; } = ThingManager.BlendModes.Alpha;
 		public Hitbox Hitbox { get; } = new();
-
-		[JsonIgnore]
-		internal Texture Texture
-			=> TexturePath != null && Scene.CurrentScene.Textures.ContainsKey(TexturePath) ? Scene.CurrentScene.Textures[TexturePath] : null;
-		[JsonIgnore]
-		internal Shader Shader
-			=> ShaderPath != null && Scene.CurrentScene.Shaders.ContainsKey(ShaderPath) ? Scene.CurrentScene.Shaders[ShaderPath] : null;
 
 		[JsonConstructor]
 		internal Visual() { }
@@ -71,13 +60,33 @@ void main()
 		internal void Draw(RenderTarget renderTarget) => OnDraw(renderTarget);
 		internal abstract void OnDraw(RenderTarget renderTarget);
 
+		internal Texture GetTexture()
+		{
+			var textures = Scene.CurrentScene.Textures;
+			var path = TexturePath;
+			if(string.IsNullOrWhiteSpace(path))
+				return default;
+
+			path = path.Replace("/", "\\");
+			return textures.ContainsKey(path) ? textures[path] : null;
+		}
+		internal Shader GetShader()
+		{
+			var shaders = Scene.CurrentScene.Shaders;
+			var path = ShaderPath;
+			if(string.IsNullOrWhiteSpace(path))
+				return default;
+
+			path = path.Replace("/", "\\");
+			return shaders.ContainsKey(path) ? shaders[path] : null;
+		}
 		internal BlendMode GetBlendMode()
 		{
 			return BlendMode switch
 			{
-				BlendModes.Alpha => SFML.Graphics.BlendMode.Alpha,
-				BlendModes.Add => SFML.Graphics.BlendMode.Add,
-				BlendModes.Multiply => SFML.Graphics.BlendMode.Multiply,
+				ThingManager.BlendModes.Alpha => SFML.Graphics.BlendMode.Alpha,
+				ThingManager.BlendModes.Add => SFML.Graphics.BlendMode.Add,
+				ThingManager.BlendModes.Multiply => SFML.Graphics.BlendMode.Multiply,
 				_ => SFML.Graphics.BlendMode.None,
 			};
 		}

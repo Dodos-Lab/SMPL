@@ -54,6 +54,7 @@
 			var camera = Get<Camera>(CameraUID);
 			if(camera != null)
 				renderTarget = camera.renderTexture;
+			var Texture = GetTexture();
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
 			var w0 = w * TexCoordsUnitA.X;
@@ -69,7 +70,7 @@
 				new(CornerClockwise(3).ToSFML(), Tint, new(w0, hh)),
 			};
 
-			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, Shader));
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, GetShader()));
 		}
 		#endregion
 	}

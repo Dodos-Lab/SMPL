@@ -1,22 +1,22 @@
-﻿using Fasterflect;
-
-namespace SMPL
+﻿namespace SMPL
 {
 	public static class ThingManager
 	{
+		public enum BlendModes { None, Alpha, Add, Multiply }
+
 		public class PropertyInfo
 		{
 			public string Name { get; internal set; }
 			public string Type { get; internal set; }
 			public string OwnerType { get; internal set; }
-			public bool IsSetter { get; internal set; }
-			public bool IsGetter { get; internal set; }
+			public bool HasSetter { get; internal set; }
+			public bool HasGetter { get; internal set; }
 
 			public override string ToString()
 			{
-				var getStr = IsGetter ? "get;" : "";
-				var setStr = IsSetter ? "set;" : "";
-				var sep = IsGetter && IsSetter ? " " : "";
+				var getStr = HasGetter ? "get;" : "";
+				var setStr = HasSetter ? "set;" : "";
+				var sep = HasGetter && HasSetter ? " " : "";
 
 				return $"{OwnerType}.{Type} {Name} {{ {getStr}{sep}{setStr} }}";
 			}
@@ -61,7 +61,7 @@ namespace SMPL
 		public static void DrawAllVisuals(RenderTarget renderTarget)
 		{
 			var objs = Visual.visuals;
-			foreach(var kvp in objs)
+			foreach(var kvp in objs.Reverse())
 				for(int i = 0; i < kvp.Value.Count; i++)
 					kvp.Value[i].Draw(renderTarget);
 		}
@@ -124,7 +124,7 @@ namespace SMPL
 			var obj = Thing.Get(uid);
 			if(obj == null)
 			{
-				ThingNotFoundError(uid);
+				MissingThingError(uid);
 				return default;
 			}
 			var type = obj.GetType();
@@ -137,7 +137,7 @@ namespace SMPL
 			var obj = Thing.Get(uid);
 			if(obj == null)
 			{
-				ThingNotFoundError(uid);
+				MissingThingError(uid);
 				return default;
 			}
 			var type = obj.GetType();
@@ -150,7 +150,7 @@ namespace SMPL
 			var obj = Thing.Get(uid);
 			if(obj == null)
 			{
-				ThingNotFoundError(uid);
+				MissingThingError(uid);
 				return default;
 			}
 			var type = obj.GetType();
@@ -163,7 +163,7 @@ namespace SMPL
 			var obj = Thing.Get(uid);
 			if(obj == null)
 			{
-				ThingNotFoundError(uid);
+				MissingThingError(uid);
 				return default;
 			}
 			var type = obj.GetType();
@@ -172,6 +172,31 @@ namespace SMPL
 			return voidMethodsAllNames.ContainsKey(type) && voidMethodsAllNames[type].Contains(voidMethodName);
 		}
 
+		public static PropertyInfo GetPropertyInfo(string uid, string propertyName)
+		{
+			// don't even bother checking setters since all props have getters
+			var get = GetPropInfo(uid, false, propertyName, false);
+			if(get == null)
+			{
+				MissingPropError(Get(uid), propertyName, false, true);
+				return default;
+			}
+
+			return get;
+		}
+		public static MethodInfo GetMethodInfo(string uid, string methodName)
+		{
+			var rtrn = GetMethodInfo(uid, false, methodName, false);
+			var vd = GetMethodInfo(uid, true, methodName, false);
+
+			if(rtrn == null && vd == null)
+			{
+				MissingMethodError(Get(uid), methodName, false, true);
+				return default;
+			}
+
+			return rtrn ?? vd;
+		}
 		public static List<PropertyInfo> GetPropertiesInfo(string uid)
 		{
 			var names = new List<string>();
@@ -248,7 +273,7 @@ namespace SMPL
 					setters[key] = type.DelegateForSetPropertyValue(setPropertyName);
 				else
 				{
-					MissingPropError(type, obj, setPropertyName, true);
+					MissingPropError(obj, setPropertyName, true);
 					return;
 				}
 			}
@@ -279,7 +304,7 @@ namespace SMPL
 					getters[key] = type.DelegateForGetPropertyValue(getPropertyName);
 				else
 				{
-					MissingPropError(type, obj, getPropertyName, false);
+					MissingPropError(obj, getPropertyName, false);
 					return default;
 				}
 			}
@@ -309,7 +334,7 @@ namespace SMPL
 					voidMethodParamTypes[key] = paramTypes;
 				}
 				else
-					MissingMethodError(type, obj, voidMethodName, true);
+					MissingMethodError(obj, voidMethodName, true);
 			}
 
 			if(TryTypeMismatchError(obj, voidMethodParamTypes, parameters.ToArray(), true) == false && voidMethods.ContainsKey(key))
@@ -338,7 +363,7 @@ namespace SMPL
 					returnMethodParamTypes[key] = paramTypes;
 				}
 				else
-					MissingMethodError(type, obj, getMethodName, false);
+					MissingMethodError(obj, getMethodName, false);
 			}
 
 			return TryTypeMismatchError(obj, returnMethodParamTypes, parameters, false) || returnMethodParamTypes.ContainsKey(key) == false ?
@@ -413,10 +438,6 @@ namespace SMPL
 			allNames[type] = methodNames;
 		}
 
-		internal static void ThingNotFoundError(string uid)
-		{
-			Console.LogError(0, $"{{{uid}}} does not exist.");
-		}
 		private static bool TryTypeMismatchError(Thing obj, Dictionary<(Type, string), List<Type>> paramTypes, object[] parameters, bool isVoid)
 		{
 			if(parameters == null || parameters.Length == 0)
@@ -438,18 +459,34 @@ namespace SMPL
 			return false;
 		}
 
-		private static void MissingPropError(Type type, Thing obj, string propertyName, bool set)
+		internal static void MissingThingError(string uid)
+		{
+			Console.LogError(0, $"{{{uid}}} does not exist.");
+		}
+		private static void MissingPropError(Thing obj, string propertyName, bool set, bool skipGetSet = false)
 		{
 			var setStr = set ? "setter" : "getter";
 			var objStr = $"{obj.GetType().Name}{{{obj.UID}}}";
+			var final = setStr + "s";
+
+			if(skipGetSet)
+			{
+				setStr = "property";
+				final = "properties";
+			}
+
 			Console.LogError(2, $"{objStr} does not have the {setStr} [{propertyName}].",
-				$"{objStr} has the following {setStr}s:\n{GetAllProps(obj.UID, set)}");
+				$"{objStr} has the following {final}:\n{GetAllProps(obj.UID, set)}");
 		}
-		private static void MissingMethodError(Type type, Thing obj, string methodName, bool isVoid)
+		private static void MissingMethodError(Thing obj, string methodName, bool isVoid, bool skipVoidReturn = false)
 		{
-			var voidStr = isVoid ? "void" : "return";
+			var voidStr = isVoid ? "void " : "return ";
 			var objStr = $"{obj.GetType().Name}{{{obj.UID}}}";
-			Console.LogError(2, $"{objStr} does not have a {voidStr} method <{methodName}>.",
+
+			if(skipVoidReturn)
+				voidStr = "";
+
+			Console.LogError(2, $"{objStr} does not have a {voidStr}method <{methodName}>.",
 				$"{objStr} has the following {voidStr} methods:\n{GetAllMethods(obj.UID, isVoid)}");
 		}
 		private static void PropTypeMismatchError(Thing obj, string propertyName, Type valueType, Type expectedValueType, bool set)
@@ -491,7 +528,7 @@ namespace SMPL
 			var obj = Thing.Get(uid);
 			if(obj == null)
 			{
-				ThingNotFoundError(uid);
+				MissingThingError(uid);
 				return default;
 			}
 			return obj;
@@ -503,24 +540,10 @@ namespace SMPL
 				return new();
 			var type = obj.GetType();
 
-			TryAddAllProps(type, true);
-			TryAddAllProps(type, false);
-
 			var result = new List<PropertyInfo>();
 			var allNames = set ? settersAllNames[type] : gettersAllNames[type];
 			for(int i = 0; i < allNames.Count; i++)
-			{
-				var name = allNames[i];
-				var key = (type, name);
-				result.Add(new()
-				{
-					IsGetter = set == false || gettersAllNames[type].Contains(name),
-					IsSetter = set || settersAllNames[type].Contains(name),
-					Name = name,
-					OwnerType = type.GetPrettyName(),
-					Type = (set ? setterTypes[key] : getterTypes[key]).GetPrettyName()
-				});
-			}
+				result.Add(GetPropInfo(uid, set, allNames[i]));
 			return result;
 		}
 		private static List<MethodInfo> GetMethodsInfo(string uid, bool isVoid)
@@ -534,22 +557,66 @@ namespace SMPL
 			var result = new List<MethodInfo>();
 			var allNames = isVoid ? voidMethodsAllNames[type] : returnMethodsAllNames[type];
 			for(int i = 0; i < allNames.Count; i++)
-			{
-				var name = allNames[i];
-				var key = (type, name);
-				var paramTypes = isVoid ? voidMethodParamTypes[key] : returnMethodParamTypes[key];
-				var paramNames = new List<string>(isVoid ? voidMethodParamNames[key] : returnMethodParamNames[key]);
+				result.Add(GetMethodInfo(uid, allNames[i]));
+			return result;
+		}
+		private static PropertyInfo GetPropInfo(string uid, bool set, string propName, bool error = true)
+		{
+			var obj = Get(uid);
+			if(obj == null)
+				return default;
+			var type = obj.GetType();
 
-				var method = new MethodInfo()
-				{
-					ReturnType = isVoid ? null : returnMethodTypes[key].GetPrettyName(),
-					Name = name,
-					OwnerType = type.GetPrettyName(),
-				};
-				for(int j = 0; j < paramNames.Count; j++)
-					method.parameters.Add(new() { Name = paramNames[j], Owner = method, Type = paramTypes[j].GetPrettyName() });
-				result.Add(method);
+			TryAddAllProps(type, true);
+			TryAddAllProps(type, false);
+
+			var allNames = set ? settersAllNames : gettersAllNames;
+			if(allNames[type].Contains(propName) == false)
+			{
+				if(error)
+					MissingPropError(obj, propName, set);
+				return default;
 			}
+
+			var key = (type, propName);
+			return new PropertyInfo()
+			{
+				HasGetter = set == false || gettersAllNames[type].Contains(propName),
+				HasSetter = set || settersAllNames[type].Contains(propName),
+				Name = propName,
+				OwnerType = type.GetPrettyName(),
+				Type = (set ? setterTypes[key] : getterTypes[key]).GetPrettyName()
+			};
+		}
+		private static MethodInfo GetMethodInfo(string uid, bool isVoid, string methodName, bool error = true)
+		{
+			var obj = Get(uid);
+			if(obj == null)
+				return default;
+			var type = obj.GetType();
+
+			TryAddAllMethods(type, isVoid);
+
+			var allNames = isVoid ? voidMethodsAllNames : returnMethodsAllNames;
+			if(allNames[type].Contains(methodName) == false)
+			{
+				if(error)
+					MissingMethodError(obj, methodName, isVoid);
+				return default;
+			}
+
+			var key = (type, methodName);
+			var paramTypes = isVoid ? voidMethodParamTypes[key] : returnMethodParamTypes[key];
+			var paramNames = new List<string>(isVoid ? voidMethodParamNames[key] : returnMethodParamNames[key]);
+
+			var result = new MethodInfo()
+			{
+				ReturnType = isVoid ? null : returnMethodTypes[key].GetPrettyName(),
+				Name = methodName,
+				OwnerType = type.GetPrettyName(),
+			};
+			for(int j = 0; j < paramNames.Count; j++)
+				result.parameters.Add(new() { Name = paramNames[j], Owner = result, Type = paramTypes[j].GetPrettyName() });
 			return result;
 		}
 		#endregion

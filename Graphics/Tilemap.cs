@@ -49,7 +49,7 @@
 					vertsArr.Append(new(botLeft, c, new(txCrdsA.X, txCrdsB.Y)));
 				}
 
-			renderTarget.Draw(vertsArr, new(GetBlendMode(), Transform.Identity, Texture, Shader));
+			renderTarget.Draw(vertsArr, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader()));
 			vertsArr.Dispose();
 		}
 		public void SetTile(Vector2 tilePositionIndecies, Tile tile)

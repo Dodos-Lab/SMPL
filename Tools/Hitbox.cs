@@ -42,7 +42,7 @@
 			var thing = Thing.Get(thingUID);
 			if(thing == null)
 			{
-				ThingManager.ThingNotFoundError(thingUID);
+				ThingManager.MissingThingError(thingUID);
 				return;
 			}
 
