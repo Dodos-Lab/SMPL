@@ -97,6 +97,11 @@
 			return GetPositionFromSelf(tileIndecies * CellSize);
 		}
 
+		public override void ApplyDefaultHitbox()
+		{
+			throw new NotImplementedException();
+		}
+
 		internal override void OnDestroy()
 		{
 			base.OnDestroy();

@@ -33,7 +33,7 @@
 				_ => default,
 			};
 		}
-		public virtual void ApplyDefaultHitbox()
+		public override void ApplyDefaultHitbox()
 		{
 			Hitbox.LocalLines.Clear();
 			Hitbox.LocalLines.Add(new(-Origin, new Vector2(LocalSize.X, 0) - Origin));

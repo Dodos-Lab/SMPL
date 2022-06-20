@@ -148,7 +148,7 @@
 		}
 		public float LocalAngle
 		{
-			get => localAng;
+			get => localAng.AngleTo360();
 			set { localAng = value; UpdateSelfAndChildren(); }
 		}
 		public Vector2 LocalDirection
@@ -172,7 +172,7 @@
 		[JsonIgnore]
 		public float Angle
 		{
-			get => GetAngle(global);
+			get => GetAngle(global).AngleTo360();
 			set => LocalAngle = GetAngle(GlobalToLocal(Scale, value, Position));
 		}
 		[JsonIgnore]

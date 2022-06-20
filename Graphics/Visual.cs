@@ -50,6 +50,8 @@ void main()
 		public ThingManager.BlendModes BlendMode { get; set; } = ThingManager.BlendModes.Alpha;
 		public Hitbox Hitbox { get; } = new();
 
+		public abstract void ApplyDefaultHitbox();
+
 		[JsonConstructor]
 		internal Visual() { }
 		internal Visual(string uid) : base(uid)

@@ -199,11 +199,8 @@
 				assets.Clear();
 			}
 		}
-		protected void Save(string filePath)
+		protected bool Save(string filePath)
 		{
-			if(filePath == null)
-				return;
-
 			try
 			{
 				foreach(var kvp in objs)
@@ -214,8 +211,14 @@
 
 				var json = JsonConvert.SerializeObject(this);
 				File.WriteAllText(filePath, json.Compress());
+				return true;
 			}
-			catch(Exception) { Console.LogError(1, $"Could not save {nameof(Scene)} at '{filePath}'."); }
+			catch(Exception)
+			{
+				Console.LogError(1, $"Could not save {nameof(Scene)} at '{filePath}'.");
+				return false;
+			}
+
 
 			void TryAdd<T>(Dictionary<string, T> dict, Thing thing) where T : Thing
 			{
