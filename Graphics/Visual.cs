@@ -49,8 +49,7 @@ void main()
 		public string CameraUID { get; set; }
 		public ThingManager.BlendModes BlendMode { get; set; } = ThingManager.BlendModes.Alpha;
 		public Hitbox Hitbox { get; } = new();
-
-		public abstract void ApplyDefaultHitbox();
+		public Hitbox BoundingBox => GetBoundingBox();
 
 		[JsonConstructor]
 		internal Visual() { }
@@ -61,6 +60,7 @@ void main()
 
 		internal void Draw(RenderTarget renderTarget) => OnDraw(renderTarget);
 		internal abstract void OnDraw(RenderTarget renderTarget);
+		internal abstract Hitbox GetBoundingBox();
 
 		internal Texture GetTexture()
 		{

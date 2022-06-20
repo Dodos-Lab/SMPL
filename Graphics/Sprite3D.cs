@@ -140,6 +140,10 @@
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader()));
 			}
 		}
+		internal override Hitbox GetBoundingBox()
+		{
+			return base.GetBoundingBox();
+		}
 
 		internal Vector2 Corner3DClockwise(int index)
 		{

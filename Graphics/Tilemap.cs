@@ -97,7 +97,7 @@
 			return GetPositionFromSelf(tileIndecies * CellSize);
 		}
 
-		public override void ApplyDefaultHitbox()
+		internal override Hitbox GetBoundingBox()
 		{
 			throw new NotImplementedException();
 		}

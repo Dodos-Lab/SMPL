@@ -33,14 +33,6 @@
 				_ => default,
 			};
 		}
-		public override void ApplyDefaultHitbox()
-		{
-			Hitbox.LocalLines.Clear();
-			Hitbox.LocalLines.Add(new(-Origin, new Vector2(LocalSize.X, 0) - Origin));
-			Hitbox.LocalLines.Add(new(new Vector2(LocalSize.X, 0) - Origin, LocalSize - Origin));
-			Hitbox.LocalLines.Add(new(LocalSize - Origin, new Vector2(0, LocalSize.Y) - Origin));
-			Hitbox.LocalLines.Add(new(new Vector2(0, LocalSize.Y) - Origin, -Origin));
-		}
 
 		#region Backend
 		[JsonConstructor]
@@ -71,6 +63,18 @@
 			};
 
 			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Texture, GetShader()));
+		}
+
+		internal override Hitbox GetBoundingBox()
+		{
+			var hitbox = new Hitbox(
+				-Origin,
+				new Vector2(LocalSize.X, 0) - Origin,
+				LocalSize - Origin,
+				new Vector2(0, LocalSize.Y) - Origin,
+				-Origin);
+			hitbox.TransformLocalLines(UID);
+			return hitbox;
 		}
 		#endregion
 	}

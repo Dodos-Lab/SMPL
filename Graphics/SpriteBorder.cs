@@ -80,14 +80,17 @@
 
 			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader()));
 		}
-		public override void ApplyDefaultHitbox()
+		internal override Hitbox GetBoundingBox()
 		{
 			var borderSz = new Vector2(BorderSize, BorderSize) / Scale;
-			Hitbox.LocalLines.Clear();
-			Hitbox.LocalLines.Add(new(-Origin - borderSz, new Vector2(LocalSize.X + borderSz.X, -borderSz.Y) - Origin));
-			Hitbox.LocalLines.Add(new(new Vector2(LocalSize.X + borderSz.X, -borderSz.Y) - Origin, LocalSize - Origin + borderSz));
-			Hitbox.LocalLines.Add(new(LocalSize - Origin + borderSz, new Vector2(-borderSz.X, LocalSize.Y + borderSz.Y) - Origin));
-			Hitbox.LocalLines.Add(new(new Vector2(-borderSz.X, LocalSize.Y + borderSz.Y) - Origin, -Origin - borderSz));
+			var hitbox = new Hitbox(
+				-Origin - borderSz,
+				new Vector2(LocalSize.X + borderSz.X, -borderSz.Y) - Origin,
+				LocalSize - Origin + borderSz,
+				new Vector2(-borderSz.X, LocalSize.Y + borderSz.Y) - Origin,
+				-Origin - borderSz);
+			hitbox.TransformLocalLines(UID);
+			return hitbox;
 		}
 
 		internal Vector2 CornerBorderClockwise(int index)
