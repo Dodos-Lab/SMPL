@@ -270,22 +270,97 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 			{
 				FragmentUniforms = @"
 uniform vec4 AmbientColor;
+
+//uniform vec2 Direction;
+//uniform vec4 DirectionalColor;
+//uniform float DirectionalIntensity;
+
 uniform vec2 Positions[50];
 uniform vec4 Colors[50];
-uniform float Strengths[50];
+uniform float Intensities[50];
 uniform float Radiuses[50];",
 				FragmentCode = @"
 vec4 result = AmbientColor;
+//float value =
+//	sin(TextureCoords.x * 2 - (Direction.x - 0.28) * 2) * DirectionalIntensity +
+//	sin(TextureCoords.y * 2 + (Direction.y + 0.28) * 2) * DirectionalIntensity;
+//result += value;
+
+float cameraRatio = CameraSize.x / CameraSize.y;
+
 for(int i = 0; i < 50; i++)
 {
-	float dist = distance(CameraCoords, vec2(Positions[i].x, 1 - Positions[i].y));
+	float dist = distance(vec2(CameraCoords.x * cameraRatio, CameraCoords.y), vec2(Positions[i].x * cameraRatio, 1 - Positions[i].y) / CameraSize);
 	if (dist < Radiuses[i])
 	{
-		float value = Map(dist, Radiuses[i], 0, 0, Strengths[i]);
+		float value = Map(dist, Radiuses[i], 0, 0, Intensities[i]);
 		result += value * Colors[i];
 	}
 }
 FinalColor *= result;"
+			} },
+			{ ThingManager.Effects.Grid, new()
+			{
+				FragmentUniforms = @"
+uniform vec4 ColorX;
+uniform vec4 ColorY;
+uniform vec2 GridSize;
+uniform vec2 GridSpacing;",
+				FragmentCode = @"
+GridSpacing -= GridSize;
+if (mod(TextureCoords.x * TextureSize.x, round(GridSize.x) + GridSpacing.x) > round(GridSpacing.x))
+	FinalColor = ColorX;
+if (mod(TextureCoords.y * TextureSize.y, round(GridSize.y) + GridSpacing.y) > round(GridSpacing.y))
+	FinalColor = ColorY;"
+			} },
+			{ ThingManager.Effects.Outline, new()
+			{
+				FragmentUniforms = @"
+uniform vec4 Color;
+uniform float Thickness;
+uniform float ThresholdOpacity;",
+				FragmentCode = @"
+float off = Thickness / 1000;
+vec4 col = Color;
+if (FinalColor.a < ThresholdOpacity)
+{
+	float u = GetPixelColor(Texture, vec2(TextureCoords.x, TextureCoords.y - off)).a;
+	float d = GetPixelColor(Texture, vec2(TextureCoords.x, TextureCoords.y + off)).a;
+	float l = GetPixelColor(Texture, vec2(TextureCoords.x - off, TextureCoords.y)).a;
+	float r = GetPixelColor(Texture, vec2(TextureCoords.x + off, TextureCoords.y)).a;
+
+	if (u > 0.0 || d > 0.0 || l > 0.0 || r > 0.0)
+		FinalColor = col;
+}"
+			} },
+			{ ThingManager.Effects.Pixelate, new()
+			{
+				FragmentUniforms = @"
+uniform float Strength;",
+				FragmentCode = @"
+float factor = 1.0 / (Strength / 500 + 0.001);
+vec2 pos = floor(TextureCoords * factor + 0.5) / factor;
+FinalColor = GetPixelColor(Texture, pos);"
+			} },
+			{ ThingManager.Effects.Screen, new()
+			{
+				FragmentUniforms = @"
+uniform float Speed;
+uniform float Size;",
+				FragmentCode = @"
+FinalColor.rgb *= 1 + sin((-Time * Speed * 100.0) + TextureCoords.y * (10.0 / Size)) / 2;"
+			} },
+			{ ThingManager.Effects.Water, new()
+			{
+				FragmentUniforms = @"
+uniform vec2 Speed;
+uniform vec2 Strength;",
+				FragmentCode = @"
+Strength *= 20;
+Speed *= 2;
+TextureCoords.x += sin(radians(2000 * Time * Speed.x / 10 + TextureCoords.y * 250)) * 0.02 * Strength.x / 10;
+TextureCoords.y += cos(radians(2000 * Time * Speed.y / 10 + TextureCoords.x * 500)) * 0.03 * Strength.y / 10;
+FinalColor = GetPixelColor(Texture, TextureCoords);"
 			} },
 		};
 
@@ -348,7 +423,10 @@ FinalColor *= result;"
 
 			var tex = GetTexture();
 			if(tex != null)
+			{
 				shader?.SetUniform("Texture", tex);
+				shader?.SetUniform("TextureSize", new Vec2(tex.Size.X, tex.Size.Y));
+			}
 
 			shader?.SetUniform("HasTexture", tex != null);
 			shader?.SetUniform("Time", Time.GameClock);

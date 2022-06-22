@@ -6,11 +6,12 @@
 		public enum Effects
 		{
 			None, Custom, ColorFill, ColorAdjust, ColorReplaceLight, ColorsSwap, ColorsReplace, ColorsTint,
-			Blink, Blur, Earthquake, Edge, Fade, Lights, Grid, Outline, Pixelate, Screen, Water, Wind
+			Blink, Blur, Earthquake, Edge, Lights, Grid, Outline, Pixelate, Screen, Water
 		}
 		public struct CodeGLSL
 		{
 			private const string FRAG_UNI = @"uniform sampler2D Texture;
+uniform vec2 TextureSize;
 uniform bool HasTexture;
 uniform float Time;
 uniform vec2 CameraSize;
@@ -49,6 +50,7 @@ void main()
 	gl_FragColor = FinalColor * Tint;
 }";
 			private const string VERT_UNI = @"uniform float Time;
+uniform vec2 TextureSize;
 ";
 			private const string VERT_PRE_MAIN = @"
 void main()
@@ -62,14 +64,8 @@ void main()
 }";
 
 			public string FragmentUniforms { get; set; }
-			/// <summary>
-			/// texture, time, texCoord, finalColor
-			/// </summary>
 			public string FragmentCode { get; set; }
 			public string VertexUniforms { get; set; }
-			/// <summary>
-			/// time, corner
-			/// </summary>
 			public string VertexCode { get; set; }
 
 			internal string GetFragCode()
@@ -141,7 +137,14 @@ void main()
 			var visuals = Visual.visuals.Reverse();
 			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
-					kvp.Value[i].Draw(renderTarget);
+				{
+					var visual = kvp.Value[i];
+
+					if(visual.Effect == Effects.Lights)
+						Light.Update(visual);
+
+					visual.Draw(renderTarget);
+				}
 		}
 
 		public static List<string> GetUIDs()

@@ -56,8 +56,6 @@
 		}
 		public bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
 		[JsonIgnore]
-		internal Texture Texture => renderTexture.Texture;
-		[JsonIgnore]
 		public Vector2 MouseCursorPosition
 		{
 			get { var p = Mouse.GetPosition(Game.Window); return PointToCamera(new(p.X, p.Y)); }
@@ -74,6 +72,10 @@
 		internal override void OnDestroy()
 			=> renderTexture.Dispose();
 
+		public RenderTexture GetRenderTexture()
+		{
+			return renderTexture;
+		}
 		public bool Captures(Hitbox hitbox)
 		{
 			return GetScreenHitbox().ConvexContains(hitbox);
@@ -84,7 +86,7 @@
 		}
 		public void Snap(string imagePath)
 		{
-			var img = Texture.CopyToImage();
+			var img = renderTexture.Texture.CopyToImage();
 			var result = img.SaveToFile(imagePath);
 			img.Dispose();
 
@@ -144,7 +146,7 @@
 				new(new Vector2f(-viewSz.X * 0.5f, viewSz.Y * 0.5f), new Vector2f(0, texSz.Y))
 			};
 
-			Game.Window.Draw(verts, PrimitiveType.Quads, new(Scene.MainCamera.Texture));
+			Game.Window.Draw(verts, PrimitiveType.Quads, new(Scene.MainCamera.renderTexture.Texture));
 		}
 	}
 }

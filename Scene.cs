@@ -274,6 +274,9 @@
 
 		internal static void UpdateCurrentScene()
 		{
+			// this is thread safe, should be stored for the check bellow
+			// otherwise a case occurs sometimes where OnUpdate is called before OnStart
+			var updateLoadingScreen = CurrentScene.assetQueue.Count > CurrentScene.loadedAssets.Count;
 			if(stopScene != null)
 			{
 				stopScene = null;
@@ -285,7 +288,7 @@
 				startScene = null;
 				CurrentScene?.OnStart();
 			}
-			if(CurrentScene.assetQueue.Count < CurrentScene.loadedAssets.Count)
+			if(updateLoadingScreen)
 				LoadingScene?.OnUpdate();
 			else
 				CurrentScene?.OnUpdate();
