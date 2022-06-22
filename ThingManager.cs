@@ -3,6 +3,84 @@
 	public static class ThingManager
 	{
 		public enum BlendModes { None, Alpha, Add, Multiply }
+		public enum Effects
+		{
+			None, Custom, ColorFill, ColorAdjust, ColorReplaceLight, ColorsSwap, ColorsReplace, ColorsTint,
+			Blink, Blur, Earthquake, Edge, Fade, Lights, Grid, Outline, Pixelate, Screen, Water, Wind
+		}
+		public struct CodeGLSL
+		{
+			private const string FRAG_UNI = @"uniform sampler2D Texture;
+uniform bool HasTexture;
+uniform float Time;
+uniform vec2 CameraSize;
+";
+			private const string FRAG_PRE_MAIN = @"
+vec4 GetPixelColor(sampler2D texture, vec2 coords);
+bool ColorEqualsColor(vec4 a, vec4 b, float margin);
+float Map(float value, float min1, float max1, float min2, float max2);
+
+float Map(float value, float min1, float max1, float min2, float max2)
+{
+  return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+}
+vec4 GetPixelColor(sampler2D texture, vec2 coords)
+{
+	return texture2D(texture, coords);
+}
+bool ColorEqualsColor(vec4 a, vec4 b, float margin)
+{
+   margin += 0.001;
+	return
+		a.x > b.x - margin && a.x < b.x + margin &&
+		a.y > b.y - margin && a.y < b.y + margin &&
+		a.z > b.z - margin && a.z < b.z + margin &&
+		a.w > b.w - margin && a.w < b.w + margin;
+}
+
+void main()
+{
+	vec4 Tint = gl_Color;
+	vec2 TextureCoords = gl_TexCoord[0].xy;
+	vec2 CameraCoords = gl_FragCoord / CameraSize;
+	vec4 FinalColor = HasTexture ? GetPixelColor(Texture, TextureCoords) : vec4(1.0);
+";
+			private const string FRAG_POST_MAIN = @"
+	gl_FragColor = FinalColor * Tint;
+}";
+			private const string VERT_UNI = @"uniform float Time;
+";
+			private const string VERT_PRE_MAIN = @"
+void main()
+{
+	vec4 Corner = gl_Vertex;
+";
+			private const string VERT_POST_MAIN = @"
+	gl_Position = gl_ModelViewProjectionMatrix * Corner;
+	gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+	gl_FrontColor = gl_Color;
+}";
+
+			public string FragmentUniforms { get; set; }
+			/// <summary>
+			/// texture, time, texCoord, finalColor
+			/// </summary>
+			public string FragmentCode { get; set; }
+			public string VertexUniforms { get; set; }
+			/// <summary>
+			/// time, corner
+			/// </summary>
+			public string VertexCode { get; set; }
+
+			internal string GetFragCode()
+			{
+				return $"{FRAG_UNI}{FragmentUniforms}{FRAG_PRE_MAIN}{FragmentCode}{FRAG_POST_MAIN}";
+			}
+			internal string GetVertCode()
+			{
+				return $"{VERT_UNI}{VertexUniforms}{VERT_PRE_MAIN}{VertexCode}{VERT_POST_MAIN}";
+			}
+		}
 
 		public class PropertyInfo
 		{
@@ -18,7 +96,7 @@
 				var setStr = HasSetter ? "set;" : "";
 				var sep = HasGetter && HasSetter ? " " : "";
 
-				return $"{OwnerType}.{Type} {Name} {{ {getStr}{sep}{setStr} }}";
+				return $"{OwnerType} {{ {Type} {Name} {{ {getStr}{sep}{setStr} }} }}";
 			}
 		}
 		public class MethodInfo
@@ -36,7 +114,7 @@
 				var returnTypeStr = ReturnType ?? "void";
 				for(int i = 0; i < parameters.Count; i++)
 					paramStr += (i == 0 ? "" : ", ") + parameters[i].ToString();
-				return $"{returnTypeStr} {OwnerType}.{Name}({paramStr})";
+				return $"{OwnerType} {{ {returnTypeStr} {Name}({paramStr}) }}";
 			}
 		}
 		public class ParameterInfo
@@ -60,8 +138,8 @@
 		}
 		public static void DrawAllVisuals(RenderTarget renderTarget)
 		{
-			var objs = Visual.visuals;
-			foreach(var kvp in objs.Reverse())
+			var visuals = Visual.visuals.Reverse();
+			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
 					kvp.Value[i].Draw(renderTarget);
 		}
@@ -278,7 +356,7 @@
 				}
 			}
 
-			var valueType = setterTypes[(type, setPropertyName)];
+			var valueType = value.GetType();
 			if(valueType != setterTypes[key])
 			{
 				PropTypeMismatchError(obj, setPropertyName, valueType, setterTypes[key], true);
@@ -337,7 +415,7 @@
 					MissingMethodError(obj, voidMethodName, true);
 			}
 
-			if(TryTypeMismatchError(obj, voidMethodParamTypes, parameters.ToArray(), true) == false && voidMethods.ContainsKey(key))
+			if(voidMethods.ContainsKey(key) && TryTypeMismatchError(obj, key, voidMethodParamTypes[key], parameters.ToArray(), true) == false)
 				voidMethods[key].Invoke(obj, parameters);
 		}
 		public static object CallGet(string uid, string getMethodName, params object[] parameters)
@@ -366,7 +444,7 @@
 					MissingMethodError(obj, getMethodName, false);
 			}
 
-			return TryTypeMismatchError(obj, returnMethodParamTypes, parameters, false) || returnMethodParamTypes.ContainsKey(key) == false ?
+			return returnMethodParamTypes.ContainsKey(key) == false || TryTypeMismatchError(obj, key, returnMethodParamTypes[key], parameters, false) ?
 				default : returnMethods[key].Invoke(obj, parameters);
 		}
 
@@ -438,30 +516,27 @@
 			allNames[type] = methodNames;
 		}
 
-		private static bool TryTypeMismatchError(Thing obj, Dictionary<(Type, string), List<Type>> paramTypes, object[] parameters, bool isVoid)
+		private static bool TryTypeMismatchError(Thing obj, (Type, string) key, List<Type> paramTypes, object[] parameters, bool isVoid)
 		{
 			if(parameters == null || parameters.Length == 0)
 				return false;
 
 			var nth = new string[] { "st", "nd", "rd" };
-			var vStr = isVoid ? "Void" : "Return";
+			var method = GetMethodInfo(obj.UID, key.Item2);
 
-			foreach(var kvp in paramTypes)
-				for(int i = 0; i < kvp.Value.Count; i++)
-					if(parameters[i].GetType() != kvp.Value[i])
-					{
-						var nthStr = i < 4 ? nth[i] : "th";
-						Console.LogError(2, $"The {vStr}<{kvp.Key.Item2}> of {obj.GetType().Name}{{{obj.UID}}} cannot process its {i + 1}{nthStr} " +
-							$"parameter's value of type `{parameters[i].GetType().Name}`.",
-							$"It expects a value of type `{kvp.Value[i]}`.");
-						return true;
-					}
+			for(int i = 0; i < paramTypes.Count; i++)
+				if(parameters[i].GetType() != paramTypes[i])
+				{
+					var nthStr = i < 4 ? nth[i] : "th";
+					Console.LogError(2, $"The method\n{method}\ncannot process the value of its {i + 1}{nthStr} parameter.",
+						$"It expects a value of type `{paramTypes[i].FullName}`, not `{parameters[i].GetType().FullName}`.");
+					return true;
+				}
 			return false;
 		}
-
 		internal static void MissingThingError(string uid)
 		{
-			Console.LogError(0, $"{{{uid}}} does not exist.");
+			Console.LogError(0, $"Thing{{{uid}}} does not exist.");
 		}
 		private static void MissingPropError(Thing obj, string propertyName, bool set, bool skipGetSet = false)
 		{
@@ -476,24 +551,23 @@
 			}
 
 			Console.LogError(2, $"{objStr} does not have the {setStr} [{propertyName}].",
-				$"{objStr} has the following {final}:\n{GetAllProps(obj.UID, set)}");
+				$"It has the following {final}:\n{GetAllProps(obj.UID, set)}");
 		}
 		private static void MissingMethodError(Thing obj, string methodName, bool isVoid, bool skipVoidReturn = false)
 		{
 			var voidStr = isVoid ? "void " : "return ";
-			var objStr = $"{obj.GetType().Name}{{{obj.UID}}}";
 
 			if(skipVoidReturn)
 				voidStr = "";
 
-			Console.LogError(2, $"{objStr} does not have a {voidStr}method <{methodName}>.",
-				$"{objStr} has the following {voidStr} methods:\n{GetAllMethods(obj.UID, isVoid)}");
+			Console.LogError(2, $"{obj} does not have a {voidStr}method <{methodName}>.",
+				$"It has the following {voidStr}methods:\n{GetAllMethods(obj.UID, isVoid)}");
 		}
 		private static void PropTypeMismatchError(Thing obj, string propertyName, Type valueType, Type expectedValueType, bool set)
 		{
-			var sStr = set ? "Set" : "Get";
-			Console.LogError(1, $"The {sStr}[{propertyName}] of {obj.GetType().Name}{{{obj.UID}}} cannot process a value of Type`{valueType.Name}`.",
-				$"It expects a value of Type`{expectedValueType.Name}`.");
+			var prop = GetPropertyInfo(obj.UID, propertyName);
+			Console.LogError(1, $"The property\n{prop}\ncannot process the provided value.",
+				$"It expects a value of type `{expectedValueType.GetPrettyName(true)}`, not `{valueType.GetPrettyName(true)}`.");
 		}
 
 		private static string GetAllProps(string uid, bool setter)

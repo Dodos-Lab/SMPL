@@ -16,6 +16,7 @@ global using Newtonsoft.Json;
 global using Newtonsoft.Json.Serialization;
 global using SFML.Audio;
 global using SFML.Graphics;
+global using SFML.Graphics.Glsl;
 global using SFML.System;
 global using SFML.Window;
 global using SMPL.Graphics;

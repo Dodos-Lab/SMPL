@@ -243,7 +243,7 @@
 
 		public override string ToString()
 		{
-			return $"{GetType().Name} {{{uid}}}";
+			return $"{GetType().GetPrettyName()}{{{uid}}}";
 		}
 
 		#region Backend
@@ -355,7 +355,7 @@
 
 			if(error && objs[uid] is not T)
 			{
-				Console.LogError(depth + 1, $"The {{{uid}}} exists but it is not a `{typeof(T).Name}` - it is a `{objs[uid].GetType().Name}`.");
+				Console.LogError(depth + 1, $"The {{{uid}}} exists but it is not a `{typeof(T).GetPrettyName()}` - it is a `{objs[uid].GetType().GetPrettyName()}`.");
 				return default;
 			}
 

@@ -128,10 +128,6 @@
 					}
 					else if(extension == ".ttf" || extension == ".otf")
 						Fonts[key] = new(path);
-					else if(extension == ".vert")
-						Shaders[key] = new(path, null, Visual.DEFAULT_FRAG);
-					else if(extension == ".frag")
-						Shaders[key] = new(Visual.DEFAULT_VERT, null, path);
 					else if(extension == ".obj")
 						Console.LogError(1, $"Work in progress...");
 					else
@@ -152,7 +148,6 @@
 				TryDisposeAndRemove(Fonts, path);
 				TryDisposeAndRemove(Music, path);
 				TryDisposeAndRemove(Sounds, path);
-				TryDisposeAndRemove(Shaders, path);
 
 				//TryRemove(Sprites3D, path);
 				TryRemove(Files, path);
@@ -183,7 +178,6 @@
 			DisposeAndClear(Fonts);
 			DisposeAndClear(Music);
 			DisposeAndClear(Sounds);
-			DisposeAndClear(Shaders);
 
 			//Sprites3D.Clear();
 			Files.Clear();
@@ -266,7 +260,6 @@
 		internal ConcurrentDictionary<string, Music> Music { get; } = new();
 		internal ConcurrentDictionary<string, Sound> Sounds { get; } = new();
 		internal ConcurrentDictionary<string, Font> Fonts { get; } = new();
-		internal ConcurrentDictionary<string, Shader> Shaders { get; } = new();
 		internal ConcurrentDictionary<string, string> Files { get; } = new();
 		//internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
 

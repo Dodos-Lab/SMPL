@@ -788,12 +788,36 @@ namespace SMPL.Tools
 		private static readonly Dictionary<string, int> gateEntries = new();
 		private static readonly Dictionary<string, bool> gates = new();
 
-		internal static string GetPrettyName(this Type type)
+		internal static string GetPrettyName(this Type type, bool full = false)
 		{
+			var n = full ? type.FullName : type.Name;
+			n = n.Replace("+", ".");
+
 			if(type.GetGenericArguments().Length == 0)
-				return type.Name;
-			var name = type.Name[..type.Name.IndexOf("`")];
-			return name + "<" + string.Join(",", type.GetGenericArguments().Select(GetPrettyName)) + ">";
+				return n;
+
+			var name = n[..type.Name.IndexOf("`")] + "<";
+			var genericArgs = type.GetGenericArguments();
+			for(int i = 0; i < genericArgs.Length; i++)
+				name += GetPrettyName(genericArgs[i], full);
+			name += ">";
+			return name;
+		}
+		internal static Vec2 ToGLSL(this Vector2 vec)
+		{
+			return new(vec.X, vec.Y);
+		}
+		internal static Vec3 ToGLSL(this Vector3 vec)
+		{
+			return new(vec.X, vec.Y, vec.Z);
+		}
+		internal static Vec4 ToGLSL(this Vector4 vec)
+		{
+			return new(vec.X, vec.Y, vec.Z, vec.W);
+		}
+		internal static Vec4 ToGLSL(this Color col)
+		{
+			return new(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f);
 		}
 		#endregion
 	}
