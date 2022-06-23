@@ -49,6 +49,7 @@
 			var camera = Get<Camera>(CameraUID);
 			if(camera != null)
 				renderTarget = camera.renderTexture;
+
 			var ps = new List<Particle>(particles);
 			var verts = new Vertex[ps.Count * 4];
 
@@ -85,7 +86,7 @@
 				verts[i + 3] = new(botLeft.ToSFML(), c, new(txA.X, txB.Y));
 			}
 
-			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader()));
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
 		}
 		internal override Hitbox GetBoundingBox()
 		{

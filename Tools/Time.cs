@@ -6,49 +6,6 @@
 	public static class Time
 	{
 		/// <summary>
-		/// A set of values used by <see cref="SecondsToText(float, Format)"/> and <see cref="SecondsToText(int, Format)"/>
-		/// that specify the way time is represented as a <see cref="string"/>.
-		/// </summary>
-		public struct Format
-		{
-			/// <summary>
-			/// A set of values that represent a single unit of time (seconds, minutes, hours etc).
-			/// </summary>
-			public struct Unit
-			{
-				/// <summary>
-				/// Whether this time <see cref="Unit"/> is skipped in the final <see cref="Format"/>.
-				/// </summary>
-				public bool IsSkipped { get; set; }
-				/// <summary>
-				/// The suffix that accompanies the <see cref="Unit"/>'s value in the final <see cref="Format"/> ('23s', '4 min', '10 hours' for example).
-				/// </summary>
-				public string Suffix { get; set; }
-			}
-
-			/// <summary>
-			/// The <see cref="string"/> (usually ':') between <see cref="Unit"/> values ('0:22:10', '12h 20s' for example). For better
-			/// default readability, this is assumed to be a space (' ') if null.
-			/// </summary>
-			public string Separator { get; set; }
-			/// <summary>
-			/// The settings for the hours unit.
-			/// </summary>
-			public Unit Hours { get; set; }
-			/// <summary>
-			/// The settings for the minutes unit.
-			/// </summary>
-			public Unit Minutes { get; set; }
-			/// <summary>
-			/// The settings for the seconds <see cref="Unit"/>.
-			/// </summary>
-			public Unit Seconds { get; set; }
-			/// <summary>
-			/// The settings for the milliseconds <see cref="Unit"/>.
-			/// </summary>
-			public Unit Milliseconds { get; set; }
-		}
-		/// <summary>
 		/// The type of time convertion going from one time unit to another. This is used by <see cref="ToTime"/>.
 		/// </summary>
 		public enum Convertion
@@ -88,52 +45,6 @@
 				Convertion.WeeksToDays => number * 7,
 				_ => 0,
 			};
-		}
-		/// <summary>
-		/// Converts <paramref name="seconds"/> into a <see cref="string"/> following a <paramref name="format"/>. Then returns the result.
-		/// </summary>
-		public static string SecondsToText(this float seconds, Format format = new())
-		{
-			if(float.IsNaN(seconds) || float.IsInfinity(seconds))
-				return null;
-
-			seconds = seconds.Sign(false);
-			var ms = 0;
-			if(seconds.ToString().Contains('.'))
-			{
-				var spl = seconds.ToString().Split('.');
-				ms = int.Parse(spl[1]) * 100;
-				seconds = seconds.Round(toward: Extensions.RoundWay.Down);
-			}
-			var sec = seconds % 60;
-			var min = ToTime(seconds, Convertion.SecondsToMinutes) % 60;
-			var hr = ToTime(seconds, Convertion.SecondsToHours);
-			var msShow = !format.Milliseconds.IsSkipped;
-			var secShow = !format.Seconds.IsSkipped;
-			var minShow = !format.Minutes.IsSkipped;
-			var hrShow = !format.Hours.IsSkipped;
-
-			var sep = format.Separator ?? " ";
-			var msStr = msShow ? $"{ms:D2}" : "";
-			var secStr = secShow ? $"{(int)sec:D2}" : "";
-			var minStr = minShow ? $"{(int)min:D2}" : "";
-			var hrStr = hrShow ? $"{(int)hr:D2}" : "";
-			var msF = msShow ? $"{format.Milliseconds.Suffix}" : "";
-			var secF = secShow ? $"{format.Seconds.Suffix}" : "";
-			var minF = minShow ? $"{format.Minutes.Suffix}" : "";
-			var hrF = hrShow ? $"{format.Hours.Suffix}" : "";
-			var secMsSep = msShow && (secShow || minShow || hrShow) ? $"{sep}" : "";
-			var minSecSep = secShow && (minShow || hrShow) ? $"{sep}" : "";
-			var hrMinSep = minShow && hrShow ? $"{sep}" : "";
-
-			return $"{hrStr}{hrF}{hrMinSep}{minStr}{minF}{minSecSep}{secStr}{secF}{secMsSep}{msStr}{msF}";
-		}
-		/// <summary>
-		/// Converts <paramref name="seconds"/> into a <see cref="string"/> following a <paramref name="format"/>. Then returns the result.
-		/// </summary>
-		public static string SecondsToText(this int seconds, Format format = new())
-		{
-			return SecondsToText((float)seconds, format);
 		}
 
 		/// <summary>

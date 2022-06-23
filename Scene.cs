@@ -201,6 +201,7 @@
 				{
 					TryAdd(cameras, kvp.Value);
 					TryAdd(sprites, kvp.Value);
+					TryAdd(lights, kvp.Value);
 				}
 
 				var json = JsonConvert.SerializeObject(this);
@@ -253,6 +254,8 @@
 		private Dictionary<string, Camera> cameras = new();
 		[JsonProperty]
 		private Dictionary<string, Sprite> sprites = new();
+		[JsonProperty]
+		private Dictionary<string, Light> lights = new();
 
 		internal Dictionary<string, Thing> objs = new();
 		private ConcurrentDictionary<string, string> loadedAssets = new();

@@ -1,8 +1,9 @@
 ﻿namespace SMPL
 {
-	internal class Thing
+	internal abstract class Thing
 	{
 		private int order;
+		private readonly Clock age = new();
 		internal readonly static SortedDictionary<int, List<Thing>> objsOrder = new();
 
 		private readonly List<string> childrenUIDs = new();
@@ -80,6 +81,16 @@
 			}
 		}
 		public string OldUID => oldUID;
+
+		public float AgeSeconds => age.ElapsedTime.AsSeconds();
+		public string AgeTimer
+		{
+			get
+			{
+				var ts = TimeSpan.FromSeconds(AgeSeconds);
+				return $"{ts:%h}h {ts:%m}m {ts:%s}s";
+			}
+		}
 
 		public string ParentUID
 		{
@@ -182,6 +193,9 @@
 			set => Angle = Vector2.Normalize(value).DirectionToAngle();
 		}
 
+		public Hitbox Hitbox { get; } = new();
+		public Hitbox BoundingBox => GetBoundingBox();
+
 		public Vector2 GetLocalPositionFromParent(Vector2 position)
 		{
 			return GetPosition(GlobalToLocal(Scale, Angle, position));
@@ -249,7 +263,6 @@
 		#region Backend
 		[JsonConstructor]
 		internal Thing() { }
-
 		internal Thing(string uid)
 		{
 			UID = uid;
@@ -266,6 +279,7 @@
 		internal void Update() => OnUpdate();
 		internal virtual void OnUpdate() { }
 		internal virtual void OnDestroy() { }
+		internal abstract Hitbox GetBoundingBox();
 
 		internal Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)
 		{

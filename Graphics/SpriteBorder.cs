@@ -14,6 +14,7 @@
 			var camera = Get<Camera>(CameraUID);
 			if(camera != null)
 				renderTarget = camera.renderTexture;
+
 			var Texture = GetTexture();
 			var w = Texture == null ? 0 : Texture.Size.X;
 			var h = Texture == null ? 0 : Texture.Size.Y;
@@ -78,7 +79,7 @@
 				new(CornerClockwise(2).PointMoveAtAngle(Angle + 90, BorderSize, false).ToSFML(), Tint, bottomRight - new Vector2f(BorderSize, 0)),
 			};
 
-			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader()));
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
 		}
 		internal override Hitbox GetBoundingBox()
 		{

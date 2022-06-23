@@ -2,10 +2,6 @@
 {
 	internal class Camera : Thing
 	{
-		private Vector2 res;
-		private float scale = 1;
-		internal RenderTexture renderTexture = new(0, 0);
-
 		[JsonProperty]
 		public Vector2 Resolution
 		{
@@ -54,23 +50,17 @@
 				renderTexture.SetView(view);
 			}
 		}
-		public bool IsSmooth { get => renderTexture.Smooth; set => renderTexture.Smooth = value; }
+		public bool IsSmooth
+		{
+			get => renderTexture.Smooth;
+			set => renderTexture.Smooth = value;
+		}
 		[JsonIgnore]
 		public Vector2 MouseCursorPosition
 		{
 			get { var p = Mouse.GetPosition(Game.Window); return PointToCamera(new(p.X, p.Y)); }
 			set { var p = PointToWorld(value); Mouse.SetPosition(new((int)p.X, (int)p.Y), Game.Window); }
 		}
-
-		[JsonConstructor]
-		internal Camera() { }
-		internal Camera(string uid, Vector2 resolution) : base(uid) =>
-			Init((uint)resolution.X.Limit(0, Texture.MaximumSize), (uint)resolution.Y.Limit(0, Texture.MaximumSize));
-		internal Camera(string uid, uint resolutionX, uint resolutionY) : base(uid) =>
-			Init(resolutionX, resolutionY);
-
-		internal override void OnDestroy()
-			=> renderTexture.Dispose();
 
 		public RenderTexture GetRenderTexture()
 		{
@@ -113,18 +103,26 @@
 
 		public Vector2 PointToCamera(Vector2 worldPoint)
 		{
-			return Game.Window.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
+			return Game.Window == null ? default : Game.Window.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
 		}
 		public Vector2 PointToWorld(Vector2 cameraPoint)
 		{
 			var p = Game.Window.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
-			return new(p.X, p.Y);
+			return Game.Window == null ? default : new(p.X, p.Y);
 		}
 
-		private Hitbox GetScreenHitbox()
+		#region Backend
+		private Vector2 res;
+		private float scale = 1;
+		internal RenderTexture renderTexture = new(0, 0);
+
+		[JsonConstructor]
+		internal Camera() { }
+		internal Camera(string uid, Vector2 resolution) : base(uid)
 		{
-			return new Hitbox(CornerClockwise(0), CornerClockwise(1), CornerClockwise(2), CornerClockwise(3), CornerClockwise(4));
+			Init((uint)resolution.X.Limit(0, Texture.MaximumSize), (uint)resolution.Y.Limit(0, Texture.MaximumSize));
 		}
+
 		private void Init(uint resolutionX, uint resolutionY)
 		{
 			resolutionX = (uint)((int)resolutionX).Limit(0, (int)Texture.MaximumSize);
@@ -133,6 +131,24 @@
 			Position = new();
 			Resolution = new(resolutionX, resolutionY);
 		}
+
+		internal override void OnDestroy()
+			=> renderTexture.Dispose();
+		internal override Hitbox GetBoundingBox()
+		{
+			return new Hitbox(
+				CornerClockwise(0),
+				CornerClockwise(1),
+				CornerClockwise(2),
+				CornerClockwise(3),
+				CornerClockwise(0));
+		}
+
+		private Hitbox GetScreenHitbox()
+		{
+			return new Hitbox(CornerClockwise(0), CornerClockwise(1), CornerClockwise(2), CornerClockwise(3), CornerClockwise(4));
+		}
+
 		internal static void DrawMainCameraToWindow()
 		{
 			Scene.MainCamera.renderTexture.Display();
@@ -148,5 +164,6 @@
 
 			Game.Window.Draw(verts, PrimitiveType.Quads, new(Scene.MainCamera.renderTexture.Texture));
 		}
+		#endregion
 	}
 }

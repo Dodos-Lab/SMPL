@@ -127,7 +127,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public static bool IsNumber(this string text)
 		{
-			return float.IsNaN(ToNumber(text));
+			return float.IsNaN(ToNumber(text)) == false;
 		}
 		/// <summary>
 		/// Returns whether <paramref name="text"/> contains only letters.
@@ -818,6 +818,10 @@ namespace SMPL.Tools
 		internal static Vec4 ToGLSL(this Color col)
 		{
 			return new(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f);
+		}
+		internal static string ToBackslashPath(this string path)
+		{
+			return string.IsNullOrWhiteSpace(path) ? default : path.Replace("/", "\\");
 		}
 		#endregion
 	}

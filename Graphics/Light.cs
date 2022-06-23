@@ -1,68 +1,89 @@
 ﻿namespace SMPL.Graphics
 {
-	public struct Light
+	internal class Light : Thing
 	{
+		public Color Color { get; set; } = new Color(255, 255, 255, 50);
+		#region Backend
 		internal static readonly Vector2[] positions = new Vector2[50];
 		internal static readonly Color[] colors = new Color[50];
-		internal static readonly float[] radiuses = new float[50];
-		internal static readonly float[] intensities = new float[50];
+		internal static readonly float[] scales = new float[50];
 
-		public Vector2 Position { get; set; }
-		public float Radius { get; set; }
-		public float Intensity { get; set; }
-		public Color Color { get; set; }
+		internal static List<Light> lights = new();
 
-		public Light(Vector2 position, Color color, float radius = 0.5f, float intensity = 1f)
+		internal const float SIZE = 100f;
+		internal const float HALF_SIZE = SIZE / 2f;
+
+		[JsonConstructor]
+		internal Light()
 		{
-			Position = position;
-			Radius = radius;
-			Intensity = intensity;
-			Color = color;
+			TryInit();
 		}
-
-		public static Color AmbientColor { get; set; } = new Color(50, 50, 50);
-		public static void Set(int index, Light light)
+		internal Light(string uid) : base(uid)
 		{
-			if(TryIndexError(index))
-				return;
-
-			positions[index] = light.Position;
-			colors[index] = light.Color;
-			intensities[index] = light.Intensity;
-			radiuses[index] = light.Radius;
+			TryInit();
 		}
-		public static Light Get(int index)
+		private void TryInit()
 		{
-			return TryIndexError(index) ? default : new Light(positions[index], colors[index], radiuses[index], intensities[index]);
+			if(TryCreationError() == false)
+				lights.Add(this);
 		}
-		internal static void Update(Visual visual)
+		private bool TryCreationError()
 		{
-			var camera = Thing.Get<Camera>(visual.CameraUID);
-			if(camera == null)
-				camera = Thing.Get<Camera>(Scene.MAIN_CAMERA_UID);
-
-			var rend = camera.renderTexture;
-			var positionsInShader = new Vector2[positions.Length];
-			for(int j = 0; j < positionsInShader.Length; j++)
+			if(lights.Count == 50)
 			{
-				var pos = rend.MapCoordsToPixel(positions[j].ToSFML(), rend.GetView()) - new Vector2i(0, (int)(rend.Texture.Size.Y));
-				positionsInShader[j] = new(pos.X, pos.Y);
-			}
-
-			visual.SetShaderColor("AmbientColor", AmbientColor);
-			visual.SetShaderColorArray("Colors", colors);
-			visual.SetShaderVector2Array("Positions", positionsInShader);
-			visual.SetShaderFloatArray("Intensities", intensities);
-			visual.SetShaderFloatArray("Radiuses", radiuses);
-		}
-		private static bool TryIndexError(int index)
-		{
-			if(index.IsBetween(0, 49, true, true) == false)
-			{
-				Console.LogError(1, $"The index {index} is out of range. Up to 50 lights are allowed (indexes 0 to 49 inclusively).");
+				Console.LogError(1, $"Cannot create {nameof(Light)}{{{UID}}}. Only up to 50 lights are allowed.");
 				return true;
 			}
 			return false;
 		}
+
+		internal void UpdateGlobalArrays()
+		{
+			var i = lights.IndexOf(this);
+			positions[i] = Position;
+			colors[i] = Color;
+			scales[i] = Scale;
+		}
+
+		internal override void OnDestroy()
+		{
+			base.OnDestroy();
+			lights.Remove(this);
+		}
+
+		internal static void Update(Visual visual, RenderTarget renderTarget)
+		{
+			for(int i = 0; i < lights.Count; i++)
+				lights[i].UpdateGlobalArrays();
+
+			var camera = Get<Camera>(visual.CameraUID);
+			if(camera != null)
+				renderTarget = camera.renderTexture;
+
+			var positionsInShader = new Vector2[positions.Length];
+			for(int j = 0; j < positionsInShader.Length; j++)
+			{
+				var p = renderTarget.MapCoordsToPixel(positions[j].ToSFML(), renderTarget.GetView()) - new Vector2i(0, (int)(renderTarget.Size.Y));
+				positionsInShader[j] = new Vector2(p.X, p.Y);
+			}
+
+			visual.SetShaderColor("AmbientColor", ThingManager.AmbientColor);
+			visual.SetShaderColorArray("Colors", colors);
+			visual.SetShaderVector2Array("Positions", positionsInShader);
+			visual.SetShaderFloatArray("Scales", scales);
+		}
+
+		internal override Hitbox GetBoundingBox()
+		{
+			var hitbox = new Hitbox(
+				new(-HALF_SIZE, -HALF_SIZE),
+				new(HALF_SIZE, -HALF_SIZE),
+				new(HALF_SIZE, HALF_SIZE),
+				new(-HALF_SIZE, HALF_SIZE),
+				new(-HALF_SIZE, -HALF_SIZE));
+			hitbox.TransformLocalLines(UID);
+			return hitbox;
+		}
+		#endregion
 	}
 }

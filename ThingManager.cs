@@ -5,8 +5,24 @@
 		public enum BlendModes { None, Alpha, Add, Multiply }
 		public enum Effects
 		{
-			None, Custom, ColorFill, ColorAdjust, ColorReplaceLight, ColorsSwap, ColorsReplace, ColorsTint,
-			Blink, Blur, Earthquake, Edge, Lights, Grid, Outline, Pixelate, Screen, Water
+			None,
+			Custom,
+			ColorFill,
+			ColorAdjust,
+			ColorReplaceLight,
+			ColorsSwap,
+			ColorsReplace,
+			ColorsTint,
+			Blink,
+			Blur,
+			Earthquake,
+			Edge,
+			Lights,
+			Grid,
+			Outline,
+			Pixelate,
+			Screen,
+			Water
 		}
 		public struct CodeGLSL
 		{
@@ -15,6 +31,7 @@ uniform vec2 TextureSize;
 uniform bool HasTexture;
 uniform float Time;
 uniform vec2 CameraSize;
+uniform vec2 CameraResolution;
 ";
 			private const string FRAG_PRE_MAIN = @"
 vec4 GetPixelColor(sampler2D texture, vec2 coords);
@@ -68,13 +85,21 @@ void main()
 			public string VertexUniforms { get; set; }
 			public string VertexCode { get; set; }
 
-			internal string GetFragCode()
+			public string GetFragment()
 			{
 				return $"{FRAG_UNI}{FragmentUniforms}{FRAG_PRE_MAIN}{FragmentCode}{FRAG_POST_MAIN}";
 			}
-			internal string GetVertCode()
+			public string GetVertex()
 			{
 				return $"{VERT_UNI}{VertexUniforms}{VERT_PRE_MAIN}{VertexCode}{VERT_POST_MAIN}";
+			}
+
+			public static CodeGLSL GetEffectCode(Effects effect)
+			{
+				if(effect == Effects.Custom)
+					return default;
+
+				return Visual.shaders[effect];
 			}
 		}
 
@@ -125,6 +150,8 @@ void main()
 			}
 		}
 
+		public static Color AmbientColor { get; set; } = new Color(50, 50, 50);
+
 		public static void UpdateAllThings()
 		{
 			var objs = Thing.objsOrder;
@@ -141,7 +168,7 @@ void main()
 					var visual = kvp.Value[i];
 
 					if(visual.Effect == Effects.Lights)
-						Light.Update(visual);
+						Light.Update(visual, renderTarget);
 
 					visual.Draw(renderTarget);
 				}
@@ -184,20 +211,21 @@ void main()
 				if(kvp.Value != Scene.MainCamera)
 					kvp.Value.Destroy(true);
 		}
-		public static string Create(string uid)
-		{
-			var spr = new Thing(GetFreeUID(uid));
-			return spr.UID;
-		}
+
 		public static string CreateSprite(string uid)
 		{
-			var spr = new Sprite(GetFreeUID(uid));
-			return spr.UID;
+			var t = new Sprite(GetFreeUID(uid));
+			return t.UID;
+		}
+		public static string CreateLight(string uid)
+		{
+			var t = new Light(GetFreeUID(uid));
+			return t.UID;
 		}
 		public static string CreateCamera(string uid, Vector2 resolution)
 		{
-			var cam = new Camera(uid, (uint)(resolution.X), (uint)(resolution.Y));
-			return cam.UID;
+			var t = new Camera(uid, resolution);
+			return t.UID;
 		}
 
 		public static bool HasSetter(string uid, string setPropertyName)

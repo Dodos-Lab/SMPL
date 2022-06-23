@@ -46,6 +46,7 @@
 			var camera = Get<Camera>(CameraUID);
 			if(camera != null)
 				renderTarget = camera.renderTexture;
+
 			var tex = GetTexture();
 			var w = tex == null ? 0 : tex.Size.X;
 			var h = tex == null ? 0 : tex.Size.Y;
@@ -62,7 +63,7 @@
 				new(CornerClockwise(3).ToSFML(), Tint, new(w0, hh)),
 			};
 
-			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader()));
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
 		}
 
 		internal override Hitbox GetBoundingBox()

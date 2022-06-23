@@ -39,14 +39,42 @@
 		}
 		public string CameraUID { get; set; }
 		public ThingManager.BlendModes BlendMode { get; set; } = ThingManager.BlendModes.Alpha;
-		public Hitbox Hitbox { get; } = new();
-		public Hitbox BoundingBox => GetBoundingBox();
 
 		public void SetCustomShader(ThingManager.CodeGLSL shaderCode)
 		{
 			Effect = ThingManager.Effects.Custom;
 			SetShader(shaderCode);
 		}
+
+		public void SetShaderFloat(string uniformName, float value)
+		{
+			shader?.SetUniform(uniformName, value);
+		}
+		public void SetShaderBool(string uniformName, bool value)
+		{
+			shader?.SetUniform(uniformName, value);
+		}
+		public void SetShaderInt(string uniformName, int value)
+		{
+			shader?.SetUniform(uniformName, value);
+		}
+		public void SetShaderVector2(string uniformName, Vector2 value)
+		{
+			shader?.SetUniform(uniformName, value.ToGLSL());
+		}
+		public void SetShaderVector3(string uniformName, Vector3 value)
+		{
+			shader?.SetUniform(uniformName, value.ToGLSL());
+		}
+		public void SetShaderVector4(string uniformName, Vector4 value)
+		{
+			shader?.SetUniform(uniformName, value.ToGLSL());
+		}
+		public void SetShaderColor(string uniformName, Color value)
+		{
+			shader?.SetUniform(uniformName, value.ToGLSL());
+		}
+
 		public void SetShaderFloatArray(string uniformName, float[] value)
 		{
 			shader?.SetUniformArray(uniformName, value);
@@ -83,35 +111,6 @@
 
 			shader?.SetUniformArray(uniformName, array);
 		}
-		public void SetShaderFloat(string uniformName, float value)
-		{
-			shader?.SetUniform(uniformName, value);
-		}
-		public void SetShaderBool(string uniformName, bool value)
-		{
-			shader?.SetUniform(uniformName, value);
-		}
-		public void SetShaderInt(string uniformName, int value)
-		{
-			shader?.SetUniform(uniformName, value);
-		}
-		public void SetShaderVector2(string uniformName, Vector2 value)
-		{
-			shader?.SetUniform(uniformName, value.ToGLSL());
-		}
-		public void SetShaderVector3(string uniformName, Vector3 value)
-		{
-			shader?.SetUniform(uniformName, value.ToGLSL());
-		}
-		public void SetShaderVector4(string uniformName, Vector4 value)
-		{
-			shader?.SetUniform(uniformName, value.ToGLSL());
-		}
-		public void SetShaderColor(string uniformName, Color value)
-		{
-			shader?.SetUniform(uniformName, value.ToGLSL());
-		}
-
 		#region Backend
 		private ThingManager.Effects effect;
 		private int depth;
@@ -119,16 +118,15 @@
 		internal readonly static SortedDictionary<int, List<Visual>> visuals = new();
 		internal readonly static Dictionary<ThingManager.Effects, ThingManager.CodeGLSL> shaders = new()
 		{
-			{ ThingManager.Effects.None,
-				default },
+			{ ThingManager.Effects.None, default },
 			{ ThingManager.Effects.ColorFill, new()
 			{
 				FragmentUniforms = @"
 uniform vec4 Color = vec4(1.0);
-uniform float ThresholdOpacity;",
+uniform float ThresholdOpacity = 0.5;",
 				FragmentCode = @"
-if (finalColor.a > ThresholdOpacity)
-	finalColor = Color;", } },
+if (FinalColor.a > ThresholdOpacity)
+	FinalColor = Color;", } },
 			{ ThingManager.Effects.ColorAdjust, new()
 			{
 				FragmentUniforms = @"
@@ -150,18 +148,22 @@ FinalColor = vec4(color, FinalColor.a);", } },
 			{ ThingManager.Effects.ColorReplaceLight, new()
 			{
 				FragmentUniforms = @"
-uniform vec4 ColorsInBright;
-uniform vec4 ColorsInDark;
-uniform float ThresholdBright;
-uniform float ThresholdDark;",
+uniform bool ReplaceBright = true;
+uniform bool ReplaceDark = true;
+uniform vec4 ColorInBright = vec4(0.0, 0.0, 0.0, 1.0);
+uniform vec4 ColorInDark = vec4(1.0);
+uniform float ThresholdBright = 0.5;
+uniform float ThresholdDark = 0.5;",
 				FragmentCode = @"
-vec3 luminanceVector = vec3(0.2125, 0.7154, 0.0721);
-float luminance = dot(luminanceVector, FinalColor.rgb);
-float luminance2 = -dot(luminanceVector, FinalColor.rgb);
-luminance = max(0.0, luminance - ThresholdDark);
-luminance2 = max(0.0, luminance2 + (1 - ThresholdBright));
-if (luminance == 0) FinalColor = ColorInDark;
-if (luminance2 == 0) FinalColor = ColorInBright;"
+vec3 l = vec3(0.2125, 0.7154, 0.0721);
+float dark = dot(l, FinalColor.rgb);
+float bright = -dot(l, FinalColor.rgb);
+dark = max(0.0, dark - ThresholdDark);
+bright = max(0.0, bright + (1 - ThresholdBright));
+if (ReplaceDark && dark == 0.0)
+	FinalColor = ColorInDark;
+if (ReplaceBright && bright == 0.0)
+	FinalColor = ColorInBright;"
 			} },
 			{ ThingManager.Effects.ColorsSwap, new()
 			{
@@ -202,7 +204,7 @@ for(int i = 0; i < 10; i++)
 			{ ThingManager.Effects.Blur, new()
 			{
 				FragmentUniforms = @"
-uniform vec2 Strength;",
+uniform vec2 Strength = 0.5;",
 				FragmentCode = @"
 vec2 off = Strength / 100.0;
 vec4 pixel =
@@ -220,17 +222,19 @@ FinalColor = (pixel / 16.0);"
 			{ ThingManager.Effects.Blink, new()
 			{
 				FragmentUniforms = @"
-uniform float Speed;
-uniform float TargetOpacity;",
+uniform float Speed = 0.5;
+uniform float TargetOpacity;
+uniform float OpacityThreshold = 0.5;",
 				FragmentCode = @"
-FinalColor.a = max(1 + cos(Time * Speed), TargetOpacity) / 2;"
+if (FinalColor.a > OpacityThreshold)
+	FinalColor.a = max(1 + cos(Time * Speed * 10), TargetOpacity) / 2;"
 			} },
 			{ ThingManager.Effects.Edge, new()
 			{
 				FragmentUniforms = @"
-uniform float Thickness;
-uniform float Threshold;
-uniform vec4 Color;",
+uniform float Thickness = 0.2;
+uniform float Threshold = 0.7;
+uniform vec4 Color = vec4(1.0);",
 				FragmentCode = @"
 float offset = Thickness / 100.0;
 vec2 offx = vec2(offset, 0.0);
@@ -252,7 +256,7 @@ vec4 hEdge = GetPixelColor(Texture, TextureCoords - offy) * -2.0 +
    vec3 result = sqrt(hEdge.rgb * hEdge.rgb + vEdge.rgb * vEdge.rgb);
    float edge = length(result);
    vec4 pixel = GetPixelColor(Texture, TextureCoords);
-	float value = Map(Threshold, 1.1, 0.0, 0.0, 2);
+	float value = (1 - Threshold) * 2;
    if (edge > value)
       pixel.rgb = Color.rgb;
 	FinalColor = pixel;"
@@ -260,7 +264,7 @@ vec4 hEdge = GetPixelColor(Texture, TextureCoords - offy) * -2.0 +
 			{ ThingManager.Effects.Earthquake, new()
 			{
 				FragmentUniforms = @"
-uniform vec2 Strength;",
+uniform vec2 Strength = vec2(0.4, 0.3);",
 				FragmentCode = @"
 TextureCoords.x += sin(radians(3000 * Time + TextureCoords.x * 0)) * cos(Time) * Strength.x / 100;
 TextureCoords.y += cos(radians(3000 * Time + TextureCoords.y * 0)) * sin(Time) * Strength.y / 100;
@@ -269,7 +273,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 			{ ThingManager.Effects.Lights, new()
 			{
 				FragmentUniforms = @"
-uniform vec4 AmbientColor;
+uniform vec4 AmbientColor = vec4(0.2, 0.2, 0.2, 1.0);
 
 //uniform vec2 Direction;
 //uniform vec4 DirectionalColor;
@@ -277,10 +281,9 @@ uniform vec4 AmbientColor;
 
 uniform vec2 Positions[50];
 uniform vec4 Colors[50];
-uniform float Intensities[50];
-uniform float Radiuses[50];",
+uniform float Scales[50];",
 				FragmentCode = @"
-vec4 result = AmbientColor;
+vec3 result = AmbientColor.rgb;
 //float value =
 //	sin(TextureCoords.x * 2 - (Direction.x - 0.28) * 2) * DirectionalIntensity +
 //	sin(TextureCoords.y * 2 + (Direction.y + 0.28) * 2) * DirectionalIntensity;
@@ -290,35 +293,40 @@ float cameraRatio = CameraSize.x / CameraSize.y;
 
 for(int i = 0; i < 50; i++)
 {
+	float radius = Scales[i] * 0.05;
+	float scale = CameraResolution.x / CameraSize.x;
 	float dist = distance(vec2(CameraCoords.x * cameraRatio, CameraCoords.y), vec2(Positions[i].x * cameraRatio, 1 - Positions[i].y) / CameraSize);
-	if (dist < Radiuses[i])
+	radius *= scale;
+	dist /= scale;
+	if (dist < radius)
 	{
-		float value = Map(dist, Radiuses[i], 0, 0, Intensities[i]);
-		result += value * Colors[i];
+		float value = Map(dist, radius, 0, 0, Colors[i].a * 5);
+		result += value * Colors[i].rgb;
 	}
 }
-FinalColor *= result;"
+FinalColor.rgb *= result;"
 			} },
 			{ ThingManager.Effects.Grid, new()
 			{
 				FragmentUniforms = @"
-uniform vec4 ColorX;
-uniform vec4 ColorY;
-uniform vec2 GridSize;
-uniform vec2 GridSpacing;",
+uniform vec4 ColorX = vec4(1.0);
+uniform vec4 ColorY = vec4(1.0);
+uniform vec2 GridSize = 2;
+uniform vec2 GridSpacing = 10;
+uniform float ThresholdOpacity = 0.5;",
 				FragmentCode = @"
 GridSpacing -= GridSize;
-if (mod(TextureCoords.x * TextureSize.x, round(GridSize.x) + GridSpacing.x) > round(GridSpacing.x))
+if (FinalColor.a > ThresholdOpacity && mod(TextureCoords.x * TextureSize.x, round(GridSize.x) + GridSpacing.x) > round(GridSpacing.x))
 	FinalColor = ColorX;
-if (mod(TextureCoords.y * TextureSize.y, round(GridSize.y) + GridSpacing.y) > round(GridSpacing.y))
+if (FinalColor.a > ThresholdOpacity && mod(TextureCoords.y * TextureSize.y, round(GridSize.y) + GridSpacing.y) > round(GridSpacing.y))
 	FinalColor = ColorY;"
 			} },
 			{ ThingManager.Effects.Outline, new()
 			{
 				FragmentUniforms = @"
-uniform vec4 Color;
-uniform float Thickness;
-uniform float ThresholdOpacity;",
+uniform vec4 Color = vec4(1.0);
+uniform float Thickness = 2;
+uniform float ThresholdOpacity = 0.5;",
 				FragmentCode = @"
 float off = Thickness / 1000;
 vec4 col = Color;
@@ -336,7 +344,7 @@ if (FinalColor.a < ThresholdOpacity)
 			{ ThingManager.Effects.Pixelate, new()
 			{
 				FragmentUniforms = @"
-uniform float Strength;",
+uniform float Strength = 4;",
 				FragmentCode = @"
 float factor = 1.0 / (Strength / 500 + 0.001);
 vec2 pos = floor(TextureCoords * factor + 0.5) / factor;
@@ -345,16 +353,16 @@ FinalColor = GetPixelColor(Texture, pos);"
 			{ ThingManager.Effects.Screen, new()
 			{
 				FragmentUniforms = @"
-uniform float Speed;
-uniform float Size;",
+uniform float Speed = 0.1;
+uniform float Size = 1.0;",
 				FragmentCode = @"
 FinalColor.rgb *= 1 + sin((-Time * Speed * 100.0) + TextureCoords.y * (10.0 / Size)) / 2;"
 			} },
 			{ ThingManager.Effects.Water, new()
 			{
 				FragmentUniforms = @"
-uniform vec2 Speed;
-uniform vec2 Strength;",
+uniform vec2 Speed = vec2(0.3, 0.3);
+uniform vec2 Strength = vec2(0.3, 0.2);",
 				FragmentCode = @"
 Strength *= 20;
 Speed *= 2;
@@ -373,17 +381,12 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 
 		internal void Draw(RenderTarget renderTarget) => OnDraw(renderTarget);
 		internal abstract void OnDraw(RenderTarget renderTarget);
-		internal abstract Hitbox GetBoundingBox();
 
 		internal Texture GetTexture()
 		{
 			var textures = Scene.CurrentScene.Textures;
-			var path = TexturePath;
-			if(string.IsNullOrWhiteSpace(path))
-				return default;
-
-			path = path.Replace("/", "\\");
-			return textures.ContainsKey(path) ? textures[path] : null;
+			var path = TexturePath.ToBackslashPath();
+			return path != null && textures.ContainsKey(path) ? textures[path] : null;
 		}
 		internal void SetShader(ThingManager.Effects effect)
 		{
@@ -406,8 +409,8 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 
 			try
 			{
-				var frag = shaderCode.GetFragCode();
-				var vert = shaderCode.GetVertCode();
+				var frag = shaderCode.GetFragment();
+				var vert = shaderCode.GetVertex();
 				shader = Shader.FromString(vert, null, frag);
 			}
 			catch(Exception)
@@ -416,9 +419,9 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 				Console.LogError(0, "Could not set custom shader.", "Check the shader code for errors.");
 			}
 		}
-		internal Shader GetShader()
+		internal Shader GetShader(RenderTarget renderTarget)
 		{
-			if(Shader.IsAvailable == false)
+			if(Shader.IsAvailable == false || shader == default)
 				return default;
 
 			var tex = GetTexture();
@@ -429,14 +432,12 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 			}
 
 			shader?.SetUniform("HasTexture", tex != null);
-			shader?.SetUniform("Time", Time.GameClock);
+			shader?.SetUniform("Time", AgeSeconds);
 
-			var camera = Get<Camera>(CameraUID);
-			if(camera == null)
-				camera = Get<Camera>(Scene.MAIN_CAMERA_UID);
-
-			var sz = camera.renderTexture.GetView().Size;
+			var sz = renderTarget.GetView().Size;
+			var res = renderTarget.Size;
 			shader?.SetUniform("CameraSize", new Vec2(sz.X, sz.Y));
+			shader?.SetUniform("CameraResolution", new Vec2(res.X, res.Y));
 			return shader;
 		}
 		internal BlendMode GetBlendMode()
