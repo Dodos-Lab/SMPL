@@ -4,6 +4,8 @@
 	{
 		public Color Tint { get; set; } = Color.White;
 		public bool IsHidden { get; set; }
+		public bool HasSmoothTexture { get; set; }
+		public bool HasRepeatedTexture { get; set; } = true;
 		public int Depth
 		{
 			get => depth;
@@ -379,7 +381,24 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 			Depth = 0;
 		}
 
-		internal void Draw(RenderTarget renderTarget) => OnDraw(renderTarget);
+		internal void Draw(RenderTarget renderTarget)
+		{
+			var tex = GetTexture();
+			var prev = (false, false);
+
+			if(tex != null)
+			{
+				prev = (tex.Smooth, tex.Repeated);
+				tex.Smooth = HasSmoothTexture;
+				tex.Repeated = HasRepeatedTexture;
+			}
+			OnDraw(renderTarget);
+			if(tex != null)
+			{
+				tex.Smooth = prev.Item1;
+				tex.Repeated = prev.Item2;
+			}
+		}
 		internal abstract void OnDraw(RenderTarget renderTarget);
 
 		internal Texture GetTexture()

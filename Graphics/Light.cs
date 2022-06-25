@@ -44,13 +44,6 @@
 			colors[i] = Color;
 			scales[i] = Scale;
 		}
-
-		internal override void OnDestroy()
-		{
-			base.OnDestroy();
-			lights.Remove(this);
-		}
-
 		internal static void Update(Visual visual, RenderTarget renderTarget)
 		{
 			for(int i = 0; i < lights.Count; i++)
@@ -73,6 +66,17 @@
 			visual.SetShaderFloatArray("Scales", scales);
 		}
 
+		internal override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			var i = lights.IndexOf(this);
+			positions[i] = default;
+			colors[i] = default;
+			scales[i] = default;
+
+			lights.Remove(this);
+		}
 		internal override Hitbox GetBoundingBox()
 		{
 			var hitbox = new Hitbox(

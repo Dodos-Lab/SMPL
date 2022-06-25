@@ -97,8 +97,14 @@
 			get => parentUID;
 			set
 			{
-				if(parentUID == value)
+				if(parentUID == value || uid == value)
 					return;
+
+				if(childrenUIDs.Contains(value))
+				{
+					var child = Get(value);
+					child.ParentUID = null;
+				}
 
 				var parent = Get(parentUID);
 
@@ -269,11 +275,17 @@
 			UpdateOrder = 0;
 			LocalScale = 1;
 
-			// hello, world! do i have any children before i was even born? claim ownership if so
+			// i just got born, do i have any children before i was even born? claim ownership if so
+			// or perhaps i am a child of theirs before i was even born? approve their parentship if so
+			// (the longer living object wins parentship if both cases are true for some reason)
 			var objs = Scene.CurrentScene.objs;
 			foreach(var kvp in objs)
+			{
 				if(kvp.Value.parentUID == uid)
 					childrenUIDs.Add(kvp.Key);
+				else if(kvp.Value.childrenUIDs.Contains(uid))
+					ParentUID = kvp.Value.UID;
+			}
 		}
 
 		internal void Update() => OnUpdate();

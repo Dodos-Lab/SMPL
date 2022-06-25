@@ -89,9 +89,9 @@
 				if(loadedAssets.ContainsKey(path))
 					return;
 
-				if(path == null)
+				if(string.IsNullOrWhiteSpace(path) || (Directory.Exists(path) == false && File.Exists(path) == false))
 				{
-					Console.LogError(-1, "Could not load asset with its path being 'null'.");
+					Console.LogError(-1, $"Could not load asset at '{path}'. The path is invalid or the file/directory is missing.");
 					return;
 				}
 
