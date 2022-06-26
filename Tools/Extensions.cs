@@ -659,7 +659,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
 		{
-			renderTarget ??= Scene.MainCamera.renderTexture;
+			renderTarget ??= Scene.MainCamera.GetRenderTexture();
 			color = color == default ? Color.White : color;
 
 			size /= 2;

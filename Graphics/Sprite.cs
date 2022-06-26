@@ -45,7 +45,7 @@
 
 			var camera = Get<Camera>(CameraUID);
 			if(camera != null)
-				renderTarget = camera.renderTexture;
+				renderTarget = camera.GetRenderTexture();
 
 			var tex = GetTexture();
 			var w = tex == null ? 0 : tex.Size.X;

@@ -27,7 +27,7 @@
 
 			var camera = Get<Camera>(CameraUID);
 			if(camera != null)
-				renderTarget = camera.renderTexture;
+				renderTarget = camera.GetRenderTexture();
 
 			var vertsArr = new VertexArray(PrimitiveType.Quads);
 

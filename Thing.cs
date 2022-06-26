@@ -65,7 +65,7 @@
 				uid = value;
 				objs[uid] = this;
 
-				var parent = Get(parentUID, 0, false);
+				var parent = Get(parentUID);
 				if(parent != null)
 				{
 					parent.childrenUIDs.Remove(oldUID);
@@ -74,7 +74,7 @@
 
 				for(int i = 0; i < childrenUIDs.Count; i++)
 				{
-					var child = Get(childrenUIDs[i], 0, false);
+					var child = Get(childrenUIDs[i]);
 					if(child != null)
 						child.parentUID = uid;
 				}
@@ -369,23 +369,14 @@
 			return MathF.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12);
 		}
 
-		internal static Thing Get(string uid, int depth = 1, bool error = true)
+		internal static Thing Get(string uid)
 		{
-			return Get<Thing>(uid, depth, error);
+			return Get<Thing>(uid);
 		}
-		internal static T Get<T>(string uid, int depth = 1, bool error = true) where T : Thing
+		internal static T Get<T>(string uid) where T : Thing
 		{
 			var objs = Scene.CurrentScene.objs;
-			if(string.IsNullOrWhiteSpace(uid) || objs.ContainsKey(uid) == false)
-				return default;
-
-			if(error && objs[uid] is not T)
-			{
-				Console.LogError(depth + 1, $"The {{{uid}}} exists but it is not a `{typeof(T).GetPrettyName()}` - it is a `{objs[uid].GetType().GetPrettyName()}`.");
-				return default;
-			}
-
-			return (T)objs[uid];
+			return ThingManager.Exists(uid) == false || objs[uid] is not T ? default : (T)objs[uid];
 		}
 		#endregion
 

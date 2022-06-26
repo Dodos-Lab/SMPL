@@ -16,40 +16,6 @@
 			}
 		}
 
-		public new Vector2 Position
-		{
-			get => renderTexture.GetView().Center.ToSystem();
-			set
-			{
-				var view = renderTexture.GetView();
-				base.Position = value;
-				view.Center = value.ToSFML();
-				renderTexture.SetView(view);
-			}
-		}
-		public new float Angle
-		{
-			get => renderTexture.GetView().Rotation;
-			set
-			{
-				var view = renderTexture.GetView();
-				view.Rotation = value;
-				base.Angle = value;
-				renderTexture.SetView(view);
-			}
-		}
-		public new float Scale
-		{
-			get => scale;
-			set
-			{
-				scale = value;
-				var view = renderTexture.GetView();
-				view.Size = new Vector2f(renderTexture.Size.X, renderTexture.Size.Y) * scale;
-				base.Scale = scale;
-				renderTexture.SetView(view);
-			}
-		}
 		public bool IsSmooth
 		{
 			get => renderTexture.Smooth;
@@ -64,6 +30,13 @@
 
 		public RenderTexture GetRenderTexture()
 		{
+			var view = renderTexture.GetView();
+			view.Center = Position.ToSFML();
+			view.Rotation = Angle;
+			view.Size = new Vector2f(renderTexture.Size.X, renderTexture.Size.Y) * Scale;
+			renderTexture.SetView(view);
+
+			Scene.CurrentScene.Textures[UID] = renderTexture.Texture;
 			return renderTexture;
 		}
 		public bool Captures(Hitbox hitbox)
@@ -113,8 +86,7 @@
 
 		#region Backend
 		private Vector2 res;
-		private float scale = 1;
-		internal RenderTexture renderTexture = new(0, 0);
+		private RenderTexture renderTexture = new(0, 0);
 
 		[JsonConstructor]
 		internal Camera() { }
@@ -151,7 +123,7 @@
 
 		internal static void DrawMainCameraToWindow()
 		{
-			Scene.MainCamera.renderTexture.Display();
+			Scene.MainCamera.GetRenderTexture().Display();
 			var texSz = Scene.MainCamera.renderTexture.Size;
 			var viewSz = Game.Window.GetView().Size;
 			var verts = new Vertex[]

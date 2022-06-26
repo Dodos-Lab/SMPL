@@ -63,7 +63,7 @@
 		/// </summary>
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4)
 		{
-			renderTarget ??= Scene.MainCamera.renderTexture;
+			renderTarget ??= Scene.MainCamera.GetRenderTexture();
 			color = color == default ? Color.White : color;
 
 			for(int i = 0; i < Lines.Count; i++)

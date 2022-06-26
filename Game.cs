@@ -63,7 +63,7 @@ namespace SMPL
 				Time.Update();
 				Scene.UpdateCurrentScene();
 				ThingManager.UpdateAllThings();
-				ThingManager.DrawAllVisuals(Scene.MainCamera.renderTexture);
+				ThingManager.DrawAllVisuals(Scene.MainCamera.GetRenderTexture());
 				Camera.DrawMainCameraToWindow();
 				Window.Display();
 			}

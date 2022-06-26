@@ -26,7 +26,7 @@
 
 			var camera = Get<Camera>(CameraUID);
 			if(camera != null)
-				renderTarget = camera.renderTexture;
+				renderTarget = camera.GetRenderTexture();
 
 			UpdateGlobalText();
 			renderTarget.Draw(textInstance, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));

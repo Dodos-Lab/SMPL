@@ -194,7 +194,7 @@ void main()
 
 		public static bool Exists(string uid)
 		{
-			return uid != null && Scene.CurrentScene.objs.ContainsKey(uid);
+			return string.IsNullOrWhiteSpace(uid) == false && Scene.CurrentScene.objs.ContainsKey(uid);
 		}
 		public static void Destroy(string uid, bool destroyChildren)
 		{

@@ -124,7 +124,7 @@
 
 			var camera = Get<Camera>(CameraUID);
 			if(camera != null)
-				renderTarget = camera.renderTexture;
+				renderTarget = camera.GetRenderTexture();
 
 			var h = Height * Scale / textureCount;
 			for(int i = 0; i < textureCount; i++)
