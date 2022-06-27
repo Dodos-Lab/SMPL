@@ -162,16 +162,26 @@ void main()
 		public static void DrawAllVisuals(RenderTarget renderTarget)
 		{
 			var visuals = Visual.visuals.Reverse();
+			var cameras = Camera.cameras;
+
+			for(int i = 0; i < cameras.Count; i++)
+				cameras[i].GetRenderTexture().Clear(Color.Transparent);
+
 			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
-				{
-					var visual = kvp.Value[i];
+					for(int j = 0; j < kvp.Value[i].CameraUIDs.Count; j++)
+					{
+						var cam = Thing.Get<Camera>(kvp.Value[i].CameraUIDs[j]);
+						if(cam != null)
+							kvp.Value[i].Draw(cam.GetRenderTexture());
+					}
 
-					if(visual.Effect == Effects.Lights)
-						Light.Update(visual, renderTarget);
+			for(int i = 0; i < cameras.Count; i++)
+				cameras[i].GetRenderTexture().Display();
 
-					visual.Draw(renderTarget);
-				}
+			foreach(var kvp in visuals)
+				for(int i = 0; i < kvp.Value.Count; i++)
+					kvp.Value[i].Draw(renderTarget);
 		}
 
 		public static List<string> GetUIDs()

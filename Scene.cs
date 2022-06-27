@@ -214,7 +214,6 @@
 				return false;
 			}
 
-
 			void TryAdd<T>(Dictionary<string, T> dict, Thing thing) where T : Thing
 			{
 				if(thing is T t && dict.ContainsKey(t.UID) == false)

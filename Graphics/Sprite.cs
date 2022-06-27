@@ -43,10 +43,6 @@
 			if(IsHidden)
 				return;
 
-			var camera = Get<Camera>(CameraUID);
-			if(camera != null)
-				renderTarget = camera.GetRenderTexture();
-
 			var tex = GetTexture();
 			var w = tex == null ? 0 : tex.Size.X;
 			var h = tex == null ? 0 : tex.Size.Y;

@@ -49,10 +49,6 @@
 			for(int i = 0; i < lights.Count; i++)
 				lights[i].UpdateGlobalArrays();
 
-			var camera = Get<Camera>(visual.CameraUID);
-			if(camera != null)
-				renderTarget = camera.GetRenderTexture();
-
 			var positionsInShader = new Vector2[positions.Length];
 			for(int j = 0; j < positionsInShader.Length; j++)
 			{

@@ -25,10 +25,6 @@
 			if(IsHidden)
 				return;
 
-			var camera = Get<Camera>(CameraUID);
-			if(camera != null)
-				renderTarget = camera.GetRenderTexture();
-
 			var vertsArr = new VertexArray(PrimitiveType.Quads);
 
 			foreach(var kvp in map)

@@ -85,27 +85,34 @@
 		}
 
 		#region Backend
+		internal static readonly List<Camera> cameras = new();
+
 		private Vector2 res;
 		private RenderTexture renderTexture = new(0, 0);
 
 		[JsonConstructor]
-		internal Camera() { }
+		internal Camera()
+		{
+			cameras.Add(this);
+		}
 		internal Camera(string uid, Vector2 resolution) : base(uid)
 		{
-			Init((uint)resolution.X.Limit(0, Texture.MaximumSize), (uint)resolution.Y.Limit(0, Texture.MaximumSize));
-		}
+			cameras.Add(this);
 
-		private void Init(uint resolutionX, uint resolutionY)
-		{
-			resolutionX = (uint)((int)resolutionX).Limit(0, (int)Texture.MaximumSize);
-			resolutionY = (uint)((int)resolutionY).Limit(0, (int)Texture.MaximumSize);
+			var resolutionX = (uint)((int)resolution.X).Limit(0, (int)Texture.MaximumSize);
+			var resolutionY = (uint)((int)resolution.Y).Limit(0, (int)Texture.MaximumSize);
 			renderTexture = new(resolutionX, resolutionY);
 			Position = new();
 			Resolution = new(resolutionX, resolutionY);
 		}
 
 		internal override void OnDestroy()
-			=> renderTexture.Dispose();
+		{
+			cameras.Remove(this);
+			if(Scene.CurrentScene.Textures.ContainsKey(UID))
+				Scene.CurrentScene.Textures.Remove(UID, out _);
+			renderTexture.Dispose();
+		}
 		internal override Hitbox GetBoundingBox()
 		{
 			return new Hitbox(

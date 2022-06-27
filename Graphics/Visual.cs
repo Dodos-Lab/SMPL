@@ -39,7 +39,7 @@
 					SetShader(effect);
 			}
 		}
-		public string CameraUID { get; set; }
+		public List<string> CameraUIDs { get; } = new();
 		public ThingManager.BlendModes BlendMode { get; set; } = ThingManager.BlendModes.Alpha;
 
 		public void SetCustomShader(ThingManager.CodeGLSL shaderCode)
@@ -392,7 +392,12 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 				tex.Smooth = HasSmoothTexture;
 				tex.Repeated = HasRepeatedTexture;
 			}
+
+			if(Effect == ThingManager.Effects.Lights)
+				Light.Update(this, renderTarget);
+
 			OnDraw(renderTarget);
+
 			if(tex != null)
 			{
 				tex.Smooth = prev.Item1;

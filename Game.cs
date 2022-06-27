@@ -21,7 +21,6 @@ global using SFML.System;
 global using SFML.Window;
 global using SMPL.Graphics;
 global using SMPL.Tools;
-//global using SMPL.UI;
 global using Sprite = SMPL.Graphics.Sprite;
 global using Console = SMPL.Tools.Console;
 global using Time = SMPL.Tools.Time;

@@ -46,10 +46,6 @@
 			if(particles == null || particles.Count == 0)
 				return;
 
-			var camera = Get<Camera>(CameraUID);
-			if(camera != null)
-				renderTarget = camera.GetRenderTexture();
-
 			var ps = new List<Particle>(particles);
 			var verts = new Vertex[ps.Count * 4];
 

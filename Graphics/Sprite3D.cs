@@ -122,10 +122,6 @@
 			if(IsHidden || textureCount == 0)
 				return;
 
-			var camera = Get<Camera>(CameraUID);
-			if(camera != null)
-				renderTarget = camera.GetRenderTexture();
-
 			var h = Height * Scale / textureCount;
 			for(int i = 0; i < textureCount; i++)
 			{
