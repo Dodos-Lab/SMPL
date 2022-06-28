@@ -2,10 +2,9 @@
 {
 	internal abstract class Thing
 	{
-		private int order;
 		private readonly Clock age = new();
-		internal readonly static SortedDictionary<int, List<Thing>> objsOrder = new();
 
+		private readonly Hitbox hitbox = new();
 		private readonly List<string> childrenUIDs = new();
 		private string parentUID, oldUID, parOldUID;
 		private Vector2 localPos;
@@ -130,28 +129,6 @@
 		public string ParentOldUID => parOldUID;
 		[JsonIgnore]
 		public ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
-		public int UpdateOrder
-		{
-			get => order;
-			set
-			{
-				TryCreateOrder(order);
-
-				if(objsOrder[order].Contains(this))
-					objsOrder[order].Remove(this);
-
-				order = value;
-
-				TryCreateOrder(order);
-				objsOrder[order].Add(this);
-
-				void TryCreateOrder(int order)
-				{
-					if(objsOrder.ContainsKey(order) == false)
-						objsOrder[order] = new();
-				}
-			}
-		}
 
 		public Vector2 LocalPosition
 		{
@@ -178,7 +155,7 @@
 		public Vector2 Position
 		{
 			get => GetPosition(global);
-			set => LocalPosition = GetLocalPositionFromParent(value);
+			set => LocalPosition = LocalPositionFromParent(value);
 		}
 		[JsonIgnore]
 		public float Scale
@@ -199,34 +176,25 @@
 			set => Angle = Vector2.Normalize(value).DirectionToAngle();
 		}
 
-		public Hitbox Hitbox { get; } = new();
+		public Hitbox Hitbox { get { hitbox.TransformLocalLines(uid); return hitbox; } }
 		public Hitbox BoundingBox => GetBoundingBox();
 
-		public Vector2 GetLocalPositionFromParent(Vector2 position)
+		public Vector2 LocalPositionFromParent(Vector2 position)
 		{
 			return GetPosition(GlobalToLocal(Scale, Angle, position));
 		}
-		public Vector2 GetPositionFromParent(Vector2 localPosition)
+		public Vector2 PositionFromParent(Vector2 localPosition)
 		{
 			return GetPosition(LocalToGlobal(LocalScale, LocalAngle, localPosition));
 		}
-		public Vector2 GetLocalPositionFromSelf(Vector2 position)
+		public Vector2 LocalPositionFromSelf(Vector2 position)
 		{
-			var m = Matrix3x2.Identity;
-			m *= Matrix3x2.CreateTranslation(position);
-			m *= Matrix3x2.CreateTranslation(Position);
-
-			return GetPosition(m);
+			Matrix3x2.Invert(global, out var m);
+			return Vector2.Transform(position, m);
 		}
-		public Vector2 GetPositionFromSelf(Vector2 localPosition)
+		public Vector2 PositionFromSelf(Vector2 localPosition)
 		{
-			var m = Matrix3x2.Identity;
-			m *= Matrix3x2.CreateTranslation(localPosition);
-			m *= Matrix3x2.CreateRotation(LocalAngle.DegreesToRadians());
-			m *= Matrix3x2.CreateScale(LocalScale);
-			m *= Matrix3x2.CreateTranslation(LocalPosition);
-
-			return GetPosition(m * GetParentMatrix());
+			return Vector2.Transform(localPosition, global);
 		}
 
 		public void Destroy(bool includeChildren)
@@ -247,7 +215,6 @@
 					child.Destroy(includeChildren);
 			}
 			Scene.CurrentScene.objs.Remove(uid);
-			objsOrder[order].Remove(this);
 
 			// prevents hard jump to world coordinates
 			for(int i = 0; i < children.Count; i++)
@@ -272,7 +239,6 @@
 		internal Thing(string uid)
 		{
 			UID = uid;
-			UpdateOrder = 0;
 			LocalScale = 1;
 
 			// i just got born, do i have any children before i was even born? claim ownership if so

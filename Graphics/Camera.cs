@@ -66,10 +66,10 @@
 			var sz = renderTexture.GetView().Size * 0.5f;
 			return index switch
 			{
-				0 => GetPositionFromSelf(new(-sz.X, -sz.Y)),
-				1 => GetPositionFromSelf(new(sz.X, -sz.Y)),
-				2 => GetPositionFromSelf(new(sz.X, sz.Y)),
-				3 => GetPositionFromSelf(new(-sz.X, sz.Y)),
+				0 => PositionFromSelf(new(-sz.X, -sz.Y)),
+				1 => PositionFromSelf(new(sz.X, -sz.Y)),
+				2 => PositionFromSelf(new(sz.X, sz.Y)),
+				3 => PositionFromSelf(new(-sz.X, sz.Y)),
 				_ => default,
 			};
 		}
@@ -143,7 +143,9 @@
 				new(new Vector2f(-viewSz.X * 0.5f, viewSz.Y * 0.5f), new Vector2f(0, texSz.Y))
 			};
 
+			Game.Window.Clear();
 			Game.Window.Draw(verts, PrimitiveType.Quads, new(Scene.MainCamera.renderTexture.Texture));
+			Game.Window.Display();
 		}
 		#endregion
 	}

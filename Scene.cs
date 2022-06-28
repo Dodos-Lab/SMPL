@@ -30,8 +30,6 @@
 
 		//public ThemeUI ThemeUI { get; set; }
 
-		[JsonConstructor]
-		internal Scene() { }
 		public Scene(params string[] initialAssetPaths)
 		{
 			Init(initialAssetPaths);
@@ -39,18 +37,6 @@
 		public Scene(List<string> initialAssetPaths)
 		{
 			Init(initialAssetPaths.ToArray());
-		}
-		private void Init(string[] initAssetPaths)
-		{
-			if(initAssetPaths == null)
-				return;
-
-			for(int i = 0; i < initAssetPaths.Length; i++)
-			{
-				var a = initAssetPaths[i];
-				if(a != null)
-					assetQueue.TryAdd(a, a);
-			}
 		}
 
 		public static T Load<T>(string path) where T : Scene
@@ -248,6 +234,7 @@
 			}
 		}
 
+		private bool hasStarted;
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		internal static Thread assetsLoading;
 		internal static Camera MainCamera => Thing.Get<Camera>(MAIN_CAMERA_UID);
@@ -270,6 +257,22 @@
 		internal ConcurrentDictionary<string, string> Files { get; } = new();
 		//internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
 
+		[JsonConstructor]
+		internal Scene() { }
+
+		private void Init(string[] initAssetPaths)
+		{
+			if(initAssetPaths == null)
+				return;
+
+			for(int i = 0; i < initAssetPaths.Length; i++)
+			{
+				var a = initAssetPaths[i];
+				if(a != null)
+					assetQueue.TryAdd(a, a);
+			}
+		}
+
 		internal void LoadInitialAssets()
 		{
 			foreach(var asset in assetQueue)
@@ -281,9 +284,6 @@
 
 		internal static void UpdateCurrentScene()
 		{
-			// this is thread safe, should be stored for the check bellow
-			// otherwise a case occurs sometimes where OnUpdate is called before OnStart
-			var updateLoadingScreen = CurrentScene.assetQueue.Count > CurrentScene.loadedAssets.Count;
 			if(stopScene != null)
 			{
 				stopScene = null;
@@ -293,9 +293,10 @@
 			{
 				LoadingScene?.OnStop();
 				startScene = null;
+				CurrentScene.hasStarted = true;
 				CurrentScene?.OnStart();
 			}
-			if(updateLoadingScreen)
+			if(CurrentScene.hasStarted == false)
 				LoadingScene?.OnUpdate();
 			else
 				CurrentScene?.OnUpdate();

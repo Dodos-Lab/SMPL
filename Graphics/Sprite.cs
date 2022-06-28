@@ -26,10 +26,10 @@
 			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
 			return index switch
 			{
-				0 => GetPositionFromSelf(-Origin),
-				1 => GetPositionFromSelf(new Vector2(LocalSize.X, 0) - Origin),
-				2 => GetPositionFromSelf(LocalSize - Origin),
-				3 => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin),
+				0 => PositionFromSelf(-Origin),
+				1 => PositionFromSelf(new Vector2(LocalSize.X, 0) - Origin),
+				2 => PositionFromSelf(LocalSize - Origin),
+				3 => PositionFromSelf(new Vector2(0, LocalSize.Y) - Origin),
 				_ => default,
 			};
 		}

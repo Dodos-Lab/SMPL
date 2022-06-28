@@ -31,10 +31,10 @@
 				foreach(var kvp2 in kvp.Value)
 				{
 					var localPos = kvp.Key * CellSize;
-					var topLeft = GetPositionFromSelf(localPos).ToSFML();
-					var topRight = GetPositionFromSelf(localPos + new Vector2(CellSize.X, 0)).ToSFML();
-					var botRight = GetPositionFromSelf(localPos + CellSize).ToSFML();
-					var botLeft = GetPositionFromSelf(localPos + new Vector2(0, CellSize.Y)).ToSFML();
+					var topLeft = PositionFromSelf(localPos).ToSFML();
+					var topRight = PositionFromSelf(localPos + new Vector2(CellSize.X, 0)).ToSFML();
+					var botRight = PositionFromSelf(localPos + CellSize).ToSFML();
+					var botLeft = PositionFromSelf(localPos + new Vector2(0, CellSize.Y)).ToSFML();
 					var txCrdsA = kvp2.Value.IndeciesTexCoords * CellSize;
 					var txCrdsB = txCrdsA + kvp2.Value.IndeciesSize * CellSize;
 					var c = kvp2.Value.Color;
@@ -86,11 +86,11 @@
 		}
 		public Vector2 GetTileIndecies(Vector2 position)
 		{
-			return (GetLocalPositionFromSelf(position) / CellSize).PointToGrid(CellSize) / CellSize;
+			return (LocalPositionFromSelf(position) / CellSize).PointToGrid(CellSize) / CellSize;
 		}
 		public Vector2 GetTilePosition(Vector2 tileIndecies)
 		{
-			return GetPositionFromSelf(tileIndecies * CellSize);
+			return PositionFromSelf(tileIndecies * CellSize);
 		}
 
 		internal override Hitbox GetBoundingBox()

@@ -57,15 +57,12 @@ namespace SMPL
 			while(Window.IsOpen)
 			{
 				Window.DispatchEvents();
-				Window.Clear();
 				Scene.MainCamera.Fill(Color.Black);
 
 				Time.Update();
 				Scene.UpdateCurrentScene();
-				ThingManager.UpdateAllThings();
 				ThingManager.DrawAllVisuals(Scene.MainCamera.GetRenderTexture());
 				Camera.DrawMainCameraToWindow();
-				Window.Display();
 			}
 		}
 		public static void Stop()

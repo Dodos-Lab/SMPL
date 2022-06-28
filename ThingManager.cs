@@ -152,20 +152,14 @@ void main()
 
 		public static Color AmbientColor { get; set; } = new Color(50, 50, 50);
 
-		public static void UpdateAllThings()
-		{
-			var objs = Thing.objsOrder;
-			foreach(var kvp in objs)
-				for(int i = 0; i < kvp.Value.Count; i++)
-					kvp.Value[i].Update();
-		}
 		public static void DrawAllVisuals(RenderTarget renderTarget)
 		{
 			var visuals = Visual.visuals.Reverse();
 			var cameras = Camera.cameras;
 
 			for(int i = 0; i < cameras.Count; i++)
-				cameras[i].GetRenderTexture().Clear(Color.Transparent);
+				if(cameras[i].UID != Scene.MAIN_CAMERA_UID)
+					cameras[i].GetRenderTexture().Clear(Color.Transparent);
 
 			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
@@ -176,12 +170,16 @@ void main()
 							kvp.Value[i].Draw(cam.GetRenderTexture());
 					}
 
+
 			for(int i = 0; i < cameras.Count; i++)
-				cameras[i].GetRenderTexture().Display();
+				if(cameras[i].UID != Scene.MAIN_CAMERA_UID)
+					cameras[i].GetRenderTexture().Display();
 
 			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
 					kvp.Value[i].Draw(renderTarget);
+
+			Scene.UpdateCurrentScene();
 		}
 
 		public static List<string> GetUIDs()

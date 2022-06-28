@@ -50,8 +50,8 @@
 
 			for(int i = 0; i < LocalLines.Count; i++)
 			{
-				var a = thing.GetPositionFromSelf(LocalLines[i].A);
-				var b = thing.GetPositionFromSelf(LocalLines[i].B);
+				var a = thing.PositionFromSelf(LocalLines[i].A);
+				var b = thing.PositionFromSelf(LocalLines[i].B);
 				Lines.Add(new(a, b));
 			}
 		}
