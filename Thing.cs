@@ -13,7 +13,7 @@
 		private Matrix3x2 global;
 		private string uid;
 
-		public List<string> Types
+		public ReadOnlyCollection<string> Types
 		{
 			get
 			{
@@ -26,7 +26,7 @@
 					Add(curType.BaseType);
 					curType = curType.BaseType;
 				}
-				return result;
+				return result.AsReadOnly();
 
 				void Add(Type type)
 				{
@@ -123,13 +123,13 @@
 				Scale = prevSc;
 
 				var newParent = Get(parentUID);
-				if(newParent != null)
+				if(newParent != null && newParent.childrenUIDs.Contains(uid) == false)
 					newParent.childrenUIDs.Add(uid);
 			}
 		}
 		public string ParentOldUID => parOldUID;
 		[JsonIgnore]
-		public List<string> ChildrenUIDs => new(childrenUIDs);
+		public ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
 		public int UpdateOrder
 		{
 			get => order;

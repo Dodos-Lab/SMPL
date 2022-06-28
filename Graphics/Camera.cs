@@ -108,6 +108,8 @@
 
 		internal override void OnDestroy()
 		{
+			base.OnDestroy();
+
 			cameras.Remove(this);
 			if(Scene.CurrentScene.Textures.ContainsKey(UID))
 				Scene.CurrentScene.Textures.Remove(UID, out _);

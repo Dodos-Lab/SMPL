@@ -197,6 +197,11 @@
 		{
 			try
 			{
+				// clear these in case of previous save/load
+				cameras.Clear();
+				sprites.Clear();
+				lights.Clear();
+
 				foreach(var kvp in objs)
 				{
 					TryAdd(cameras, kvp.Value);
