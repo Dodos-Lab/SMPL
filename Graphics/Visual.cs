@@ -42,81 +42,58 @@
 		public List<string> CameraUIDs { get; } = new();
 		public ThingManager.BlendModes BlendMode { get; set; } = ThingManager.BlendModes.Alpha;
 
+		public ThingManager.CodeGLSL EffectCode(ThingManager.Effects effect)
+		{
+			return effect == ThingManager.Effects.Custom ? custom : shaders[effect];
+		}
 		public void SetCustomShader(ThingManager.CodeGLSL shaderCode)
 		{
+			custom = shaderCode;
 			Effect = ThingManager.Effects.Custom;
 			SetShader(shaderCode);
 		}
 
-		public void SetShaderFloat(string uniformName, float value)
-		{
-			shader?.SetUniform(uniformName, value);
-		}
 		public void SetShaderBool(string uniformName, bool value)
 		{
 			shader?.SetUniform(uniformName, value);
+			uniformsBool[uniformName] = value;
 		}
 		public void SetShaderInt(string uniformName, int value)
 		{
 			shader?.SetUniform(uniformName, value);
+			uniformsInt[uniformName] = value;
+		}
+		public void SetShaderFloat(string uniformName, float value)
+		{
+			shader?.SetUniform(uniformName, value);
+			uniformsFloat[uniformName] = value;
 		}
 		public void SetShaderVector2(string uniformName, Vector2 value)
 		{
 			shader?.SetUniform(uniformName, value.ToGLSL());
+			uniformsVec2[uniformName] = value.ToGLSL();
 		}
 		public void SetShaderVector3(string uniformName, Vector3 value)
 		{
 			shader?.SetUniform(uniformName, value.ToGLSL());
+			uniformsVec3[uniformName] = value.ToGLSL();
 		}
 		public void SetShaderVector4(string uniformName, Vector4 value)
 		{
 			shader?.SetUniform(uniformName, value.ToGLSL());
+			uniformsVec4[uniformName] = value.ToGLSL();
 		}
 		public void SetShaderColor(string uniformName, Color value)
 		{
 			shader?.SetUniform(uniformName, value.ToGLSL());
+			uniformsVec4[uniformName] = value.ToGLSL();
 		}
 
-		public void SetShaderFloatArray(string uniformName, float[] value)
-		{
-			shader?.SetUniformArray(uniformName, value);
-		}
-		public void SetShaderVector2Array(string uniformName, Vector2[] value)
-		{
-			var array = new Vec2[value.Length];
-			for(int i = 0; i < array.Length; i++)
-				array[i] = value[i].ToGLSL();
-
-			shader?.SetUniformArray(uniformName, array);
-		}
-		public void SetShaderVector3Array(string uniformName, Vector3[] value)
-		{
-			var array = new Vec3[value.Length];
-			for(int i = 0; i < array.Length; i++)
-				array[i] = value[i].ToGLSL();
-
-			shader?.SetUniformArray(uniformName, array);
-		}
-		public void SetShaderVector4Array(string uniformName, Vector4[] value)
-		{
-			var array = new Vec4[value.Length];
-			for(int i = 0; i < array.Length; i++)
-				array[i] = value[i].ToGLSL();
-
-			shader?.SetUniformArray(uniformName, array);
-		}
-		public void SetShaderColorArray(string uniformName, Color[] value)
-		{
-			var array = new Vec4[value.Length];
-			for(int i = 0; i < array.Length; i++)
-				array[i] = value[i].ToGLSL();
-
-			shader?.SetUniformArray(uniformName, array);
-		}
 		#region Backend
 		private ThingManager.Effects effect;
 		private int depth;
 		private Shader shader;
+		private ThingManager.CodeGLSL custom;
 		internal readonly static SortedDictionary<int, List<Visual>> visuals = new();
 		internal readonly static Dictionary<ThingManager.Effects, ThingManager.CodeGLSL> shaders = new()
 		{
@@ -274,23 +251,23 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 			} },
 			{ ThingManager.Effects.Lights, new()
 			{
+				//uniform vec2 Direction;
+				//uniform vec4 DirectionalColor;
+				//uniform float DirectionalIntensity;
+				//
+				//
+				//float value =
+				//	sin(TextureCoords.x * 2 - (Direction.x - 0.28) * 2) * DirectionalIntensity +
+				//	sin(TextureCoords.y * 2 + (Direction.y + 0.28) * 2) * DirectionalIntensity;
+				//result += value;
 				FragmentUniforms = @"
 uniform vec4 AmbientColor = vec4(0.2, 0.2, 0.2, 1.0);
-
-//uniform vec2 Direction;
-//uniform vec4 DirectionalColor;
-//uniform float DirectionalIntensity;
 
 uniform vec2 Positions[50];
 uniform vec4 Colors[50];
 uniform float Scales[50];",
 				FragmentCode = @"
 vec3 result = AmbientColor.rgb;
-//float value =
-//	sin(TextureCoords.x * 2 - (Direction.x - 0.28) * 2) * DirectionalIntensity +
-//	sin(TextureCoords.y * 2 + (Direction.y + 0.28) * 2) * DirectionalIntensity;
-//result += value;
-
 float cameraRatio = CameraSize.x / CameraSize.y;
 
 for(int i = 0; i < 50; i++)
@@ -374,6 +351,19 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 			} },
 		};
 
+		[JsonProperty]
+		private readonly ConcurrentDictionary<string, bool> uniformsBool = new();
+		[JsonProperty]
+		private readonly ConcurrentDictionary<string, int> uniformsInt = new();
+		[JsonProperty]
+		private readonly ConcurrentDictionary<string, float> uniformsFloat = new();
+		[JsonProperty]
+		private readonly ConcurrentDictionary<string, Vec2> uniformsVec2 = new();
+		[JsonProperty]
+		private readonly ConcurrentDictionary<string, Vec3> uniformsVec3 = new();
+		[JsonProperty]
+		private readonly ConcurrentDictionary<string, Vec4> uniformsVec4 = new();
+
 		[JsonConstructor]
 		internal Visual() { }
 		internal Visual(string uid) : base(uid)
@@ -416,7 +406,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 		{
 			if(Shader.IsAvailable == false)
 			{
-				Console.LogError(0, $"Could not set the *{effect}* shader. This device does not support shaders.");
+				Console.LogError(0, $"Could not set the {effect} shader. This device does not support shaders.");
 				return;
 			}
 
@@ -436,12 +426,61 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 				var frag = shaderCode.GetFragment();
 				var vert = shaderCode.GetVertex();
 				shader = Shader.FromString(vert, null, frag);
+
+				foreach(var kvp in uniformsBool)
+					shader?.SetUniform(kvp.Key, kvp.Value);
+				foreach(var kvp in uniformsInt)
+					shader?.SetUniform(kvp.Key, kvp.Value);
+				foreach(var kvp in uniformsFloat)
+					shader?.SetUniform(kvp.Key, kvp.Value);
+				foreach(var kvp in uniformsVec2)
+					shader?.SetUniform(kvp.Key, kvp.Value);
+				foreach(var kvp in uniformsVec3)
+					shader?.SetUniform(kvp.Key, kvp.Value);
+				foreach(var kvp in uniformsVec4)
+					shader?.SetUniform(kvp.Key, kvp.Value);
 			}
 			catch(Exception)
 			{
 				Effect = ThingManager.Effects.None;
 				Console.LogError(0, "Could not set custom shader.", "Check the shader code for errors.");
 			}
+		}
+		internal void SetShaderFloatArray(string uniformName, float[] value)
+		{
+			shader?.SetUniformArray(uniformName, value);
+		}
+		internal void SetShaderVector2Array(string uniformName, Vector2[] value)
+		{
+			var array = new Vec2[value.Length];
+			for(int i = 0; i < array.Length; i++)
+				array[i] = value[i].ToGLSL();
+
+			shader?.SetUniformArray(uniformName, array);
+		}
+		internal void SetShaderVector3Array(string uniformName, Vector3[] value)
+		{
+			var array = new Vec3[value.Length];
+			for(int i = 0; i < array.Length; i++)
+				array[i] = value[i].ToGLSL();
+
+			shader?.SetUniformArray(uniformName, array);
+		}
+		internal void SetShaderVector4Array(string uniformName, Vector4[] value)
+		{
+			var array = new Vec4[value.Length];
+			for(int i = 0; i < array.Length; i++)
+				array[i] = value[i].ToGLSL();
+
+			shader?.SetUniformArray(uniformName, array);
+		}
+		internal void SetShaderColorArray(string uniformName, Color[] value)
+		{
+			var array = new Vec4[value.Length];
+			for(int i = 0; i < array.Length; i++)
+				array[i] = value[i].ToGLSL();
+
+			shader?.SetUniformArray(uniformName, array);
 		}
 		internal Shader GetShader(RenderTarget renderTarget)
 		{
@@ -462,6 +501,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 			var res = renderTarget.Size;
 			shader?.SetUniform("CameraSize", new Vec2(sz.X, sz.Y));
 			shader?.SetUniform("CameraResolution", new Vec2(res.X, res.Y));
+
 			return shader;
 		}
 		internal BlendMode GetBlendMode()

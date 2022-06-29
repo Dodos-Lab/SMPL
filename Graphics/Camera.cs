@@ -88,7 +88,7 @@
 		internal static readonly List<Camera> cameras = new();
 
 		private Vector2 res;
-		private RenderTexture renderTexture = new(0, 0);
+		private RenderTexture renderTexture = new(1, 1);
 
 		[JsonConstructor]
 		internal Camera()
