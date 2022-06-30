@@ -226,7 +226,7 @@ namespace SMPL.Tools
 		/// if outside of the range.<br></br>
 		/// The animation result starts at 0 and settles on 1 at the end (may go outside during the animation but never ends outside).
 		/// The result is then returned. These calculations are also known as 'easing functions'.<br></br><br></br>
-		/// - Example: An animation of rotating a <see cref="Sprite"/> for 3 seconds would look something like this:<code>
+		/// - Example: An animation of rotating a <see cref="SpriteInstance"/> for 3 seconds would look something like this:<code>
 		/// step += Time.Delta / 3f;
 		/// var result = step.AnimateUnit(Animations.Bounce, AnimationWay.Forward, repeated: false);
 		/// sprite.Angle = result * 360f;
@@ -659,7 +659,7 @@ namespace SMPL.Tools
 		/// </summary>
 		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
 		{
-			renderTarget ??= Scene.MainCamera.GetRenderTexture();
+			renderTarget ??= Scene.MainCamera.RenderTexture;
 			color = color == default ? Color.White : color;
 
 			size /= 2;
@@ -783,6 +783,17 @@ namespace SMPL.Tools
 		/// </summary>
 		public static int Map(this int number, int a1, int a2, int b1, int b2) =>
 			(int)Map((float)number, a1, a2, b1, b2);
+
+		/// <summary>
+		/// Applies a certain <paramref name="unitAmount"/>[0 to 1] of <paramref name="tint"/> to a <paramref name="color"/>.
+		/// </summary>
+		public static Color Tint(this Color color, Color tint, float unitAmount)
+		{
+			var r = color.R + (unitAmount * (255f - tint.R));
+			var g = color.G + (unitAmount * (255f - tint.G));
+			var b = color.B + (unitAmount * (255f - tint.B));
+			return new((byte)r, (byte)g, (byte)b, color.A);
+		}
 
 		#region Backend
 		private static readonly Dictionary<string, int> gateEntries = new();

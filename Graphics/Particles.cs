@@ -1,24 +1,24 @@
 ﻿namespace SMPL.Graphics
 {
-	internal class Particle
+	public class Particle
 	{
-		internal Vector2 TexCoordsUnitA { get; set; }
-		internal Vector2 TexCoordsUnitB { get; set; } = new(1);
-		internal Color Color { get; set; } = Color.White;
-		internal float Lifetime { get; set; } = 2;
-		internal float Speed { get; set; } = 100;
-		internal float MoveAngle { get; set; }
+		public Vector2 TexCoordsUnitA { get; set; }
+		public Vector2 TexCoordsUnitB { get; set; } = new(1);
+		public Color Color { get; set; } = Color.White;
+		public float LifetimeSeconds { get; set; } = 2;
+		public float Speed { get; set; } = 100;
+		public float MoveAngle { get; set; }
 
-		internal Vector2 Position { get; set; }
-		internal float Angle { get; set; }
-		internal float Size { get; set; } = 8;
+		public Vector2 Position { get; set; }
+		public float Angle { get; set; }
+		public float Size { get; set; } = 8;
 
-		internal Particle()
+		public Particle()
 		{
 			TexCoordsUnitA = default;
 			TexCoordsUnitB = new(1);
 			Color = Color.White;
-			Lifetime = 2;
+			LifetimeSeconds = 2;
 			Speed = 100;
 			MoveAngle = 0;
 
@@ -28,13 +28,13 @@
 		}
 	}
 
-	internal abstract class ParticleManager : Visual
+	internal abstract class ParticleManagerInstance : VisualInstance
 	{
 		private readonly List<Particle> particles = new();
 
 		internal int ParticleCount => particles == null ? 0 : particles.Count;
 
-		internal ParticleManager(string uid) : base(uid) { }
+		internal ParticleManagerInstance(string uid) : base(uid) { }
 		internal void Spawn(uint amount)
 		{
 			for(int i = 0; i < amount; i++)
@@ -52,13 +52,13 @@
 			for(int i = 0; i < ps.Count * 4; i += 4)
 			{
 				var p = ps[i / 4];
-				if(p.Lifetime <= 0)
+				if(p.LifetimeSeconds <= 0)
 				{
-					p.Lifetime = 0;
+					p.LifetimeSeconds = 0;
 					particles.Remove(p);
 					continue;
 				}
-				p.Lifetime -= Time.Delta;
+				p.LifetimeSeconds -= Time.Delta;
 
 				OnParticleUpdate(p);
 

@@ -43,7 +43,7 @@
 		/// </summary>
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4)
 		{
-			renderTarget ??= Scene.MainCamera.GetRenderTexture();
+			renderTarget ??= Scene.MainCamera.RenderTexture;
 			color = color == default ? Color.White : color;
 
 			width /= 2;
@@ -95,7 +95,7 @@
 		/// if the calculation fails to find the best point. Returns <see cref="B"/> if the path [<see cref="A"/> -> <see cref="B"/>]
 		/// has no obstacles.<br></br><br></br>
 		/// May be used as:<br></br>
-		/// - Setting <see cref="A"/> to be the position of some <see cref="Thing"/>/<see cref="Sprite"/>.<br></br>
+		/// - Setting <see cref="A"/> to be the position of some <see cref="ThingInstance"/>/<see cref="SpriteInstance"/>.<br></br>
 		/// - Setting <see cref="B"/> to be some target point destination (for example <see cref="Scene.MouseCursorPosition"/>).<br></br>
 		/// - Checking whether there is a clear path between them by calling this method and its result being invalid or not.<br></br>
 		/// - If invalid then this means it is time to handle the case where there is no path/the path is too complex to be taken

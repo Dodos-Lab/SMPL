@@ -6,11 +6,11 @@
 	public class Hitbox
 	{
 		/// <summary>
-		/// This list is used by <see cref="UpdateLines(Thing)"/> which transforms and moves its contents into <see cref="Lines"/>.
+		/// This list is used by <see cref="UpdateLines(ThingInstance)"/> which transforms and moves its contents into <see cref="Lines"/>.
 		/// </summary>
 		public List<Line> LocalLines { get; } = new();
 		/// <summary>
-		/// This list is used by <see cref="UpdateLines(Thing)"/> for writing and all the rest of the methods for reading.
+		/// This list is used by <see cref="UpdateLines(ThingInstance)"/> for writing and all the rest of the methods for reading.
 		/// </summary>
 		public List<Line> Lines { get; } = new();
 
@@ -39,19 +39,16 @@
 		/// </summary>
 		public void TransformLocalLines(string thingUID)
 		{
-			var thing = Thing.Get(thingUID);
+			var thing = ThingInstance.GetTryError(thingUID);
 			if(thing == null)
-			{
-				ThingManager.MissingThingError(thingUID);
 				return;
-			}
 
 			Lines.Clear();
 
 			for(int i = 0; i < LocalLines.Count; i++)
 			{
-				var a = thing.PositionFromSelf(LocalLines[i].A);
-				var b = thing.PositionFromSelf(LocalLines[i].B);
+				var a = thing.GetPositionFromSelf(LocalLines[i].A);
+				var b = thing.GetPositionFromSelf(LocalLines[i].B);
 				Lines.Add(new(a, b));
 			}
 		}
@@ -63,7 +60,7 @@
 		/// </summary>
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4)
 		{
-			renderTarget ??= Scene.MainCamera.GetRenderTexture();
+			renderTarget ??= Scene.MainCamera.RenderTexture;
 			color = color == default ? Color.White : color;
 
 			for(int i = 0; i < Lines.Count; i++)

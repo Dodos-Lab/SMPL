@@ -205,7 +205,7 @@
 				return false;
 			}
 
-			void TryAdd<T>(Dictionary<string, T> dict, Thing thing) where T : Thing
+			void TryAdd<T>(Dictionary<string, T> dict, ThingInstance thing) where T : ThingInstance
 			{
 				if(thing is T t && dict.ContainsKey(t.UID) == false)
 					dict[t.UID] = t;
@@ -237,18 +237,18 @@
 		private bool hasStarted;
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		internal static Thread assetsLoading;
-		internal static Camera MainCamera => Thing.Get<Camera>(MAIN_CAMERA_UID);
+		internal static CameraInstance MainCamera => ThingInstance.Get<CameraInstance>(MAIN_CAMERA_UID);
 
 		[JsonProperty]
 		private ConcurrentDictionary<string, string> assetQueue = new();
 		[JsonProperty]
-		private Dictionary<string, Camera> cameras = new();
+		private Dictionary<string, CameraInstance> cameras = new();
 		[JsonProperty]
-		private Dictionary<string, Sprite> sprites = new();
+		private Dictionary<string, SpriteInstance> sprites = new();
 		[JsonProperty]
-		private Dictionary<string, Light> lights = new();
+		private Dictionary<string, LightInstance> lights = new();
 
-		internal Dictionary<string, Thing> objs = new();
+		internal Dictionary<string, ThingInstance> objs = new();
 		private ConcurrentDictionary<string, string> loadedAssets = new();
 		internal ConcurrentDictionary<string, Texture> Textures { get; } = new();
 		internal ConcurrentDictionary<string, Music> Music { get; } = new();
@@ -315,7 +315,7 @@
 				{
 					if(scene.IsLoaded == false)
 					{
-						ThingManager.DestroyAll();
+						Thing.DestroyAll();
 						scene.UnloadAllAssets();
 					}
 

@@ -55,11 +55,11 @@
 		/// <summary>
 		/// The time in seconds since the last frame/tick/update. This is useful for multiplying a step value against it in continuous calculations
 		/// so that the step value is consistent on all systems.<br></br><br></br>
-		/// - Example: An <see cref="Thing"/> moving with the speed of 1 pixel per frame/tick/update in a game running at 60 FPS will be moving with 60
+		/// - Example: An <see cref="ThingInstance"/> moving with the speed of 1 pixel per frame/tick/update in a game running at 60 FPS will be moving with 60
 		/// pixels per second.<br></br> But on a game running at 120 FPS - it will be moving with 120 pixels per second or twice as fast.<br></br>
 		/// This also  means that some users with low-end hardware will appear to play the game in slow motion
 		/// (when the FPS drops bellow 40, 30, 20).<br></br>
-		/// The step value of that <see cref="Thing"/> (in this case the speed of '1 pixel per frame/tick/update') should be multiplied with
+		/// The step value of that <see cref="ThingInstance"/> (in this case the speed of '1 pixel per frame/tick/update') should be multiplied with
 		/// <see cref="Delta"/> to prevent it from messing with the gameplay.<br></br><br></br>
 		/// - Note: The continuous movement methods in <see cref="Extensions"/> are already accounting the delta time
 		/// in their calculations with an argument determining whether they are FPS dependent.

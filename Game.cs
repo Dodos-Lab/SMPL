@@ -22,7 +22,6 @@ global using SFML.System;
 global using SFML.Window;
 global using SMPL.Graphics;
 global using SMPL.Tools;
-global using Sprite = SMPL.Graphics.Sprite;
 global using Console = SMPL.Tools.Console;
 global using Time = SMPL.Tools.Time;
 
@@ -48,8 +47,8 @@ namespace SMPL
 			Scene.CurrentScene = startingScene;
 			Scene.LoadingScene = loadingScene;
 
-			if(ThingManager.Exists(Scene.MAIN_CAMERA_UID) == false)
-				ThingManager.CreateCamera(Scene.MAIN_CAMERA_UID, Settings.ScreenResolution);
+			if(Thing.Exists(Scene.MAIN_CAMERA_UID) == false)
+				Thing.CreateCamera(Scene.MAIN_CAMERA_UID, Settings.ScreenResolution);
 
 			Scene.assetsLoading = new(Scene.ThreadLoadAssets) { IsBackground = true, Name = "AssetsLoading" };
 			Scene.assetsLoading.Start();
@@ -57,12 +56,12 @@ namespace SMPL
 			while(Window.IsOpen)
 			{
 				Window.DispatchEvents();
-				Scene.MainCamera.Fill(Color.Black);
+				Scene.MainCamera.RenderTexture.Clear(Color.Black);
 
 				Time.Update();
 				Scene.UpdateCurrentScene();
-				ThingManager.DrawAllVisuals(Scene.MainCamera.GetRenderTexture());
-				Camera.DrawMainCameraToWindow();
+				Thing.DrawAllVisuals(Scene.MainCamera.RenderTexture);
+				CameraInstance.DrawMainCameraToWindow();
 			}
 		}
 		public static void Stop()
