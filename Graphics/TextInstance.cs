@@ -5,7 +5,11 @@
 		public string FontPath { get; set; }
 		public string Value { get; set; } = "Hello, World!";
 		public Color Color { get; set; } = Color.White;
-		public uint SymbolSize { get; set; } = 32;
+		public int SymbolSize
+		{
+			get => symbolSize;
+			set => symbolSize = value.Limit(0, 2048, Extensions.Limitation.Overflow);
+		}
 		public float SymbolSpace { get; set; } = 1;
 		public float LineSpace { get; set; } = 1;
 		public Color OutlineColor { get; set; } = Color.Black;
@@ -14,6 +18,7 @@
 		public Vector2 OriginUnit { get; set; } = new(0.5f);
 
 		#region Backend
+		private int symbolSize = 32;
 		internal static Text textInstance = new();
 
 		[JsonConstructor]
@@ -31,19 +36,26 @@
 		internal override Hitbox GetBoundingBox()
 		{
 			UpdateGlobalText();
+			if(textInstance.Font == null)
+				return new Hitbox(Global(-50, -50), Global(50, -50), Global(50, 50), Global(-50, 50), Global(-50, -50));
+
 			var bounds = textInstance.GetLocalBounds();
-			var tl = new Vector2(bounds.Left, bounds.Top);
-			var tr = new Vector2(bounds.Left + bounds.Width, bounds.Top);
-			var br = new Vector2(bounds.Left + bounds.Width, bounds.Top + bounds.Height);
-			var bl = new Vector2(bounds.Left, bounds.Top + bounds.Height);
+			bounds.Left -= textInstance.Origin.X;
+			bounds.Top -= textInstance.Origin.Y;
+			var tl = Global(bounds.Left, bounds.Top);
+			var tr = Global(bounds.Left + bounds.Width, bounds.Top);
+			var br = Global(bounds.Left + bounds.Width, bounds.Top + bounds.Height);
+			var bl = Global(bounds.Left, bounds.Top + bounds.Height);
 			return new Hitbox(tl, tr, br, bl, tl);
+
+			Vector2 Global(float x, float y) => GetPositionFromSelf(new(x, y));
 		}
 
 		internal void UpdateGlobalText()
 		{
 			var text = textInstance;
 			text.Font = GetFont();
-			text.CharacterSize = SymbolSize;
+			text.CharacterSize = (uint)SymbolSize.Limit(0, int.MaxValue);
 			text.FillColor = Color.Tint(Tint, 0.5f);
 			text.LetterSpacing = SymbolSpace;
 			text.LineSpacing = LineSpace;

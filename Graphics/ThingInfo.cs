@@ -367,6 +367,9 @@
 				return new();
 			var type = obj.GetType();
 
+			TryAddAllProps(type, true);
+			TryAddAllProps(type, false);
+
 			var result = new List<Property>();
 			var allNames = set ? settersAllNames[type] : gettersAllNames[type];
 			for(int i = 0; i < allNames.Count; i++)
