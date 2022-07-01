@@ -50,19 +50,6 @@
 			set => OriginUnit = value / LocalSize;
 		}
 
-		public override Vector2 GetCornerClockwise(int index)
-		{
-			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
-			return index switch
-			{
-				0 => GetPositionFromSelf(-Origin),
-				1 => GetPositionFromSelf(new Vector2(LocalSize.X, 0) - Origin),
-				2 => GetPositionFromSelf(LocalSize - Origin),
-				3 => GetPositionFromSelf(new Vector2(0, LocalSize.Y) - Origin),
-				_ => default,
-			};
-		}
-
 		#region Backend
 		[JsonConstructor]
 		internal SpriteInstance() { }
@@ -80,12 +67,13 @@
 			var h0 = h * TexCoordUnitA.Y;
 			var hh = h * TexCoordUnitB.Y;
 
+			var lines = BoundingBox.Lines;
 			var verts = new Vertex[]
 			{
-				new(GetCornerClockwise(0).ToSFML(), Tint, new(w0, h0)),
-				new(GetCornerClockwise(1).ToSFML(), Tint, new(ww, h0)),
-				new(GetCornerClockwise(2).ToSFML(), Tint, new(ww, hh)),
-				new(GetCornerClockwise(3).ToSFML(), Tint, new(w0, hh)),
+				new(lines[0].A.ToSFML(), Tint, new(w0, h0)),
+				new(lines[1].A.ToSFML(), Tint, new(ww, h0)),
+				new(lines[2].A.ToSFML(), Tint, new(ww, hh)),
+				new(lines[3].A.ToSFML(), Tint, new(w0, hh)),
 			};
 
 			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
@@ -99,7 +87,6 @@
 				LocalSize - Origin,
 				new Vector2(0, LocalSize.Y) - Origin,
 				-Origin);
-			hitbox.TransformLocalLines(UID);
 			return hitbox;
 		}
 		#endregion

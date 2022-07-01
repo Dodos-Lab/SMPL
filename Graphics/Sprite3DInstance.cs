@@ -102,21 +102,6 @@
 		}
 		internal Sprite3DInstance(string uid, ICollection<string> texturePaths) : base(uid) => this.texturePaths = texturePaths.ToArray();
 
-		internal void SetHitbox3D()
-		{
-			var points = new List<Vector2>();
-
-			for(int i = 0; i < 4; i++)
-				points.Add(GetCornerClockwise(i));
-			for(int i = 0; i < 4; i++)
-				points.Add(GetCorner3DClockwise(i));
-
-			var outline = points.OutlinePoints();
-
-			Hitbox.Lines.Clear();
-			for(int i = 1; i < outline.Count; i++)
-				Hitbox.Lines.Add(new(outline[i - 1], outline[i]));
-		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			if(IsHidden || textureCount == 0)
@@ -128,10 +113,10 @@
 				var tex = Scene.CurrentScene.Textures[texturePaths[i]];
 				var verts = new Vertex[]
 				{
-					new(GetCornerClockwise(0).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
-					new(GetCornerClockwise(1).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, 0)),
-					new(GetCornerClockwise(2).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, tex.Size.Y)),
-					new(GetCornerClockwise(3).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
+					//new(GetCornerClockwise(0).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
+					//new(GetCornerClockwise(1).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, 0)),
+					//new(GetCornerClockwise(2).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, tex.Size.Y)),
+					//new(GetCornerClockwise(3).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
 				};
 
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
@@ -140,21 +125,6 @@
 		internal override Hitbox GetBoundingBox()
 		{
 			return base.GetBoundingBox();
-		}
-
-		internal Vector2 GetCorner3DClockwise(int index)
-		{
-			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
-
-			var h = Height * (textureCount == 0 ? 1 : textureCount);
-			return index switch
-			{
-				0 => GetCornerClockwise(0).PointMoveAtAngle(Angle3D, h, false),
-				1 => GetCornerClockwise(1).PointMoveAtAngle(Angle3D, h, false),
-				2 => GetCornerClockwise(2).PointMoveAtAngle(Angle3D, h, false),
-				3 => GetCornerClockwise(3).PointMoveAtAngle(Angle3D, h, false),
-				_ => default,
-			};
 		}
 
 		#region Backend

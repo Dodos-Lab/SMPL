@@ -41,6 +41,10 @@
 		public static string GetFreeUID(string uid)
 		{
 			var i = 1;
+
+			if(string.IsNullOrWhiteSpace(uid))
+				uid = nameof(Thing);
+
 			var freeUID = uid;
 
 			var objs = Scene.CurrentScene.objs;
@@ -72,14 +76,19 @@
 					kvp.Value.Destroy(true);
 		}
 
+		public static string CreateNinePatch(string uid, string texturePath)
+		{
+			var t = new NinePatchInstance(uid) { TexturePath = texturePath };
+			return t.UID;
+		}
 		public static string CreateSprite(string uid, string texturePath)
 		{
-			var t = new SpriteInstance(GetFreeUID(uid)) { TexturePath = texturePath };
+			var t = new SpriteInstance(uid) { TexturePath = texturePath };
 			return t.UID;
 		}
 		public static string CreateLight(string uid, Color color)
 		{
-			var t = new LightInstance(GetFreeUID(uid)) { Color = color };
+			var t = new LightInstance(uid) { Color = color };
 			return t.UID;
 		}
 		public static string CreateCamera(string uid, Vector2 resolution)

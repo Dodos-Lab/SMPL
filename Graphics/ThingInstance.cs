@@ -34,18 +34,7 @@
 				if(value == uid)
 					return;
 
-				if(string.IsNullOrWhiteSpace(value))
-				{
-					Console.LogError(1, $"The [{nameof(UID)}] '{value}' is invalid.");
-					return;
-				}
-
 				var objs = Scene.CurrentScene.objs;
-				if(objs.ContainsKey(value))
-				{
-					Console.LogError(1, $"Another {{{nameof(ThingInstance)}}} already exists with the [{nameof(UID)}] '{value}'.");
-					return;
-				}
 
 				if(uid != null)
 					objs.Remove(uid);
@@ -167,7 +156,15 @@
 		}
 
 		public Hitbox Hitbox { get { hitbox.TransformLocalLines(uid); return hitbox; } }
-		public Hitbox BoundingBox => GetBoundingBox();
+		public Hitbox BoundingBox
+		{
+			get
+			{
+				var bb = GetBoundingBox();
+				bb.TransformLocalLines(uid);
+				return bb;
+			}
+		}
 
 		public Vector2 GetLocalPositionFromParent(Vector2 position)
 		{
@@ -216,7 +213,6 @@
 				child.ParentUID = uid;
 			}
 		}
-		public virtual Vector2 GetCornerClockwise(int index) => Position;
 
 		public override string ToString()
 		{
@@ -237,7 +233,7 @@
 		internal ThingInstance() { }
 		internal ThingInstance(string uid)
 		{
-			UID = uid;
+			UID = Thing.GetFreeUID(uid);
 			LocalScale = 1;
 
 			// i just got born, do i have any children before i was even born? claim ownership if so

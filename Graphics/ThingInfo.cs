@@ -48,6 +48,8 @@
 		public const string SPRITE_ORIGIN = nameof(SpriteInstance.Origin);
 		public const string SPRITE_ORIGIN_UNIT = nameof(SpriteInstance.OriginUnit);
 
+		public const string NINE_PATCH_BORDER_SIZE = nameof(NinePatchInstance.BorderSize);
+
 		public const string TEXT_FONT_PATH = nameof(TextInstance.FontPath);
 		public const string TEXT_VALUE = nameof(TextInstance.Value);
 		public const string TEXT_COLOR = nameof(TextInstance.Color);
@@ -82,7 +84,6 @@
 		public const string THING_GET_POSITION_FROM_PARENT = nameof(ThingInstance.GetPositionFromParent);
 		public const string THING_GET_LOCAL_POSITION_FROM_SELF = nameof(ThingInstance.GetLocalPositionFromSelf);
 		public const string THING_GET_POSITION_FROM_SELF = nameof(ThingInstance.GetPositionFromSelf);
-		public const string THING_GET_CORNER_CLOCKWISE = nameof(ThingInstance.GetCornerClockwise);
 		public const string THING_DESTROY = nameof(ThingInstance.Destroy);
 
 		public const string CAMERA_SNAP = nameof(CameraInstance.Snap);

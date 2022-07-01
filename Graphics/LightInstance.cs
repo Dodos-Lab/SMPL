@@ -81,7 +81,6 @@
 				new(HALF_SIZE, HALF_SIZE),
 				new(-HALF_SIZE, HALF_SIZE),
 				new(-HALF_SIZE, -HALF_SIZE));
-			hitbox.TransformLocalLines(UID);
 			return hitbox;
 		}
 		#endregion

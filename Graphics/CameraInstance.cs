@@ -52,19 +52,6 @@
 			if(result == false)
 				Console.LogError(1, $"Could not save the image at '{imagePath}'.");
 		}
-		public override Vector2 GetCornerClockwise(int index)
-		{
-			index = index.Limit(0, 4, Extensions.Limitation.Overflow);
-			var sz = renderTexture.GetView().Size * 0.5f;
-			return index switch
-			{
-				0 => GetPositionFromSelf(new(-sz.X, -sz.Y)),
-				1 => GetPositionFromSelf(new(sz.X, -sz.Y)),
-				2 => GetPositionFromSelf(new(sz.X, sz.Y)),
-				3 => GetPositionFromSelf(new(-sz.X, sz.Y)),
-				_ => default,
-			};
-		}
 
 		public Vector2 PointToCamera(Vector2 worldPoint)
 		{
@@ -109,12 +96,13 @@
 		}
 		internal override Hitbox GetBoundingBox()
 		{
+			var sz = renderTexture.GetView().Size * 0.5f;
 			return new Hitbox(
-				GetCornerClockwise(0),
-				GetCornerClockwise(1),
-				GetCornerClockwise(2),
-				GetCornerClockwise(3),
-				GetCornerClockwise(0));
+				new(-sz.X, -sz.Y),
+				new(sz.X, -sz.Y),
+				new(sz.X, sz.Y),
+				new(-sz.X, sz.Y),
+				new(-sz.X, -sz.Y));
 		}
 
 		internal static void DrawMainCameraToWindow()
