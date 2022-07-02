@@ -2,7 +2,23 @@
 {
 	internal class NinePatchInstance : SpriteInstance
 	{
-		public float BorderSize { get; set; } = 16;
+		public float BorderSize
+		{
+			get => borderSz;
+			set { borderSz = value; base.LocalSize = rawLocalSz - new Vector2(value) * 2; }
+		}
+		public new Vector2 LocalSize
+		{
+			get => rawLocalSz;
+			set { rawLocalSz = value; base.LocalSize = value - new Vector2(BorderSize) * 2; }
+		}
+		[JsonIgnore]
+		public new Vector2 Size
+		{
+			get => LocalSize * Scale;
+			set => LocalSize = value / Scale;
+		}
+
 		public new Hitbox BoundingBox
 		{
 			get
@@ -21,9 +37,17 @@
 		}
 
 		#region Backend
+		private Vector2 rawLocalSz;
+		private float borderSz = 16;
+
 		[JsonConstructor]
-		internal NinePatchInstance() { }
-		internal NinePatchInstance(string uid) : base(uid) { }
+		internal NinePatchInstance() => Init();
+		internal NinePatchInstance(string uid) : base(uid) => Init();
+
+		private void Init()
+		{
+			LocalSize = new(100);
+		}
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{

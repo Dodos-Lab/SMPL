@@ -252,7 +252,12 @@
 		internal void Update() => OnUpdate();
 		internal virtual void OnUpdate() { }
 		internal virtual void OnDestroy() { }
-		internal abstract Hitbox GetBoundingBox();
+		internal virtual Hitbox GetBoundingBox()
+		{
+			return new Hitbox(Local(-50, -50), Local(50, -50), Local(50, 50), Local(-50, 50), Local(-50, -50));
+
+			Vector2 Local(float x, float y) => GetLocalPositionFromSelf(new(x, y));
+		}
 
 		internal Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)
 		{

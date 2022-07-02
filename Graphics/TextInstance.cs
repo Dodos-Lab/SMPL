@@ -35,20 +35,18 @@
 		}
 		internal override Hitbox GetBoundingBox()
 		{
-			UpdateGlobalText();
-			if(textInstance.Font == null)
-				return new Hitbox(Global(-50, -50), Global(50, -50), Global(50, 50), Global(-50, 50), Global(-50, -50));
+			if(GetFont() == null)
+				return base.GetBoundingBox();
 
+			UpdateGlobalText();
 			var bounds = textInstance.GetLocalBounds();
 			bounds.Left -= textInstance.Origin.X;
 			bounds.Top -= textInstance.Origin.Y;
-			var tl = Global(bounds.Left, bounds.Top);
-			var tr = Global(bounds.Left + bounds.Width, bounds.Top);
-			var br = Global(bounds.Left + bounds.Width, bounds.Top + bounds.Height);
-			var bl = Global(bounds.Left, bounds.Top + bounds.Height);
+			var tl = new Vector2(bounds.Left, bounds.Top);
+			var tr = new Vector2(bounds.Left + bounds.Width, bounds.Top);
+			var br = new Vector2(bounds.Left + bounds.Width, bounds.Top + bounds.Height);
+			var bl = new Vector2(bounds.Left, bounds.Top + bounds.Height);
 			return new Hitbox(tl, tr, br, bl, tl);
-
-			Vector2 Global(float x, float y) => GetPositionFromSelf(new(x, y));
 		}
 
 		internal void UpdateGlobalText()

@@ -67,6 +67,41 @@
 		protected virtual void OnStop() { }
 		protected virtual void OnGameStop() { }
 
+		protected ReadOnlyCollection<string> GetAssetPaths()
+		{
+			var result = new List<string>();
+			result.AddRange(Textures.Keys.ToList());
+			result.AddRange(Fonts.Keys.ToList());
+			result.AddRange(Music.Keys.ToList());
+			result.AddRange(Sounds.Keys.ToList());
+			result.AddRange(Files.Keys.ToList());
+			return result.AsReadOnly();
+		}
+		protected bool AssetsAreLoaded(string path)
+		{
+			var assets = GetAssetPaths();
+			return Directory.Exists(path) ? Dir(path) : File(path);
+
+			bool Dir(string path)
+			{
+				var dirs = Directory.GetDirectories(path);
+				var files = Directory.GetFiles(path);
+
+				for(int i = 0; i < dirs.Length; i++)
+					if(Dir(dirs[i]) == false)
+						return false;
+
+				for(int i = 0; i < files.Length; i++)
+					if(File(files[i]) == false)
+						return false;
+
+				return true;
+			}
+			bool File(string path)
+			{
+				return assets.Contains(path);
+			}
+		}
 		protected void LoadAssets(params string[] paths)
 		{
 			for(int i = 0; i < paths?.Length; i++)
@@ -187,12 +222,16 @@
 				cameras.Clear();
 				sprites.Clear();
 				lights.Clear();
+				texts.Clear();
+				npatches.Clear();
 
 				foreach(var kvp in objs)
 				{
 					TryAdd(cameras, kvp.Value);
 					TryAdd(sprites, kvp.Value);
 					TryAdd(lights, kvp.Value);
+					TryAdd(texts, kvp.Value);
+					TryAdd(npatches, kvp.Value);
 				}
 
 				var json = JsonConvert.SerializeObject(this);
@@ -247,6 +286,10 @@
 		private Dictionary<string, SpriteInstance> sprites = new();
 		[JsonProperty]
 		private Dictionary<string, LightInstance> lights = new();
+		[JsonProperty]
+		private Dictionary<string, TextInstance> texts = new();
+		[JsonProperty]
+		private Dictionary<string, NinePatchInstance> npatches = new();
 
 		internal Dictionary<string, ThingInstance> objs = new();
 		private ConcurrentDictionary<string, string> loadedAssets = new();
