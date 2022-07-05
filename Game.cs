@@ -20,7 +20,6 @@ global using SFML.Graphics;
 global using SFML.Graphics.Glsl;
 global using SFML.System;
 global using SFML.Window;
-global using SMPL.Graphics;
 global using SMPL.Tools;
 global using Console = SMPL.Tools.Console;
 global using Time = SMPL.Tools.Time;
@@ -60,9 +59,39 @@ namespace SMPL
 
 				Time.Update();
 				Scene.UpdateCurrentScene();
-				Thing.DrawAllVisuals(Scene.MainCamera.RenderTexture);
+				UpdateEngine(Scene.MainCamera.RenderTexture);
 				CameraInstance.DrawMainCameraToWindow();
 			}
+		}
+		public static void UpdateEngine(RenderTarget renderTarget)
+		{
+			var visuals = VisualInstance.visuals.Reverse();
+			var cameras = CameraInstance.cameras;
+
+			for(int i = 0; i < cameras.Count; i++)
+				if(cameras[i].UID != Scene.MAIN_CAMERA_UID)
+					cameras[i].RenderTexture.Clear(Color.Transparent);
+
+			foreach(var kvp in visuals)
+				for(int i = 0; i < kvp.Value.Count; i++)
+					for(int j = 0; j < kvp.Value[i].CameraUIDs.Count; j++)
+					{
+						var cam = ThingInstance.Get<CameraInstance>(kvp.Value[i].CameraUIDs[j]);
+						if(cam != null)
+							kvp.Value[i].Draw(cam.RenderTexture);
+					}
+
+
+			for(int i = 0; i < cameras.Count; i++)
+				if(cameras[i].UID != Scene.MAIN_CAMERA_UID)
+					cameras[i].RenderTexture.Display();
+
+			foreach(var kvp in visuals)
+				for(int i = 0; i < kvp.Value.Count; i++)
+					kvp.Value[i].Draw(renderTarget);
+
+			Scene.UpdateCurrentScene();
+			AudioInstance.Update();
 		}
 		public static void Stop()
 		{

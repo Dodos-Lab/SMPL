@@ -18,31 +18,36 @@
 			WeeksToHours, WeeksToDays
 		}
 
+		public static string ToTimer(this float seconds)
+		{
+			var ts = TimeSpan.FromSeconds(seconds);
+			return $"{ts:%h}h {ts:%m}m {ts:%s}s";
+		}
 		/// <summary>
-		/// Converts a <paramref name="number"/> from one time unit to another (chosen by <paramref name="convertType"/>). Then returns the result.
+		/// Converts a <paramref name="time"/> from one time unit to another (chosen by <paramref name="convertType"/>). Then returns the result.
 		/// </summary>
-		public static float ToTime(this float number, Convertion convertType)
+		public static float ToTime(this float time, Convertion convertType)
 		{
 			return convertType switch
 			{
-				Convertion.MillisecondsToSeconds => number / 1000,
-				Convertion.MillisecondsToMinutes => number / 1000 / 60,
-				Convertion.SecondsToMilliseconds => number * 1000,
-				Convertion.SecondsToMinutes => number / 60,
-				Convertion.SecondsToHours => number / 3600,
-				Convertion.MinutesToMilliseconds => number * 60000,
-				Convertion.MinutesToSeconds => number * 60,
-				Convertion.MinutesToHours => number / 60,
-				Convertion.MinutesToDays => number / 1440,
-				Convertion.HoursToSeconds => number * 3600,
-				Convertion.HoursToMinutes => number * 60,
-				Convertion.HoursToDays => number / 24,
-				Convertion.HoursToWeeks => number / 168,
-				Convertion.DaysToMinutes => number * 1440,
-				Convertion.DaysToHours => number * 24,
-				Convertion.DaysToWeeks => number / 7,
-				Convertion.WeeksToHours => number * 168,
-				Convertion.WeeksToDays => number * 7,
+				Convertion.MillisecondsToSeconds => time / 1000,
+				Convertion.MillisecondsToMinutes => time / 1000 / 60,
+				Convertion.SecondsToMilliseconds => time * 1000,
+				Convertion.SecondsToMinutes => time / 60,
+				Convertion.SecondsToHours => time / 3600,
+				Convertion.MinutesToMilliseconds => time * 60000,
+				Convertion.MinutesToSeconds => time * 60,
+				Convertion.MinutesToHours => time / 60,
+				Convertion.MinutesToDays => time / 1440,
+				Convertion.HoursToSeconds => time * 3600,
+				Convertion.HoursToMinutes => time * 60,
+				Convertion.HoursToDays => time / 24,
+				Convertion.HoursToWeeks => time / 168,
+				Convertion.DaysToMinutes => time * 1440,
+				Convertion.DaysToHours => time * 24,
+				Convertion.DaysToWeeks => time / 7,
+				Convertion.WeeksToHours => time * 168,
+				Convertion.WeeksToDays => time * 7,
 				_ => 0,
 			};
 		}

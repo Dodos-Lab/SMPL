@@ -165,16 +165,19 @@
 			for(int i = 0; i < paths?.Length; i++)
 			{
 				var path = paths[i];
-				TryDisposeAndRemove(Textures, path);
-				TryDisposeAndRemove(Fonts, path);
-				TryDisposeAndRemove(Music, path);
-				TryDisposeAndRemove(Sounds, path);
+				if(Path.HasExtension(path))
+				{
+					Remove(path);
+					continue;
+				}
 
-				//TryRemove(Sprites3D, path);
-				TryRemove(Files, path);
+				var dirs = Directory.GetDirectories(path);
+				var files = Directory.GetFiles(path);
 
-				loadedAssets.TryRemove(path, out _);
-				assetQueue.TryRemove(path, out _);
+				for(int j = 0; j < dirs.Length; j++)
+					UnloadAssets(dirs[j]);
+				for(int j = 0; j < files.Length; j++)
+					Remove(files[j]);
 			}
 
 			void TryDisposeAndRemove<T>(ConcurrentDictionary<string, T> assets, string key) where T : IDisposable
@@ -191,6 +194,19 @@
 					return;
 
 				assets.Remove(key, out _);
+			}
+			void Remove(string path)
+			{
+				TryDisposeAndRemove(Textures, path);
+				TryDisposeAndRemove(Fonts, path);
+				TryDisposeAndRemove(Music, path);
+				TryDisposeAndRemove(Sounds, path);
+
+				//TryRemove(Sprites3D, path);
+				TryRemove(Files, path);
+
+				loadedAssets.TryRemove(path, out _);
+				assetQueue.TryRemove(path, out _);
 			}
 		}
 		protected void UnloadAllAssets()
@@ -219,11 +235,17 @@
 			try
 			{
 				// clear these in case of previous save/load
+				assetQueue.Clear();
 				cameras.Clear();
 				sprites.Clear();
 				lights.Clear();
 				texts.Clear();
 				npatches.Clear();
+				audio.Clear();
+
+				var assets = GetAssetPaths();
+				for(int i = 0; i < assets.Count; i++)
+					assetQueue.TryAdd(assets[i], assets[i]);
 
 				foreach(var kvp in objs)
 				{
@@ -232,6 +254,7 @@
 					TryAdd(lights, kvp.Value);
 					TryAdd(texts, kvp.Value);
 					TryAdd(npatches, kvp.Value);
+					TryAdd(audio, kvp.Value);
 				}
 
 				var json = JsonConvert.SerializeObject(this);
@@ -290,6 +313,8 @@
 		private Dictionary<string, TextInstance> texts = new();
 		[JsonProperty]
 		private Dictionary<string, NinePatchInstance> npatches = new();
+		[JsonProperty]
+		private Dictionary<string, AudioInstance> audio = new();
 
 		internal Dictionary<string, ThingInstance> objs = new();
 		private ConcurrentDictionary<string, string> loadedAssets = new();
