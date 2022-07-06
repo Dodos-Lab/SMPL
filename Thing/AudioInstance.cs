@@ -25,14 +25,24 @@
 					{
 						case Thing.AudioStatus.Playing: if(sound.Status != SoundStatus.Playing) sound.Play(); break;
 						case Thing.AudioStatus.Paused: sound.Pause(); break;
-						case Thing.AudioStatus.Stopped: sound.Stop(); break;
+						case Thing.AudioStatus.Stopped:
+							{
+								Progress = 0;
+								sound.Stop();
+								break;
+							}
 					}
 				else if(music != null)
 					switch(status)
 					{
 						case Thing.AudioStatus.Playing: if(music.Status != SoundStatus.Playing) music.Play(); break;
 						case Thing.AudioStatus.Paused: music.Pause(); break;
-						case Thing.AudioStatus.Stopped: music.Stop(); break;
+						case Thing.AudioStatus.Stopped:
+							{
+								Progress = 0;
+								music.Stop();
+								break;
+							}
 					}
 			}
 		}
@@ -88,7 +98,7 @@
 		private static readonly List<AudioInstance> audios = new();
 		[JsonProperty]
 		private Thing.AudioStatus status;
-		private float duration;
+		private float duration, prevProg;
 		private string audioPath;
 
 		[JsonConstructor]
@@ -152,8 +162,13 @@
 
 			for(int i = 0; i < audios.Count; i++)
 			{
-				audios[i].SyncAudioProps();
-				audios[i].Status = audios[i].status;
+				var a = audios[i];
+				a.SyncAudioProps();
+				a.Status = a.status;
+
+				if(a.ProgressUnit == 0 && a.prevProg != 0 && a.status == Thing.AudioStatus.Playing)
+					a.Status = Thing.AudioStatus.Stopped;
+				a.prevProg = a.ProgressUnit;
 			}
 		}
 		internal override void OnDestroy()
