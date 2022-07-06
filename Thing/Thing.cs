@@ -69,9 +69,14 @@
 			var t = new CameraInstance(uid, resolution);
 			return t.UID;
 		}
-		public static string CreateText(string uid, string fontPath)
+		public static string CreateText(string uid, string fontPath, string value = "Hello, World!")
 		{
-			var t = new TextInstance(uid) { FontPath = fontPath };
+			var t = new TextInstance(uid) { FontPath = fontPath, Value = value };
+			return t.UID;
+		}
+		public static string CreateTilemap(string uid, string texturePath, float tileWidth = 32, float tileHeight = 32)
+		{
+			var t = new TilemapInstance(uid) { TexturePath = texturePath, TileSize = new(tileWidth, tileHeight) };
 			return t.UID;
 		}
 
