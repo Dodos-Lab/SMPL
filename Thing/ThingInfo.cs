@@ -72,6 +72,10 @@
 			public const string AUDIO_PROGRESS_UNIT = nameof(AudioInstance.ProgressUnit);
 			public const string AUDIO_PROGRESS = nameof(AudioInstance.Progress);
 			public const string AUDIO_FADE = nameof(AudioInstance.DistanceFade);
+
+			public const string TILEMAP_TILE_SIZE = nameof(TilemapInstance.TileSize);
+			public const string TILEMAP_TILE_GAP = nameof(TilemapInstance.TileGap);
+			public const string TILEMAP_TILE_PALETTE = nameof(TilemapInstance.TilePalette);
 			#endregion
 
 			public string Name { get; internal set; }
@@ -109,6 +113,17 @@
 			public const string VISUAL_SET_EFFECT_VECTOR3 = nameof(VisualInstance.SetEffectVector3);
 			public const string VISUAL_SET_EFFECT_VECTOR4 = nameof(VisualInstance.SetEffectVector4);
 			public const string VISUAL_SET_EFFECT_COLOR = nameof(VisualInstance.SetEffectColor);
+
+			public const string TILEMAP_SET_TILE = nameof(TilemapInstance.SetTile);
+			public const string TILEMAP_SET_TILE_SQUARE = nameof(TilemapInstance.SetTileSquare);
+			public const string TILEMAP_REMOVE_TILES = nameof(TilemapInstance.RemoveTiles);
+			public const string TILEMAP_REMOVE_TILE_AT_DEPTH = nameof(TilemapInstance.RemoveTileAtDepth);
+			public const string TILEMAP_REMOVE_TILE_SQUARE = nameof(TilemapInstance.RemoveTileSquare);
+			public const string TILEMAP_REMOVE_TILE_SQUARE_AT_DEPTH = nameof(TilemapInstance.RemoveTileSquareAtDepth);
+			public const string TILEMAP_GET_TILE_INDECIES = nameof(TilemapInstance.GetTileIndecies);
+			public const string TILEMAP_GET_TILE_POSITION = nameof(TilemapInstance.GetTilePosition);
+			public const string TILEMAP_GET_PALETTE_FROM_POSITION = nameof(TilemapInstance.GetPaletteFromPosition);
+			public const string TILEMAP_GET_PALETTE_FROM_TILE_INDECIES = nameof(TilemapInstance.GetPaletteFromTileIndecies);
 			#endregion
 
 			public class Parameter

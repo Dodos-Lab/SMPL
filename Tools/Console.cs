@@ -65,7 +65,7 @@
 		/// <summary>
 		/// Display an error on the <see cref="Console"/> with <paramref name="description"/>.
 		/// Some information about where the error has occurred is also included through <paramref name="callChainIndex"/> and the <see cref="Debug"/>
-		/// properties. The <paramref name="description"/> is skipped if <paramref name="callChainIndex"/> is -1.
+		/// properties (unless <paramref name="callChainIndex"/> is -1).
 		/// </summary>
 		public static void LogError(int callChainIndex, string description, string tip = null)
 		{

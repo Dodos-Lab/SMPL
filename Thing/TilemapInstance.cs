@@ -21,37 +21,88 @@
 	}
 	internal class TilemapInstance : VisualInstance
 	{
+		public List<Thing.Tile> TilePalette { get; } = new();
 		public Vector2 TileSize { get; set; } = new(32);
 		public Vector2 TileGap { get; set; }
+		public int TileCount => tileCount;
 
-		public void SetTile(Vector2 tilePositionIndecies, Thing.Tile tile)
+		public void SetTile(Vector2 tilePositionIndecies, int tilePaletteIndex)
 		{
+			if(TryTilePaletteIndexError(tilePaletteIndex))
+				return;
+
 			if(map.ContainsKey(tilePositionIndecies) == false)
 				map[tilePositionIndecies] = new();
 
-			map[tilePositionIndecies][tile.Depth] = tile;
+			tileCount++;
+
+			UpdateCornerPoints(tilePositionIndecies);
+			map[tilePositionIndecies][TilePalette[tilePaletteIndex].Depth] = tilePaletteIndex;
 		}
-		public void SetTileSquare(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, Thing.Tile tile)
+		public void SetTileSquare(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, int tilePaletteIndex)
+		{
+			if(TryTilePaletteIndexError(tilePaletteIndex))
+				return;
+
+			var a = tilePositionIndeciesA;
+			var b = tilePositionIndeciesB;
+
+			SecureMinMax(ref a, ref b);
+
+			for(float x = a.X; x < b.X; x++)
+				for(float y = a.Y; y < b.Y; y++)
+					SetTile(new(x, y), tilePaletteIndex);
+		}
+
+		public void RemoveTileAtDepth(Vector2 tilePositionIndecies, int depth)
+		{
+			if(map.ContainsKey(tilePositionIndecies) == false || map[tilePositionIndecies].ContainsKey(depth) == false)
+				return;
+
+			tileCount--;
+			map[tilePositionIndecies].Remove(depth);
+
+			RecalculateCornerPoints();
+		}
+		public void RemoveTiles(Vector2 tilePositionIndecies)
+		{
+			if(map.ContainsKey(tilePositionIndecies) == false)
+				return;
+
+			tileCount--;
+			map.Remove(tilePositionIndecies);
+
+			RecalculateCornerPoints();
+		}
+		public void RemoveTileSquareAtDepth(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, int depth)
 		{
 			var a = tilePositionIndeciesA;
 			var b = tilePositionIndeciesB;
 
-			if(a.X > b.X)
-				(a.X, b.X) = (b.X, a.X);
-			if(a.Y > b.Y)
-				(a.Y, b.Y) = (b.Y, a.Y);
+			SecureMinMax(ref a, ref b);
 
 			for(float x = a.X; x < b.X; x++)
 				for(float y = a.Y; y < b.Y; y++)
-					SetTile(new(x, y), tile);
+					RemoveTileAtDepth(new(x, y), depth);
+		}
+		public void RemoveTileSquare(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB)
+		{
+			var a = tilePositionIndeciesA;
+			var b = tilePositionIndeciesB;
+
+			SecureMinMax(ref a, ref b);
+
+			for(float x = a.X; x < b.X; x++)
+				for(float y = a.Y; y < b.Y; y++)
+					RemoveTiles(new(x, y));
 		}
 
-		public List<Thing.Tile> GetTilesFromPosition(Vector2 position)
+		public List<int> GetPaletteFromPosition(Vector2 position)
 		{
 			var pos = GetTileIndecies(position);
 			return map.ContainsKey(pos) == false ? new() : map[pos].Values.ToList();
 		}
-		public List<Thing.Tile> GetTilesFromIndecies(Vector2 tileIndecies)
+		public List<int> GetPaletteFromTileIndecies(Vector2 tileIndecies)
 		{
 			return map.ContainsKey(tileIndecies) == false ? new() : map[tileIndecies].Values.ToList();
 		}
@@ -65,9 +116,11 @@
 		}
 
 		#region Backend
+		private int tileCount;
+		private Vector2 topLeftIndecies = new(float.MaxValue, float.MaxValue), botRightIndecies = new(float.MinValue, float.MinValue);
 		private readonly VertexArray vertsArr = new(PrimitiveType.Quads);
 		[JsonProperty]
-		private readonly Dictionary<Vector2, SortedDictionary<float, Thing.Tile>> map = new();
+		private readonly Dictionary<Vector2, SortedDictionary<int, int>> map = new();
 
 		[JsonConstructor]
 		internal TilemapInstance() { }
@@ -92,9 +145,10 @@
 					var topRight = GetPositionFromSelf(localPos + new Vector2(TileSize.X, 0)).ToSFML();
 					var botRight = GetPositionFromSelf(localPos + TileSize).ToSFML();
 					var botLeft = GetPositionFromSelf(localPos + new Vector2(0, TileSize.Y)).ToSFML();
-					var txCrdsA = kvp2.Value.IndeciesTexCoord * TileSize + (TileGap * kvp2.Value.IndeciesTexCoord);
-					var txCrdsB = txCrdsA + kvp2.Value.IndeciesSize * TileSize;
-					var c = kvp2.Value.Color;
+					var tile = TilePalette[kvp2.Value];
+					var txCrdsA = tile.IndeciesTexCoord * TileSize + (TileGap * tile.IndeciesTexCoord) + TileGap;
+					var txCrdsB = txCrdsA + tile.IndeciesSize * TileSize;
+					var c = tile.Color;
 
 					vertsArr.Append(new(topLeft, c, new(txCrdsA.X, txCrdsA.Y)));
 					vertsArr.Append(new(topRight, c, new(txCrdsB.X, txCrdsA.Y)));
@@ -106,7 +160,55 @@
 		}
 		internal override Hitbox GetBoundingBox()
 		{
-			throw new NotImplementedException();
+			return tileCount == 0 ? base.GetBoundingBox() : new Hitbox(
+				new Vector2(topLeftIndecies.X, topLeftIndecies.Y) * TileSize,
+				new Vector2(botRightIndecies.X, topLeftIndecies.Y) * TileSize,
+				new Vector2(botRightIndecies.X, botRightIndecies.Y) * TileSize,
+				new Vector2(topLeftIndecies.X, botRightIndecies.Y) * TileSize,
+				new Vector2(topLeftIndecies.X, topLeftIndecies.Y) * TileSize);
+		}
+
+		private bool TryTilePaletteIndexError(int tilePaletteIndex)
+		{
+			if(TilePalette.Count == 0)
+			{
+				Console.LogError(1, $"There are no tiles in the {nameof(TilePalette)} of this Tilemap, add some before setting tiles.");
+				return true;
+			}
+			if(tilePaletteIndex < 0 || tilePaletteIndex >= TilePalette.Count)
+			{
+				Console.LogError(1, $"The {nameof(tilePaletteIndex)} is outside of the {nameof(TilePalette)} range. " +
+					$"It has to be in range [0 to {TilePalette.Count - 1}] (inclusively).");
+				return true;
+			}
+			return false;
+		}
+		private void RecalculateCornerPoints()
+		{
+			topLeftIndecies = new(float.MaxValue, float.MaxValue);
+			botRightIndecies = new(float.MinValue, float.MinValue);
+			foreach(var kvp in map)
+				UpdateCornerPoints(kvp.Key);
+		}
+		private void UpdateCornerPoints(Vector2 tilePositionIndecies)
+		{
+			var p = tilePositionIndecies;
+
+			if(topLeftIndecies.X > p.X)
+				topLeftIndecies.X = p.X;
+			if(topLeftIndecies.Y > p.Y)
+				topLeftIndecies.Y = p.Y;
+			if(botRightIndecies.X < p.X + 1)
+				botRightIndecies.X = p.X + 1;
+			if(botRightIndecies.Y < p.Y + 1)
+				botRightIndecies.Y = p.Y + 1;
+		}
+		private static void SecureMinMax(ref Vector2 min, ref Vector2 max)
+		{
+			if(min.X > max.X)
+				(min.X, max.X) = (max.X, min.X);
+			if(min.Y > max.Y)
+				(min.Y, max.Y) = (max.Y, min.Y);
 		}
 		#endregion
 	}
