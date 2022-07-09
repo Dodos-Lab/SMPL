@@ -21,14 +21,14 @@
 	}
 	internal class TilemapInstance : VisualInstance
 	{
-		public List<Thing.Tile> TilePalette { get; } = new();
+		public Dictionary<string, Thing.Tile> TilePalette { get; } = new();
 		public Vector2 TileSize { get; set; } = new(32);
 		public Vector2 TileGap { get; set; }
 		public int TileCount => tileCount;
 
-		public void SetTile(Vector2 tilePositionIndecies, int tilePaletteIndex)
+		public void SetTile(Vector2 tilePositionIndecies, string tilePaletteUID)
 		{
-			if(TryTilePaletteIndexError(tilePaletteIndex))
+			if(TryTilePaletteIndexError(tilePaletteUID))
 				return;
 
 			if(map.ContainsKey(tilePositionIndecies) == false)
@@ -37,11 +37,11 @@
 			tileCount++;
 
 			UpdateCornerPoints(tilePositionIndecies);
-			map[tilePositionIndecies][TilePalette[tilePaletteIndex].Depth] = tilePaletteIndex;
+			map[tilePositionIndecies][TilePalette[tilePaletteUID].Depth] = tilePaletteUID;
 		}
-		public void SetTileSquare(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, int tilePaletteIndex)
+		public void SetTileSquare(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, string tilePaletteUID)
 		{
-			if(TryTilePaletteIndexError(tilePaletteIndex))
+			if(TryTilePaletteIndexError(tilePaletteUID))
 				return;
 
 			var a = tilePositionIndeciesA;
@@ -51,12 +51,21 @@
 
 			for(float x = a.X; x < b.X; x++)
 				for(float y = a.Y; y < b.Y; y++)
-					SetTile(new(x, y), tilePaletteIndex);
+					SetTile(new(x, y), tilePaletteUID);
+		}
+
+		public bool HasTileAtDepth(Vector2 tilePositionIndecies, int depth)
+		{
+			return HasTile(tilePositionIndecies) && map[tilePositionIndecies].ContainsKey(depth);
+		}
+		public bool HasTile(Vector2 tilePositionIndecies)
+		{
+			return map.ContainsKey(tilePositionIndecies);
 		}
 
 		public void RemoveTileAtDepth(Vector2 tilePositionIndecies, int depth)
 		{
-			if(map.ContainsKey(tilePositionIndecies) == false || map[tilePositionIndecies].ContainsKey(depth) == false)
+			if(HasTileAtDepth(tilePositionIndecies, depth) == false)
 				return;
 
 			tileCount--;
@@ -97,18 +106,18 @@
 					RemoveTiles(new(x, y));
 		}
 
-		public List<int> GetPaletteFromPosition(Vector2 position)
+		public List<string> GetPaletteUIDsFromPosition(Vector2 position)
 		{
 			var pos = GetTileIndecies(position);
 			return map.ContainsKey(pos) == false ? new() : map[pos].Values.ToList();
 		}
-		public List<int> GetPaletteFromTileIndecies(Vector2 tileIndecies)
+		public List<string> GetPaletteUIDsFromTileIndecies(Vector2 tileIndecies)
 		{
 			return map.ContainsKey(tileIndecies) == false ? new() : map[tileIndecies].Values.ToList();
 		}
 		public Vector2 GetTileIndecies(Vector2 position)
 		{
-			return (GetLocalPositionFromSelf(position) / TileSize).PointToGrid(TileSize) / TileSize;
+			return (GetLocalPositionFromSelf(position) / TileSize).PointToGrid(new(1));
 		}
 		public Vector2 GetTilePosition(Vector2 tileIndecies)
 		{
@@ -119,8 +128,9 @@
 		private int tileCount;
 		private Vector2 topLeftIndecies = new(float.MaxValue, float.MaxValue), botRightIndecies = new(float.MinValue, float.MinValue);
 		private readonly VertexArray vertsArr = new(PrimitiveType.Quads);
+
 		[JsonProperty]
-		private readonly Dictionary<Vector2, SortedDictionary<int, int>> map = new();
+		private readonly Dictionary<Vector2, SortedDictionary<int, string>> map = new();
 
 		[JsonConstructor]
 		internal TilemapInstance() { }
@@ -168,17 +178,16 @@
 				new Vector2(topLeftIndecies.X, topLeftIndecies.Y) * TileSize);
 		}
 
-		private bool TryTilePaletteIndexError(int tilePaletteIndex)
+		private bool TryTilePaletteIndexError(string tilePaletteUID)
 		{
 			if(TilePalette.Count == 0)
 			{
 				Console.LogError(1, $"There are no tiles in the {nameof(TilePalette)} of this Tilemap, add some before setting tiles.");
 				return true;
 			}
-			if(tilePaletteIndex < 0 || tilePaletteIndex >= TilePalette.Count)
+			if(TilePalette.ContainsKey(tilePaletteUID) == false)
 			{
-				Console.LogError(1, $"The {nameof(tilePaletteIndex)} is outside of the {nameof(TilePalette)} range. " +
-					$"It has to be in range [0 to {TilePalette.Count - 1}] (inclusively).");
+				Console.LogError(1, $"The {nameof(tilePaletteUID)} is not present in the {nameof(TilePalette)}.");
 				return true;
 			}
 			return false;

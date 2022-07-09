@@ -75,6 +75,7 @@
 
 			public const string TILEMAP_TILE_SIZE = nameof(TilemapInstance.TileSize);
 			public const string TILEMAP_TILE_GAP = nameof(TilemapInstance.TileGap);
+			public const string TILEMAP_TILE_COUNT = nameof(TilemapInstance.TileCount);
 			public const string TILEMAP_TILE_PALETTE = nameof(TilemapInstance.TilePalette);
 			#endregion
 
@@ -116,14 +117,16 @@
 
 			public const string TILEMAP_SET_TILE = nameof(TilemapInstance.SetTile);
 			public const string TILEMAP_SET_TILE_SQUARE = nameof(TilemapInstance.SetTileSquare);
+			public const string TILEMAP_HAS_TILE = nameof(TilemapInstance.HasTile);
+			public const string TILEMAP_HAS_TILE_AT_DEPTH = nameof(TilemapInstance.HasTileAtDepth);
 			public const string TILEMAP_REMOVE_TILES = nameof(TilemapInstance.RemoveTiles);
 			public const string TILEMAP_REMOVE_TILE_AT_DEPTH = nameof(TilemapInstance.RemoveTileAtDepth);
 			public const string TILEMAP_REMOVE_TILE_SQUARE = nameof(TilemapInstance.RemoveTileSquare);
 			public const string TILEMAP_REMOVE_TILE_SQUARE_AT_DEPTH = nameof(TilemapInstance.RemoveTileSquareAtDepth);
 			public const string TILEMAP_GET_TILE_INDECIES = nameof(TilemapInstance.GetTileIndecies);
 			public const string TILEMAP_GET_TILE_POSITION = nameof(TilemapInstance.GetTilePosition);
-			public const string TILEMAP_GET_PALETTE_FROM_POSITION = nameof(TilemapInstance.GetPaletteFromPosition);
-			public const string TILEMAP_GET_PALETTE_FROM_TILE_INDECIES = nameof(TilemapInstance.GetPaletteFromTileIndecies);
+			public const string TILEMAP_GET_PALETTE_UIDS_FROM_POSITION = nameof(TilemapInstance.GetPaletteUIDsFromPosition);
+			public const string TILEMAP_GET_PALETTE_UIDS_FROM_TILE_INDECIES = nameof(TilemapInstance.GetPaletteUIDsFromTileIndecies);
 			#endregion
 
 			public class Parameter
