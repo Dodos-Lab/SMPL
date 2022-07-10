@@ -121,7 +121,7 @@
 		}
 		public Vector2 GetTilePosition(Vector2 tileIndecies)
 		{
-			return GetPositionFromSelf(tileIndecies * TileSize);
+			return GetPositionFromSelf(tileIndecies * TileSize + (TileSize * 0.5f));
 		}
 
 		#region Backend

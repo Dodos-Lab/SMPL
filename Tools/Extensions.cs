@@ -810,7 +810,10 @@ namespace SMPL.Tools
 			var name = n[..type.Name.IndexOf("`")] + "<";
 			var genericArgs = type.GetGenericArguments();
 			for(int i = 0; i < genericArgs.Length; i++)
-				name += GetPrettyName(genericArgs[i], full);
+			{
+				var sep = i == 0 ? "" : ", ";
+				name += sep + GetPrettyName(genericArgs[i], full);
+			}
 			name += ">";
 			return name;
 		}
