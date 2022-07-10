@@ -202,12 +202,19 @@
 			var nth = new string[] { "st", "nd", "rd" };
 			var method = Info.GetMethod(obj.UID, key.Item2);
 
+			if(paramTypes.Count != parameters.Length)
+			{
+				Console.LogError(2, $"The method\n{method}\ncannot process its parameters.",
+					$"It expects {paramTypes.Count} parameters, not {parameters.Length}.");
+				return true;
+			}
+
 			for(int i = 0; i < paramTypes.Count; i++)
 				if(parameters[i].GetType() != paramTypes[i])
 				{
 					var nthStr = i < 4 ? nth[i] : "th";
 					Console.LogError(2, $"The method\n{method}\ncannot process the value of its {i + 1}{nthStr} parameter.",
-						$"It expects a value of type `{paramTypes[i].FullName}`, not `{parameters[i].GetType().FullName}`.");
+						$"It expects a value of type {paramTypes[i].FullName}, not {parameters[i].GetType().FullName}.");
 					return true;
 				}
 			return false;

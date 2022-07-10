@@ -24,24 +24,26 @@
 		public Dictionary<string, Thing.Tile> TilePalette { get; } = new();
 		public Vector2 TileSize { get; set; } = new(32);
 		public Vector2 TileGap { get; set; }
+		[JsonIgnore]
 		public int TileCount => tileCount;
 
 		public void SetTile(Vector2 tilePositionIndecies, string tilePaletteUID)
 		{
-			if(TryTilePaletteIndexError(tilePaletteUID))
+			if(TryTilePaletteError(tilePaletteUID))
 				return;
 
 			if(map.ContainsKey(tilePositionIndecies) == false)
+			{
 				map[tilePositionIndecies] = new();
-
-			tileCount++;
+				tileCount++;
+			}
 
 			UpdateCornerPoints(tilePositionIndecies);
 			map[tilePositionIndecies][TilePalette[tilePaletteUID].Depth] = tilePaletteUID;
 		}
 		public void SetTileSquare(Vector2 tilePositionIndeciesA, Vector2 tilePositionIndeciesB, string tilePaletteUID)
 		{
-			if(TryTilePaletteIndexError(tilePaletteUID))
+			if(TryTilePaletteError(tilePaletteUID))
 				return;
 
 			var a = tilePositionIndeciesA;
@@ -128,9 +130,10 @@
 		private int tileCount;
 		private Vector2 topLeftIndecies = new(float.MaxValue, float.MaxValue), botRightIndecies = new(float.MinValue, float.MinValue);
 		private readonly VertexArray vertsArr = new(PrimitiveType.Quads);
+		private readonly Dictionary<Vector2, SortedDictionary<int, string>> map = new();
 
 		[JsonProperty]
-		private readonly Dictionary<Vector2, SortedDictionary<int, string>> map = new();
+		private readonly Dictionary<string, SortedDictionary<int, string>> jsonMap = new();
 
 		[JsonConstructor]
 		internal TilemapInstance() { }
@@ -178,7 +181,27 @@
 				new Vector2(topLeftIndecies.X, topLeftIndecies.Y) * TileSize);
 		}
 
-		private bool TryTilePaletteIndexError(string tilePaletteUID)
+		internal void MapToJSON()
+		{
+			jsonMap.Clear();
+
+			foreach(var kvp in map)
+				jsonMap[JsonConvert.SerializeObject(kvp.Key)] = kvp.Value;
+		}
+		internal void MapFromJSON()
+		{
+			map.Clear();
+
+			foreach(var kvp in jsonMap)
+			{
+				map[JsonConvert.DeserializeObject<Vector2>(kvp.Key)] = kvp.Value;
+				tileCount++;
+			}
+
+			RecalculateCornerPoints();
+		}
+
+		private bool TryTilePaletteError(string tilePaletteUID)
 		{
 			if(TilePalette.Count == 0)
 			{
@@ -187,7 +210,7 @@
 			}
 			if(TilePalette.ContainsKey(tilePaletteUID) == false)
 			{
-				Console.LogError(1, $"The {nameof(tilePaletteUID)} is not present in the {nameof(TilePalette)}.");
+				Console.LogError(1, $"The {nameof(tilePaletteUID)} '{tilePaletteUID}' is not present in the {nameof(TilePalette)}.");
 				return true;
 			}
 			return false;

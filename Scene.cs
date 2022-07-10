@@ -56,6 +56,9 @@
 				loadedScene.IsLoaded = true;
 				scene = prevScene;
 
+				foreach(var kvp in loadedScene.tilemaps)
+					kvp.Value.MapFromJSON();
+
 				return loadedScene;
 			}
 			catch(Exception) { Console.LogError(1, $"Could not load {nameof(Scene)} from '{path}'."); }
@@ -242,6 +245,7 @@
 				texts.Clear();
 				npatches.Clear();
 				audio.Clear();
+				tilemaps.Clear();
 
 				var assets = GetAssetPaths();
 				for(int i = 0; i < assets.Count; i++)
@@ -255,6 +259,7 @@
 					TryAdd(texts, kvp.Value);
 					TryAdd(npatches, kvp.Value);
 					TryAdd(audio, kvp.Value);
+					TryAdd(tilemaps, kvp.Value);
 				}
 
 				var json = JsonConvert.SerializeObject(this);
@@ -270,7 +275,12 @@
 			void TryAdd<T>(Dictionary<string, T> dict, ThingInstance thing) where T : ThingInstance
 			{
 				if(thing is T t && dict.ContainsKey(t.UID) == false)
+				{
 					dict[t.UID] = t;
+
+					if(thing is TilemapInstance tilemap)
+						tilemap.MapToJSON();
+				}
 			}
 		}
 
@@ -315,6 +325,8 @@
 		private Dictionary<string, NinePatchInstance> npatches = new();
 		[JsonProperty]
 		private Dictionary<string, AudioInstance> audio = new();
+		[JsonProperty]
+		private Dictionary<string, TilemapInstance> tilemaps = new();
 
 		internal Dictionary<string, ThingInstance> objs = new();
 		private ConcurrentDictionary<string, string> loadedAssets = new();

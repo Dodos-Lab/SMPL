@@ -149,6 +149,7 @@
 		}
 
 		public Hitbox Hitbox { get { hitbox.TransformLocalLines(uid); return hitbox; } }
+		[JsonIgnore]
 		public Hitbox BoundingBox
 		{
 			get
