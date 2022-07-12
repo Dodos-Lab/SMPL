@@ -94,6 +94,8 @@
 		public float DistanceFade { get; set; } = 2f;
 
 		#region Backend
+		private Sound sound;
+		private Music music;
 		private bool created;
 		private static readonly List<AudioInstance> audios = new();
 		[JsonProperty]
@@ -118,20 +120,32 @@
 		}
 		private Sound GetSound()
 		{
+			if(sound != null)
+				return sound;
+
 			var sfx = Scene.CurrentScene.Sounds;
-			return audioPath != null && sfx.ContainsKey(audioPath) ? sfx[audioPath] : default;
+			if(audioPath != null && sfx.ContainsKey(audioPath))
+				sound = new Sound(sfx[audioPath]);
+
+			return sound;
 		}
 		private Music GetMusic()
 		{
-			var music = Scene.CurrentScene.Music;
-			return audioPath != null && music.ContainsKey(audioPath) ? music[audioPath] : default;
+			if(music != null)
+				return music;
+
+			var m = Scene.CurrentScene.Music;
+			if(audioPath != null && m.ContainsKey(audioPath))
+				music = new Music(audioPath); // that's fine, it's just a stream, not holding any data (shouldn't be heavy)
+
+			return music;
 		}
 
 		private void SyncAudioProps()
 		{
 			var sound = GetSound();
 			var music = GetMusic();
-			var vol = VolumeUnit * 100f;
+			var vol = VolumeUnit * Game.Settings.VolumeMaster * 100f;
 			var pos = new Vector3f(Position.X, Position.Y, 0f);
 
 			if(sound != null)
@@ -139,7 +153,7 @@
 				duration = sound.SoundBuffer.Duration.AsSeconds();
 				sound.Loop = IsLooping;
 				sound.Pitch = PitchUnit;
-				sound.Volume = vol;
+				sound.Volume = vol * Game.settings.VolumeSound;
 				sound.Attenuation = DistanceFade;
 				sound.MinDistance = 100f;
 				sound.Position = IsGlobal ? default : pos;
@@ -149,7 +163,7 @@
 				duration = music.Duration.AsSeconds();
 				music.Loop = IsLooping;
 				music.Pitch = PitchUnit;
-				music.Volume = vol;
+				music.Volume = vol * Game.settings.VolumeMusic;
 				music.Attenuation = DistanceFade;
 				music.MinDistance = 100f;
 				music.Position = IsGlobal ? default : pos;
@@ -179,6 +193,10 @@
 
 			sound?.Stop();
 			music?.Stop();
+
+			sound?.Dispose();
+			music?.Dispose();
+
 			audios.Remove(this);
 		}
 		#endregion

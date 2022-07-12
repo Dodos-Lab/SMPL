@@ -29,25 +29,7 @@ namespace SMPL
 	public static class Game
 	{
 		public enum WindowState { Windowed, Borderless, Fullscreen }
-		public static ReadOnlyCollection<Vector2> SupportedMonitorResolutions
-		{
-			get
-			{
-				var result = new List<Vector2>();
-				var m = new DEVMODE();
-				int i = 0;
-				while(EnumDisplaySettings(null, i, ref m))
-				{
-					var res = new Vector2(m.dmPelsWidth, m.dmPelsHeight);
-					if(result.Contains(res) == false)
-						result.Add(res);
-					i++;
-				}
-				return result.AsReadOnly();
-			}
-		}
-		public static Vector2 ScreenResolution => new(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-		public static string SettingsUID { get; set; }
+		public static Settings Settings => settings;
 
 		public static RenderWindow Window { get; internal set; }
 		public static Vector2 MouseCursorPosition
@@ -61,13 +43,14 @@ namespace SMPL
 			if(startingScene == null || Window != null)
 				return;
 
-			InitWindow(WindowState.Windowed, Game.ScreenResolution);
+			Settings.Load();
+			InitWindow(Settings.WindowState, Settings.Resolution);
 
 			Scene.CurrentScene = startingScene;
 			Scene.LoadingScene = loadingScene;
 
 			if(Thing.Exists(Scene.MAIN_CAMERA_UID) == false)
-				Thing.CreateCamera(Scene.MAIN_CAMERA_UID, Game.ScreenResolution);
+				Thing.CreateCamera(Scene.MAIN_CAMERA_UID, Settings.ScreenResolution);
 
 			Scene.assetsLoading = new(Scene.ThreadLoadAssets) { IsBackground = true, Name = "AssetsLoading" };
 			Scene.assetsLoading.Start();
@@ -115,6 +98,7 @@ namespace SMPL
 		}
 		public static void Stop()
 		{
+			Settings.Save();
 			Scene.CurrentScene?.GameStop();
 			Window.Close();
 		}
@@ -139,23 +123,32 @@ namespace SMPL
 		}
 		public static void CenterWindow()
 		{
-			var sz = Game.ScreenResolution;
+			var sz = Settings.ScreenResolution;
 			Window.Size = new((uint)(sz.X / 1.5f), (uint)(sz.Y / 1.5f));
 			Window.Position = new Vector2i((int)(sz.X / 2f), (int)(sz.Y / 2f)) - new Vector2i((int)(Window.Size.X / 2), (int)(Window.Size.Y / 2));
 		}
 
 		#region Backend
+		internal static Settings settings = new();
 		internal static Styles currWindowStyle;
 		private static void Main() { }
 		private static void OnClose(object sender, EventArgs e) => Stop();
+
 		internal static void InitWindow(WindowState windowState, Vector2 resolution)
 		{
+			if(Window != null)
+			{
+				Window.Closed -= OnClose;
+				Window.Dispose();
+			}
+
 			currWindowStyle = windowState.ToWindowStyles();
 			Window = new(new((uint)resolution.X, (uint)resolution.Y), "SMPL Game", currWindowStyle) { Position = new() };
 			Window.Clear();
 			Window.Display();
 			Window.Closed += OnClose;
 			Window.SetFramerateLimit(120);
+			Window.SetVerticalSyncEnabled(Settings.IsVSyncEnabled);
 
 			var view = Window.GetView();
 			view.Center = new();
@@ -181,49 +174,6 @@ namespace SMPL
 				WindowState.Fullscreen => Styles.Fullscreen,
 				_ => Styles.Default,
 			};
-		}
-
-		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
-		private static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
-
-		[StructLayout(LayoutKind.Sequential)]
-		private struct DEVMODE
-		{
-
-			private const int CCHDEVICENAME = 0x20;
-			private const int CCHFORMNAME = 0x20;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-			public string dmDeviceName;
-			public short dmSpecVersion;
-			public short dmDriverVersion;
-			public short dmSize;
-			public short dmDriverExtra;
-			public int dmFields;
-			public int dmPositionX;
-			public int dmPositionY;
-			public ScreenOrientation dmDisplayOrientation;
-			public int dmDisplayFixedOutput;
-			public short dmColor;
-			public short dmDuplex;
-			public short dmYResolution;
-			public short dmTTOption;
-			public short dmCollate;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-			public string dmFormName;
-			public short dmLogPixels;
-			public int dmBitsPerPel;
-			public int dmPelsWidth;
-			public int dmPelsHeight;
-			public int dmDisplayFlags;
-			public int dmDisplayFrequency;
-			public int dmICMMethod;
-			public int dmICMIntent;
-			public int dmMediaType;
-			public int dmDitherType;
-			public int dmReserved1;
-			public int dmReserved2;
-			public int dmPanningWidth;
-			public int dmPanningHeight;
 		}
 		#endregion
 	}
