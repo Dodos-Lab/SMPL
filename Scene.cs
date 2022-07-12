@@ -28,8 +28,6 @@
 		public const string MAIN_CAMERA_UID = "MainCamera";
 		public bool IsLoaded { get; private set; }
 
-		//public ThemeUI ThemeUI { get; set; }
-
 		public Scene(params string[] initialAssetPaths)
 		{
 			Init(initialAssetPaths);

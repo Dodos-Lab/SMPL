@@ -38,7 +38,7 @@ namespace SMPL.Tools
 		/// <summary>
 		/// The type of number animations used by <see cref="AnimateUnit"/>. Also known as 'easing functions'.
 		/// </summary>
-		public enum Animations
+		public enum Animation
 		{
 			BendWeak, // Sine
 			Bend, // Cubic
@@ -232,41 +232,41 @@ namespace SMPL.Tools
 		/// sprite.Angle = result * 360f;
 		/// </code>
 		/// </summary>
-		public static float AnimateUnit(this float progress, Animations animationType, AnimationWay animationCurve, bool repeated = false)
+		public static float AnimateUnit(this float progress, Animation animationType, AnimationWay animationCurve, bool repeated = false)
 		{
 			var result = 0f;
 			var x = progress.Limit(0, 1, repeated ? Limitation.Overflow : Limitation.ClosestBound);
 			switch(animationType)
 			{
-				case Animations.BendWeak:
+				case Animation.BendWeak:
 					{
 						result = animationCurve == AnimationWay.Backward ? 1 - MathF.Cos(x * MathF.PI / 2) :
 							animationCurve == AnimationWay.Forward ? 1 - MathF.Sin(x * MathF.PI / 2) :
 							-(MathF.Cos(MathF.PI * x) - 1) / 2;
 						break;
 					}
-				case Animations.Bend:
+				case Animation.Bend:
 					{
 						result = animationCurve == AnimationWay.Backward ? x * x * x :
 							animationCurve == AnimationWay.Forward ? 1 - MathF.Pow(1 - x, 3) :
 							(x < 0.5 ? 4 * x * x * x : 1 - MathF.Pow(-2 * x + 2, 3) / 2);
 						break;
 					}
-				case Animations.BendStrong:
+				case Animation.BendStrong:
 					{
 						result = animationCurve == AnimationWay.Backward ? x * x * x * x :
 							animationCurve == AnimationWay.Forward ? 1 - MathF.Pow(1 - x, 5) :
 							(x < 0.5 ? 16 * x * x * x * x * x : 1 - MathF.Pow(-2 * x + 2, 5) / 2);
 						break;
 					}
-				case Animations.Circle:
+				case Animation.Circle:
 					{
 						result = animationCurve == AnimationWay.Backward ? 1 - MathF.Sqrt(1 - MathF.Pow(x, 2)) :
 							animationCurve == AnimationWay.Forward ? MathF.Sqrt(1 - MathF.Pow(x - 1, 2)) :
 							(x < 0.5 ? (1 - MathF.Sqrt(1 - MathF.Pow(2 * x, 2))) / 2 : (MathF.Sqrt(1 - MathF.Pow(-2 * x + 2, 2)) + 1) / 2);
 						break;
 					}
-				case Animations.Elastic:
+				case Animation.Elastic:
 					{
 						result = animationCurve == AnimationWay.Backward ?
 							(x == 0 ? 0 : x == 1 ? 1 : -MathF.Pow(2, 10 * x - 10) * MathF.Sin((x * 10 - 10.75f) * ((2 * MathF.PI) / 3))) :
@@ -277,7 +277,7 @@ namespace SMPL.Tools
 							(MathF.Pow(2, -20 * x + 10) * MathF.Sin((20 * x - 11.125f) * (2 * MathF.PI) / 4.5f)) / 2 + 1);
 						break;
 					}
-				case Animations.Swing:
+				case Animation.Swing:
 					{
 						result = animationCurve == AnimationWay.Backward ? 2.70158f * x * x * x - 1.70158f * x * x :
 							animationCurve == AnimationWay.Forward ? 1 + 2.70158f * MathF.Pow(x - 1, 3) + 1.70158f * MathF.Pow(x - 1, 2) :
@@ -285,7 +285,7 @@ namespace SMPL.Tools
 							(MathF.Pow(2 * x - 2, 2) * ((2.59491f + 1) * (x * 2 - 2) + 2.59491f) + 2) / 2);
 						break;
 					}
-				case Animations.Bounce:
+				case Animation.Bounce:
 					{
 						result = animationCurve == AnimationWay.Backward ? 1 - easeOutBounce(1 - x) :
 							animationCurve == AnimationWay.Forward ? easeOutBounce(x) :
