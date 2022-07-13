@@ -5,23 +5,23 @@
 		public class Property
 		{
 			#region Property Names
-			public const string THING_TYPES = nameof(ThingInstance.Types);
-			public const string THING_UID = nameof(ThingInstance.UID);
-			public const string THING_OLD_UID = nameof(ThingInstance.OldUID);
-			public const string THING_AGE = nameof(ThingInstance.Age);
-			public const string THING_PARENT_UID = nameof(ThingInstance.ParentUID);
-			public const string THING_PARENT_OLD_UID = nameof(ThingInstance.ParentOldUID);
-			public const string THING_CHILDREN_UIDS = nameof(ThingInstance.ChildrenUIDs);
-			public const string THING_LOCAL_POSITION = nameof(ThingInstance.LocalPosition);
-			public const string THING_LOCAL_ANGLE = nameof(ThingInstance.LocalAngle);
-			public const string THING_LOCAL_DIRECTION = nameof(ThingInstance.LocalDirection);
-			public const string THING_LOCAL_SCALE = nameof(ThingInstance.LocalScale);
-			public const string THING_POSITION = nameof(ThingInstance.Position);
-			public const string THING_ANGLE = nameof(ThingInstance.Angle);
-			public const string THING_DIRECTION = nameof(ThingInstance.Direction);
-			public const string THING_SCALE = nameof(ThingInstance.Scale);
-			public const string THING_HITBOX = nameof(ThingInstance.Hitbox);
-			public const string THING_BOUNDING_BOX = nameof(ThingInstance.BoundingBox);
+			public const string TYPES = nameof(ThingInstance.Types);
+			public const string UID = nameof(ThingInstance.UID);
+			public const string OLD_UID = nameof(ThingInstance.OldUID);
+			public const string AGE = nameof(ThingInstance.Age);
+			public const string PARENT_UID = nameof(ThingInstance.ParentUID);
+			public const string PARENT_OLD_UID = nameof(ThingInstance.ParentOldUID);
+			public const string CHILDREN_UIDS = nameof(ThingInstance.ChildrenUIDs);
+			public const string LOCAL_POSITION = nameof(ThingInstance.LocalPosition);
+			public const string LOCAL_ANGLE = nameof(ThingInstance.LocalAngle);
+			public const string LOCAL_DIRECTION = nameof(ThingInstance.LocalDirection);
+			public const string LOCAL_SCALE = nameof(ThingInstance.LocalScale);
+			public const string POSITION = nameof(ThingInstance.Position);
+			public const string ANGLE = nameof(ThingInstance.Angle);
+			public const string DIRECTION = nameof(ThingInstance.Direction);
+			public const string SCALE = nameof(ThingInstance.Scale);
+			public const string HITBOX = nameof(ThingInstance.Hitbox);
+			public const string BOUNDING_BOX = nameof(ThingInstance.BoundingBox);
 
 			public const string CAMERA_IS_SMOOTH = nameof(CameraInstance.IsSmooth);
 			public const string CAMERA_MOUSE_CURSOR_POSITION = nameof(CameraInstance.MouseCursorPosition);
@@ -77,6 +77,10 @@
 			public const string TILEMAP_TILE_GAP = nameof(TilemapInstance.TileGap);
 			public const string TILEMAP_TILE_COUNT = nameof(TilemapInstance.TileCount);
 			public const string TILEMAP_TILE_PALETTE = nameof(TilemapInstance.TilePalette);
+
+			public const string UI_BUTTON_IS_DISABLED = nameof(ButtonInstance.IsDisabled);
+			public const string UI_BUTTON_HOLD_DELAY = nameof(ButtonInstance.HoldDelay);
+			public const string UI_BUTTON_HOLD_TRIGGER_SPEED = nameof(ButtonInstance.HoldTriggerSpeed);
 			#endregion
 
 			public string Name { get; internal set; }
@@ -97,11 +101,11 @@
 		public class Method
 		{
 			#region Method Names
-			public const string THING_GET_LOCAL_POSITION_FROM_PARENT = nameof(ThingInstance.GetLocalPositionFromParent);
-			public const string THING_GET_POSITION_FROM_PARENT = nameof(ThingInstance.GetPositionFromParent);
-			public const string THING_GET_LOCAL_POSITION_FROM_SELF = nameof(ThingInstance.GetLocalPositionFromSelf);
-			public const string THING_GET_POSITION_FROM_SELF = nameof(ThingInstance.GetPositionFromSelf);
-			public const string THING_DESTROY = nameof(ThingInstance.Destroy);
+			public const string GET_LOCAL_POSITION_FROM_PARENT = nameof(ThingInstance.GetLocalPositionFromParent);
+			public const string GET_POSITION_FROM_PARENT = nameof(ThingInstance.GetPositionFromParent);
+			public const string GET_LOCAL_POSITION_FROM_SELF = nameof(ThingInstance.GetLocalPositionFromSelf);
+			public const string GET_POSITION_FROM_SELF = nameof(ThingInstance.GetPositionFromSelf);
+			public const string DESTROY = nameof(ThingInstance.Destroy);
 
 			public const string CAMERA_SNAP = nameof(CameraInstance.Snap);
 
@@ -127,6 +131,8 @@
 			public const string TILEMAP_GET_TILE_POSITION = nameof(TilemapInstance.GetTilePosition);
 			public const string TILEMAP_GET_PALETTE_UIDS_FROM_POSITION = nameof(TilemapInstance.GetPaletteUIDsFromPosition);
 			public const string TILEMAP_GET_PALETTE_UIDS_FROM_TILE_INDECIES = nameof(TilemapInstance.GetPaletteUIDsFromTileIndecies);
+
+			public const string UI_BUTTON_TRIGGER = nameof(ButtonInstance.Trigger);
 			#endregion
 
 			public class Parameter

@@ -2,6 +2,21 @@
 {
 	public static partial class Thing
 	{
+		public static class UI
+		{
+			public static string CreateButton(string uid, string texturePath)
+			{
+				var t = new ButtonInstance(uid) { TexturePath = texturePath };
+				return t.UID;
+			}
+			public static string CreateTextButton(string uid, string textUID, string texturePath, string fontPath, string value = "Hello, World!")
+			{
+				var tt = new TextInstance(textUID) { FontPath = fontPath, Value = value };
+				var t = new TextButtonInstance(uid, textUID) { TexturePath = texturePath, TextUID = tt.UID };
+				return t.UID;
+			}
+		}
+
 		public static List<string> GetUIDs()
 		{
 			return Scene.CurrentScene.objs.Keys.ToList();

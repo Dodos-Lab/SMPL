@@ -21,6 +21,7 @@ global using SFML.Graphics.Glsl;
 global using SFML.System;
 global using SFML.Window;
 global using SMPL.Tools;
+global using SMPL.UI;
 global using Console = SMPL.Tools.Console;
 global using Time = SMPL.Tools.Time;
 
@@ -99,7 +100,7 @@ namespace SMPL
 		public static void Stop()
 		{
 			Settings.Save();
-			Scene.CurrentScene?.GameStop();
+			Event.GameStop();
 			Window.Close();
 		}
 

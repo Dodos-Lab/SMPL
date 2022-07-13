@@ -1,6 +1,6 @@
 ﻿namespace SMPL
 {
-	public class Scene
+	public sealed class Scene
 	{
 		public static Vector2 MouseCursorPosition
 		{
@@ -19,27 +19,36 @@
 				}
 				unloadScene = scene;
 				scene = value;
-				LoadingScene?.OnStart();
+
+				if(LoadingScene != null)
+					Event.SceneStart(LoadingScene.Name);
+
 				loadScene = value;
 			}
 		}
 		public static Scene LoadingScene { get; set; }
-
 		public const string MAIN_CAMERA_UID = "MainCamera";
+
 		public bool IsLoaded { get; private set; }
+		public string Name { get; set; }
 
-		public Scene(params string[] initialAssetPaths)
+		public Scene(string name, params string[] initialAssetPaths)
 		{
-			Init(initialAssetPaths);
-		}
-		public Scene(List<string> initialAssetPaths)
-		{
-			Init(initialAssetPaths.ToArray());
-		}
+			Name = name;
 
-		public static T Load<T>(string path) where T : Scene
+			if(initialAssetPaths == null)
+				return;
+
+			for(int i = 0; i < initialAssetPaths.Length; i++)
+			{
+				var a = initialAssetPaths[i];
+				if(a != null)
+					assetQueue.TryAdd(a, a);
+			}
+		}
+		public static Scene Load(string filePath)
 		{
-			if(path == null)
+			if(filePath == null)
 				return default;
 
 			try
@@ -47,8 +56,8 @@
 				var def = new Scene();
 				var prevScene = scene;
 				scene = def;
-				var json = File.ReadAllText(path).Decompress();
-				var loadedScene = JsonConvert.DeserializeObject<T>(json);
+				var json = File.ReadAllText(filePath).Decompress();
+				var loadedScene = JsonConvert.DeserializeObject<Scene>(json);
 
 				loadedScene.objs = def.objs;
 				loadedScene.IsLoaded = true;
@@ -59,16 +68,11 @@
 
 				return loadedScene;
 			}
-			catch(Exception) { Console.LogError(1, $"Could not load {nameof(Scene)} from '{path}'."); }
+			catch(Exception) { Console.LogError(1, $"Could not load {nameof(Scene)} from '{filePath}'."); }
 			return default;
 		}
 
-		protected virtual void OnStart() { }
-		protected virtual void OnUpdate() { }
-		protected virtual void OnStop() { }
-		protected virtual void OnGameStop() { }
-
-		protected ReadOnlyCollection<string> GetAssetPaths()
+		public ReadOnlyCollection<string> GetAssetPaths()
 		{
 			var result = new List<string>();
 			result.AddRange(Textures.Keys.ToList());
@@ -78,7 +82,7 @@
 			result.AddRange(Files.Keys.ToList());
 			return result.AsReadOnly();
 		}
-		protected bool AssetsAreLoaded(string path)
+		public bool AssetsAreLoaded(string path)
 		{
 			var assets = GetAssetPaths();
 			return Directory.Exists(path) ? Dir(path) : File(path);
@@ -103,7 +107,7 @@
 				return assets.Contains(path);
 			}
 		}
-		protected void LoadAssets(params string[] paths)
+		public void LoadAssets(params string[] paths)
 		{
 			for(int i = 0; i < paths?.Length; i++)
 			{
@@ -161,7 +165,7 @@
 				catch(Exception) { Console.LogError(-1, $"Could not load asset at '{path}'."); }
 			}
 		}
-		protected void UnloadAssets(params string[] paths)
+		public void UnloadAssets(params string[] paths)
 		{
 			for(int i = 0; i < paths?.Length; i++)
 			{
@@ -210,7 +214,7 @@
 				assetQueue.TryRemove(path, out _);
 			}
 		}
-		protected void UnloadAllAssets()
+		public void UnloadAllAssets()
 		{
 			DisposeAndClear(Textures);
 			DisposeAndClear(Fonts);
@@ -231,8 +235,9 @@
 				assets.Clear();
 			}
 		}
-		protected bool Save(string filePath)
+		public bool Save(string directoryPath)
 		{
+			var filePath = Path.Join(directoryPath, $"{Name}.scene");
 			try
 			{
 				// clear these in case of previous save/load
@@ -338,19 +343,6 @@
 		[JsonConstructor]
 		internal Scene() { }
 
-		private void Init(string[] initAssetPaths)
-		{
-			if(initAssetPaths == null)
-				return;
-
-			for(int i = 0; i < initAssetPaths.Length; i++)
-			{
-				var a = initAssetPaths[i];
-				if(a != null)
-					assetQueue.TryAdd(a, a);
-			}
-		}
-
 		internal void LoadInitialAssets()
 		{
 			foreach(var asset in assetQueue)
@@ -358,26 +350,28 @@
 
 			loadedAssets = assetQueue;
 		}
-		internal void GameStop() => OnGameStop();
 
 		internal static void UpdateCurrentScene()
 		{
 			if(stopScene != null)
 			{
 				stopScene = null;
-				CurrentScene?.OnStop();
+				if(CurrentScene != null)
+					Event.SceneStop(CurrentScene.Name);
 			}
 			if(startScene != null)
 			{
-				LoadingScene?.OnStop();
+				if(LoadingScene != null)
+					Event.SceneStop(LoadingScene.Name);
 				startScene = null;
 				CurrentScene.hasStarted = true;
-				CurrentScene?.OnStart();
+				if(CurrentScene != null)
+					Event.SceneStart(CurrentScene.Name);
 			}
-			if(CurrentScene.hasStarted == false)
-				LoadingScene?.OnUpdate();
-			else
-				CurrentScene?.OnUpdate();
+			if(CurrentScene.hasStarted == false && LoadingScene != null)
+				Event.SceneUpdate(LoadingScene.Name);
+			else if(CurrentScene.hasStarted && CurrentScene != null)
+				Event.SceneUpdate(CurrentScene.Name);
 		}
 		internal static void ThreadLoadAssets()
 		{
