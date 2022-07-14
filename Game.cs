@@ -39,33 +39,18 @@ namespace SMPL
 			set { Mouse.SetPosition(new((int)value.X, (int)value.Y), Window); }
 		}
 
-		public static void Start(Scene startingScene, Scene loadingScene = null)
+		public static void Start(string sceneName, params string[] initialAssetPaths)
 		{
-			if(startingScene == null || Window != null)
+			if(string.IsNullOrWhiteSpace(sceneName))
 				return;
 
-			Settings.Load();
-			InitWindow(Settings.WindowState, Settings.Resolution);
-
-			Scene.CurrentScene = startingScene;
-			Scene.LoadingScene = loadingScene;
-
-			if(Thing.Exists(Scene.MAIN_CAMERA_UID) == false)
-				Thing.CreateCamera(Scene.MAIN_CAMERA_UID, Settings.ScreenResolution);
-
-			Scene.assetsLoading = new(Scene.ThreadLoadAssets) { IsBackground = true, Name = "AssetsLoading" };
-			Scene.assetsLoading.Start();
-
-			while(Window.IsOpen)
-			{
-				Window.DispatchEvents();
-				Scene.MainCamera.RenderTexture.Clear(Color.Black);
-
-				Time.Update();
-				Scene.UpdateCurrentScene();
-				UpdateEngine(Scene.MainCamera.RenderTexture);
-				CameraInstance.DrawMainCameraToWindow();
-			}
+			Scene.CurrentScene = new(sceneName, initialAssetPaths);
+			Start();
+		}
+		public static void Load(string scenePath)
+		{
+			Scene.Load(scenePath);
+			Start();
 		}
 		public static void UpdateEngine(RenderTarget renderTarget)
 		{
@@ -133,6 +118,31 @@ namespace SMPL
 		internal static Settings settings = new();
 		internal static Styles currWindowStyle;
 		private static void Main() { }
+		private static void Start()
+		{
+			if(Window != null)
+				return;
+
+			Settings.Load();
+			InitWindow(Settings.WindowState, Settings.Resolution);
+
+			if(Thing.Exists(Scene.MAIN_CAMERA_UID) == false)
+				Thing.CreateCamera(Scene.MAIN_CAMERA_UID, Settings.ScreenResolution);
+
+			Scene.assetsLoading = new(Scene.ThreadLoadAssets) { IsBackground = true, Name = "AssetsLoading" };
+			Scene.assetsLoading.Start();
+
+			while(Window.IsOpen)
+			{
+				Window.DispatchEvents();
+				Scene.MainCamera.RenderTexture.Clear(Color.Black);
+
+				Time.Update();
+				Scene.UpdateCurrentScene();
+				UpdateEngine(Scene.MainCamera.RenderTexture);
+				CameraInstance.DrawMainCameraToWindow();
+			}
+		}
 		private static void OnClose(object sender, EventArgs e) => Stop();
 
 		internal static void InitWindow(WindowState windowState, Vector2 resolution)

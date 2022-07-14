@@ -39,7 +39,7 @@
 		/// </summary>
 		public void TransformLocalLines(string thingUID)
 		{
-			var thing = ThingInstance.GetTryError(thingUID);
+			var thing = ThingInstance.Get(thingUID);
 			if(thing == null)
 				return;
 

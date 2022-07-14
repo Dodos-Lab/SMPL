@@ -81,6 +81,26 @@
 			public const string UI_BUTTON_IS_DISABLED = nameof(ButtonInstance.IsDisabled);
 			public const string UI_BUTTON_HOLD_DELAY = nameof(ButtonInstance.HoldDelay);
 			public const string UI_BUTTON_HOLD_TRIGGER_SPEED = nameof(ButtonInstance.HoldTriggerSpeed);
+
+			public const string UI_TEXT_BUTTON_IS_HYPERLINK = nameof(TextButtonInstance.IsHyperlink);
+			public const string UI_TEXT_BUTTON_TEXT_UID = nameof(TextButtonInstance.TextUID);
+
+			public const string UI_CHECKBOX_IS_ACTIVE = nameof(CheckboxInstance.IsActive);
+
+			public const string UI_PROGRESS_BAR_RANGE_A = nameof(ProgressBarInstance.RangeA);
+			public const string UI_PROGRESS_BAR_RANGE_B = nameof(ProgressBarInstance.RangeB);
+			public const string UI_PROGRESS_BAR_PROGRESS = nameof(ProgressBarInstance.Progress);
+			public const string UI_PROGRESS_BAR_VALUE = nameof(ProgressBarInstance.Value);
+			public const string UI_PROGRESS_BAR_MAX_LENGTH = nameof(ProgressBarInstance.MaxLength);
+
+			public const string UI_TEXTBOX_LINE_WIDTH = nameof(TextboxInstance.LineWidth);
+			public const string UI_TEXTBOX_LINE_SPACE = nameof(TextboxInstance.LineSpace);
+			public const string UI_TEXTBOX_LINE_COUNT = nameof(TextboxInstance.LineCount);
+			public const string UI_TEXTBOX_ALIGNMENT = nameof(TextboxInstance.Alignment);
+			public const string UI_TEXTBOX_RESOLUTION = nameof(TextboxInstance.Resolution);
+			public const string UI_TEXTBOX_BACKGROUND_COLOR = nameof(TextboxInstance.BackgroundColor);
+			public const string UI_TEXTBOX_SHADOW_OFFSET = nameof(TextboxInstance.ShadowOffset);
+			public const string UI_TEXTBOX_SHADOW_COLOR = nameof(TextboxInstance.ShadowColor);
 			#endregion
 
 			public string Name { get; internal set; }
@@ -133,6 +153,10 @@
 			public const string TILEMAP_GET_PALETTE_UIDS_FROM_TILE_INDECIES = nameof(TilemapInstance.GetPaletteUIDsFromTileIndecies);
 
 			public const string UI_BUTTON_TRIGGER = nameof(ButtonInstance.Trigger);
+
+			public const string UI_TEXTBOX_GET_SYMBOL_CORNERS = nameof(TextboxInstance.GetSymbolCorners);
+			public const string UI_TEXTBOX_GET_SYMBOL_INDEX = nameof(TextboxInstance.GetSymbolIndex);
+			public const string UI_TEXTBOX_GET_SYMBOLS = nameof(TextboxInstance.GetSymbols);
 			#endregion
 
 			public class Parameter

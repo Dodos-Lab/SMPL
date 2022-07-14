@@ -12,11 +12,16 @@
 			get => scene;
 			set
 			{
+				if(value == scene)
+					return;
+
 				if(value == null)
 				{
 					Game.Stop();
 					return;
 				}
+
+				Thing.DestroyAll();
 				unloadScene = scene;
 				scene = value;
 
@@ -46,10 +51,10 @@
 					assetQueue.TryAdd(a, a);
 			}
 		}
-		public static Scene Load(string filePath)
+		public static void Load(string filePath)
 		{
-			if(filePath == null)
-				return default;
+			if(string.IsNullOrWhiteSpace(filePath))
+				return;
 
 			try
 			{
@@ -66,10 +71,9 @@
 				foreach(var kvp in loadedScene.tilemaps)
 					kvp.Value.MapFromJSON();
 
-				return loadedScene;
+				CurrentScene = loadedScene;
 			}
 			catch(Exception) { Console.LogError(1, $"Could not load {nameof(Scene)} from '{filePath}'."); }
-			return default;
 		}
 
 		public ReadOnlyCollection<string> GetAssetPaths()
@@ -385,13 +389,8 @@
 
 				if(unloadScene != null)
 				{
-					if(scene.IsLoaded == false)
-					{
-						Thing.DestroyAll();
-						scene.UnloadAllAssets();
-					}
-
 					stopScene = unloadScene;
+					unloadScene.UnloadAllAssets();
 					unloadScene = null;
 				}
 				if(loadScene != null)

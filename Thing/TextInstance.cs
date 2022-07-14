@@ -69,7 +69,7 @@
 			text.Origin = new(local.Width * OriginUnit.X, local.Height * OriginUnit.Y * 1.4f);
 			text.Position = text.Position;
 		}
-		internal Font GetFont()
+		private Font GetFont()
 		{
 			var fonts = Scene.CurrentScene.Fonts;
 			var path = FontPath.ToBackslashPath();

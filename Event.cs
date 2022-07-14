@@ -19,6 +19,8 @@
 		public static event ThingEventHandler ButtonPressed;
 		public static event ThingEventHandler ButtonReleased;
 
+		public static event ThingEventHandler CheckboxChecked;
+
 		#region Backend
 		internal static void GameStop() => GameStopped?.Invoke();
 
@@ -32,6 +34,9 @@
 		internal static void ButtonUnhover(string uid) => ButtonUnhovered?.Invoke(uid);
 		internal static void ButtonPress(string uid) => ButtonPressed?.Invoke(uid);
 		internal static void ButtonRelease(string uid) => ButtonReleased?.Invoke(uid);
+
+		internal static void CheckboxCheck(string uid) => CheckboxChecked?.Invoke(uid);
+
 		#endregion
 	}
 }

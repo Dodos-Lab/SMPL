@@ -9,10 +9,26 @@
 				var t = new ButtonInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
+			public static string CreateCheckbox(string uid, string texturePath)
+			{
+				var t = new CheckboxInstance(uid) { TexturePath = texturePath };
+				return t.UID;
+			}
+			public static string CreateProgressBar(string uid, string texturePath)
+			{
+				var t = new ProgressBarInstance(uid) { TexturePath = texturePath };
+				return t.UID;
+			}
 			public static string CreateTextButton(string uid, string textUID, string texturePath, string fontPath, string value = "Hello, World!")
 			{
 				var tt = new TextInstance(textUID) { FontPath = fontPath, Value = value };
 				var t = new TextButtonInstance(uid, textUID) { TexturePath = texturePath, TextUID = tt.UID };
+				return t.UID;
+			}
+			public static string CreateTextbox(string uid, string cameraUID, string fontPath, string value = "Hello, World!",
+				uint resolutionX = 200, uint resolutionY = 200)
+			{
+				var t = new TextboxInstance(uid, cameraUID, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
 		}
@@ -50,13 +66,6 @@
 
 			var obj = ThingInstance.Get(uid);
 			obj.Destroy(destroyChildren);
-		}
-		public static void DestroyAll()
-		{
-			var objs = Scene.CurrentScene.objs;
-			foreach(var kvp in objs)
-				if(kvp.Value != Scene.MainCamera)
-					kvp.Value.Destroy(true);
 		}
 
 		public static string CreateAudio(string uid, string filePath)
@@ -209,6 +218,17 @@
 		}
 
 		#region Backend
+		internal static void DestroyAll()
+		{
+			if(Scene.CurrentScene == null)
+				return;
+
+			var objs = Scene.CurrentScene.objs;
+			foreach(var kvp in objs)
+				if(kvp.Value != Scene.MainCamera)
+					kvp.Value.Destroy(true);
+		}
+
 		internal static bool TryTypeMismatchError(ThingInstance obj, (Type, string) key, List<Type> paramTypes, object[] parameters, bool isVoid)
 		{
 			if(parameters == null || parameters.Length == 0)

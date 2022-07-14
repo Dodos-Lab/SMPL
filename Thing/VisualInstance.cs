@@ -618,6 +618,8 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 		{
 			base.OnDestroy();
 			visuals[depth].Remove(this);
+			if(visuals[depth].Count == 0)
+				visuals.Remove(depth);
 		}
 		#endregion
 	}
