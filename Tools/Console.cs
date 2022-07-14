@@ -50,7 +50,8 @@
 			TryCreate();
 		}
 		/// <summary>
-		/// Display <paramref name="message"/> on the <see cref="Console"/>. May be followed by <paramref name="newLine"/>.
+		/// Display a <paramref name="message"/> on the <see cref="Console"/> with certain <paramref name="backgroundColor"/> and <paramref name="messageColor"/>.
+		/// May be followed by <paramref name="newLine"/>.
 		/// </summary>
 		public static void Log(object message, ConsoleColor messageColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black, bool newLine = true)
 		{

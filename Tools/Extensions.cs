@@ -220,19 +220,8 @@ namespace SMPL.Tools
 		{
 			return ((number % 360) + 360) % 360;
 		}
-		/// <summary>
-		/// Converts a unit <paramref name="progress"/> ranged [0 - 1] to a value calculated according to
-		/// <paramref name="animationType"/> and <paramref name="animationCurve"/>. May also be <paramref name="repeated"/> 
-		/// if outside of the range.<br></br>
-		/// The animation result starts at 0 and settles on 1 at the end (may go outside during the animation but never ends outside).
-		/// The result is then returned. These calculations are also known as 'easing functions'.<br></br><br></br>
-		/// - Example: An animation of rotating a <see cref="SpriteInstance"/> for 3 seconds would look something like this:<code>
-		/// step += Time.Delta / 3f;
-		/// var result = step.AnimateUnit(Animations.Bounce, AnimationWay.Forward, repeated: false);
-		/// sprite.Angle = result * 360f;
-		/// </code>
-		/// </summary>
-		public static float AnimateUnit(this float progress, Animation animationType, AnimationWay animationCurve, bool repeated = false)
+
+		public static float Animate(this float progress, Animation animationType, AnimationWay animationCurve, bool repeated = false)
 		{
 			var result = 0f;
 			var x = progress.Limit(0, 1, repeated ? Limitation.Overflow : Limitation.ClosestBound);
@@ -652,9 +641,9 @@ namespace SMPL.Tools
 			return point;
 		}
 		/// <summary>
-		/// Draws <paramref name="point"/> to a <paramref name="camera"/> with <paramref name="color"/> having some
-		/// <paramref name="size"/>. The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if no
-		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// Draws <paramref name="point"/> to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
+		/// <paramref name="size"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Scene.MainCamera"/>'s <see cref="RenderTexture"/> if no
+		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
 		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
