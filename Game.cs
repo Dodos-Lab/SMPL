@@ -54,6 +54,10 @@ namespace SMPL
 		}
 		public static void UpdateEngine(RenderTarget renderTarget)
 		{
+			Window.DispatchEvents();
+			Scene.MainCamera.RenderTexture.Clear(Color.Black);
+			Time.Update();
+
 			var visuals = VisualInstance.visuals.Reverse();
 			var cameras = CameraInstance.cameras;
 
@@ -81,6 +85,7 @@ namespace SMPL
 
 			Scene.UpdateCurrentScene();
 			AudioInstance.Update();
+			CameraInstance.DrawMainCameraToWindow();
 		}
 		public static void Stop()
 		{
@@ -133,15 +138,7 @@ namespace SMPL
 			Scene.assetsLoading.Start();
 
 			while(Window.IsOpen)
-			{
-				Window.DispatchEvents();
-				Scene.MainCamera.RenderTexture.Clear(Color.Black);
-
-				Time.Update();
-				Scene.UpdateCurrentScene();
 				UpdateEngine(Scene.MainCamera.RenderTexture);
-				CameraInstance.DrawMainCameraToWindow();
-			}
 		}
 		private static void OnClose(object sender, EventArgs e) => Stop();
 
