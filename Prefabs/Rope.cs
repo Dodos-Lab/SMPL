@@ -2,53 +2,108 @@
 {
 	public class Rope
 	{
+		public class Point
+		{
+			public Vector2 Position { get; set; }
+			public bool IsLocked { get; set; }
+
+			public Point(Vector2 position, bool isLocked = false)
+			{
+				this.Position = position;
+				this.IsLocked = isLocked;
+				prevPosition = position;
+			}
+
+			public override string ToString()
+			{
+				var locked = IsLocked ? " (locked)" : "";
+				return $"{Position}{locked}";
+			}
+
+			internal Vector2 prevPosition;
+		}
+
+		public List<Point> Points { get; } = new();
 		public Vector2 Position { get; set; }
 		public Vector2 Gravity { get; set; } = new Vector2(0, 1);
 		public Vector2 Force { get; set; }
 
-		public Rope(Vector2 position, int segmentCount = 5, float segmentLength = 100f)
+		public Rope(Vector2 position, params Point[] points)
 		{
 			Position = position;
-			var step = new Vector2(segmentLength, 0);
-			for(int i = 0; i < segmentCount; i++)
-			{
-				var segment = i == 0 ?
-					new Segment(new(position, true), new(position + step)) :
-					new Segment(segments[i - 1].b, new(position + step * (i + 1)));
 
-				segments.Add(segment);
+			if(points != null && points.Length > 0)
+			{
+				this.Points = points.ToList();
+
+				var start = new Point(position, true);
+				segments[(new(start, points[0]))] = new(start, points[0]);
+				for(int i = 1; i < points.Length; i++)
+					segments[(points[i - 1], points[i])] = new(points[i - 1], points[i]);
 			}
 		}
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4f)
 		{
-			for(int i = 0; i < segments.Count; i++)
-				new Line(segments[i].a.position, segments[i].b.position).Draw(renderTarget, color, width);
+			foreach(var kvp in segments)
+				new Line(kvp.Value.a.Position, kvp.Value.b.Position).Draw(renderTarget, color, width);
 		}
 
-		public void Connect(int segmentIndex, Rope rope, int targetSegmentIndex)
+		public void Tie(Point pointA, Point pointB, bool mergePoints = false)
 		{
-			var s1 = segments[segmentIndex - 1];
-			var s2 = rope.segments[targetSegmentIndex];
+			if(mergePoints)
+			{
+				pointA.Position = pointB.Position;
+				pointA.prevPosition = pointB.prevPosition;
+			}
 
-			s1.b = s2.a;
-			segments[segmentIndex].a = s2.a;
+			segments[(pointA, pointB)] = new(pointA, pointB);
 		}
+		public void Untie(Point pointA, Point pointB)
+		{
+			segments.Remove((pointA, pointB));
+			segments.Remove((pointA, pointB));
+		}
+		public void Cut(Point point)
+		{
+			Points.Remove(point);
+			var pairs = new List<(Point, Point)>();
+			foreach(var kvp in segments)
+				if(kvp.Key.Item1 == point || kvp.Key.Item2 == point)
+					pairs.Add(kvp.Key);
+
+			for(int i = 0; i < pairs.Count; i++)
+				segments.Remove(pairs[i]);
+		}
+
 		public void Update()
 		{
-			if(segments.Count > 0)
-				segments[0].a.position = Position;
-
-			for(int i = 0; i < segments.Count; i++)
+			foreach(var kvp in segments)
 			{
-				var s = segments[i];
+				kvp.Value.a.Position = Position;
+				break;
+			}
 
-				CalculatePoint(s.a);
-				CalculatePoint(s.b);
+			for(int i = 0; i < Points.Count; i++)
+			{
+				var p = Points[i];
 
+				if(p.IsLocked)
+					continue;
+
+				var prev = p.Position;
+				p.Position += p.Position - p.prevPosition;
+				p.Position += Gravity * Time.Delta * 10;
+				p.Position += Force * Time.Delta * 10;
+				p.prevPosition = prev;
+			}
+
+			foreach(var kvp in segments)
+			{
+				var s = kvp.Value;
 				for(int j = 0; j < 5; j++)
 				{
-					var a = s.a.position;
-					var b = s.b.position;
+					var a = s.a.Position;
+					var b = s.b.Position;
 					var center = (a + b) / 2;
 					var dir = Vector2.Normalize(a - b);
 					var length = (a - b).Length();
@@ -56,26 +111,15 @@
 					if(length <= s.length)
 						continue;
 
-					if(s.a.isLocked == false)
-						s.a.position = center + dir * s.length / 2;
-					if(s.b.isLocked == false)
-						s.b.position = center - dir * s.length / 2;
-				}
-
-				void CalculatePoint(Point p)
-				{
-					if(p.isLocked)
-						return;
-
-					var prev = p.position;
-					p.position += p.position - p.prevPosition;
-					p.position += Gravity * Time.Delta * 7;
-					p.position += Force * Time.Delta * 7;
-					p.prevPosition = prev;
+					if(s.a.IsLocked == false)
+						s.a.Position = center + dir * s.length / 2;
+					if(s.b.IsLocked == false)
+						s.b.Position = center - dir * s.length / 2;
 				}
 			}
 		}
 
+		#region Backend
 		private class Segment
 		{
 			public Point a, b;
@@ -85,21 +129,11 @@
 			{
 				this.a = a;
 				this.b = b;
-				length = Vector2.Distance(a.position, b.position);
+				length = Vector2.Distance(a.Position, b.Position);
 			}
 		}
-		private class Point
-		{
-			public Vector2 position, prevPosition;
-			public bool isLocked;
 
-			public Point(Vector2 position, bool isLocked = false)
-			{
-				this.position = position;
-				this.isLocked = isLocked;
-				prevPosition = position;
-			}
-		}
-		private readonly List<Segment> segments = new();
+		private readonly Dictionary<(Point, Point), Segment> segments = new();
+		#endregion
 	}
 }
