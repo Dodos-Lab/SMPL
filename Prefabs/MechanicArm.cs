@@ -6,10 +6,10 @@
 	public class MechanicArm
 	{
 		public ReadOnlyCollection<Vector2> Points => points.AsReadOnly();
-		public Vector2 OriginPosition
+		public Vector2 Position
 		{
-			get => originPosition;
-			private set { originPosition = value; Update(); }
+			get => position;
+			private set { position = value; Update(); }
 		}
 		public Vector2 TargetPosition
 		{
@@ -24,7 +24,7 @@
 			for(int i = 1; i < segmentLengths.Length; i++)
 				points.Add(points[i - 1] + new Vector2(segmentLengths[i - 1], 0));
 
-			OriginPosition = originPosition;
+			Position = originPosition;
 
 			Update();
 		}
@@ -38,11 +38,11 @@
 		#region Backend
 		private readonly List<Vector2> points = new();
 		private readonly float[] lengths;
-		private Vector2 originPosition, targetPosition;
+		private Vector2 position, targetPosition;
 
 		private void Update()
 		{
-			points[0] = originPosition;
+			points[0] = position;
 			var originPoint = points[0];
 
 			for(int i = 0; i < 16; i++)

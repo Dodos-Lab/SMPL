@@ -164,11 +164,10 @@
 			public string name;
 		}
 
-#pragma warning disable CS0649
 		internal dynamic[] sheets;
 		internal dynamic[] customTypes;
 		internal bool compress;
-#pragma warning disable CS0649
+
 		[JsonIgnore]
 		private Dictionary<string, Sheet> cacheSheets = new();
 		[JsonIgnore]
