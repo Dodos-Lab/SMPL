@@ -36,31 +36,43 @@
 		}
 
 		/// <summary>
-		/// Draws this line to a <paramref name="camera"/> with <paramref name="color"/> having some
-		/// <paramref name="width"/>. The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if no
-		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// Calculates the vertices of the line with <paramref name="color"/> and <paramref name="width"/>. The texture coordinates are calculated acording to
+		/// <see cref="Length"/> and <paramref name="width"/>. The default <paramref name="color"/> is assumed to be white if no
+		/// <paramref name="color"/> is passed. These vertices are meant for drawing with <see cref="PrimitiveType.Quads"/>.
+		/// </summary>
+		public Vertex[] ToVertices(Color color = default, float width = 4)
+		{
+			color = color == default ? Color.White : color;
+			width /= 2;
+
+			var startLeft = A.PointMoveAtAngle(Angle - 90, width, false);
+			var startRight = A.PointMoveAtAngle(Angle + 90, width, false);
+			var endLeft = B.PointMoveAtAngle(Angle - 90, width, false);
+			var endRight = B.PointMoveAtAngle(Angle + 90, width, false);
+			var len = Length;
+
+			var verts = new Vertex[]
+			{
+				new(new(startLeft.X, startLeft.Y), color, new(0, 0)),
+				new(new(startRight.X, startRight.Y), color, new(width, 0)),
+				new(new(endRight.X, endRight.Y), color, new(width, len)),
+				new(new(endLeft.X, endLeft.Y), color, new(0, len)),
+			};
+
+			return verts;
+		}
+		/// <summary>
+		/// Draws this line to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
+		/// <paramref name="width"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Scene.MainCamera"/>'s <see cref="RenderTexture"/> if no
+		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4)
 		{
 			renderTarget ??= Scene.MainCamera.RenderTexture;
-			color = color == default ? Color.White : color;
-
-			width /= 2;
-			var startLeft = A.PointMoveAtAngle(Angle - 90, width, false);
-			var startRight = A.PointMoveAtAngle(Angle + 90, width, false);
-			var endLeft = B.PointMoveAtAngle(Angle - 90, width, false);
-			var endRight = B.PointMoveAtAngle(Angle + 90, width, false);
-
-			var vert = new Vertex[]
-			{
-				new(new(startLeft.X, startLeft.Y), color),
-				new(new(startRight.X, startRight.Y), color),
-				new(new(endRight.X, endRight.Y), color),
-				new(new(endLeft.X, endLeft.Y), color),
-			};
-			renderTarget.Draw(vert, PrimitiveType.Quads);
+			renderTarget.Draw(ToVertices(color, width), PrimitiveType.Quads);
 		}
+
 		/// <summary>
 		/// Returns the point where this line and another <paramref name="line"/> cross. Returns an invalid vector
 		/// (<see cref="Extensions.NaN(Vector2)"/>) if there is no such point.

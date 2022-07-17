@@ -163,11 +163,11 @@
 
 		/// <summary>
 		/// Draws the curve to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
-		/// <paramref name="width"/>. The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if no
-		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// <paramref name="width"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Scene.MainCamera"/>'s <see cref="RenderTexture"/> if no
+		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
-		public void Draw(RenderTarget renderTarget = default, float detail = 10, Color color = default, float width = 4f)
+		public void Draw(RenderTarget renderTarget = default, float detail = 1, Color color = default, float width = 4f)
 		{
 			if(IsLooping == false && Points.Count < 4)
 				return;
@@ -175,7 +175,7 @@
 			renderTarget ??= Scene.MainCamera.RenderTexture;
 			color = color == default ? Color.White : color;
 			width /= 2;
-			var lines = 1f / (Points.Count - (IsLooping ? 0 : 3));
+			var lines = (1f / (Points.Count - (IsLooping ? 0 : 3))) * detail;
 
 			for(float i = 0f; i <= Points.Count + lines; i += lines)
 			{
@@ -190,8 +190,8 @@
 		}
 		/// <summary>
 		/// Draws the points that are making the curve to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
-		/// <paramref name="width"/>. The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if no
-		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// <paramref name="width"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Scene.MainCamera"/>'s <see cref="RenderTexture"/> if no
+		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed.
 		/// </summary>
 		public void DrawPoints(RenderTarget renderTarget = default, Color color = default, float width = 4f)

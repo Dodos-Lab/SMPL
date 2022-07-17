@@ -147,10 +147,10 @@
 			public const string TILEMAP_REMOVE_TILE_AT_DEPTH = nameof(TilemapInstance.RemoveTileAtDepth);
 			public const string TILEMAP_REMOVE_TILE_SQUARE = nameof(TilemapInstance.RemoveTileSquare);
 			public const string TILEMAP_REMOVE_TILE_SQUARE_AT_DEPTH = nameof(TilemapInstance.RemoveTileSquareAtDepth);
-			public const string TILEMAP_GET_TILE_INDECIES = nameof(TilemapInstance.GetTileIndecies);
+			public const string TILEMAP_GET_TILE_INDEXES = nameof(TilemapInstance.GetTileIndexes);
 			public const string TILEMAP_GET_TILE_POSITION = nameof(TilemapInstance.GetTilePosition);
 			public const string TILEMAP_GET_PALETTE_UIDS_FROM_POSITION = nameof(TilemapInstance.GetPaletteUIDsFromPosition);
-			public const string TILEMAP_GET_PALETTE_UIDS_FROM_TILE_INDECIES = nameof(TilemapInstance.GetPaletteUIDsFromTileIndecies);
+			public const string TILEMAP_GET_PALETTE_UIDS_FROM_TILE_INDEXES = nameof(TilemapInstance.GetPaletteUIDsFromTileIndexes);
 
 			public const string UI_BUTTON_TRIGGER = nameof(ButtonInstance.Trigger);
 

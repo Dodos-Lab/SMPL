@@ -92,29 +92,27 @@ namespace SMPL.Tools
 		/// <summary>
 		/// Picks randomly a single <typeparamref name="T"/> value out of a <paramref name="list"/> and returns it.
 		/// </summary>
-		public static T Choose<T>(this List<T> list)
+		public static T Choose<T>(this IList<T> list)
 		{
 			return list[Random(0, list.Count - 1)];
 		}
 		/// <summary>
 		/// Randomly shuffles the contents of a <paramref name="list"/>.
 		/// </summary>
-		public static void Shuffle<T>(this List<T> list)
+		public static void Shuffle<T>(this IList<T> list)
 		{
 			var n = list.Count;
 			while(n > 1)
 			{
 				n--;
 				var k = new Random().Next(n + 1);
-				var value = list[k];
-				list[k] = list[n];
-				list[n] = value;
+				(list[n], list[k]) = (list[k], list[n]);
 			}
 		}
 		/// <summary>
 		/// Calculates the average <see cref="float"/> out of a <paramref name="list"/> of <see cref="float"/>s and returns it.
 		/// </summary>
-		public static float Average(this List<float> list)
+		public static float Average(this IList<float> list)
 		{
 			var sum = 0f;
 			for(int i = 0; i < list.Count; i++)
@@ -641,32 +639,6 @@ namespace SMPL.Tools
 			return point;
 		}
 		/// <summary>
-		/// Draws <paramref name="point"/> to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
-		/// <paramref name="size"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Scene.MainCamera"/>'s <see cref="RenderTexture"/> if no
-		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
-		/// <paramref name="color"/> is passed.
-		/// </summary>
-		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
-		{
-			renderTarget ??= Scene.MainCamera.RenderTexture;
-			color = color == default ? Color.White : color;
-
-			size /= 2;
-			var tl = point.PointMoveAtAngle(270, size, false).PointMoveAtAngle(180, size, false);
-			var tr = point.PointMoveAtAngle(270, size, false).PointMoveAtAngle(0, size, false);
-			var br = point.PointMoveAtAngle(90, size, false).PointMoveAtAngle(0, size, false);
-			var bl = point.PointMoveAtAngle(90, size, false).PointMoveAtAngle(180, size, false);
-
-			var vert = new Vertex[]
-			{
-				new(new(tl.X, tl.Y), color),
-				new(new(tr.X, tr.Y), color),
-				new(new(br.X, br.Y), color),
-				new(new(bl.X, bl.Y), color),
-			};
-			renderTarget.Draw(vert, PrimitiveType.Quads);
-		}
-		/// <summary>
 		/// Converts a <see cref="Vector2f"/> into a <see cref="Vector2"/> and returns the result.
 		/// </summary>
 		public static Vector2 ToSystem(this Vector2f vector)
@@ -684,7 +656,7 @@ namespace SMPL.Tools
 		/// Picks the outside points in a collection of <paramref name="points"/> which when connected will form an outline of the initial collection.
 		/// The picked points are then returned in a new list.
 		/// </summary>
-		public static List<Vector2> OutlinePoints(this ICollection<Vector2> points)
+		public static List<Vector2> OutlinePoints(this IList<Vector2> points)
 		{
 			var result = new List<Vector2>();
 			foreach(var p in points)
@@ -709,7 +681,7 @@ namespace SMPL.Tools
 					break;
 				counter++;
 
-				Vector2 Next(ICollection<Vector2> points, Vector2 p)
+				Vector2 Next(IEnumerable<Vector2> points, Vector2 p)
 				{
 					Vector2 q = p;
 					int t;
@@ -723,6 +695,94 @@ namespace SMPL.Tools
 				}
 			}
 			result.Add(result[0]);
+			return result;
+		}
+
+		/// <summary>
+		/// Calculates the vertices of a <paramref name="point"/> with <paramref name="color"/> and <paramref name="size"/>.
+		/// The texture coordinates are calculated acording to <paramref name="size"/>. The default <paramref name="color"/> is assumed to be white if no
+		/// <paramref name="color"/> is passed. These vertices are meant for drawing with <see cref="PrimitiveType.Quads"/>.
+		/// </summary>
+		public static Vertex[] PointToVertices(this Vector2 point, Color color = default, float size = 4)
+		{
+			color = color == default ? Color.White : color;
+			size /= 2;
+
+			var tl = point + new Vector2(-size, -size);
+			var tr = point + new Vector2(size, -size);
+			var br = point + new Vector2(size, size);
+			var bl = point + new Vector2(-size, size);
+
+			var verts = new Vertex[]
+			{
+				new(new(tl.X, tl.Y), color, new(0, 0)),
+				new(new(tr.X, tr.Y), color, new(size, 0)),
+				new(new(br.X, br.Y), color, new(size, size)),
+				new(new(bl.X, bl.Y), color, new(0, size)),
+			};
+
+			return verts;
+		}
+		/// <summary>
+		/// Calculates the vertices of a collection of <paramref name="points"/>. See <see cref="PointToVertices"/> for more info.
+		/// </summary>
+		public static Vertex[] PointsToVertices(this IList<Vector2> points, Color color = default, float size = 4)
+		{
+			var result = new Vertex[points.Count * 4];
+			for(int i = 0; i < points.Count; i++)
+			{
+				var verts = points[i].PointToVertices(color, size);
+				var j = i * 4;
+				result[j + 0] = verts[0];
+				result[j + 1] = verts[1];
+				result[j + 2] = verts[2];
+				result[j + 3] = verts[3];
+			}
+			return result;
+		}
+		/// <summary>
+		/// Draws <paramref name="point"/> to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
+		/// <paramref name="size"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Scene.MainCamera"/>'s <see cref="RenderTexture"/> if no
+		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// <paramref name="color"/> is passed.
+		/// </summary>
+		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
+		{
+			renderTarget ??= Scene.MainCamera.RenderTexture;
+			renderTarget.Draw(point.PointToVertices(color, size), PrimitiveType.Quads);
+		}
+		/// <summary>
+		/// Draws a collection of <paramref name="points"/>. See <see cref="DrawPoint"/> for more info.
+		/// </summary>
+		public static void DrawPoints(this IList<Vector2> points, RenderTarget renderTarget = default, Color color = default, float size = 4)
+		{
+			renderTarget ??= Scene.MainCamera.RenderTexture;
+			renderTarget.Draw(points.PointsToVertices(color, size), PrimitiveType.Quads);
+		}
+
+		/// <summary>
+		/// Draws a collection of <paramref name="lines"/>. See <see cref="Line.Draw"/> for more info.
+		/// </summary>
+		public static void Draw(this IList<Line> lines, RenderTarget renderTarget = default, Color color = default, float size = 4)
+		{
+			renderTarget ??= Scene.MainCamera.RenderTexture;
+			renderTarget.Draw(lines.ToVertices(color, size), PrimitiveType.Quads);
+		}
+		/// <summary>
+		/// Calculates the vertices of a collection of <paramref name="lines"/>. See <see cref="Line.ToVertices"/> for more info.
+		/// </summary>
+		public static Vertex[] ToVertices(this IList<Line> lines, Color color = default, float width = 4)
+		{
+			var result = new Vertex[lines.Count * 4];
+			for(int i = 0; i < lines.Count; i++)
+			{
+				var verts = lines[i].ToVertices(color, width);
+				var j = i * 4;
+				result[j + 0] = verts[0];
+				result[j + 1] = verts[1];
+				result[j + 2] = verts[2];
+				result[j + 3] = verts[3];
+			}
 			return result;
 		}
 

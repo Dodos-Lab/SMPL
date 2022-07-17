@@ -53,18 +53,11 @@
 			}
 		}
 		/// <summary>
-		/// Draws all <see cref="Lines"/> onto <paramref name="camera"/> with <paramref name="color"/> and <paramref name="width"/> for each line.
-		/// The <paramref name="camera"/> is assumed to be the <see cref="Scene.MainCamera"/> if no
-		/// <paramref name="camera"/> is passed. The default <paramref name="color"/> is assumed to be white if no
-		/// <paramref name="color"/> is passed.
+		/// Draws all <see cref="Lines"/>. See <see cref="Extensions.Draw"/> for more info.
 		/// </summary>
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4)
 		{
-			renderTarget ??= Scene.MainCamera.RenderTexture;
-			color = color == default ? Color.White : color;
-
-			for(int i = 0; i < Lines.Count; i++)
-				Lines[i].Draw(renderTarget, color, width);
+			Lines.Draw(renderTarget, color, width);
 		}
 
 		/// <summary>

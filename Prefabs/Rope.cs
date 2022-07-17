@@ -1,5 +1,8 @@
 ﻿namespace SMPL.Prefabs
 {
+	/// <summary>
+	/// Original concept by Sebastian Lague (github.com/SebLague)
+	/// </summary>
 	public class Rope
 	{
 		public class Point
@@ -44,8 +47,12 @@
 		}
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4f)
 		{
+			var lines = new List<Line>();
+
 			foreach(var kvp in segments)
-				new Line(kvp.Value.a.Position, kvp.Value.b.Position).Draw(renderTarget, color, width);
+				lines.Add(new Line(kvp.Value.a.Position, kvp.Value.b.Position));
+
+			lines.Draw(renderTarget, color, width);
 		}
 
 		public void Tie(Point pointA, Point pointB, bool mergePoints = false)
@@ -58,21 +65,17 @@
 
 			segments[(pointA, pointB)] = new(pointA, pointB);
 		}
-		public void Untie(Point pointA, Point pointB)
+		public void Untie(Point pointA, Point pointB, bool removeTie = false)
 		{
 			segments.Remove((pointA, pointB));
-			segments.Remove((pointA, pointB));
-		}
-		public void Cut(Point point)
-		{
-			Points.Remove(point);
-			var pairs = new List<(Point, Point)>();
-			foreach(var kvp in segments)
-				if(kvp.Key.Item1 == point || kvp.Key.Item2 == point)
-					pairs.Add(kvp.Key);
+			segments.Remove((pointB, pointA));
 
-			for(int i = 0; i < pairs.Count; i++)
-				segments.Remove(pairs[i]);
+			if(removeTie == false)
+			{
+				var newB = new Point(pointB.Position, pointB.IsLocked);
+				Points.Add(newB);
+				segments[(pointA, newB)] = new(pointA, newB);
+			}
 		}
 
 		public void Update()
@@ -134,6 +137,14 @@
 		}
 
 		private readonly Dictionary<(Point, Point), Segment> segments = new();
+		private List<(Point, Point)> GetPairsContainingPoint(Point p)
+		{
+			var pairs = new List<(Point, Point)>();
+			foreach(var kvp in segments)
+				if(kvp.Key.Item1 == p || kvp.Key.Item2 == p)
+					pairs.Add(kvp.Key);
+			return pairs;
+		}
 		#endregion
 	}
 }

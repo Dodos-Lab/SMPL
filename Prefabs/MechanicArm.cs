@@ -31,8 +31,11 @@
 
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4f)
 		{
+			var lines = new List<Line>();
 			for(int i = 0; i < points.Count - 1; i++)
-				new Line(points[i], points[i + 1]).Draw(renderTarget, color, width);
+				lines.Add(new Line(points[i], points[i + 1]));
+
+			lines.Draw(renderTarget, color, width);
 		}
 
 		#region Backend
