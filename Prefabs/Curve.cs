@@ -172,21 +172,17 @@
 			if(IsLooping == false && Points.Count < 4)
 				return;
 
-			renderTarget ??= Scene.MainCamera.RenderTexture;
-			color = color == default ? Color.White : color;
-			width /= 2;
-			var lines = (1f / (Points.Count - (IsLooping ? 0 : 3))) * detail;
+			var lineCount = (1f / (Points.Count - (IsLooping ? 0 : 3))) / (detail / 10);
+			var lines = new List<Line>();
 
-			for(float i = 0f; i <= Points.Count + lines; i += lines)
+			for(float i = 0f; i <= Points.Count + lineCount; i += lineCount)
 			{
 				if(i == 0 && IsLooping == false)
-					continue; // don't draw loop ('0 - step' loops back to the last index)
+					continue; // don't draw loop (0 - step = last index)
 
-				var p1 = GetPoint(i);
-				var p2 = GetPoint(i - lines);
-				var line = new Line(p1, p2);
-				line.Draw(renderTarget, color, width);
+				lines.Add(new(GetPoint(i), GetPoint(i - lineCount)));
 			}
+			lines.Draw(renderTarget, color, width);
 		}
 		/// <summary>
 		/// Draws the points that are making the curve to a <paramref name="renderTarget"/> with <paramref name="color"/> having some

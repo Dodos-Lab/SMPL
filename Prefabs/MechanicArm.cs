@@ -6,6 +6,16 @@
 	public class MechanicArm
 	{
 		public ReadOnlyCollection<Vector2> Points => points.AsReadOnly();
+		public ReadOnlyCollection<Line> Lines
+		{
+			get
+			{
+				var lines = new List<Line>();
+				for(int i = 0; i < points.Count - 1; i++)
+					lines.Add(new Line(points[i], points[i + 1]));
+				return lines.AsReadOnly();
+			}
+		}
 		public Vector2 Position
 		{
 			get => position;
@@ -17,12 +27,12 @@
 			set { targetPosition = value; Update(); }
 		}
 
-		public MechanicArm(Vector2 originPosition, params float[] segmentLengths)
+		public MechanicArm(Vector2 originPosition, int segmentCount = 5, float segmentLength = 50f)
 		{
-			lengths = (float[])segmentLengths.Clone();
 			points.Add(originPosition);
-			for(int i = 1; i < segmentLengths.Length; i++)
-				points.Add(points[i - 1] + new Vector2(segmentLengths[i - 1], 0));
+			length = segmentLength;
+			for(int i = 1; i < segmentCount + 1; i++)
+				points.Add(points[i - 1] + new Vector2(segmentLength, 0));
 
 			Position = originPosition;
 
@@ -31,16 +41,12 @@
 
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4f)
 		{
-			var lines = new List<Line>();
-			for(int i = 0; i < points.Count - 1; i++)
-				lines.Add(new Line(points[i], points[i + 1]));
-
-			lines.Draw(renderTarget, color, width);
+			Lines.Draw(renderTarget, color, width);
 		}
 
 		#region Backend
 		private readonly List<Vector2> points = new();
-		private readonly float[] lengths;
+		private readonly float length;
 		private Vector2 position, targetPosition;
 
 		private void Update()
@@ -52,7 +58,6 @@
 			{
 				var startingFromTarget = i % 2 == 0;
 				points.Reverse();
-				Array.Reverse(lengths);
 				points[0] = startingFromTarget ? targetPosition : originPoint;
 
 				for(int j = 1; j < points.Count; j++)
@@ -61,10 +66,11 @@
 						points[j] += new Vector2(0.01f, -0.02f);
 
 					var dir = (points[j] - points[j - 1]).NormalizeDirection();
-					points[j] = points[j - 1] + dir * lengths[j - 1];
+					points[j] = points[j - 1] + dir * length;
 				}
 				var dstToTarget = (points[^1] - targetPosition).Length();
-				if(startingFromTarget == false && dstToTarget <= 0.01) return;
+				if(startingFromTarget == false && dstToTarget <= 0.01)
+					return;
 			}
 		}
 		#endregion

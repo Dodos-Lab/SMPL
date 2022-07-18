@@ -27,6 +27,17 @@
 		}
 
 		public List<Point> Points { get; } = new();
+		public ReadOnlyCollection<Line> Lines
+		{
+			get
+			{
+				var lines = new List<Line>();
+
+				foreach(var kvp in segments)
+					lines.Add(new Line(kvp.Value.a.Position, kvp.Value.b.Position));
+				return lines.AsReadOnly();
+			}
+		}
 		public Vector2 Position { get; set; }
 		public Vector2 Gravity { get; set; } = new Vector2(0, 1);
 		public Vector2 Force { get; set; }
@@ -47,12 +58,7 @@
 		}
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4f)
 		{
-			var lines = new List<Line>();
-
-			foreach(var kvp in segments)
-				lines.Add(new Line(kvp.Value.a.Position, kvp.Value.b.Position));
-
-			lines.Draw(renderTarget, color, width);
+			Lines.Draw(renderTarget, color, width);
 		}
 
 		public void Tie(Point pointA, Point pointB, bool mergePoints = false)
