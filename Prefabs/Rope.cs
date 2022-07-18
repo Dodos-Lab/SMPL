@@ -42,18 +42,23 @@
 		public Vector2 Gravity { get; set; } = new Vector2(0, 1);
 		public Vector2 Force { get; set; }
 
-		public Rope(Vector2 position, params Point[] points)
+		public Rope(Vector2 position, int segmentCount, float segmentLength)
 		{
 			Position = position;
+			segmentCount = Math.Max(1, segmentCount);
+			segmentLength = MathF.Max(1, segmentLength);
 
-			if(points != null && points.Length > 0)
+			var start = new Point(position, true);
+			Points.Add(start);
+
+			for(int i = 1; i < segmentCount + 1; i++)
+				Points.Add(new Point(position + new Vector2(i * segmentLength, 0)));
+
+			for(int i = 1; i < segmentCount + 1; i++)
 			{
-				this.Points = points.ToList();
-
-				var start = new Point(position, true);
-				segments[(new(start, points[0]))] = new(start, points[0]);
-				for(int i = 1; i < points.Length; i++)
-					segments[(points[i - 1], points[i])] = new(points[i - 1], points[i]);
+				var p1 = Points[i - 1];
+				var p2 = Points[i];
+				segments[(p1, p2)] = new(p1, p2);
 			}
 		}
 		public void Draw(RenderTarget renderTarget = default, Color color = default, float width = 4f)

@@ -20,6 +20,7 @@ global using SFML.Graphics;
 global using SFML.Graphics.Glsl;
 global using SFML.System;
 global using SFML.Window;
+global using SMPL.Prefabs;
 global using SMPL.Tools;
 global using SMPL.UI;
 global using Console = SMPL.Tools.Console;

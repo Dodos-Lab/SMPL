@@ -5,6 +5,16 @@
 		public delegate void EventHandler();
 		public delegate void ThingEventHandler(string thingUID);
 		public delegate void SceneEventHandler(string sceneName);
+		public delegate void MultiplayerClientEventHandler(string clientUniqueID);
+		public delegate void MultiplayerServerEventHandler();
+		public delegate void MultiplayerMessageEventHandler(LAN.Message message);
+
+		public static event MultiplayerClientEventHandler MultiplayerClientConnected;
+		public static event MultiplayerClientEventHandler MultiplayerClientDisconnected;
+		public static event MultiplayerClientEventHandler MultiplayerClientTakenUID;
+		public static event MultiplayerServerEventHandler MultiplayerServerStarted;
+		public static event MultiplayerServerEventHandler MultiplayerServerStopped;
+		public static event MultiplayerMessageEventHandler MultiplayerMessageReceived;
 
 		public static event EventHandler GameStopped;
 
@@ -37,6 +47,30 @@
 
 		internal static void CheckboxCheck(string uid) => CheckboxChecked?.Invoke(uid);
 
+		internal static void MultiplayerClientConnect(string clientUID)
+		{
+			MultiplayerClientConnected?.Invoke(clientUID);
+		}
+		internal static void MultiplayerClientDisconnect(string clientUID)
+		{
+			MultiplayerClientDisconnected?.Invoke(clientUID);
+		}
+		internal static void MultiplayerClientTakeUID(string clientUID)
+		{
+			MultiplayerClientTakenUID?.Invoke(clientUID);
+		}
+		internal static void MultiplayerServerStart()
+		{
+			MultiplayerServerStarted?.Invoke();
+		}
+		internal static void MultiplayerServerStop()
+		{
+			MultiplayerServerStopped?.Invoke();
+		}
+		internal static void MultiplayerMessageReceive(LAN.Message message)
+		{
+			MultiplayerMessageReceived?.Invoke(message);
+		}
 		#endregion
 	}
 }
