@@ -34,15 +34,23 @@
 		public Vector2 TexCoordUnitA { get; set; }
 		public Vector2 TexCoordUnitB { get; set; } = new(1);
 
-		public void Lock(Vector2 indexes, bool isLocked)
+		public float BreakThreshold { get; set; } = 30f;
+
+		public void Pin(Vector2 indexes, bool isPinned)
 		{
-			var x = (int)indexes.X.Limit(0, segCount.X - 1);
-			var y = (int)indexes.Y.Limit(0, segCount.Y - 1);
-			rope.Points[GetIndex(x, y)].IsLocked = isLocked;
+			rope.Points[GetIndex(indexes)].IsPinned = isPinned;
+		}
+		public void Cut(Vector2 indexes)
+		{
+			var i1 = GetIndex(indexes);
+			var i2 = GetIndex(indexes + new Vector2(1, 0));
+			var i3 = GetIndex(indexes + new Vector2(0, 1));
+			rope.Untie(rope.Points[i1], rope.Points[i2], true);
+			rope.Untie(rope.Points[i1], rope.Points[i3], true);
 		}
 
 		#region Backend
-		private Vector2 size, segCount;
+		private Vector2 segCount, segSize;
 		private readonly VertexArray verts = new(PrimitiveType.Quads);
 
 		[JsonProperty]
@@ -52,10 +60,10 @@
 		internal ClothInstance() { }
 		internal ClothInstance(string uid, Vector2 size, Vector2 segmentCount) : base(uid)
 		{
-			segCount = new(MathF.Max(1, segmentCount.X + 1), MathF.Max(1, segmentCount.Y + 1));
+			segCount = new((segmentCount.X + 1).Limit(1, 10), (segmentCount.Y + 1).Limit(1, 10));
 			size = new(MathF.Max(2, size.X), MathF.Max(2, size.Y));
-			this.size = size;
 			var sz = size / segCount;
+			segSize = sz;
 
 			rope = new(Position, (int)segmentCount.Y, sz.Y);
 
@@ -71,19 +79,20 @@
 
 					if(y > 0)
 					{
-						var upPoint = rope.Points[GetIndex(x, y - 1)];
+						var upPoint = rope.Points[GetIndex(new(x, y - 1))];
 						rope.Tie(upPoint, point);
 					}
 					if(x > 0)
 					{
-						var prevPoint = rope.Points[GetIndex(x - 1, y)];
+						var prevPoint = rope.Points[GetIndex(new(x - 1, y))];
 						rope.Tie(prevPoint, point);
 					}
 				}
-			Lock(new(), true);
-			Lock(new(segCount.X, 0), true);
-			Lock(segCount, true);
-			Lock(new(0, segCount.Y), true);
+
+			Pin(new(), true);
+			Pin(new(segCount.X, 0), true);
+			Pin(segCount, true);
+			Pin(new(0, segCount.Y), true);
 		}
 
 		internal override void OnDraw(RenderTarget renderTarget)
@@ -91,9 +100,7 @@
 			rope.Position = Position;
 			rope.Update();
 
-			verts.Clear();
-
-			Position.DrawPoint();
+			TryTear();
 
 			var tex = GetTexture();
 			var w = tex == null ? 0 : tex.Size.X;
@@ -103,13 +110,18 @@
 			var h0 = h * TexCoordUnitA.Y;
 			var hh = h * TexCoordUnitB.Y;
 
+			verts.Clear();
 			for(int y = 0; y < segCount.Y - 1; y++)
 				for(int x = 0; x < segCount.X - 1; x++)
 				{
-					var topL = rope.Points[GetIndex(x, y)];
-					var topR = rope.Points[GetIndex(x + 1, y)];
-					var botR = rope.Points[GetIndex(x + 1, y + 1)];
-					var botL = rope.Points[GetIndex(x, y + 1)];
+					var topL = rope.Points[GetIndex(new(x, y))];
+					var topR = rope.Points[GetIndex(new(x + 1, y))];
+					var botR = rope.Points[GetIndex(new(x + 1, y + 1))];
+					var botL = rope.Points[GetIndex(new(x, y + 1))];
+
+					if(topL.skip || topR.skip || botR.skip || botR.skip)
+						continue;
+
 					var tl = GetTexCoord(x, y);
 					var tr = GetTexCoord(x + 1, y);
 					var br = GetTexCoord(x + 1, y + 1);
@@ -121,9 +133,10 @@
 					verts.Append(new(botL.Position.ToSFML(), Tint, bl));
 				}
 
-			renderTarget.Draw(verts, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
-
-			BoundingBox.Draw();
+			var lineVerts = rope.Lines.ToVertices(Tint, 1);
+			var rendState = new RenderStates(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget));
+			renderTarget.Draw(lineVerts, PrimitiveType.Quads, rendState);
+			renderTarget.Draw(verts, rendState);
 
 			Vector2f GetTexCoord(int x, int y)
 			{
@@ -134,24 +147,60 @@
 		}
 		internal override Hitbox GetBoundingBox()
 		{
-			var center = GetLocalPositionFromSelf(rope.Points[GetIndex((int)segCount.X / 2, (int)segCount.Y / 2)].Position);
-			var sz = size * 0.5f;
-			var hitbox = new Hitbox(
-				center + new Vector2(-sz.X, -sz.Y),
-				center + new Vector2(sz.X, -sz.Y),
-				center + new Vector2(sz.X, sz.Y),
-				center + new Vector2(-sz.X, sz.Y),
-				center + new Vector2(-sz.X, -sz.Y));
+			var topL = GetLocalPositionFromSelf(rope.Points[0].Position);
+			var topR = GetLocalPositionFromSelf(rope.Points[GetIndex(new((int)segCount.X - 1, 0))].Position);
+			var botR = GetLocalPositionFromSelf(rope.Points[^1].Position);
+			var botL = GetLocalPositionFromSelf(rope.Points[GetIndex(new(0, (int)segCount.Y - 1))].Position);
+			var hitbox = new Hitbox(topL, topR, botR, botL, topL);
 			return hitbox;
 		}
-
-		private int GetIndex(int x, int y)
+		internal override void OnDestroy()
 		{
-			return y * (int)segCount.X + x;
+			verts.Dispose();
+			base.OnDestroy();
 		}
-		private Vector2 GetIndexes(int i)
+
+		private int GetIndex(Vector2 indexes)
 		{
-			return new(i / segCount.X, i % segCount.X);
+			indexes.X = indexes.X.Limit(0, segCount.X - 1);
+			indexes.Y = indexes.Y.Limit(0, segCount.Y - 1);
+			return (int)indexes.Y * (int)segCount.X + (int)indexes.X;
+		}
+		private void TryTear()
+		{
+			if(BreakThreshold <= 0)
+				return;
+
+			var tl = rope.Points[0].Position;
+			var tr = rope.Points[GetIndex(new((int)segCount.X - 1, 0))].Position;
+			var br = rope.Points[^1].Position;
+			var bl = rope.Points[GetIndex(new(0, (int)segCount.Y - 1))].Position;
+
+			var tltr = tl.DistanceBetweenPoints(tr);
+			var blbr = tl.DistanceBetweenPoints(bl);
+			var trbr = tr.DistanceBetweenPoints(br);
+			var tlbl = tl.DistanceBetweenPoints(bl);
+			var sz = segCount.X * segSize.X;
+			var tearStep = segCount / BreakThreshold;
+
+			for(int i = 0; i < segCount.Y; i++)
+				if(ShouldBreak(tltr, tearStep.Y, i))
+					Cut(new(segCount.X / 2, i));
+			for(int i = 0; i < segCount.Y; i++)
+				if(ShouldBreak(blbr, tearStep.Y, i))
+					Cut(new(segCount.X / 2, i));
+
+			for(int i = 0; i < segCount.X; i++)
+				if(ShouldBreak(tlbl, tearStep.X, i))
+					Cut(new(i, segCount.Y / 2));
+			for(int i = 0; i < segCount.X; i++)
+				if(ShouldBreak(trbr, tearStep.X, i))
+					Cut(new(i, segCount.Y / 2));
+
+			bool ShouldBreak(float dist, float tearStep, int i)
+			{
+				return dist > sz * (1 + (tearStep * (i + 1)));
+			}
 		}
 		#endregion
 	}
