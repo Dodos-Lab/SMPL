@@ -103,6 +103,11 @@
 			var t = new TilemapInstance(uid) { TexturePath = texturePath, TileSize = new(tileWidth, tileHeight) };
 			return t.UID;
 		}
+		public static string CreateCloth(string uid, string texturePath, float width = 100, float height = 100, int quadCountX = 5, int quadCountY = 5)
+		{
+			var t = new ClothInstance(uid, new(width, height), new(quadCountX, quadCountY)) { TexturePath = texturePath };
+			return t.UID;
+		}
 
 		public static void Set(string uid, string setPropertyName, object value)
 		{

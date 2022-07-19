@@ -52,7 +52,7 @@
 			Points.Add(start);
 
 			for(int i = 1; i < segmentCount + 1; i++)
-				Points.Add(new Point(position + new Vector2(i * segmentLength, 0)));
+				Points.Add(new Point(position + new Vector2(0, i * segmentLength)));
 
 			for(int i = 1; i < segmentCount + 1; i++)
 			{
@@ -91,11 +91,8 @@
 
 		public void Update()
 		{
-			foreach(var kvp in segments)
-			{
-				kvp.Value.a.Position = Position;
-				break;
-			}
+			if(Points.Count > 0)
+				Points[0].Position = Position;
 
 			for(int i = 0; i < Points.Count; i++)
 			{

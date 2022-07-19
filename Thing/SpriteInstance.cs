@@ -32,9 +32,9 @@
 		}
 
 		public Vector2 TexCoordUnitA { get; set; }
-		public Vector2 TexCoordUnitB { get; set; } = new(1, 1);
+		public Vector2 TexCoordUnitB { get; set; } = new(1);
 
-		public Vector2 LocalSize { get; set; } = new(100, 100);
+		public Vector2 LocalSize { get; set; } = new(100);
 		[JsonIgnore]
 		public Vector2 Size
 		{
@@ -42,7 +42,7 @@
 			set => LocalSize = value / Scale;
 		}
 
-		public Vector2 OriginUnit { get; set; } = new(0.5f, 0.5f);
+		public Vector2 OriginUnit { get; set; } = new(0.5f);
 		[JsonIgnore]
 		public Vector2 Origin
 		{
