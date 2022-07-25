@@ -1,4 +1,5 @@
 ﻿global using System;
+global using System.Collections;
 global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.Collections.ObjectModel;
@@ -12,17 +13,22 @@ global using System.Runtime.InteropServices;
 global using System.Runtime.Serialization;
 global using System.Threading;
 global using System.Windows.Forms;
+
 global using Fasterflect;
+
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Serialization;
+
 global using SFML.Audio;
 global using SFML.Graphics;
 global using SFML.Graphics.Glsl;
 global using SFML.System;
 global using SFML.Window;
+
 global using SMPL.Prefabs;
 global using SMPL.Tools;
 global using SMPL.UI;
+
 global using Console = SMPL.Tools.Console;
 global using Time = SMPL.Tools.Time;
 

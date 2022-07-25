@@ -148,7 +148,14 @@
 			set => Angle = Vector2.Normalize(value).DirectionToAngle();
 		}
 
-		public Hitbox Hitbox { get { hitbox.TransformLocalLines(uid); return hitbox; } }
+		public Hitbox Hitbox
+		{
+			get
+			{
+				hitbox.TransformLocalLines(uid);
+				return hitbox;
+			}
+		}
 		[JsonIgnore]
 		public Hitbox BoundingBox
 		{
@@ -356,6 +363,5 @@
 			Console.LogError(0, $"Thing{{{uid}}} does not exist.");
 		}
 		#endregion
-
 	}
 }
