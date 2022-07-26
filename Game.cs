@@ -1,5 +1,4 @@
 ﻿global using System;
-global using System.Collections;
 global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.Collections.ObjectModel;
@@ -74,12 +73,15 @@ namespace SMPL
 
 			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
-					for(int j = 0; j < kvp.Value[i].CameraUIDs.Count; j++)
+				{
+					var camUIDs = Thing.GetUIDsByTag(kvp.Value[i].CameraTag);
+					for(int j = 0; j < camUIDs.Count; j++)
 					{
-						var cam = ThingInstance.Get<CameraInstance>(kvp.Value[i].CameraUIDs[j]);
+						var cam = ThingInstance.Get<CameraInstance>(camUIDs[j]);
 						if(cam != null)
 							kvp.Value[i].Draw(cam.RenderTexture);
 					}
+				}
 
 
 			for(int i = 0; i < cameras.Count; i++)

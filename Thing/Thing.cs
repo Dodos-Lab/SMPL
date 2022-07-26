@@ -37,6 +37,30 @@
 		{
 			return Scene.CurrentScene.objs.Keys.ToList();
 		}
+		public static List<string> GetUIDsByTag(string tag)
+		{
+			var uids = new List<string>();
+			var objs = Scene.CurrentScene.objs;
+			foreach(var kvp in objs)
+				if(kvp.Value.Tags.Contains(tag))
+					uids.Add(kvp.Key);
+			return uids;
+		}
+		public static List<string> GetTags()
+		{
+			var tags = new List<string>();
+			var objs = Scene.CurrentScene.objs;
+			foreach(var kvp in objs)
+				for(int i = 0; i < kvp.Value.Tags.Count; i++)
+				{
+					var tag = kvp.Value.Tags[i];
+					if(tags.Contains(tag))
+						continue;
+
+					tags.Add(tag);
+				}
+			return tags;
+		}
 		public static string GetFreeUID(string uid)
 		{
 			var i = 1;

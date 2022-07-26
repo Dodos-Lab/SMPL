@@ -139,7 +139,7 @@ void main()
 					SetShader(effect);
 			}
 		}
-		public List<string> CameraUIDs { get; } = new();
+		public string CameraTag { get; set; }
 		public Thing.BlendMode BlendMode { get; set; } = Thing.BlendMode.Alpha;
 
 		public Thing.CodeGLSL GetEffectCode(Thing.Effect effect)

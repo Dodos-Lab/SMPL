@@ -336,6 +336,7 @@
 		private Dictionary<string, TilemapInstance> tilemaps = new();
 
 		internal Dictionary<string, ThingInstance> objs = new();
+
 		private ConcurrentDictionary<string, string> loadedAssets = new();
 		internal ConcurrentDictionary<string, Texture> Textures { get; } = new();
 		internal ConcurrentDictionary<string, Music> Music { get; } = new();

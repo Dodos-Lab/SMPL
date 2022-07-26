@@ -60,6 +60,8 @@
 		}
 		public string OldUID => oldUID;
 
+		public List<string> Tags { get; } = new();
+
 		[JsonIgnore]
 		public float Age => age.ElapsedTime.AsSeconds();
 
@@ -214,7 +216,6 @@
 				child.ParentUID = uid;
 			}
 		}
-
 		public override string ToString()
 		{
 			return $"{GetType().GetPrettyName()}{{{uid}}}";
