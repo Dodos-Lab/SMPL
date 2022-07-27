@@ -4,48 +4,41 @@
 	{
 		public class Particle
 		{
-			public Vector2 TexCoordsUnitA { get; set; }
-			public Vector2 TexCoordsUnitB { get; set; } = new(1);
+			public Vector2 TexCoordUnitA { get; set; }
+			public Vector2 TexCoordUnitB { get; set; } = new(1);
 			public Color Color { get; set; } = Color.White;
-			public float LifetimeSeconds { get; set; } = 2;
-			public float Speed { get; set; } = 100;
+			public float Lifetime { get; set; } = 2;
+			public float Speed { get; set; }
 			public float MoveAngle { get; set; }
 
 			public Vector2 Position { get; set; }
 			public float Angle { get; set; }
 			public float Size { get; set; } = 8;
-
-			public Particle()
-			{
-				TexCoordsUnitA = default;
-				TexCoordsUnitB = new(1);
-				Color = Color.White;
-				LifetimeSeconds = 2;
-				Speed = 100;
-				MoveAngle = 0;
-
-				Position = default;
-				Angle = 0;
-				Size = 8;
-			}
 		}
 	}
-	internal abstract class ParticleManagerInstance : VisualInstance
+	internal class ParticleManagerInstance : VisualInstance
 	{
+		public int Count => particles == null ? 0 : particles.Count;
+
+		public void Spawn(Thing.Particle particle)
+		{
+			particles.Add(particle);
+		}
+		public void Destroy(Thing.Particle particle)
+		{
+			particles.Remove(particle);
+		}
+
+		#region Backend
 		private readonly List<Thing.Particle> particles = new();
 
-		internal int ParticleCount => particles == null ? 0 : particles.Count;
-
+		[JsonConstructor]
+		internal ParticleManagerInstance() : base() { }
 		internal ParticleManagerInstance(string uid) : base(uid) { }
-		internal void Spawn(uint amount)
-		{
-			for(int i = 0; i < amount; i++)
-				particles.Add(OnParticleSpawn());
-		}
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			if(particles == null || particles.Count == 0)
+			if(particles.Count == 0)
 				return;
 
 			var ps = new List<Thing.Particle>(particles);
@@ -54,21 +47,27 @@
 			for(int i = 0; i < ps.Count * 4; i += 4)
 			{
 				var p = ps[i / 4];
-				if(p.LifetimeSeconds <= 0)
+				if(p == null)
+					continue;
+
+				if(p.Lifetime <= 0)
 				{
-					p.LifetimeSeconds = 0;
+					p.Lifetime = 0;
 					particles.Remove(p);
 					continue;
 				}
-				p.LifetimeSeconds -= Time.Delta;
+				p.Lifetime -= Time.Delta;
 
-				OnParticleUpdate(p);
+				if(p.Speed != 0)
+					p.Position = p.Position.PointMoveAtAngle(p.MoveAngle, p.Speed);
 
-				var Texture = GetTexture();
-				var txSz = Texture == null ? new Vector2() : new Vector2(Texture.Size.X, Texture.Size.Y);
+				Event.ParticleUpdate(UID, p);
+
+				var texture = GetTexture();
+				var txSz = texture == null ? new Vector2() : new Vector2(texture.Size.X, texture.Size.Y);
 				var pos = p.Position;
-				var txA = p.TexCoordsUnitA * txSz;
-				var txB = p.TexCoordsUnitB * txSz;
+				var txA = p.TexCoordUnitA * txSz;
+				var txB = p.TexCoordUnitB * txSz;
 				var c = p.Color;
 				var sz = p.Size;
 				var ang = p.Angle;
@@ -95,9 +94,6 @@
 			base.OnDestroy();
 			particles.Clear();
 		}
-
-		internal void DestroyParticle(Thing.Particle particle) => particles.Remove(particle);
-		internal abstract Thing.Particle OnParticleSpawn();
-		internal abstract void OnParticleUpdate(Thing.Particle particle);
+		#endregion
 	}
 }

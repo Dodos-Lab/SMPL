@@ -8,6 +8,7 @@
 			public const string TYPES = nameof(ThingInstance.Types);
 			public const string UID = nameof(ThingInstance.UID);
 			public const string OLD_UID = nameof(ThingInstance.OldUID);
+			public const string TAGS = nameof(ThingInstance.Tags);
 			public const string AGE = nameof(ThingInstance.Age);
 			public const string PARENT_UID = nameof(ThingInstance.ParentUID);
 			public const string PARENT_OLD_UID = nameof(ThingInstance.ParentOldUID);
@@ -37,7 +38,7 @@
 			public const string VISUAL_DEPTH = nameof(VisualInstance.Depth);
 			public const string VISUAL_TEXTURE_PATH = nameof(VisualInstance.TexturePath);
 			public const string VISUAL_EFFECT = nameof(VisualInstance.Effect);
-			public const string VISUAL_CAMERA_UIDS = nameof(VisualInstance.CameraUIDs);
+			public const string VISUAL_CAMERA_Tag = nameof(VisualInstance.CameraTag);
 			public const string VISUAL_BLEND_MODE = nameof(VisualInstance.BlendMode);
 
 			public const string SPRITE_TEX_COORD_UNIT_A = nameof(SpriteInstance.TexCoordUnitA);
@@ -50,6 +51,8 @@
 			public const string SPRITE_ORIGIN_UNIT = nameof(SpriteInstance.OriginUnit);
 
 			public const string NINE_PATCH_BORDER_SIZE = nameof(NinePatchInstance.BorderSize);
+
+			public const string PARTICLE_MANAGER_COUNT = nameof(ParticleManagerInstance.Count);
 
 			public const string TEXT_FONT_PATH = nameof(TextInstance.FontPath);
 			public const string TEXT_VALUE = nameof(TextInstance.Value);
@@ -128,6 +131,9 @@
 			public const string DESTROY = nameof(ThingInstance.Destroy);
 
 			public const string CAMERA_SNAP = nameof(CameraInstance.Snap);
+
+			public const string PARTICLE_MANAGER_SPAWN = nameof(ParticleManagerInstance.Spawn);
+			public const string PARTICLE_MANAGER_DESTROY = nameof(ParticleManagerInstance.Destroy);
 
 			public const string VISUAL_GET_EFFECT_CODE = nameof(VisualInstance.GetEffectCode);
 			public const string VISUAL_SET_CUSTOM_EFFECT = nameof(VisualInstance.SetCustomEffect);

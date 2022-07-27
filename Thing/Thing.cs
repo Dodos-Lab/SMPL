@@ -132,6 +132,11 @@
 			var t = new ClothInstance(uid, new(width, height), new(quadCountX, quadCountY)) { TexturePath = texturePath };
 			return t.UID;
 		}
+		public static string CreateParticleManager(string uid, string texturePath)
+		{
+			var t = new ParticleManagerInstance(uid) { TexturePath = texturePath };
+			return t.UID;
+		}
 
 		public static void Set(string uid, string setPropertyName, object value)
 		{
