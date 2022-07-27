@@ -31,6 +31,12 @@
 				var t = new TextboxInstance(uid, cameraUID, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
+			public static string CreateInputbox(string uid, string cameraUID, string fontPath, string value = "Hello, World!",
+				uint resolutionX = 300, uint resolutionY = 40)
+			{
+				var t = new InputboxInstance(uid, cameraUID, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
+				return t.UID;
+			}
 		}
 
 		public static List<string> GetUIDs()

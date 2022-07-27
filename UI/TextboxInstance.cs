@@ -37,7 +37,7 @@
 				textInstance.LetterSpacing = SymbolSpace;
 				textInstance.LineSpacing = LineSpace;
 				textInstance.Style = Style;
-				textInstance.Position = new();
+				textInstance.Position = new(textOffsetX, 0);
 				textInstance.Rotation = 0;
 				textInstance.Scale = new(1, 1);
 
@@ -87,7 +87,7 @@
 		{
 			for(int i = 0; i < Value.Length; i++)
 			{
-				var corners = GetSymbolCorners((uint)i).ToList();
+				var corners = GetSymbolCorners(i).ToList();
 				if(corners.Count == 4)
 					corners.Add(corners[0]);
 				var hitbox = new Hitbox(corners.ToArray());
@@ -96,19 +96,19 @@
 			}
 			return -1;
 		}
-		public ReadOnlyCollection<Vector2> GetSymbolCorners(uint characterIndex)
+		public ReadOnlyCollection<Vector2> GetSymbolCorners(int characterIndex)
 		{
 			var result = new List<Vector2>();
 
-			if(characterIndex > left.Length - 1)
+			if(characterIndex < 0 || characterIndex > left.Length - 1)
 				return result.AsReadOnly();
 
 			Update();
 			var prevIndex = (int)characterIndex;
 			characterIndex = GetNextNonFormatChar(characterIndex);
 
-			var tl = (textInstance.Position + textInstance.FindCharacterPos(characterIndex)).ToSystem();
-			var tr = (textInstance.Position + textInstance.FindCharacterPos(characterIndex + 1)).ToSystem();
+			var tl = (textInstance.Position + textInstance.FindCharacterPos((uint)characterIndex)).ToSystem();
+			var tr = (textInstance.Position + textInstance.FindCharacterPos((uint)characterIndex + 1)).ToSystem();
 
 			if(prevIndex < left.Length && left[prevIndex] == '\n') // end of line
 				tr = new(Resolution.X, tl.Y);
@@ -122,14 +122,14 @@
 			tl.Y += boundTop;
 			tr.Y += boundTop;
 
-			var view = camera.RenderTexture.GetView();
-			var camA = view.Center - view.Size * 0.5f;
-			var camB = view.Center + view.Size * 0.5f;
-
-			Limit(ref tl);
-			Limit(ref tr);
-			Limit(ref br);
-			Limit(ref bl);
+			//var view = camera.RenderTexture.GetView();
+			//var camA = view.Center - view.Size * 0.5f;
+			//var camB = view.Center + view.Size * 0.5f;
+			//
+			//Limit(ref tl);
+			//Limit(ref tr);
+			//Limit(ref br);
+			//Limit(ref bl);
 
 			if(tl.X == tr.X || tl.Y == bl.Y)
 				return result.AsReadOnly();
@@ -141,11 +141,11 @@
 
 			return result.AsReadOnly();
 
-			void Limit(ref Vector2 corner) => corner = new(corner.X.Limit(camA.X, camB.X), corner.Y.Limit(camA.Y, camB.Y));
+			//void Limit(ref Vector2 corner) => corner = new(corner.X.Limit(camA.X, camB.X), corner.Y.Limit(camA.Y, camB.Y));
 		}
 		public string GetSymbols(Vector2 worldPoint, Thing.TextboxSymbolCollection symbols)
 		{
-			for(uint i = 0; i < Value.Length; i++)
+			for(int i = 0; i < Value.Length; i++)
 			{
 				var corners = GetSymbolCorners(i).ToList();
 				if(corners.Count == 0)
@@ -222,8 +222,11 @@
 		private Vector2 res;
 		private uint lineCount;
 		private List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
-		private CameraInstance camera;
 		private string left, center, right, font;
+
+		protected bool skipParentRender;
+		protected CameraInstance camera;
+		protected float textOffsetX;
 
 		[JsonConstructor]
 		internal TextboxInstance() { }
@@ -245,7 +248,6 @@
 		{
 			Update();
 
-			camera.RenderTexture.Clear(BackgroundColor);
 			if(ShadowOffset != default)
 			{
 				var tr = Transform.Identity;
@@ -255,18 +257,14 @@
 				camera.RenderTexture.Draw(textInstance, new(SFML.Graphics.BlendMode.Alpha, tr, null, null));
 				textInstance.FillColor = col;
 			}
-			camera.RenderTexture.Draw(textInstance);
-			camera.RenderTexture.Display();
+			if(skipParentRender == false)
+				camera.RenderTexture.Clear(BackgroundColor);
 
-			var bb = BoundingBox;
-			var verts = new Vertex[]
-			{
-				new(bb.Lines[0].A.ToSFML(), Color.White, new()),
-				new(bb.Lines[1].A.ToSFML(), Color.White, new(Resolution.X, 0)),
-				new(bb.Lines[2].A.ToSFML(), Color.White, Resolution.ToSFML()),
-				new(bb.Lines[3].A.ToSFML(), Color.White, new(0, Resolution.Y)),
-			};
-			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Scene.CurrentScene.Textures[camera.UID], GetShader(renderTarget)));
+			if(string.IsNullOrWhiteSpace(textInstance.DisplayedString) == false)
+				camera.RenderTexture.Draw(textInstance);
+
+			if(skipParentRender == false)
+				DrawTextbox(renderTarget);
 		}
 		internal override void OnDestroy()
 		{
@@ -288,9 +286,9 @@
 				new Vector2(0) - or);
 		}
 
-		private void Update()
+		protected void Update()
 		{
-			textInstance.Position = new();
+			textInstance.Position = new(textOffsetX, 0);
 			textInstance.Rotation = 0;
 			textInstance.Scale = new(1, 1);
 			textInstance.Font = GetFont();
@@ -316,6 +314,7 @@
 			}
 			var b = textInstance.GetLocalBounds();
 			var sz = camera.RenderTexture.Size;
+			var x = -sz.X * 0.5f + textOffsetX;
 			switch(Alignment)
 			{
 				case Thing.TextboxAlignment.TopLeft: Top(); break;
@@ -329,12 +328,26 @@
 				case Thing.TextboxAlignment.Bottom: Bottom(); break;
 			}
 
-			void Top() => textInstance.Position = new(-sz.X * 0.5f, -camera.RenderTexture.Size.Y * 0.5f - b.Top * 0.5f);
+			void Top() => textInstance.Position = new Vector2f(x, -camera.RenderTexture.Size.Y * 0.5f - b.Top * 0.5f);
 			void CenterX() => textInstance.DisplayedString = center;
-			void CenterY() => textInstance.Position = new(-sz.X * 0.5f, -b.Height * 0.5f - (Alignment == Thing.TextboxAlignment.Left ? b.Top : 0));
-			void Bottom() => textInstance.Position = new(-sz.X * 0.5f, camera.RenderTexture.Size.Y * 0.5f - b.Height + b.Top);
+			void CenterY() => textInstance.Position = new(x, -b.Height * 0.5f - (Alignment == Thing.TextboxAlignment.Left ? b.Top : 0));
+			void Bottom() => textInstance.Position = new(x, camera.RenderTexture.Size.Y * 0.5f - b.Height + b.Top);
 			void Left() => textInstance.DisplayedString = left;
 			void Right() => textInstance.DisplayedString = right;
+		}
+		protected void DrawTextbox(RenderTarget renderTarget)
+		{
+			camera.RenderTexture.Display();
+
+			var bb = BoundingBox;
+			var verts = new Vertex[]
+			{
+				new(bb.Lines[0].A.ToSFML(), Color.White, new()),
+				new(bb.Lines[1].A.ToSFML(), Color.White, new(Resolution.X, 0)),
+				new(bb.Lines[2].A.ToSFML(), Color.White, Resolution.ToSFML()),
+				new(bb.Lines[3].A.ToSFML(), Color.White, new(0, Resolution.Y)),
+			};
+			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Scene.CurrentScene.Textures[camera.UID], GetShader(renderTarget)));
 		}
 		private Font GetFont()
 		{
@@ -342,7 +355,7 @@
 			var path = FontPath.ToBackslashPath();
 			return path != null && fonts.ContainsKey(path) ? fonts[path] : null;
 		}
-		private uint GetNextNonFormatChar(uint charIndex)
+		private int GetNextNonFormatChar(int charIndex)
 		{
 			if(Alignment == Thing.TextboxAlignment.TopRight || Alignment == Thing.TextboxAlignment.Right || Alignment == Thing.TextboxAlignment.BottomRight)
 				return Execute(formatSpaceRangesRight, true);
@@ -351,21 +364,21 @@
 
 			return charIndex;
 
-			uint Execute(List<(int, int)> ranges, bool isRight = false)
+			int Execute(List<(int, int)> ranges, bool isRight = false)
 			{
-				var realIndex = (uint)0;
-				for(uint i = 0; i < textInstance.DisplayedString.Length; i++)
+				var realIndex = 0;
+				for(int i = 0; i < textInstance.DisplayedString.Length; i++)
 				{
 					var lastRange = (0, 0);
 					for(int j = 0; j < ranges.Count; j++)
-						if(((int)i).IsBetween(ranges[j].Item1, ranges[j].Item2, true, true))
+						if(i.IsBetween(ranges[j].Item1, ranges[j].Item2, true, true))
 						{
-							i = (uint)ranges[j].Item2 + 1;
+							i = ranges[j].Item2 + 1;
 							lastRange = ranges[j];
 							break;
 						}
 					if(realIndex == charIndex)
-						return textInstance.DisplayedString[(int)i] == '\n' && isRight == false ? (uint)lastRange.Item1 : i;
+						return textInstance.DisplayedString[i] == '\n' && isRight == false ? lastRange.Item1 : i;
 
 					realIndex++;
 				}

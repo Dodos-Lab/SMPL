@@ -8,7 +8,7 @@
 		public delegate void MultiplayerClientEventHandler(string clientUniqueID);
 		public delegate void MultiplayerServerEventHandler();
 		public delegate void MultiplayerMessageEventHandler(LAN.Message message);
-		public delegate void ParticleEventHandler(string thingUID, Thing.Particle particle);
+		public delegate void ParticleEventHandler(string particleManagerUID, Thing.Particle particle);
 
 		public static event MultiplayerClientEventHandler MultiplayerClientConnected;
 		public static event MultiplayerClientEventHandler MultiplayerClientDisconnected;
@@ -31,6 +31,7 @@
 		public static event ThingEventHandler ButtonReleased;
 
 		public static event ThingEventHandler CheckboxChecked;
+		public static event ThingEventHandler InputboxSubmitted;
 
 		public static event ParticleEventHandler ParticleUpdated;
 
@@ -49,6 +50,7 @@
 		internal static void ButtonRelease(string uid) => ButtonReleased?.Invoke(uid);
 
 		internal static void CheckboxCheck(string uid) => CheckboxChecked?.Invoke(uid);
+		internal static void InputboxSubmit(string uid) => InputboxSubmitted?.Invoke(uid);
 
 		internal static void ParticleUpdate(string uid, Thing.Particle particle) => ParticleUpdated?.Invoke(uid, particle);
 
