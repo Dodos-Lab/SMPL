@@ -16,6 +16,11 @@
 		public string PlaceholderValue { get; set; } = "Type...";
 		public Color PlaceholderColor { get; set; } = new(255, 255, 255, 70);
 
+		public void Submit()
+		{
+			Event.InputboxSubmit(UID);
+		}
+
 		#region Backend
 		private Clock cursorBlinkTimer;
 		private bool cursorIsVisible;
@@ -73,7 +78,7 @@
 			if(keyStr == "\n")
 			{
 				IsFocused = false;
-				Event.InputboxSubmit(UID);
+				Submit();
 				return;
 			}
 

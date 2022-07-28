@@ -37,6 +37,11 @@
 				var t = new InputboxInstance(uid, cameraUID, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
+			public static string CreateSlider(string uid, string texturePath)
+			{
+				var t = new SliderInstance(uid) { TexturePath = texturePath };
+				return t.UID;
+			}
 		}
 
 		public static List<string> GetUIDs()

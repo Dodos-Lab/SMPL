@@ -18,7 +18,7 @@
 			set { max = value; Update(); }
 		}
 
-		public float Progress
+		public float ProgressUnit
 		{
 			get => Value.Map(RangeA, RangeB, 0, 1);
 			set => Value = value.Map(0, 1, RangeA, RangeB);
@@ -47,12 +47,12 @@
 			RangeB = 1;
 			OriginUnit = new(0, 0.5f);
 			MaxLength = 400;
-			Progress = 0.5f;
+			ProgressUnit = 0.5f;
 		}
 		private void Update()
 		{
 			Size = new(Value.Map(RangeA, RangeB, 0, MaxLength) * Scale, Size.Y);
-			TexCoordUnitB = new(Progress, TexCoordUnitB.Y);
+			TexCoordUnitB = new(ProgressUnit, TexCoordUnitB.Y);
 		}
 		#endregion
 	}

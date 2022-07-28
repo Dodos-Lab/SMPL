@@ -92,7 +92,7 @@
 
 			public const string UI_PROGRESS_BAR_RANGE_A = nameof(ProgressBarInstance.RangeA);
 			public const string UI_PROGRESS_BAR_RANGE_B = nameof(ProgressBarInstance.RangeB);
-			public const string UI_PROGRESS_BAR_PROGRESS = nameof(ProgressBarInstance.Progress);
+			public const string UI_PROGRESS_BAR_PROGRESS = nameof(ProgressBarInstance.ProgressUnit);
 			public const string UI_PROGRESS_BAR_VALUE = nameof(ProgressBarInstance.Value);
 			public const string UI_PROGRESS_BAR_MAX_LENGTH = nameof(ProgressBarInstance.MaxLength);
 
@@ -104,6 +104,20 @@
 			public const string UI_TEXTBOX_BACKGROUND_COLOR = nameof(TextboxInstance.BackgroundColor);
 			public const string UI_TEXTBOX_SHADOW_OFFSET = nameof(TextboxInstance.ShadowOffset);
 			public const string UI_TEXTBOX_SHADOW_COLOR = nameof(TextboxInstance.ShadowColor);
+
+			public const string UI_INPUTBOX_IS_FOCUSED = nameof(InputboxInstance.IsFocused);
+			public const string UI_INPUTBOX_IS_DISABLED = nameof(InputboxInstance.IsDisabled);
+			public const string UI_INPUTBOX_CURSOR_COLOR = nameof(InputboxInstance.CursorColor);
+			public const string UI_INPUTBOX_CURSOR_BLINK_SPEED = nameof(InputboxInstance.CursorBlinkSpeed);
+			public const string UI_INPUTBOX_CURSOR_POSITION_INDEX = nameof(InputboxInstance.CursorPositionIndex);
+			public const string UI_INPUTBOX_PLACEHOLDER_VALUE = nameof(InputboxInstance.PlaceholderValue);
+			public const string UI_INPUTBOX_PLACEHOLDER_COLOR = nameof(InputboxInstance.PlaceholderColor);
+
+			public const string UI_SLIDER_IS_DISABLED = nameof(SliderInstance.IsDisabled);
+			public const string UI_SLIDER_LENGTH_UNIT = nameof(SliderInstance.LengthUnit);
+			public const string UI_SLIDER_LENGTH = nameof(SliderInstance.Length);
+			public const string UI_SLIDER_PROGRESS_COLOR = nameof(SliderInstance.ProgressColor);
+			public const string UI_SLIDER_EMPTY_COLOR = nameof(SliderInstance.EmptyColor);
 			#endregion
 
 			public string Name { get; internal set; }
@@ -163,6 +177,8 @@
 			public const string UI_TEXTBOX_GET_SYMBOL_CORNERS = nameof(TextboxInstance.GetSymbolCorners);
 			public const string UI_TEXTBOX_GET_SYMBOL_INDEX = nameof(TextboxInstance.GetSymbolIndex);
 			public const string UI_TEXTBOX_GET_SYMBOLS = nameof(TextboxInstance.GetSymbols);
+
+			public const string UI_INPUTBOX_SUBMIT = nameof(InputboxInstance.Submit);
 			#endregion
 
 			public class Parameter
