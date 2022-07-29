@@ -108,7 +108,6 @@
 			public const string UI_INPUTBOX_IS_FOCUSED = nameof(InputboxInstance.IsFocused);
 			public const string UI_INPUTBOX_IS_DISABLED = nameof(InputboxInstance.IsDisabled);
 			public const string UI_INPUTBOX_CURSOR_COLOR = nameof(InputboxInstance.CursorColor);
-			public const string UI_INPUTBOX_CURSOR_BLINK_SPEED = nameof(InputboxInstance.CursorBlinkSpeed);
 			public const string UI_INPUTBOX_CURSOR_POSITION_INDEX = nameof(InputboxInstance.CursorPositionIndex);
 			public const string UI_INPUTBOX_PLACEHOLDER_VALUE = nameof(InputboxInstance.PlaceholderValue);
 			public const string UI_INPUTBOX_PLACEHOLDER_COLOR = nameof(InputboxInstance.PlaceholderColor);

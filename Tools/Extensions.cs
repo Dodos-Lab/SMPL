@@ -61,7 +61,8 @@ namespace SMPL.Tools
 		/// </summary>
 		public static bool Once(this bool condition, string uniqueID, uint max = uint.MaxValue)
 		{
-			if(gates.ContainsKey(uniqueID) == false && condition == false) return false;
+			if(gates.ContainsKey(uniqueID) == false && condition == false)
+				return false;
 			else if(gates.ContainsKey(uniqueID) == false && condition == true)
 			{
 				gates[uniqueID] = true;
@@ -70,14 +71,16 @@ namespace SMPL.Tools
 			}
 			else
 			{
-				if(gates[uniqueID] == true && condition == true) return false;
+				if(gates[uniqueID] == true && condition == true)
+					return false;
 				else if(gates[uniqueID] == false && condition == true)
 				{
 					gates[uniqueID] = true;
 					gateEntries[uniqueID]++;
 					return true;
 				}
-				else if(gateEntries[uniqueID] < max) gates[uniqueID] = false;
+				else if(gateEntries[uniqueID] < max)
+					gates[uniqueID] = false;
 			}
 			return false;
 		}

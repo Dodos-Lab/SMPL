@@ -6,7 +6,6 @@
 		public bool IsDisabled { get; set; }
 
 		public Color CursorColor { get; set; }
-		public float CursorBlinkSpeed { get; set; }
 		public int CursorPositionIndex
 		{
 			get => cursorIndex;
@@ -22,7 +21,8 @@
 		}
 
 		#region Backend
-		private Clock cursorBlinkTimer;
+		private const float SPEED = 0.5f;
+		private readonly Clock cursorBlinkTimer = new(), holdTimer = new(), holdTickTimer = new();
 		private bool cursorIsVisible;
 		private int cursorIndex;
 		private float cursorPosX;
@@ -53,15 +53,14 @@
 		{
 			base.OnDestroy();
 			cursorBlinkTimer.Dispose();
-			cursorBlinkTimer = null;
+			holdTimer.Dispose();
+			holdTickTimer.Dispose();
 			Game.Window.TextEntered -= OnInput;
 		}
 
 		private void Init()
 		{
 			Game.Window.TextEntered += OnInput;
-			cursorBlinkTimer = new();
-			CursorBlinkSpeed = 0.5f;
 			Value = "";
 			CursorColor = Color.White;
 			skipParentRender = true;
@@ -119,6 +118,11 @@
 			if(IsDisabled || Game.Window.HasFocus() == false)
 				return;
 
+			var left = Keyboard.IsKeyPressed(Keyboard.Key.Left);
+			var right = Keyboard.IsKeyPressed(Keyboard.Key.Right);
+
+			TryMoveCursorLeftRight();
+
 			if(Mouse.IsButtonPressed(Mouse.Button.Left).Once($"press-{GetHashCode()}"))
 			{
 				IsFocused = BoundingBox.IsHovered;
@@ -127,14 +131,20 @@
 				var index = GetSymbolIndex(Scene.MouseCursorPosition);
 				CursorPositionIndex = index == -1 ? Value.Length : index;
 			}
-			if(Keyboard.IsKeyPressed(Keyboard.Key.Left).Once($"left-{GetHashCode()}"))
-				SetIndex((int)CursorPositionIndex - 1);
-			if(Keyboard.IsKeyPressed(Keyboard.Key.Right).Once($"right-{GetHashCode()}"))
-				SetIndex((int)CursorPositionIndex + 1);
+			if(left.Once($"left-{GetHashCode()}"))
+			{
+				holdTimer.Restart();
+				SetIndex(CursorPositionIndex - 1);
+			}
+			if(right.Once($"right-{GetHashCode()}"))
+			{
+				holdTimer.Restart();
+				SetIndex(CursorPositionIndex + 1);
+			}
 			if(Keyboard.IsKeyPressed(Keyboard.Key.Up).Once($"up-{GetHashCode()}"))
-				SetIndex(Value.Length);
-			if(Keyboard.IsKeyPressed(Keyboard.Key.Down).Once($"down-{GetHashCode()}"))
 				SetIndex(0);
+			if(Keyboard.IsKeyPressed(Keyboard.Key.Down).Once($"down-{GetHashCode()}"))
+				SetIndex(Value.Length);
 			if(Keyboard.IsKeyPressed(Keyboard.Key.Delete).Once($"delete-{GetHashCode()}") && CursorPositionIndex < Value.Length)
 			{
 				ShowCursor();
@@ -146,22 +156,37 @@
 				CursorPositionIndex = index;
 				ShowCursor();
 			}
+			void TryMoveCursorLeftRight()
+			{
+				var moveLeft = false;
+				var moveRight = false;
+				if(holdTimer.ElapsedTime.AsSeconds() > SPEED)
+				{
+					if(left && right == false)
+						moveLeft = true;
+					else if(left == false && right)
+						moveRight = true;
+				}
+				if(holdTickTimer.ElapsedTime.AsSeconds() > SPEED * 0.075f)
+				{
+					holdTickTimer.Restart();
+					if(moveLeft)
+						SetIndex(CursorPositionIndex - 1);
+					else if(moveRight)
+						SetIndex(CursorPositionIndex + 1);
+				}
+			}
 		}
 		private void TryDrawCursor()
 		{
 			if(IsFocused == false || IsDisabled)
 				return;
 
-			if(cursorBlinkTimer.ElapsedTime.AsSeconds() >= CursorBlinkSpeed)
+			if(cursorBlinkTimer.ElapsedTime.AsSeconds() > SPEED)
 			{
 				cursorBlinkTimer.Restart();
 				cursorIsVisible = !cursorIsVisible;
 			}
-
-			if(CursorBlinkSpeed == 0)
-				cursorIsVisible = true;
-			else if(CursorBlinkSpeed < 0)
-				cursorIsVisible = false;
 
 			if(cursorIsVisible == false)
 				return;
@@ -200,7 +225,7 @@
 		{
 			if(cursorPosX >= Resolution.X)
 				textOffsetX -= SymbolSize * 0.3f;
-			else if(cursorPosX <= -Resolution.X)
+			else if(cursorPosX < -Resolution.X)
 				textOffsetX += SymbolSize * 0.3f;
 		}
 		#endregion
