@@ -13,7 +13,6 @@
 
 	internal class TextboxInstance : TextInstance
 	{
-		public Vector2 Resolution => res;
 		public Color BackgroundColor { get; set; } = new(100, 100, 100);
 
 		public new string FontPath
@@ -75,6 +74,8 @@
 			}
 		}
 
+		public string CameraUID => cameraUID;
+
 		public uint LineWidth { get; set; }
 		public uint LineCount => lineCount;
 
@@ -111,7 +112,7 @@
 			var tr = (textInstance.Position + textInstance.FindCharacterPos((uint)characterIndex + 1)).ToSystem();
 
 			if(prevIndex < left.Length && left[prevIndex] == '\n') // end of line
-				tr = new(Resolution.X, tl.Y);
+				tr = new(GetRes().X, tl.Y);
 
 			var sc = Scale;
 			var boundTop = textInstance.GetLocalBounds().Top;
@@ -219,34 +220,35 @@
 		}
 
 		#region Backend
-		private Vector2 res;
 		private uint lineCount;
 		private List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
 		private string left, center, right, font;
 
 		protected bool skipParentRender;
-		protected CameraInstance camera;
+		protected string cameraUID;
 		protected float textOffsetX;
 
 		[JsonConstructor]
 		internal TextboxInstance() { }
-		internal TextboxInstance(string uid, string cameraUID, uint resolutionX = 200, uint resolutionY = 200) : base(uid)
+		internal TextboxInstance(string uid, string cameraUID) : base(uid)
 		{
-			Init(cameraUID, resolutionX, resolutionY);
+			Init(cameraUID);
 		}
 
-		private void Init(string cameraUID, uint resolutionX, uint resolutionY)
+		private void Init(string cameraUID)
 		{
-			camera = new(cameraUID, new(resolutionX, resolutionY));
-			res = new(resolutionX, resolutionY);
-			TexturePath = camera.UID;
-			LineWidth = resolutionX;
+			this.cameraUID = cameraUID;
+			TexturePath = cameraUID;
 			Alignment = Thing.TextboxAlignment.Center;
 			left = "Hello, World!";
 		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			Update();
+
+			var camera = GetCamera();
+			if(camera == null)
+				return;
 
 			if(ShadowOffset != default)
 			{
@@ -269,14 +271,13 @@
 		internal override void OnDestroy()
 		{
 			base.OnDestroy();
-			camera.Destroy(false);
-			camera = null;
+			GetCamera()?.Destroy(false);
 			formatSpaceRangesCenter = null;
 			formatSpaceRangesRight = null;
 		}
 		internal override Hitbox GetBoundingBox()
 		{
-			var res = Resolution * new Vector2(0.5f);
+			var res = GetRes() * new Vector2(0.5f);
 			var or = res * OriginUnit;
 			return new Hitbox(
 				new Vector2(0) - or,
@@ -288,6 +289,10 @@
 
 		protected void Update()
 		{
+			var camera = GetCamera();
+			if(camera == null)
+				return;
+
 			textInstance.Position = new(textOffsetX, 0);
 			textInstance.Rotation = 0;
 			textInstance.Scale = new(1, 1);
@@ -337,17 +342,26 @@
 		}
 		protected void DrawTextbox(RenderTarget renderTarget)
 		{
+			var camera = GetCamera();
+			if(camera == null)
+				return;
+
 			camera.RenderTexture.Display();
 
 			var bb = BoundingBox;
+			var res = GetRes();
 			var verts = new Vertex[]
 			{
 				new(bb.Lines[0].A.ToSFML(), Color.White, new()),
-				new(bb.Lines[1].A.ToSFML(), Color.White, new(Resolution.X, 0)),
-				new(bb.Lines[2].A.ToSFML(), Color.White, Resolution.ToSFML()),
-				new(bb.Lines[3].A.ToSFML(), Color.White, new(0, Resolution.Y)),
+				new(bb.Lines[1].A.ToSFML(), Color.White, new(res.X, 0)),
+				new(bb.Lines[2].A.ToSFML(), Color.White, res.ToSFML()),
+				new(bb.Lines[3].A.ToSFML(), Color.White, new(0, res.Y)),
 			};
 			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, Scene.CurrentScene.Textures[camera.UID], GetShader(renderTarget)));
+		}
+		protected CameraInstance GetCamera()
+		{
+			return Get<CameraInstance>(cameraUID);
 		}
 		private Font GetFont()
 		{
@@ -384,6 +398,11 @@
 				}
 				return charIndex;
 			}
+		}
+		internal Vector2 GetRes()
+		{
+			var cam = Get<CameraInstance>(cameraUID);
+			return cam == null ? default : cam.Resolution;
 		}
 		#endregion
 	}

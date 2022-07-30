@@ -32,6 +32,7 @@
 
 		public static event ThingEventHandler CheckboxChecked;
 		public static event ThingEventHandler InputboxSubmitted;
+		public static event ThingEventHandler ListButtonClicked;
 
 		public static event ParticleEventHandler ParticleUpdated;
 
@@ -51,6 +52,7 @@
 
 		internal static void CheckboxCheck(string uid) => CheckboxChecked?.Invoke(uid);
 		internal static void InputboxSubmit(string uid) => InputboxSubmitted?.Invoke(uid);
+		internal static void ListButtonClick(string uid) => ListButtonClicked?.Invoke(uid);
 
 		internal static void ParticleUpdate(string uid, Thing.Particle particle) => ParticleUpdated?.Invoke(uid, particle);
 

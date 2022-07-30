@@ -21,25 +21,38 @@
 			}
 			public static string CreateTextButton(string uid, string textUID, string texturePath, string fontPath, string value = "Hello, World!")
 			{
-				var tt = new TextInstance(textUID) { FontPath = fontPath, Value = value };
-				var t = new TextButtonInstance(uid, textUID) { TexturePath = texturePath, TextUID = tt.UID };
+				var t = new TextButtonInstance(uid, CreateText(textUID, fontPath, value)) { TexturePath = texturePath };
 				return t.UID;
 			}
 			public static string CreateTextbox(string uid, string cameraUID, string fontPath, string value = "Hello, World!",
 				uint resolutionX = 200, uint resolutionY = 200)
 			{
-				var t = new TextboxInstance(uid, cameraUID, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
+				var t = new TextboxInstance(uid, CreateCamera(cameraUID, new(resolutionX, resolutionY))) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
 			public static string CreateInputbox(string uid, string cameraUID, string fontPath, string value = "Hello, World!",
 				uint resolutionX = 300, uint resolutionY = 40)
 			{
-				var t = new InputboxInstance(uid, cameraUID, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
+				var t = new InputboxInstance(uid, CreateCamera(cameraUID, new(resolutionX, resolutionY))) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
 			public static string CreateSlider(string uid, string texturePath)
 			{
 				var t = new SliderInstance(uid) { TexturePath = texturePath };
+				return t.UID;
+			}
+			public static string CreateScrollBar(string uid, string texturePath, string buttonUpUID, string buttonDownUID)
+			{
+				var up = CreateButton(buttonUpUID, texturePath);
+				var down = CreateButton(buttonDownUID, texturePath);
+				var t = new ScrollBarInstance(uid, up, down) { TexturePath = texturePath };
+				return t.UID;
+			}
+			public static string CreateList(string uid, string texturePath, string buttonUpUID, string buttonDownUID)
+			{
+				var up = CreateButton(buttonUpUID, texturePath);
+				var down = CreateButton(buttonDownUID, texturePath);
+				var t = new ListInstance(uid, up, down) { TexturePath = texturePath };
 				return t.UID;
 			}
 		}

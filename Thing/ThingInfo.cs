@@ -100,7 +100,6 @@
 			public const string UI_TEXTBOX_LINE_SPACE = nameof(TextboxInstance.LineSpace);
 			public const string UI_TEXTBOX_LINE_COUNT = nameof(TextboxInstance.LineCount);
 			public const string UI_TEXTBOX_ALIGNMENT = nameof(TextboxInstance.Alignment);
-			public const string UI_TEXTBOX_RESOLUTION = nameof(TextboxInstance.Resolution);
 			public const string UI_TEXTBOX_BACKGROUND_COLOR = nameof(TextboxInstance.BackgroundColor);
 			public const string UI_TEXTBOX_SHADOW_OFFSET = nameof(TextboxInstance.ShadowOffset);
 			public const string UI_TEXTBOX_SHADOW_COLOR = nameof(TextboxInstance.ShadowColor);
@@ -117,6 +116,12 @@
 			public const string UI_SLIDER_LENGTH = nameof(SliderInstance.Length);
 			public const string UI_SLIDER_PROGRESS_COLOR = nameof(SliderInstance.ProgressColor);
 			public const string UI_SLIDER_EMPTY_COLOR = nameof(SliderInstance.EmptyColor);
+
+			public const string UI_SCROLL_BAR_IS_FOCUSED = nameof(ScrollBarInstance.IsFocused);
+			public const string UI_SCROLL_BAR_STEP = nameof(ScrollBarInstance.Step);
+			public const string UI_SCROLL_BAR_STEP_UNIT = nameof(ScrollBarInstance.StepUnit);
+			public const string UI_SCROLL_BAR_BUTTON_UP_UID = nameof(ScrollBarInstance.ButtonUpUID);
+			public const string UI_SCROLL_BAR_BUTTON_DOWN_UID = nameof(ScrollBarInstance.ButtonDownUID);
 			#endregion
 
 			public string Name { get; internal set; }
@@ -178,6 +183,9 @@
 			public const string UI_TEXTBOX_GET_SYMBOLS = nameof(TextboxInstance.GetSymbols);
 
 			public const string UI_INPUTBOX_SUBMIT = nameof(InputboxInstance.Submit);
+
+			public const string UI_SCROLL_BAR_GO_UP = nameof(ScrollBarInstance.GoUp);
+			public const string UI_SCROLL_BAR_GO_DOWN = nameof(ScrollBarInstance.GoDown);
 			#endregion
 
 			public class Parameter

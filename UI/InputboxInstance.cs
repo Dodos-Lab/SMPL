@@ -29,7 +29,7 @@
 
 		[JsonConstructor]
 		internal InputboxInstance() => Init();
-		internal InputboxInstance(string uid, string fontPath, uint resolutionX = 300, uint resolutionY = 40) : base(uid, fontPath, resolutionX, resolutionY)
+		internal InputboxInstance(string uid, string fontPath) : base(uid, fontPath)
 		{
 			Init();
 		}
@@ -38,7 +38,7 @@
 		{
 			Alignment = Thing.TextboxAlignment.TopLeft;
 
-			camera.RenderTexture.Clear(BackgroundColor);
+			GetCamera()?.RenderTexture.Clear(BackgroundColor);
 
 			TryInput();
 			TryDrawPlaceholder();
@@ -111,7 +111,7 @@
 			textInstance.FillColor = PlaceholderColor;
 			textInstance.DisplayedString = "  " + PlaceholderValue;
 
-			camera.RenderTexture.Draw(textInstance, new(SFML.Graphics.BlendMode.Alpha));
+			GetCamera()?.RenderTexture.Draw(textInstance, new(SFML.Graphics.BlendMode.Alpha));
 		}
 		private void TryInput()
 		{
@@ -219,13 +219,14 @@
 				new(br.ToSFML(), CursorColor),
 				new(tr.ToSFML(), CursorColor),
 			};
-			camera.RenderTexture.Draw(verts, PrimitiveType.Quads);
+			GetCamera()?.RenderTexture.Draw(verts, PrimitiveType.Quads);
 		}
 		private void TryMoveTextWhenCursorOut()
 		{
-			if(cursorPosX >= Resolution.X)
+			var res = GetRes();
+			if(cursorPosX >= res.X)
 				textOffsetX -= SymbolSize * 0.3f;
-			else if(cursorPosX < -Resolution.X)
+			else if(cursorPosX < -res.X)
 				textOffsetX += SymbolSize * 0.3f;
 		}
 		#endregion
