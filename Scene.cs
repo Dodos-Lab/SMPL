@@ -345,6 +345,12 @@
 		internal ConcurrentDictionary<string, string> Files { get; } = new();
 		//internal Dictionary<string, Sprite3D> Sprites3D { get; } = new();
 
+		static Scene()
+		{
+			assetsLoading = new(ThreadLoadAssets) { IsBackground = true, Name = "AssetsLoading" };
+			assetsLoading.Start();
+		}
+
 		[JsonConstructor]
 		internal Scene() { }
 

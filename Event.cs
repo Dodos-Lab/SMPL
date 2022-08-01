@@ -29,6 +29,8 @@
 		public static event ThingEventHandler ButtonUnhovered;
 		public static event ThingEventHandler ButtonPressed;
 		public static event ThingEventHandler ButtonReleased;
+		public static event ThingEventHandler ButtonDragged;
+		public static event ThingEventHandler ButtonDropped;
 
 		public static event ThingEventHandler CheckboxChecked;
 		public static event ThingEventHandler InputboxSubmitted;
@@ -49,6 +51,8 @@
 		internal static void ButtonUnhover(string uid) => ButtonUnhovered?.Invoke(uid);
 		internal static void ButtonPress(string uid) => ButtonPressed?.Invoke(uid);
 		internal static void ButtonRelease(string uid) => ButtonReleased?.Invoke(uid);
+		internal static void ButtonDrag(string uid) => ButtonDragged?.Invoke(uid);
+		internal static void ButtonDrop(string uid) => ButtonDropped?.Invoke(uid);
 
 		internal static void CheckboxCheck(string uid) => CheckboxChecked?.Invoke(uid);
 		internal static void InputboxSubmit(string uid) => InputboxSubmitted?.Invoke(uid);

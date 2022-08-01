@@ -2,6 +2,7 @@
 {
 	internal class ButtonInstance : SpriteInstance
 	{
+		public bool IsDraggable { get; set; }
 		public bool IsDisabled { get; set; }
 		public float HoldDelay { get; set; } = 0.5f;
 		public float HoldTriggerSpeed { get; set; } = 0.1f;
@@ -9,6 +10,7 @@
 		public void Trigger() => Event.ButtonClick(UID);
 
 		#region Backend
+		private Vector2 prevMousePos;
 		private float holdDelayTimer, holdTriggerTimer;
 		private bool isClicked;
 
@@ -51,6 +53,9 @@
 				isClicked = true;
 				holdDelayTimer = HoldDelay;
 				Event.ButtonPress(UID);
+
+				if(IsDraggable)
+					Event.ButtonDrag(UID);
 			}
 			if((leftClicked == false).Once($"{id}-release"))
 			{
@@ -58,11 +63,23 @@
 				{
 					if(isClicked)
 						Event.ButtonClick(UID);
+
+					if(isClicked && IsDraggable)
+						Event.ButtonDrop(UID);
+
 					Event.ButtonRelease(UID);
 					Event.ButtonHover(UID);
 				}
 				isClicked = false;
 			}
+
+			var mousePos = Scene.MouseCursorPosition;
+			if(isClicked && IsDraggable)
+			{
+				var delta = mousePos - prevMousePos;
+				Position += delta;
+			}
+			prevMousePos = mousePos;
 		}
 
 		internal void Hover() => Event.ButtonHover(UID);

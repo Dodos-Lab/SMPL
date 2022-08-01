@@ -105,11 +105,17 @@
 				new(-sz.X, -sz.Y));
 		}
 
-		internal static void DrawMainCameraToWindow()
+		internal static void DrawMainCameraToWindow(RenderWindow window, bool mainCameraIsWindow)
 		{
-			Scene.MainCamera.RenderTexture.Display();
+			if(mainCameraIsWindow)
+			{
+				window.Display();
+				return;
+			}
+
+			Scene.MainCamera.renderTexture.Display();
 			var texSz = Scene.MainCamera.renderTexture.Size;
-			var viewSz = Game.Window.GetView().Size;
+			var viewSz = window.GetView().Size;
 			var verts = new Vertex[]
 			{
 				new(-viewSz * 0.5f, new Vector2f()),
@@ -118,9 +124,9 @@
 				new(new Vector2f(-viewSz.X * 0.5f, viewSz.Y * 0.5f), new Vector2f(0, texSz.Y))
 			};
 
-			Game.Window.Clear();
-			Game.Window.Draw(verts, PrimitiveType.Quads, new(Scene.MainCamera.renderTexture.Texture));
-			Game.Window.Display();
+			window.Clear();
+			window.Draw(verts, PrimitiveType.Quads, new(Scene.MainCamera.renderTexture.Texture));
+			window.Display();
 		}
 		#endregion
 	}

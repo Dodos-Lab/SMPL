@@ -38,7 +38,7 @@
 			public const string VISUAL_DEPTH = nameof(VisualInstance.Depth);
 			public const string VISUAL_TEXTURE_PATH = nameof(VisualInstance.TexturePath);
 			public const string VISUAL_EFFECT = nameof(VisualInstance.Effect);
-			public const string VISUAL_CAMERA_Tag = nameof(VisualInstance.CameraTag);
+			public const string VISUAL_CAMERA_TAG = nameof(VisualInstance.CameraTag);
 			public const string VISUAL_BLEND_MODE = nameof(VisualInstance.BlendMode);
 
 			public const string SPRITE_TEX_COORD_UNIT_A = nameof(SpriteInstance.TexCoordUnitA);
@@ -82,6 +82,7 @@
 			public const string TILEMAP_TILE_PALETTE = nameof(TilemapInstance.TilePalette);
 
 			public const string UI_BUTTON_IS_DISABLED = nameof(ButtonInstance.IsDisabled);
+			public const string UI_BUTTON_IS_DRAGGABLE = nameof(ButtonInstance.IsDraggable);
 			public const string UI_BUTTON_HOLD_DELAY = nameof(ButtonInstance.HoldDelay);
 			public const string UI_BUTTON_HOLD_TRIGGER_SPEED = nameof(ButtonInstance.HoldTriggerSpeed);
 

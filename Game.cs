@@ -58,18 +58,15 @@ namespace SMPL
 			Scene.Load(scenePath);
 			Start();
 		}
-		public static void UpdateEngine(RenderTarget renderTarget)
+		public static void UpdateEngine(RenderWindow window, RenderTarget mainCamera)
 		{
-			Window.DispatchEvents();
-			Scene.MainCamera.RenderTexture.Clear(Color.Black);
 			Time.Update();
 
 			var visuals = VisualInstance.visuals.Reverse();
 			var cameras = CameraInstance.cameras;
 
 			for(int i = 0; i < cameras.Count; i++)
-				if(cameras[i].UID != Scene.MAIN_CAMERA_UID)
-					cameras[i].RenderTexture.Clear(Color.Transparent);
+				cameras[i].RenderTexture.Clear(Color.Transparent);
 
 			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
@@ -83,18 +80,17 @@ namespace SMPL
 					}
 				}
 
-
 			for(int i = 0; i < cameras.Count; i++)
 				if(cameras[i].UID != Scene.MAIN_CAMERA_UID)
 					cameras[i].RenderTexture.Display();
 
 			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
-					kvp.Value[i].Draw(renderTarget);
+					kvp.Value[i].Draw(mainCamera);
 
 			Scene.UpdateCurrentScene();
 			AudioInstance.Update();
-			CameraInstance.DrawMainCameraToWindow();
+			CameraInstance.DrawMainCameraToWindow(window, window == mainCamera);
 		}
 		public static void Stop()
 		{
@@ -143,11 +139,12 @@ namespace SMPL
 			if(Thing.Exists(Scene.MAIN_CAMERA_UID) == false)
 				Thing.CreateCamera(Scene.MAIN_CAMERA_UID, Settings.ScreenResolution);
 
-			Scene.assetsLoading = new(Scene.ThreadLoadAssets) { IsBackground = true, Name = "AssetsLoading" };
-			Scene.assetsLoading.Start();
-
 			while(Window.IsOpen)
-				UpdateEngine(Scene.MainCamera.RenderTexture);
+			{
+				Window.DispatchEvents();
+				Window.Clear();
+				UpdateEngine(Window, Scene.MainCamera.RenderTexture);
+			}
 		}
 		private static void OnClose(object sender, EventArgs e) => Stop();
 

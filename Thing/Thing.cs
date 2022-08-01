@@ -87,6 +87,9 @@
 		}
 		public static string GetFreeUID(string uid)
 		{
+			if(Scene.CurrentScene == null)
+				return uid;
+
 			var i = 1;
 
 			if(string.IsNullOrWhiteSpace(uid))
