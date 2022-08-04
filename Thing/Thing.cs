@@ -123,6 +123,9 @@
 				return;
 
 			var obj = ThingInstance.Get(uid);
+			if(obj == null)
+				return;
+
 			obj.Destroy(destroyChildren);
 		}
 
