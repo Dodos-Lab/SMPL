@@ -97,12 +97,18 @@
 		internal override Hitbox GetBoundingBox()
 		{
 			var sz = renderTexture.GetView().Size * 0.5f;
-			return new Hitbox(
-				new(-sz.X, -sz.Y),
-				new(sz.X, -sz.Y),
-				new(sz.X, sz.Y),
-				new(-sz.X, sz.Y),
-				new(-sz.X, -sz.Y));
+			var tl = new Vector2(-sz.X, -sz.Y);
+			var tr = new Vector2(sz.X, -sz.Y);
+			var br = new Vector2(sz.X, sz.Y);
+			var bl = new Vector2(-sz.X, sz.Y);
+
+			bb.Lines.Clear();
+			bb.LocalLines.Clear();
+			bb.LocalLines.Add(new(tl, tr));
+			bb.LocalLines.Add(new(tr, br));
+			bb.LocalLines.Add(new(br, bl));
+			bb.LocalLines.Add(new(bl, tl));
+			return bb;
 		}
 
 		internal static void DrawMainCameraToWindow(RenderWindow window, bool mainCameraIsWindow)

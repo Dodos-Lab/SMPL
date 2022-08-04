@@ -15,9 +15,6 @@
 
 		internal static List<LightInstance> lights = new();
 
-		internal const float SIZE = 100f;
-		internal const float HALF_SIZE = SIZE / 2f;
-
 		[JsonConstructor]
 		internal LightInstance()
 		{
@@ -77,16 +74,6 @@
 			scales[i] = default;
 
 			lights.Remove(this);
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			var hitbox = new Hitbox(
-				new(-HALF_SIZE, -HALF_SIZE),
-				new(HALF_SIZE, -HALF_SIZE),
-				new(HALF_SIZE, HALF_SIZE),
-				new(-HALF_SIZE, HALF_SIZE),
-				new(-HALF_SIZE, -HALF_SIZE));
-			return hitbox;
 		}
 		#endregion
 	}

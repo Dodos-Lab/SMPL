@@ -5,12 +5,22 @@
 		public float RangeA
 		{
 			get => rangeA;
-			set { rangeA = value; Value = val; Update(); }
+			set
+			{
+				rangeA = value;
+				Value = val;
+				Update();
+			}
 		}
 		public float RangeB
 		{
 			get => rangeB;
-			set { rangeB = value; Value = val; Update(); }
+			set
+			{
+				rangeB = value;
+				Value = val;
+				Update();
+			}
 		}
 		public float MaxLength
 		{
@@ -26,7 +36,11 @@
 		public float Value
 		{
 			get => val;
-			set { val = value.Limit(RangeA, RangeB); Update(); }
+			set
+			{
+				val = value.Limit(RangeA, RangeB);
+				Update();
+			}
 		}
 
 		#region Backend

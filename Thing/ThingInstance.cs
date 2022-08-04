@@ -164,7 +164,9 @@
 			get
 			{
 				var bb = GetBoundingBox();
-				bb.TransformLocalLines(uid);
+
+				if(bb.Lines.Count == 0 && bb.LocalLines.Count != 0)
+					bb.TransformLocalLines(uid);
 				return bb;
 			}
 		}
@@ -224,7 +226,7 @@
 		#region Backend
 		private const float DEFAULT_BB_SIZE = 50f;
 		private readonly Clock age = new();
-		private readonly Hitbox hitbox = new();
+		protected readonly Hitbox hitbox = new(), bb = new();
 		private readonly List<string> childrenUIDs = new();
 		private string parentUID, oldUID, parOldUID;
 		private Vector2 localPos;
@@ -256,12 +258,18 @@
 		internal virtual Hitbox GetBoundingBox()
 		{
 			var sz = DEFAULT_BB_SIZE;
-			return new Hitbox(
-				new(-sz, -sz),
-				new(sz, -sz),
-				new(sz, sz),
-				new(-sz, sz),
-				new(-sz, -sz));
+			var tl = new Vector2(-sz, -sz);
+			var tr = new Vector2(sz, -sz);
+			var br = new Vector2(sz, sz);
+			var bl = new Vector2(-sz, sz);
+
+			bb.Lines.Clear();
+			bb.LocalLines.Clear();
+			bb.LocalLines.Add(new(tl, tr));
+			bb.LocalLines.Add(new(tr, br));
+			bb.LocalLines.Add(new(br, bl));
+			bb.LocalLines.Add(new(bl, tl));
+			return bb;
 		}
 
 		internal Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)

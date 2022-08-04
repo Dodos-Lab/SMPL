@@ -58,7 +58,7 @@ namespace SMPL
 			Scene.Load(scenePath);
 			Start();
 		}
-		public static void UpdateEngine(RenderWindow window, RenderTarget mainCamera)
+		public static void UpdateEngine(RenderTarget mainCamera)
 		{
 			Time.Update();
 
@@ -90,6 +90,9 @@ namespace SMPL
 
 			Scene.UpdateCurrentScene();
 			AudioInstance.Update();
+		}
+		public static void FinishRendering(RenderWindow window, RenderTarget mainCamera)
+		{
 			CameraInstance.DrawMainCameraToWindow(window, window == mainCamera);
 		}
 		public static void Stop()
@@ -143,7 +146,8 @@ namespace SMPL
 			{
 				Window.DispatchEvents();
 				Window.Clear();
-				UpdateEngine(Window, Scene.MainCamera.RenderTexture);
+				UpdateEngine(Scene.MainCamera.RenderTexture);
+				FinishRendering(Window, Scene.MainCamera.RenderTexture);
 			}
 		}
 		private static void OnClose(object sender, EventArgs e) => Stop();

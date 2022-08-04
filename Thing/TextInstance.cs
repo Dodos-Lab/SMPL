@@ -46,7 +46,14 @@
 			var tr = new Vector2(bounds.Left + bounds.Width, bounds.Top);
 			var br = new Vector2(bounds.Left + bounds.Width, bounds.Top + bounds.Height);
 			var bl = new Vector2(bounds.Left, bounds.Top + bounds.Height);
-			return new Hitbox(tl, tr, br, bl, tl);
+
+			bb.Lines.Clear();
+			bb.LocalLines.Clear();
+			bb.LocalLines.Add(new(tl, tr));
+			bb.LocalLines.Add(new(tr, br));
+			bb.LocalLines.Add(new(br, bl));
+			bb.LocalLines.Add(new(bl, tl));
+			return bb;
 		}
 
 		internal void UpdateGlobalText()

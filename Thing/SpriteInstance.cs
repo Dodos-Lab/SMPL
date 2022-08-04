@@ -81,13 +81,18 @@
 
 		internal override Hitbox GetBoundingBox()
 		{
-			var hitbox = new Hitbox(
-				-Origin,
-				new Vector2(LocalSize.X, 0) - Origin,
-				LocalSize - Origin,
-				new Vector2(0, LocalSize.Y) - Origin,
-				-Origin);
-			return hitbox;
+			var tl = -Origin;
+			var tr = new Vector2(LocalSize.X, 0) - Origin;
+			var br = LocalSize - Origin;
+			var bl = new Vector2(0, LocalSize.Y) - Origin;
+
+			bb.Lines.Clear();
+			bb.LocalLines.Clear();
+			bb.LocalLines.Add(new(tl, tr));
+			bb.LocalLines.Add(new(tr, br));
+			bb.LocalLines.Add(new(br, bl));
+			bb.LocalLines.Add(new(bl, tl));
+			return bb;
 		}
 		#endregion
 	}

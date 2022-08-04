@@ -55,6 +55,13 @@
 				var t = new ListInstance(uid, up, down) { TexturePath = texturePath };
 				return t.UID;
 			}
+			public static string CreateListCarousel(string uid, string texturePath, string buttonPreviousUID, string buttonNextUID)
+			{
+				var up = CreateButton(buttonPreviousUID, texturePath);
+				var down = CreateButton(buttonNextUID, texturePath);
+				var t = new ListCarouselInstance(uid, up, down) { TexturePath = texturePath };
+				return t.UID;
+			}
 		}
 
 		public static List<string> GetUIDs()
@@ -154,7 +161,7 @@
 			var t = new TilemapInstance(uid) { TexturePath = texturePath, TileSize = new(tileWidth, tileHeight) };
 			return t.UID;
 		}
-		public static string CreateCloth(string uid, string texturePath, float width = 100, float height = 100, int quadCountX = 5, int quadCountY = 5)
+		public static string CreateCloth(string uid, string texturePath, float width = 300, float height = 300, int quadCountX = 5, int quadCountY = 5)
 		{
 			var t = new ClothInstance(uid, new(width, height), new(quadCountX, quadCountY)) { TexturePath = texturePath };
 			return t.UID;

@@ -173,12 +173,21 @@
 		}
 		internal override Hitbox GetBoundingBox()
 		{
-			return tileCount == 0 ? base.GetBoundingBox() : new Hitbox(
-				new Vector2(topLeftIndexes.X, topLeftIndexes.Y) * TileSize,
-				new Vector2(botRightIndexes.X, topLeftIndexes.Y) * TileSize,
-				new Vector2(botRightIndexes.X, botRightIndexes.Y) * TileSize,
-				new Vector2(topLeftIndexes.X, botRightIndexes.Y) * TileSize,
-				new Vector2(topLeftIndexes.X, topLeftIndexes.Y) * TileSize);
+			if(tileCount == 0)
+				return base.GetBoundingBox();
+
+			var tl = new Vector2(topLeftIndexes.X, topLeftIndexes.Y) * TileSize;
+			var tr = new Vector2(botRightIndexes.X, topLeftIndexes.Y) * TileSize;
+			var br = new Vector2(botRightIndexes.X, botRightIndexes.Y) * TileSize;
+			var bl = new Vector2(topLeftIndexes.X, botRightIndexes.Y) * TileSize;
+
+			bb.Lines.Clear();
+			bb.LocalLines.Clear();
+			bb.LocalLines.Add(new(tl, tr));
+			bb.LocalLines.Add(new(tr, br));
+			bb.LocalLines.Add(new(br, bl));
+			bb.LocalLines.Add(new(bl, tl));
+			return bb;
 		}
 
 		internal void MapToJSON()

@@ -256,7 +256,8 @@
 
 				var assets = GetAssetPaths();
 				for(int i = 0; i < assets.Count; i++)
-					assetQueue.TryAdd(assets[i], assets[i]);
+					if(File.Exists(assets[i]))
+						assetQueue.TryAdd(assets[i], assets[i]);
 
 				foreach(var kvp in objs)
 				{

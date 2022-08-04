@@ -2,6 +2,30 @@
 {
 	internal class ListInstance : ScrollBarInstance
 	{
+		public new Hitbox BoundingBox
+		{
+			get
+			{
+				var up = GetButtonUp().BoundingBox.Lines;
+				var down = GetButtonDown().BoundingBox.Lines;
+				var baseBB = base.GetBoundingBox();
+				baseBB.TransformLocalLines(UID);
+
+				var tl = up[0].A;
+				var tr = down[1].A;
+				var br = down[2].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
+				var bl = up[3].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.Lines.Add(new(tl, tr));
+				bb.Lines.Add(new(tr, br));
+				bb.Lines.Add(new(br, bl));
+				bb.Lines.Add(new(bl, tl));
+				bb.Draw();
+				return bb;
+			}
+		}
 		public List<string> ButtonUIDs { get; } = new();
 
 		public int VisibleButtonCountMax { get; set; } = 5;
@@ -24,36 +48,11 @@
 			set => spacing = value.Limit(0, MaxLength);
 		}
 
-		public bool IsHovered
-		{
-			get
-			{
-				if(IsHidden || IsDisabled || ButtonUIDs.Count == 0)
-					return false;
-
-				var up = GetButtonUp();
-				var down = GetButtonDown();
-				var tr = up.BoundingBox.Lines[0].A;
-				var br = down.BoundingBox.Lines[1].A;
-
-				var topLeft = tr.PointMoveAtAngle(180, (up.LocalSize.X + ButtonWidth) * Scale, false);
-				var bottomLeft = br.PointMoveAtAngle(180, (down.LocalSize.X + ButtonWidth) * Scale, false);
-
-				hitbox.Lines.Clear();
-				hitbox.Lines.Add(new(topLeft, tr));
-				hitbox.Lines.Add(new(tr, br));
-				hitbox.Lines.Add(new(br, bottomLeft));
-				hitbox.Lines.Add(new(bottomLeft, topLeft));
-
-				return hitbox.ConvexContains(Scene.MouseCursorPosition);
-			}
-		}
 		public int ScrollIndex => scrollIndex;
 
 		#region Backend
 		private float spacing = 5;
 		private int scrollIndex;
-		private readonly Hitbox hitbox = new();
 		private string clickedUID;
 
 		[JsonConstructor]
@@ -70,7 +69,7 @@
 		{
 			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
 
-			IsFocused = IsHovered;
+			IsFocused = BoundingBox.IsHovered;
 
 			if(left.Once($"click-list-{GetHashCode()}"))
 			{
@@ -87,7 +86,7 @@
 						clickedUID = ButtonUIDs[i];
 				}
 
-				if(IsHovered == false)
+				if(BoundingBox.IsHovered == false)
 					OnUnfocus();
 			}
 
@@ -153,6 +152,7 @@
 				var y = -LocalSize.Y * OriginUnit.Y + ButtonWidth * 0.5f + LocalSize.Y;
 
 				btn.LocalSize = new(ButtonWidth, ButtonHeight);
+				btn.LocalAngle = 270;
 				btn.Scale = Scale;
 				btn.OriginUnit = new(0.5f);
 				btn.LocalPosition = new(x, y);

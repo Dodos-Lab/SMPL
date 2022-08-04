@@ -147,12 +147,18 @@
 		}
 		internal override Hitbox GetBoundingBox()
 		{
-			var topL = GetLocalPositionFromSelf(rope.Points[0].Position);
-			var topR = GetLocalPositionFromSelf(rope.Points[GetIndex(new((int)segCount.X - 1, 0))].Position);
-			var botR = GetLocalPositionFromSelf(rope.Points[^1].Position);
-			var botL = GetLocalPositionFromSelf(rope.Points[GetIndex(new(0, (int)segCount.Y - 1))].Position);
-			var hitbox = new Hitbox(topL, topR, botR, botL, topL);
-			return hitbox;
+			var tl = rope.Points[0].Position;
+			var tr = rope.Points[GetIndex(new((int)segCount.X - 1, 0))].Position;
+			var br = rope.Points[^1].Position;
+			var bl = rope.Points[GetIndex(new(0, (int)segCount.Y - 1))].Position;
+
+			bb.LocalLines.Clear();
+			bb.Lines.Clear();
+			bb.Lines.Add(new(tl, tr));
+			bb.Lines.Add(new(tr, br));
+			bb.Lines.Add(new(br, bl));
+			bb.Lines.Add(new(bl, tl));
+			return bb;
 		}
 		internal override void OnDestroy()
 		{

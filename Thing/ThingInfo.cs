@@ -123,6 +123,18 @@
 			public const string UI_SCROLL_BAR_STEP_UNIT = nameof(ScrollBarInstance.StepUnit);
 			public const string UI_SCROLL_BAR_BUTTON_UP_UID = nameof(ScrollBarInstance.ButtonUpUID);
 			public const string UI_SCROLL_BAR_BUTTON_DOWN_UID = nameof(ScrollBarInstance.ButtonDownUID);
+
+			public const string UI_LIST_BUTTON_UIDS = nameof(ListInstance.ButtonUIDs);
+			public const string UI_LIST_VISIBLE_BUTTON_COUNT_MAX = nameof(ListInstance.VisibleButtonCountMax);
+			public const string UI_LIST_VISIBLE_BUTTON_COUNT_CURRENT = nameof(ListInstance.VisibleButtonCountCurrent);
+			public const string UI_LIST_BUTTON_WIDTH = nameof(ListInstance.ButtonWidth);
+			public const string UI_LIST_BUTTON_HEIGHT = nameof(ListInstance.ButtonHeight);
+			public const string UI_LIST_BUTTON_SPACING = nameof(ListInstance.ButtonSpacing);
+			public const string UI_LIST_SCROLL_INDEX = nameof(ListInstance.ScrollIndex);
+
+			public const string UI_LIST_CAROUSEL_SELECTION_IS_REPEATING = nameof(ListCarouselInstance.SelectionIsRepeating);
+			public const string UI_LIST_CAROUSEL_SELECTION_INDEX = nameof(ListCarouselInstance.SelectionIndex);
+			public const string UI_LIST_CAROUSEL_SELECTION_UID = nameof(ListCarouselInstance.SelectionUID);
 			#endregion
 
 			public string Name { get; internal set; }

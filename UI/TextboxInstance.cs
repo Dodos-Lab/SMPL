@@ -279,12 +279,18 @@
 		{
 			var res = GetRes() * new Vector2(0.5f);
 			var or = res * OriginUnit;
-			return new Hitbox(
-				new Vector2(0) - or,
-				new Vector2(res.X, 0) - or,
-				new Vector2(res.X, res.Y) - or,
-				new Vector2(0, res.Y) - or,
-				new Vector2(0) - or);
+			var tl = new Vector2(0) - or;
+			var tr = new Vector2(res.X, 0) - or;
+			var br = new Vector2(res.X, res.Y) - or;
+			var bl = new Vector2(0, res.Y) - or;
+
+			bb.Lines.Clear();
+			bb.LocalLines.Clear();
+			bb.LocalLines.Add(new(tl, tr));
+			bb.LocalLines.Add(new(tr, br));
+			bb.LocalLines.Add(new(br, bl));
+			bb.LocalLines.Add(new(bl, tl));
+			return bb;
 		}
 
 		protected void Update()

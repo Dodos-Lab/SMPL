@@ -14,20 +14,8 @@
 		public string ButtonUpUID => scrollUpUID;
 		public string ButtonDownUID => scrollDownUID;
 
-		public void GoUp()
-		{
-			if(IsDisabled)
-				return;
-
-			Value -= Step;
-		}
-		public void GoDown()
-		{
-			if(IsDisabled)
-				return;
-
-			Value += Step;
-		}
+		public void GoUp() => OnUp();
+		public void GoDown() => OnDown();
 
 		#region Backend
 		private string scrollUpUID, scrollDownUID;
@@ -53,8 +41,8 @@
 
 			StepUnit = 0.1f;
 
-			EmptyColor = new(0, 0, 0, 100);
-			ProgressColor = new(0, 0, 0, 100);
+			EmptyColor = new(255, 255, 255, 100);
+			ProgressColor = new(255, 255, 255, 100);
 
 			Event.ButtonClicked += OnButtonClick;
 			Event.ButtonHeld += OnButtonHold;
@@ -71,22 +59,21 @@
 		{
 			var up = GetButtonUp();
 			var down = GetButtonDown();
-			var bb = BoundingBox;
 
 			if(up != null)
 			{
 				up.LocalAngle = 0;
 				up.OriginUnit = new(1, 0);
-				up.Size = new(Size.Y);
-				up.Position = bb.Lines[0].A;
+				up.LocalSize = new(LocalSize.Y);
+				up.Position = BoundingBox.Lines[0].A;
 				up.ParentUID = UID;
 			}
 			if(down != null)
 			{
 				down.LocalAngle = 0;
 				down.OriginUnit = new(0);
-				down.Size = new(Size.Y);
-				down.Position = bb.Lines[1].A;
+				down.LocalSize = new(LocalSize.Y);
+				down.Position = BoundingBox.Lines[1].A;
 				down.ParentUID = UID;
 			}
 		}
@@ -107,6 +94,20 @@
 			else if(thingUID == scrollDownUID)
 				GoDown();
 		}
+		protected virtual void OnUp()
+		{
+			if(IsDisabled)
+				return;
+
+			Value -= Step;
+		}
+		protected virtual void OnDown()
+		{
+			if(IsDisabled)
+				return;
+
+			Value += Step;
+		}
 
 		internal void OnScroll(object sender, MouseWheelScrollEventArgs e)
 		{
@@ -123,9 +124,6 @@
 			base.OnDraw(renderTarget);
 
 			Update();
-
-			GetButtonUp()?.Draw(renderTarget);
-			GetButtonDown()?.Draw(renderTarget);
 		}
 		internal override void OnDestroy()
 		{
@@ -135,11 +133,11 @@
 			Event.ButtonClicked -= OnButtonClick;
 			Event.ButtonHeld -= OnButtonHold;
 		}
-		internal ButtonInstance GetButtonUp()
+		protected ButtonInstance GetButtonUp()
 		{
 			return Get<ButtonInstance>(ButtonUpUID);
 		}
-		internal ButtonInstance GetButtonDown()
+		protected ButtonInstance GetButtonDown()
 		{
 			return Get<ButtonInstance>(ButtonDownUID);
 		}
