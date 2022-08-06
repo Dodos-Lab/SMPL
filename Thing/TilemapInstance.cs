@@ -7,15 +7,13 @@
 			public Vector2 IndexesTexCoord { get; set; }
 			public Vector2 IndexesSize { get; set; }
 			public Color Color { get; set; }
-			public int Depth { get; set; }
 
-			public Tile(Vector2 texCoordIndexes, int depth = 0, float indexSizeX = 1, float indexSizeY = 1,
+			public Tile(Vector2 texCoordIndexes, float indexSizeX = 1, float indexSizeY = 1,
 				byte r = 255, byte g = 255, byte b = 255, byte a = 255)
 			{
 				IndexesTexCoord = texCoordIndexes;
 				IndexesSize = new(indexSizeX, indexSizeY);
 				Color = new(r, g, b, a);
-				Depth = depth;
 			}
 		}
 	}
@@ -33,13 +31,10 @@
 				return;
 
 			if(map.ContainsKey(tilePositionIndexes) == false)
-			{
-				map[tilePositionIndexes] = new();
 				tileCount++;
-			}
 
 			UpdateCornerPoints(tilePositionIndexes);
-			map[tilePositionIndexes][TilePalette[tilePaletteUID].Depth] = tilePaletteUID;
+			map[tilePositionIndexes] = tilePaletteUID;
 		}
 		public void SetTileSquare(Vector2 tilePositionIndexesA, Vector2 tilePositionIndexesB, string tilePaletteUID)
 		{
@@ -55,26 +50,6 @@
 				for(float y = a.Y; y < b.Y; y++)
 					SetTile(new(x, y), tilePaletteUID);
 		}
-
-		public bool HasTileAtDepth(Vector2 tilePositionIndexes, int depth)
-		{
-			return HasTile(tilePositionIndexes) && map[tilePositionIndexes].ContainsKey(depth);
-		}
-		public bool HasTile(Vector2 tilePositionIndexes)
-		{
-			return map.ContainsKey(tilePositionIndexes);
-		}
-
-		public void RemoveTileAtDepth(Vector2 tilePositionIndexes, int depth)
-		{
-			if(HasTileAtDepth(tilePositionIndexes, depth) == false)
-				return;
-
-			tileCount--;
-			map[tilePositionIndexes].Remove(depth);
-
-			RecalculateCornerPoints();
-		}
 		public void RemoveTiles(Vector2 tilePositionIndexes)
 		{
 			if(map.ContainsKey(tilePositionIndexes) == false)
@@ -84,17 +59,6 @@
 			map.Remove(tilePositionIndexes);
 
 			RecalculateCornerPoints();
-		}
-		public void RemoveTileSquareAtDepth(Vector2 tilePositionIndexesA, Vector2 tilePositionIndexesB, int depth)
-		{
-			var a = tilePositionIndexesA;
-			var b = tilePositionIndexesB;
-
-			SecureMinMax(ref a, ref b);
-
-			for(float x = a.X; x < b.X; x++)
-				for(float y = a.Y; y < b.Y; y++)
-					RemoveTileAtDepth(new(x, y), depth);
 		}
 		public void RemoveTileSquare(Vector2 tilePositionIndexesA, Vector2 tilePositionIndexesB)
 		{
@@ -107,15 +71,18 @@
 				for(float y = a.Y; y < b.Y; y++)
 					RemoveTiles(new(x, y));
 		}
-
-		public List<string> GetPaletteUIDsFromPosition(Vector2 position)
+		public bool HasTile(Vector2 tilePositionIndexes)
 		{
-			var pos = GetTileIndexes(position);
-			return map.ContainsKey(pos) == false ? new() : map[pos].Values.ToList();
+			return map.ContainsKey(tilePositionIndexes);
 		}
-		public List<string> GetPaletteUIDsFromTileIndexes(Vector2 tileIndexes)
+
+		public string GetPaletteUIDsFromPosition(Vector2 position)
 		{
-			return map.ContainsKey(tileIndexes) == false ? new() : map[tileIndexes].Values.ToList();
+			return GetPaletteUIDsFromTileIndexes(GetTileIndexes(position));
+		}
+		public string GetPaletteUIDsFromTileIndexes(Vector2 tileIndexes)
+		{
+			return map.ContainsKey(tileIndexes) == false ? default : map[tileIndexes];
 		}
 		public Vector2 GetTileIndexes(Vector2 position)
 		{
@@ -130,10 +97,10 @@
 		private int tileCount;
 		private Vector2 topLeftIndexes = new(float.MaxValue, float.MaxValue), botRightIndexes = new(float.MinValue, float.MinValue);
 		private readonly VertexArray vertsArr = new(PrimitiveType.Quads);
-		private readonly Dictionary<Vector2, SortedDictionary<int, string>> map = new();
+		private readonly Dictionary<Vector2, string> map = new();
 
 		[JsonProperty]
-		private readonly Dictionary<string, SortedDictionary<int, string>> jsonMap = new();
+		private readonly Dictionary<string, string> jsonMap = new();
 
 		[JsonConstructor]
 		internal TilemapInstance() { }
@@ -149,25 +116,23 @@
 				return;
 
 			vertsArr.Clear();
-
 			foreach(var kvp in map)
-				foreach(var kvp2 in kvp.Value.Reverse())
-				{
-					var localPos = kvp.Key * TileSize;
-					var topLeft = GetPositionFromSelf(localPos).ToSFML();
-					var topRight = GetPositionFromSelf(localPos + new Vector2(TileSize.X, 0)).ToSFML();
-					var botRight = GetPositionFromSelf(localPos + TileSize).ToSFML();
-					var botLeft = GetPositionFromSelf(localPos + new Vector2(0, TileSize.Y)).ToSFML();
-					var tile = TilePalette[kvp2.Value];
-					var txCrdsA = tile.IndexesTexCoord * TileSize + (TileGap * tile.IndexesTexCoord) + TileGap;
-					var txCrdsB = txCrdsA + tile.IndexesSize * TileSize;
-					var c = tile.Color;
+			{
+				var localPos = kvp.Key * TileSize;
+				var topLeft = GetPositionFromSelf(localPos).ToSFML();
+				var topRight = GetPositionFromSelf(localPos + new Vector2(TileSize.X, 0)).ToSFML();
+				var botRight = GetPositionFromSelf(localPos + TileSize).ToSFML();
+				var botLeft = GetPositionFromSelf(localPos + new Vector2(0, TileSize.Y)).ToSFML();
+				var tile = TilePalette[kvp.Value];
+				var txCrdsA = tile.IndexesTexCoord * TileSize + (TileGap * tile.IndexesTexCoord) + TileGap;
+				var txCrdsB = txCrdsA + tile.IndexesSize * TileSize;
+				var c = tile.Color;
 
-					vertsArr.Append(new(topLeft, c, new(txCrdsA.X, txCrdsA.Y)));
-					vertsArr.Append(new(topRight, c, new(txCrdsB.X, txCrdsA.Y)));
-					vertsArr.Append(new(botRight, c, new(txCrdsB.X, txCrdsB.Y)));
-					vertsArr.Append(new(botLeft, c, new(txCrdsA.X, txCrdsB.Y)));
-				}
+				vertsArr.Append(new(topLeft, c, new(txCrdsA.X, txCrdsA.Y)));
+				vertsArr.Append(new(topRight, c, new(txCrdsB.X, txCrdsA.Y)));
+				vertsArr.Append(new(botRight, c, new(txCrdsB.X, txCrdsB.Y)));
+				vertsArr.Append(new(botLeft, c, new(txCrdsA.X, txCrdsB.Y)));
+			}
 
 			renderTarget.Draw(vertsArr, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
 		}
