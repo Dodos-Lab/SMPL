@@ -4,15 +4,12 @@
 	{
 		public struct Tile
 		{
-			public Vector2 IndexesTexCoord { get; set; }
-			public Vector2 IndexesSize { get; set; }
+			public Vector2 Indexes { get; set; }
 			public Color Color { get; set; }
 
-			public Tile(Vector2 texCoordIndexes, float indexSizeX = 1, float indexSizeY = 1,
-				byte r = 255, byte g = 255, byte b = 255, byte a = 255)
+			public Tile(Vector2 texCoordIndexes, byte r = 255, byte g = 255, byte b = 255, byte a = 255)
 			{
-				IndexesTexCoord = texCoordIndexes;
-				IndexesSize = new(indexSizeX, indexSizeY);
+				Indexes = texCoordIndexes;
 				Color = new(r, g, b, a);
 			}
 		}
@@ -86,7 +83,7 @@
 		}
 		public Vector2 GetTileIndexes(Vector2 position)
 		{
-			return (GetLocalPositionFromSelf(position) / TileSize).PointToGrid(new(1));
+			return (GetLocalPositionFromSelf(position) / (TileSize + TileGap)).PointToGrid(new(1));
 		}
 		public Vector2 GetTilePosition(Vector2 tileIndexes)
 		{
@@ -124,8 +121,8 @@
 				var botRight = GetPositionFromSelf(localPos + TileSize).ToSFML();
 				var botLeft = GetPositionFromSelf(localPos + new Vector2(0, TileSize.Y)).ToSFML();
 				var tile = TilePalette[kvp.Value];
-				var txCrdsA = tile.IndexesTexCoord * TileSize + (TileGap * tile.IndexesTexCoord) + TileGap;
-				var txCrdsB = txCrdsA + tile.IndexesSize * TileSize;
+				var txCrdsA = tile.Indexes * TileSize + (TileGap * tile.Indexes);
+				var txCrdsB = txCrdsA + TileSize;
 				var c = tile.Color;
 
 				vertsArr.Append(new(topLeft, c, new(txCrdsA.X, txCrdsA.Y)));
