@@ -1,44 +1,47 @@
-﻿internal class CheckboxInstance : ButtonInstance
+﻿namespace SMPL.UI
 {
-	public bool IsActive
+	internal class CheckboxInstance : ButtonInstance
 	{
-		get => active;
-		set
+		public bool IsActive
 		{
-			active = value;
-			SMPL.Event.CheckboxCheck(UID);
+			get => active;
+			set
+			{
+				active = value;
+				SMPL.Event.CheckboxCheck(UID);
+			}
 		}
-	}
 
-	#region Backend
-	private bool active;
+		#region Backend
+		private bool active;
 
-	[JsonConstructor]
-	internal CheckboxInstance()
-	{
-		Init();
-	}
-	internal CheckboxInstance(string uid) : base(uid)
-	{
-		Init();
-	}
+		[JsonConstructor]
+		internal CheckboxInstance()
+		{
+			Init();
+		}
+		internal CheckboxInstance(string uid) : base(uid)
+		{
+			Init();
+		}
 
-	private void Init()
-	{
-		Size = new(50);
-		SMPL.Event.ButtonClicked += OnClick;
-	}
-	private void OnClick(string thingUID)
-	{
-		if(thingUID != UID)
-			return;
+		private void Init()
+		{
+			Size = new(50);
+			SMPL.Event.ButtonClicked += OnClick;
+		}
+		private void OnClick(string thingUID)
+		{
+			if(thingUID != UID)
+				return;
 
-		IsActive = !IsActive;
+			IsActive = !IsActive;
+		}
+		internal override void OnDestroy()
+		{
+			base.OnDestroy();
+			SMPL.Event.ButtonClicked -= OnClick;
+		}
+		#endregion
 	}
-	internal override void OnDestroy()
-	{
-		base.OnDestroy();
-		SMPL.Event.ButtonClicked -= OnClick;
-	}
-	#endregion
 }

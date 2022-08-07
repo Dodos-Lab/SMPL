@@ -62,6 +62,21 @@
 				var t = new ListCarouselInstance(uid, up, down) { TexturePath = texturePath };
 				return t.UID;
 			}
+			public static string CreateListDropdown(string uid, string texturePath, string buttonUpUID, string buttonDownUID, string buttonShowUID)
+			{
+				var up = CreateButton(buttonUpUID, texturePath);
+				var down = CreateButton(buttonDownUID, texturePath);
+				var show = CreateButton(buttonShowUID, texturePath);
+				var t = new ListDropdownInstance(uid, up, down, show) { TexturePath = texturePath };
+				return t.UID;
+			}
+			public static string CreateListMultiselect(string uid, string texturePath, string buttonUpUID, string buttonDownUID)
+			{
+				var up = CreateButton(buttonUpUID, texturePath);
+				var down = CreateButton(buttonDownUID, texturePath);
+				var t = new ListMultiselectInstance(uid, up, down) { TexturePath = texturePath };
+				return t.UID;
+			}
 		}
 
 		public static List<string> GetUIDs()

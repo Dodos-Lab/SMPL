@@ -29,8 +29,6 @@
 			public const string CAMERA_RENDER_TEXTURE = nameof(CameraInstance.RenderTexture);
 			public const string CAMERA_RESOLUTION = nameof(CameraInstance.Resolution);
 
-			public const string LIGHT_COLOR = nameof(LightInstance.Color);
-
 			public const string VISUAL_TINT = nameof(VisualInstance.Tint);
 			public const string VISUAL_IS_HIDDEN = nameof(VisualInstance.IsHidden);
 			public const string VISUAL_IS_SMOOTH = nameof(VisualInstance.IsSmooth);
@@ -50,9 +48,15 @@
 			public const string SPRITE_ORIGIN = nameof(SpriteInstance.Origin);
 			public const string SPRITE_ORIGIN_UNIT = nameof(SpriteInstance.OriginUnit);
 
+			public const string LIGHT_COLOR = nameof(LightInstance.Color);
 			public const string NINE_PATCH_BORDER_SIZE = nameof(NinePatchInstance.BorderSize);
-
 			public const string PARTICLE_MANAGER_COUNT = nameof(ParticleManagerInstance.Count);
+
+			public const string CLOTH_TEX_COORD_A = nameof(ClothInstance.TexCoordA);
+			public const string CLOTH_TEX_COORD_B = nameof(ClothInstance.TexCoordB);
+			public const string CLOTH_TEX_COORD_UNIT_A = nameof(ClothInstance.TexCoordUnitA);
+			public const string CLOTH_TEX_COORD_UNIT_B = nameof(ClothInstance.TexCoordUnitB);
+			public const string CLOTH_BREAK_THRESHOLD = nameof(ClothInstance.BreakThreshold);
 
 			public const string TEXT_FONT_PATH = nameof(TextInstance.FontPath);
 			public const string TEXT_VALUE = nameof(TextInstance.Value);
@@ -135,6 +139,13 @@
 			public const string UI_LIST_CAROUSEL_SELECTION_IS_REPEATING = nameof(ListCarouselInstance.SelectionIsRepeating);
 			public const string UI_LIST_CAROUSEL_SELECTION_INDEX = nameof(ListCarouselInstance.SelectionIndex);
 			public const string UI_LIST_CAROUSEL_SELECTION_UID = nameof(ListCarouselInstance.SelectionUID);
+
+			public const string UI_LIST_DROPDOWN_SHOW_BUTTON_UID = nameof(ListDropdownInstance.ShowButtonUID);
+			public const string UI_LIST_DROPDOWN_SELECTION_UID = nameof(ListDropdownInstance.SelectionUID);
+			public const string UI_LIST_DROPDOWN_SELECTION_INDEX = nameof(ListDropdownInstance.SelectionIndex);
+
+			public const string UI_LIST_MULTISELECT_SELECTION_INDEXES = nameof(ListMultiselectInstance.SelectionIndexes);
+			public const string UI_LIST_MULTISELECT_SELECTION_UIDS = nameof(ListMultiselectInstance.SelectionUIDs);
 			#endregion
 
 			public string Name { get; internal set; }
@@ -185,6 +196,9 @@
 			public const string TILEMAP_GET_TILE_POSITION = nameof(TilemapInstance.GetTilePosition);
 			public const string TILEMAP_GET_PALETTE_UIDS_FROM_POSITION = nameof(TilemapInstance.GetPaletteUIDsFromPosition);
 			public const string TILEMAP_GET_PALETTE_UIDS_FROM_TILE_INDEXES = nameof(TilemapInstance.GetPaletteUIDsFromTileIndexes);
+
+			public const string CLOTH_CUT = nameof(ClothInstance.Cut);
+			public const string CLOTH_PIN = nameof(ClothInstance.Pin);
 
 			public const string UI_BUTTON_TRIGGER = nameof(ButtonInstance.Trigger);
 

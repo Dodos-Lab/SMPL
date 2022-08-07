@@ -22,7 +22,7 @@
 				bb.Lines.Add(new(tr, br));
 				bb.Lines.Add(new(br, bl));
 				bb.Lines.Add(new(bl, tl));
-				bb.Draw();
+
 				return bb;
 			}
 		}
@@ -134,7 +134,7 @@
 
 			base.OnDraw(renderTarget);
 
-			for(int i = scrollIndex; i < ButtonUIDs.Count; i++)
+			for(int i = 0; i < ButtonUIDs.Count; i++)
 			{
 				var btn = Get<ButtonInstance>(ButtonUIDs[i]);
 				if(btn == null)

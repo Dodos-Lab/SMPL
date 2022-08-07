@@ -37,7 +37,6 @@
 
 			if(holdTriggerTimer < 0 && holdDelayTimer < 0 && hovered && isClicked)
 				Event.ButtonHold(UID);
-
 			if(hovered.Once($"{id}-hovered"))
 			{
 				if(isClicked)
