@@ -211,9 +211,9 @@
 			}
 
 			var valueType = value.GetType();
-			if(valueType != Info.setterTypes[key])
+			if(valueType.Inherits(Info.setterTypes[key]) == false)
 			{
-				PropTypeMismatchError(obj, setPropertyName, valueType, Info.setterTypes[key], true);
+				PropTypeMismatchError(obj, setPropertyName, valueType, Info.setterTypes[key]);
 				return;
 			}
 
@@ -269,7 +269,7 @@
 					MissingMethodError(obj, voidMethodName, true);
 			}
 
-			if(Info.voidMethods.ContainsKey(key) && TryTypeMismatchError(obj, key, Info.voidMethodParamTypes[key], parameters.ToArray(), true) == false)
+			if(Info.voidMethods.ContainsKey(key) && TryTypeMismatchError(obj, key, Info.voidMethodParamTypes[key], parameters.ToArray()) == false)
 				Info.voidMethods[key].Invoke(obj, parameters);
 		}
 		public static object CallGet(string uid, string getMethodName, params object[] parameters)
@@ -299,7 +299,7 @@
 			}
 
 			return Info.returnMethodParamTypes.ContainsKey(key) == false ||
-				TryTypeMismatchError(obj, key, Info.returnMethodParamTypes[key], parameters, false) ?
+				TryTypeMismatchError(obj, key, Info.returnMethodParamTypes[key], parameters) ?
 				default : Info.returnMethods[key].Invoke(obj, parameters);
 		}
 
@@ -315,7 +315,7 @@
 					kvp.Value.Destroy(true);
 		}
 
-		internal static bool TryTypeMismatchError(ThingInstance obj, (Type, string) key, List<Type> paramTypes, object[] parameters, bool isVoid)
+		internal static bool TryTypeMismatchError(ThingInstance obj, (Type, string) key, List<Type> paramTypes, object[] parameters)
 		{
 			if(parameters == null || parameters.Length == 0)
 				return false;
@@ -365,7 +365,7 @@
 			Console.LogError(2, $"{obj} does not have a {voidStr}method <{methodName}>.",
 				$"It has the following {voidStr}methods:\n{Info.GetAllMethods(obj.UID, isVoid)}");
 		}
-		internal static void PropTypeMismatchError(ThingInstance obj, string propertyName, Type valueType, Type expectedValueType, bool set)
+		internal static void PropTypeMismatchError(ThingInstance obj, string propertyName, Type valueType, Type expectedValueType)
 		{
 			var prop = Info.GetProperty(obj.UID, propertyName);
 			Console.LogError(1, $"The property\n{prop}\ncannot process the provided value.",

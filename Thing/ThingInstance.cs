@@ -61,6 +61,8 @@
 		public string OldUID => oldUID;
 
 		public List<string> Tags { get; } = new();
+		public object Stats { get; set; }
+		public Type StatsType { get; set; } = typeof(object);
 
 		[JsonIgnore]
 		public float Age => age.ElapsedTime.AsSeconds();
