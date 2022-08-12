@@ -211,9 +211,10 @@
 			}
 
 			var valueType = value.GetType();
-			if(valueType.Inherits(Info.setterTypes[key]) == false)
+			var t = Info.setterTypes[key];
+			if(valueType != t && valueType.Inherits(t) == false)
 			{
-				PropTypeMismatchError(obj, setPropertyName, valueType, Info.setterTypes[key]);
+				PropTypeMismatchError(obj, setPropertyName, valueType, t);
 				return;
 			}
 

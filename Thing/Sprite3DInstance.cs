@@ -2,136 +2,65 @@
 {
 	internal class Sprite3DInstance : SpriteInstance
 	{
-		internal float Height { get; set; } = 20;
-		internal float Angle3D { get; set; } = 270;
-
-		internal Sprite3DInstance(string uid, Scene.TexturedModel3D texturedModel3D) : base(uid)
+		public List<string> TexturePaths { get; } = new();
+		public float Height { get; set; } = 20;
+		public float Angle3D { get; set; } = 270;
+		public Hitbox BoundingBox3D
 		{
-			if(texturedModel3D.ObjModelPath == null || texturedModel3D.TexturePath == null ||
-				texturedModel3D.TextureCount == 0 || File.Exists(texturedModel3D.ObjModelPath) == false || texturedModel3D.TextureDetail <= 0)
-				throw new System.Exception();
-
-			var img = default(Image);
-			if(File.Exists(texturedModel3D.TexturePath))
-				img = new Image(texturedModel3D.TexturePath);
-			var content = File.ReadAllText(texturedModel3D.ObjModelPath).Replace('\r', ' ').Split('\n');
-			var layeredImages = new List<Image>();
-			var indexTexCoords = new List<int>();
-			var indexVert = new List<int>();
-			var texCoords = new List<Vector3>();
-			var verts = new List<Vector3>();
-			var boundingBoxA = new Vector3();
-			var boundingBoxB = new Vector3();
-
-			for(int i = 0; i < content.Length; i++)
+			get
 			{
-				var split = content[i].Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
-				if(split.Length == 0)
-					continue;
+				var baseBB = base.GetBoundingBox();
+				baseBB.TransformLocalLines(UID);
 
-				switch(split[0])
-				{
-					case "v":
-						{
-							var v = new Vector3(N(1), N(2), N(3)) * texturedModel3D.Scale;
-							verts.Add(v);
+				var h = Height * Scale;
+				var tl = baseBB.Lines[0].A.PointMoveAtAngle(Angle3D, h, false);
+				var tr = baseBB.Lines[1].A.PointMoveAtAngle(Angle3D, h, false);
+				var br = baseBB.Lines[2].A.PointMoveAtAngle(Angle3D, h, false);
+				var bl = baseBB.Lines[3].A.PointMoveAtAngle(Angle3D, h, false);
 
-							if(v.X < boundingBoxA.X)
-								boundingBoxA.X = v.X;
-							if(v.Y < boundingBoxA.Y)
-								boundingBoxA.Y = v.Y;
-							if(v.Z < boundingBoxA.Z)
-								boundingBoxA.Z = v.Z;
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.Lines.Add(new(tl, tr));
+				bb.Lines.Add(new(tr, br));
+				bb.Lines.Add(new(br, bl));
+				bb.Lines.Add(new(bl, tl));
 
-							if(v.X > boundingBoxB.X)
-								boundingBoxB.X = v.X;
-							if(v.Y > boundingBoxB.Y)
-								boundingBoxB.Y = v.Y;
-							if(v.Z > boundingBoxB.Z)
-								boundingBoxB.Z = v.Z;
-
-							break;
-						}
-					case "vt": texCoords.Add(new(N(1), 1 - N(2), 1)); break;
-					case "f":
-						{
-							for(int j = 1; j < split.Length; j++)
-							{
-								var face = split[j].Split('/');
-								indexVert.Add(int.Parse(face[0]) - 1);
-
-								if(face.Length > 1 && face[1].Length != 0)
-									indexTexCoords.Add(int.Parse(face[1]) - 1);
-							}
-							break;
-						}
-				}
-				float N(int i) => float.Parse(split[i]);
+				return bb;
 			}
-
-			var vertsOffset = boundingBoxA;
-			var detail = texturedModel3D.TextureDetail;
-			boundingBoxB -= vertsOffset;
-			var textureSize = boundingBoxB * detail;
-
-			for(int i = 0; i < texturedModel3D.TextureCount; i++)
-				layeredImages.Add(new Image((uint)textureSize.X, (uint)textureSize.Z, Color.Transparent));
-
-			for(int i = 0; i < indexVert.Count; i++)
-			{
-				var p = verts[indexVert[i]];
-				var tx = i < indexTexCoords.Count ? texCoords[indexTexCoords[i]] : default;
-				var resultTexCoordsX = (uint)(p.X - vertsOffset.X).Map(0, boundingBoxB.X, 0, (uint)textureSize.X - 1);
-				var resultTexCoordsY = (uint)(p.Z - vertsOffset.Z).Map(0, boundingBoxB.Z, 0, (uint)textureSize.Z - 1);
-				var textureIndex = (int)(p.Y - vertsOffset.Y).Map(0, boundingBoxB.Y, 0, texturedModel3D.TextureCount - 1);
-				var color = img == null ? Color.White : img.GetPixel((uint)(tx.X * img.Size.X), (uint)(tx.Y * img.Size.Y));
-
-				layeredImages[textureIndex].SetPixel(resultTexCoordsX, resultTexCoordsY, color);
-			}
-
-			textureCount = layeredImages.Count;
-			texturePaths = new string[textureCount];
-			for(int i = 0; i < layeredImages.Count; i++)
-			{
-				var id = GetTextureID(i);
-				Scene.CurrentScene.Textures[id] = new Texture(layeredImages[i]);
-				texturePaths[i] = id;
-				layeredImages[i].Dispose();
-			}
-			img?.Dispose();
 		}
-		internal Sprite3DInstance(string uid, ICollection<string> texturePaths) : base(uid) => this.texturePaths = texturePaths.ToArray();
+
+		#region Backend
+
+		[JsonConstructor]
+		internal Sprite3DInstance() { }
+		internal Sprite3DInstance(string uid, params string[] texturePaths) : base(uid)
+		{
+			TexturePaths = texturePaths?.ToList();
+		}
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			if(IsHidden || textureCount == 0)
+			if(IsHidden || TexturePaths.Count == 0)
 				return;
 
-			var h = Height * Scale / textureCount;
-			for(int i = 0; i < textureCount; i++)
+			var h = Height * Scale / TexturePaths.Count;
+			var baseBB = base.GetBoundingBox();
+			baseBB.TransformLocalLines(UID);
+
+			for(int i = 0; i < TexturePaths.Count; i++)
 			{
-				var tex = Scene.CurrentScene.Textures[texturePaths[i]];
+				var tex = Scene.CurrentScene.Textures[TexturePaths[i]];
 				var verts = new Vertex[]
 				{
-					//new(GetCornerClockwise(0).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
-					//new(GetCornerClockwise(1).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, 0)),
-					//new(GetCornerClockwise(2).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, tex.Size.Y)),
-					//new(GetCornerClockwise(3).PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
+					new(baseBB.Lines[0].A.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, 0)),
+					new(baseBB.Lines[1].A.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, 0)),
+					new(baseBB.Lines[2].A.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(tex.Size.X, tex.Size.Y)),
+					new(baseBB.Lines[3].A.PointMoveAtAngle(Angle3D, i * h, false).ToSFML(), Tint, new(0, tex.Size.Y)),
 				};
 
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
 			}
 		}
-		internal override Hitbox GetBoundingBox()
-		{
-			return base.GetBoundingBox();
-		}
-
-		#region Backend
-		private readonly string[] texturePaths;
-		private readonly int textureCount;
-
-		private string GetTextureID(int i) => $"sprite3d-texture-{i}-{GetHashCode()}";
 		#endregion
 	}
 }

@@ -24,6 +24,8 @@
 		public static event SceneEventHandler SceneUpdated;
 		public static event SceneEventHandler SceneStopped;
 
+		public static event ThingEventHandler ThingCreated;
+
 		public static event ThingEventHandler ButtonClicked;
 		public static event ThingEventHandler ButtonHeld;
 		public static event ThingEventHandler ButtonHovered;
@@ -46,6 +48,8 @@
 		internal static void SceneStart(string name) => SceneStarted?.Invoke(name);
 		internal static void SceneUpdate(string name) => SceneUpdated?.Invoke(name);
 		internal static void SceneStop(string name) => SceneStopped?.Invoke(name);
+
+		internal static void ThingCreate(string uid) => ThingCreated?.Invoke(uid);
 
 		internal static void ButtonClick(string uid) => ButtonClicked?.Invoke(uid);
 		internal static void ButtonHold(string uid) => ButtonHeld?.Invoke(uid);

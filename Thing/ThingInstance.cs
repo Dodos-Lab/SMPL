@@ -59,10 +59,9 @@
 			}
 		}
 		public string OldUID => oldUID;
+		public int NumericUID => numUID;
 
 		public List<string> Tags { get; } = new();
-		public object Stats { get; set; }
-		public Type StatsType { get; set; } = typeof(object);
 
 		[JsonIgnore]
 		public float Age => age.ElapsedTime.AsSeconds();
@@ -235,18 +234,21 @@
 		private float localAng, localSc;
 		private Matrix3x2 global;
 		private string uid;
+		private readonly int numUID;
 
 		[JsonConstructor]
 		internal ThingInstance() { }
 		internal ThingInstance(string uid)
 		{
+			var objs = Scene.CurrentScene.objs;
+			numUID = objs.Count; // before UID to be 0 based
+
 			UID = Thing.GetFreeUID(uid);
 			LocalScale = 1;
 
 			// i just got born, do i have any children before i was even born? claim ownership if so
 			// or perhaps i am a child of theirs before i was even born? approve their parentship if so
 			// (the longer living object wins parentship if both cases are true for some reason)
-			var objs = Scene.CurrentScene.objs;
 			foreach(var kvp in objs)
 			{
 				if(kvp.Value.parentUID == uid)
@@ -254,6 +256,8 @@
 				else if(kvp.Value.childrenUIDs.Contains(uid))
 					ParentUID = kvp.Value.UID;
 			}
+
+			Event.ThingCreate(UID);
 		}
 
 		internal virtual void OnDestroy() { }

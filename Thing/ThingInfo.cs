@@ -8,6 +8,7 @@
 			public const string TYPES = nameof(ThingInstance.Types);
 			public const string UID = nameof(ThingInstance.UID);
 			public const string OLD_UID = nameof(ThingInstance.OldUID);
+			public const string NUMERIC_UID = nameof(ThingInstance.NumericUID);
 			public const string TAGS = nameof(ThingInstance.Tags);
 			public const string AGE = nameof(ThingInstance.Age);
 			public const string PARENT_UID = nameof(ThingInstance.ParentUID);
