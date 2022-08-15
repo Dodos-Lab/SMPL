@@ -132,6 +132,19 @@
 		{
 			return string.IsNullOrWhiteSpace(uid) == false && Scene.CurrentScene.objs.ContainsKey(uid);
 		}
+		public static string Duplicate(string uid, string newUID)
+		{
+			var thing = ThingInstance.Get(uid);
+			var prevUID = uid;
+			thing.UID = GetFreeUID(newUID);
+
+			var settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+			var json = JsonConvert.SerializeObject(thing, settings);
+
+			thing.UID = prevUID;
+			var newThing = JsonConvert.DeserializeObject<ThingInstance>(json, settings);
+			return newThing.UID;
+		}
 		public static void Destroy(string uid, bool destroyChildren)
 		{
 			if(uid == Scene.MAIN_CAMERA_UID)

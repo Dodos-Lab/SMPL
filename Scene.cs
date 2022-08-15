@@ -2,28 +2,6 @@
 {
 	public sealed class Scene
 	{
-		public class ObjModel
-		{
-			public struct TexturedModelInfo
-			{
-				public string ObjModelPath { get; set; }
-				public string TexturePath { get; set; }
-				public int TextureCount { get; set; }
-				public float TextureDetail { get; set; }
-				public Vector3 Scale { get; set; }
-
-				public TexturedModelInfo(string objPath, string texturePath, int textureCount = 20, float textureDetail = 20,
-					float scaleX = 1, float scaleY = 1, float scaleZ = 1)
-				{
-					ObjModelPath = objPath;
-					TexturePath = texturePath;
-					TextureCount = textureCount;
-					TextureDetail = textureDetail;
-					Scale = new(scaleX, scaleY, scaleZ);
-				}
-			}
-		}
-
 		public static Vector2 MouseCursorPosition
 		{
 			get => MainCamera.MouseCursorPosition;
@@ -74,33 +52,28 @@
 				var prevScene = scene;
 				scene = def;
 				var json = File.ReadAllText(filePath).Decompress();
-				var loadedScene = JsonConvert.DeserializeObject<Scene>(json);
+				var loadedScene = JsonConvert.DeserializeObject<Scene>(json, jsonSettings);
 
 				loadedScene.objs = def.objs;
 				loadedScene.IsLoaded = true;
 				scene = prevScene;
 
-				foreach(var kvp in loadedScene.tilemaps)
-					kvp.Value.MapFromJSON();
+				foreach(var kvp in loadedScene.things)
+					if(kvp.Value is TilemapInstance tm)
+						tm.MapFromJSON();
 
 				CurrentScene = loadedScene;
 			}
 			catch(Exception) { Console.LogError(1, $"Could not load {nameof(Scene)} from '{filePath}'."); }
 		}
-		public bool Save(string directoryPath)
+		public bool Save(string directoryPath = null)
 		{
 			var filePath = Path.Join(directoryPath, $"{Name}.scene");
 			try
 			{
 				// clear these in case of previous save/load
 				assetQueue.Clear();
-				cameras.Clear();
-				sprites.Clear();
-				lights.Clear();
-				texts.Clear();
-				npatches.Clear();
-				audio.Clear();
-				tilemaps.Clear();
+				things.Clear();
 
 				var assets = GetAssetPaths();
 				for(int i = 0; i < assets.Count; i++)
@@ -109,16 +82,17 @@
 
 				foreach(var kvp in objs)
 				{
-					TryAdd(cameras, kvp.Value);
-					TryAdd(sprites, kvp.Value);
-					TryAdd(lights, kvp.Value);
-					TryAdd(texts, kvp.Value);
-					TryAdd(npatches, kvp.Value);
-					TryAdd(audio, kvp.Value);
-					TryAdd(tilemaps, kvp.Value);
+					var thing = kvp.Value;
+					if(things.ContainsKey(thing.UID) == false)
+					{
+						things[thing.UID] = thing;
+
+						if(thing is TilemapInstance tilemap)
+							tilemap.MapToJSON();
+					}
 				}
 
-				var json = JsonConvert.SerializeObject(this);
+				var json = JsonConvert.SerializeObject(this, jsonSettings);
 				File.WriteAllText(filePath, json.Compress());
 				return true;
 			}
@@ -126,17 +100,6 @@
 			{
 				Console.LogError(1, $"Could not save {nameof(Scene)} at '{filePath}'.");
 				return false;
-			}
-
-			void TryAdd<T>(Dictionary<string, T> dict, ThingInstance thing) where T : ThingInstance
-			{
-				if(thing is T t && dict.ContainsKey(t.UID) == false)
-				{
-					dict[t.UID] = t;
-
-					if(thing is TilemapInstance tilemap)
-						tilemap.MapToJSON();
-				}
 			}
 		}
 
@@ -276,6 +239,7 @@
 			}
 		}
 
+		private static JsonSerializerSettings jsonSettings = new() { TypeNameHandling = TypeNameHandling.All };
 		private bool hasStarted;
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		internal static Thread assetsLoading;
@@ -293,19 +257,7 @@
 		[JsonProperty]
 		private readonly ConcurrentDictionary<string, string> assetQueue = new();
 		[JsonProperty]
-		private readonly Dictionary<string, CameraInstance> cameras = new();
-		[JsonProperty]
-		private readonly Dictionary<string, SpriteInstance> sprites = new();
-		[JsonProperty]
-		private readonly Dictionary<string, LightInstance> lights = new();
-		[JsonProperty]
-		private readonly Dictionary<string, TextInstance> texts = new();
-		[JsonProperty]
-		private readonly Dictionary<string, NinePatchInstance> npatches = new();
-		[JsonProperty]
-		private readonly Dictionary<string, AudioInstance> audio = new();
-		[JsonProperty]
-		private readonly Dictionary<string, TilemapInstance> tilemaps = new();
+		private readonly Dictionary<string, ThingInstance> things = new();
 
 		static Scene()
 		{

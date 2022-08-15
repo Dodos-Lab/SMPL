@@ -12,6 +12,9 @@
 				var baseBB = base.GetBoundingBox();
 				baseBB.TransformLocalLines(UID);
 
+				if(baseBB.Lines.Count != 4)
+					return bb;
+
 				var h = Depth * Scale;
 				var tl = baseBB.Lines[0].A.PointMoveAtAngle(Tilt, h, false);
 				var tr = baseBB.Lines[1].A.PointMoveAtAngle(Tilt, h, false);
