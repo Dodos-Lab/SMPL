@@ -45,12 +45,12 @@ namespace SMPL
 			set { Mouse.SetPosition(new((int)value.X, (int)value.Y), Window); }
 		}
 
-		public static void Start(string sceneName, params string[] initialAssetPaths)
+		public static void Start(string sceneName)
 		{
 			if(string.IsNullOrWhiteSpace(sceneName))
 				return;
 
-			Scene.CurrentScene = new(sceneName, initialAssetPaths);
+			Scene.CurrentScene = new(sceneName);
 			Start();
 		}
 		public static void Load(string scenePath)

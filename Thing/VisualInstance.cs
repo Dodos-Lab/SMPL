@@ -106,7 +106,7 @@ void main()
 		public bool IsHidden { get; set; }
 		public bool IsSmooth { get; set; }
 		public bool IsRepeated { get; set; } = true;
-		public int Depth
+		public int Order
 		{
 			get => depth;
 			set
@@ -468,7 +468,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 		internal VisualInstance() { }
 		internal VisualInstance(string uid) : base(uid)
 		{
-			Depth = 0;
+			Order = 0;
 		}
 
 		internal void Draw(RenderTarget renderTarget)

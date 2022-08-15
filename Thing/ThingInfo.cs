@@ -34,7 +34,7 @@
 			public const string VISUAL_IS_HIDDEN = nameof(VisualInstance.IsHidden);
 			public const string VISUAL_IS_SMOOTH = nameof(VisualInstance.IsSmooth);
 			public const string VISUAL_IS_REPEATED = nameof(VisualInstance.IsRepeated);
-			public const string VISUAL_DEPTH = nameof(VisualInstance.Depth);
+			public const string VISUAL_ORDER = nameof(VisualInstance.Order);
 			public const string VISUAL_TEXTURE_PATH = nameof(VisualInstance.TexturePath);
 			public const string VISUAL_EFFECT = nameof(VisualInstance.Effect);
 			public const string VISUAL_CAMERA_TAG = nameof(VisualInstance.CameraTag);
@@ -49,6 +49,17 @@
 			public const string SPRITE_ORIGIN = nameof(SpriteInstance.Origin);
 			public const string SPRITE_ORIGIN_UNIT = nameof(SpriteInstance.OriginUnit);
 
+			public const string PSEUDO_3D_TILT = nameof(Pseudo3DInstance.Tilt);
+			public const string PSEUDO_3D_DEPTH = nameof(Pseudo3DInstance.Depth);
+			public const string PSEUDO_3D_BOUNDING_BOX = nameof(Pseudo3DInstance.BoundingBox3D);
+
+			public const string CUBE_SIDE_TOP = nameof(CubeInstance.SideTop);
+			public const string CUBE_SIDE_BOTTOM = nameof(CubeInstance.SideBottom);
+			public const string CUBE_SIDE_LEFT = nameof(CubeInstance.SideLeft);
+			public const string CUBE_SIDE_RIGHT = nameof(CubeInstance.SideRight);
+			public const string CUBE_SIDE_NEAR = nameof(CubeInstance.SideNear);
+
+			public const string SPRITE_STACK_TEXTURE_PATHS = nameof(SpriteStackInstance.TexturePaths);
 			public const string LIGHT_COLOR = nameof(LightInstance.Color);
 			public const string NINE_PATCH_BORDER_SIZE = nameof(NinePatchInstance.BorderSize);
 			public const string PARTICLE_MANAGER_COUNT = nameof(ParticleManagerInstance.Count);

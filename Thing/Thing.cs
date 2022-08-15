@@ -159,6 +159,18 @@
 			var t = new SpriteInstance(uid) { TexturePath = texturePath };
 			return t.UID;
 		}
+		public static string CreateSpriteStack(string uid, params string[] texturePaths)
+		{
+			var t = new SpriteStackInstance(uid);
+			for(int i = 0; i < texturePaths?.Length; i++)
+				t.TexturePaths.Add(texturePaths[i]);
+			return t.UID;
+		}
+		public static string CreateCube(string uid, string texturePath)
+		{
+			var t = new CubeInstance(uid) { TexturePath = texturePath };
+			return t.UID;
+		}
 		public static string CreateLight(string uid, Color color)
 		{
 			var t = new LightInstance(uid) { Color = color };
