@@ -51,6 +51,7 @@
 
 			public const string PSEUDO_3D_TILT = nameof(Pseudo3DInstance.Tilt);
 			public const string PSEUDO_3D_DEPTH = nameof(Pseudo3DInstance.Depth);
+			public const string PSEUDO_3D_PERSPECTIVE_UNIT = nameof(Pseudo3DInstance.PerspectiveUnit);
 			public const string PSEUDO_3D_BOUNDING_BOX = nameof(Pseudo3DInstance.BoundingBox3D);
 
 			public const string CUBE_SIDE_TOP = nameof(CubeInstance.SideTop);
@@ -64,11 +65,15 @@
 			public const string NINE_PATCH_BORDER_SIZE = nameof(NinePatchInstance.BorderSize);
 			public const string PARTICLE_MANAGER_COUNT = nameof(ParticleManagerInstance.Count);
 
+			public const string CLOTH_IS_SIMULATING = nameof(ClothInstance.IsSimulating);
+			public const string CLOTH_HAS_THREADS = nameof(ClothInstance.HasThreads);
 			public const string CLOTH_TEX_COORD_A = nameof(ClothInstance.TexCoordA);
 			public const string CLOTH_TEX_COORD_B = nameof(ClothInstance.TexCoordB);
 			public const string CLOTH_TEX_COORD_UNIT_A = nameof(ClothInstance.TexCoordUnitA);
 			public const string CLOTH_TEX_COORD_UNIT_B = nameof(ClothInstance.TexCoordUnitB);
 			public const string CLOTH_BREAK_THRESHOLD = nameof(ClothInstance.BreakThreshold);
+			public const string CLOTH_FORCE = nameof(ClothInstance.Force);
+			public const string CLOTH_GRAVITY = nameof(ClothInstance.Gravity);
 
 			public const string TEXT_FONT_PATH = nameof(TextInstance.FontPath);
 			public const string TEXT_VALUE = nameof(TextInstance.Value);

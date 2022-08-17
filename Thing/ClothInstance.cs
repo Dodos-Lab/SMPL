@@ -2,6 +2,9 @@
 {
 	internal class ClothInstance : VisualInstance
 	{
+		public bool IsSimulating { get; set; }
+		public bool HasThreads { get; set; } = true;
+
 		[JsonIgnore]
 		public Vector2 TexCoordA
 		{
@@ -35,9 +38,22 @@
 		public Vector2 TexCoordUnitB { get; set; } = new(1);
 
 		public float BreakThreshold { get; set; } = 30f;
+		public Vector2 Force
+		{
+			get => rope.Force;
+			set => rope.Force = value;
+		}
+		public Vector2 Gravity
+		{
+			get => rope.Gravity;
+			set => rope.Gravity = value;
+		}
 
 		public void Pin(Vector2 indexes, bool isPinned)
 		{
+			if(indexes == default)
+				return;
+
 			rope.Points[GetIndex(indexes)].IsPinned = isPinned;
 		}
 		public void Cut(Vector2 indexes)
@@ -50,6 +66,9 @@
 		}
 
 		#region Backend
+		private bool prevSim;
+		private Vector2 prevPos;
+		private float prevAng, prevSc;
 		private Vector2 segCount, segSize;
 		private readonly VertexArray verts = new(PrimitiveType.Quads);
 
@@ -98,9 +117,19 @@
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			rope.Position = Position;
-			rope.Update();
 
-			TryTear();
+			if(IsSimulating)
+			{
+				rope.Update();
+				TryTear();
+			}
+			else if((IsSimulating == false && prevSim) || prevPos != Position || prevAng != Angle || prevSc != Scale)
+				NonSimulationUpdate();
+
+			prevPos = Position;
+			prevAng = Angle;
+			prevSc = Scale;
+			prevSim = IsSimulating;
 
 			var tex = GetTexture();
 			var w = tex == null ? 0 : tex.Size.X;
@@ -133,10 +162,14 @@
 					verts.Append(new(botL.Position.ToSFML(), Tint, bl));
 				}
 
-			var lineVerts = rope.Lines.ToVertices(Tint, 1);
 			var rendState = new RenderStates(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget));
-			renderTarget.Draw(lineVerts, PrimitiveType.Quads, rendState);
 			renderTarget.Draw(verts, rendState);
+
+			if(HasThreads)
+			{
+				var lineVerts = rope.Lines.ToVertices(Tint, 1);
+				renderTarget.Draw(lineVerts, PrimitiveType.Quads, rendState);
+			}
 
 			Vector2f GetTexCoord(int x, int y)
 			{
@@ -207,6 +240,18 @@
 			{
 				return dist > sz * (1 + (tearStep * (i + 1)));
 			}
+		}
+		private void NonSimulationUpdate()
+		{
+			for(int y = 0; y < segCount.Y; y++)
+				for(int x = 0; x < segCount.X; x++)
+				{
+					var indexes = new Vector2(x, y);
+					var pos = GetPositionFromSelf(indexes * segSize);
+					var point = rope.Points[GetIndex(indexes)];
+					point.Position = pos;
+					point.prevPosition = pos;
+				}
 		}
 		#endregion
 	}

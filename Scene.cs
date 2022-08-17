@@ -143,7 +143,7 @@
 				assetQueue.TryAdd(assetPaths[i], assetPaths[i]);
 		}
 		public string[] LoadSpriteStack(string objModelPath, string texturePath, Vector3 modelScale, Vector3 modelRotation = default,
-			int stackCount = 20, float stackDetail = 20)
+			int stackCount = 20, float stackDetail = 10)
 		{
 			if(objModelPath == null || texturePath == null || File.Exists(objModelPath) == false || File.Exists(texturePath) == false ||
 				stackCount <= 1 || stackDetail <= 0)
@@ -164,9 +164,16 @@
 			for(int i = 0; i < paths?.Length; i++)
 			{
 				var path = paths[i];
-				if(Path.HasExtension(path))
+				if(path == null)
+					continue;
+
+				if(Path.HasExtension(path) || Directory.Exists(path) == false)
 				{
 					Remove(path);
+
+					var sprStID = path.Length > 2 ? path[..^2] : "";
+					loadedSpriteStacks.TryRemove(sprStID, out _);
+					spriteStackQueue.TryRemove(sprStID, out _);
 					continue;
 				}
 
@@ -200,13 +207,13 @@
 		}
 		public void UnloadAllAssets()
 		{
+			loadedAssets.Clear();
+			assetQueue.Clear();
+
 			DisposeAndClear(Textures);
 			DisposeAndClear(Fonts);
 			DisposeAndClear(Music);
 			DisposeAndClear(Sounds);
-
-			loadedAssets.Clear();
-			assetQueue.Clear();
 
 			void DisposeAndClear<T>(ConcurrentDictionary<string, T> assets) where T : IDisposable
 			{
@@ -247,6 +254,7 @@
 
 		internal Dictionary<string, ThingInstance> objs = new();
 		internal readonly ConcurrentDictionary<string, string> loadedAssets = new();
+		internal readonly ConcurrentDictionary<string, SpriteStackInfo> loadedSpriteStacks = new();
 		internal ConcurrentDictionary<string, Texture> Textures { get; } = new();
 		internal ConcurrentDictionary<string, Music> Music { get; } = new();
 		internal ConcurrentDictionary<string, Sound> Sounds { get; } = new();
@@ -376,6 +384,7 @@
 				}
 
 				img?.Dispose();
+				loadedSpriteStacks.TryAdd(spriteStackInfo.Name, spriteStackInfo);
 			}
 			catch(Exception) { Console.LogError(-1, $"Could not load textured model at '{objModelPath}' / '{texturePath}'."); }
 		}
@@ -407,6 +416,8 @@
 
 					for(int j = 0; j < folderFiles.Length; j++)
 						LoadAssetsBackground(folderFiles[j]);
+
+					assetQueue.TryRemove(path, out _);
 					return;
 				}
 				try
@@ -464,13 +475,14 @@
 
 				if(CurrentScene != null)
 				{
+					// sprite stack loading has to be before the rest to prevent scenes looking for the stacked textures
+					if(CurrentScene.loadedSpriteStacks.Count < CurrentScene.spriteStackQueue.Count)
+						foreach(var spriteStack in CurrentScene.spriteStackQueue)
+							CurrentScene.LoadSpriteStackBackground(spriteStack.Value);
+
 					if(CurrentScene.loadedAssets.Count < CurrentScene.assetQueue.Count)
 						foreach(var asset in CurrentScene.assetQueue)
 							CurrentScene.LoadAssetsBackground(asset.Key);
-
-					if(CurrentScene.spriteStackQueue.IsEmpty == false)
-						foreach(var spriteStack in CurrentScene.spriteStackQueue)
-							CurrentScene.LoadSpriteStackBackground(spriteStack.Value);
 				}
 
 				if(unloadScene != null)
