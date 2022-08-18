@@ -51,16 +51,26 @@
 
 			public const string PSEUDO_3D_TILT = nameof(Pseudo3DInstance.Tilt);
 			public const string PSEUDO_3D_DEPTH = nameof(Pseudo3DInstance.Depth);
-			public const string PSEUDO_3D_PERSPECTIVE_UNIT = nameof(Pseudo3DInstance.PerspectiveUnit);
-			public const string PSEUDO_3D_BOUNDING_BOX = nameof(Pseudo3DInstance.BoundingBox3D);
 
+			public const string CUBE_PERSPECTIVE_UNIT = nameof(CubeInstance.PerspectiveUnit);
+			public const string CUBE_LOCAL_SIZE = nameof(CubeInstance.LocalSize);
+			public const string CUBE_SIZE = nameof(CubeInstance.Size);
+			public const string CUBE_ORIGIN = nameof(CubeInstance.Origin);
+			public const string CUBE_ORIGIN_UNIT = nameof(CubeInstance.OriginUnit);
+			public const string CUBE_SIDE_BOUNDING_BOX = nameof(CubeInstance.BoundingBox3D);
 			public const string CUBE_SIDE_TOP = nameof(CubeInstance.SideTop);
 			public const string CUBE_SIDE_BOTTOM = nameof(CubeInstance.SideBottom);
 			public const string CUBE_SIDE_LEFT = nameof(CubeInstance.SideLeft);
 			public const string CUBE_SIDE_RIGHT = nameof(CubeInstance.SideRight);
 			public const string CUBE_SIDE_NEAR = nameof(CubeInstance.SideNear);
+			public const string CUBE_SIDE_FAR = nameof(CubeInstance.SideFar);
 
-			public const string SPRITE_STACK_TEXTURE_PATHS = nameof(SpriteStackInstance.TexturePaths);
+			public const string SPRITE_STACK_BOUNDING_BOX = nameof(SpriteStackInstance.BoundingBox3D);
+			public const string SPRITE_STACK_LOCAL_SIZE = nameof(SpriteStackInstance.LocalSize);
+			public const string SPRITE_STACK_SIZE = nameof(SpriteStackInstance.Size);
+			public const string SPRITE_STACK_ORIGIN = nameof(SpriteStackInstance.Origin);
+			public const string SPRITE_STACK_ORIGIN_UNIT = nameof(SpriteStackInstance.OriginUnit);
+
 			public const string LIGHT_COLOR = nameof(LightInstance.Color);
 			public const string NINE_PATCH_BORDER_SIZE = nameof(NinePatchInstance.BorderSize);
 			public const string PARTICLE_MANAGER_COUNT = nameof(ParticleManagerInstance.Count);

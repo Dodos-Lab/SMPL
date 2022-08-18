@@ -2,25 +2,69 @@
 {
 	internal class SpriteStackInstance : Pseudo3DInstance
 	{
-		public List<string> TexturePaths { get; } = new();
+		public Hitbox BoundingBox3D
+		{
+			get
+			{
+				var baseBB = base.GetBoundingBox();
+				baseBB.TransformLocalLines(UID);
+
+				if(baseBB.Lines.Count != 4)
+					return bb;
+
+				var h = Depth * Scale;
+				var tl = baseBB.Lines[0].A.PointMoveAtAngle(Tilt, h, false);
+				var tr = baseBB.Lines[1].A.PointMoveAtAngle(Tilt, h, false);
+				var br = baseBB.Lines[2].A.PointMoveAtAngle(Tilt, h, false);
+				var bl = baseBB.Lines[3].A.PointMoveAtAngle(Tilt, h, false);
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.Lines.Add(new(tl, tr));
+				bb.Lines.Add(new(tr, br));
+				bb.Lines.Add(new(br, bl));
+				bb.Lines.Add(new(bl, tl));
+
+				return bb;
+			}
+		}
+
+		public Vector2 LocalSize { get; set; } = new(100);
+		[JsonIgnore]
+		public Vector2 Size
+		{
+			get => LocalSize * Scale;
+			set => LocalSize = value / Scale;
+		}
+
+		public Vector2 OriginUnit { get; set; } = new(0.5f);
+		[JsonIgnore]
+		public Vector2 Origin
+		{
+			get => OriginUnit * LocalSize;
+			set => OriginUnit = value / LocalSize;
+		}
 
 		#region Backend
+		private readonly new Hitbox bb = new();
+
 		[JsonConstructor]
 		internal SpriteStackInstance() { }
 		internal SpriteStackInstance(string uid) : base(uid) { }
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			if(IsHidden || TexturePaths.Count == 0)
+			if(IsHidden || TexturePath == null || Scene.CurrentScene.loadedTextureStacks.ContainsKey(TexturePath) == false)
 				return;
 
-			var h = Depth * Scale / TexturePaths.Count;
+			var texStack = Scene.CurrentScene.loadedTextureStacks[TexturePath];
+			var h = Depth * Scale / texStack.Count;
 			var txs = Scene.CurrentScene.Textures;
 			var bb = BoundingBox.Lines;
 
-			for(int i = 0; i < TexturePaths.Count; i++)
+			for(int i = 0; i < texStack.Count; i++)
 			{
-				var tex = txs.ContainsKey(TexturePaths[i]) ? txs[TexturePaths[i]] : default;
+				var tex = txs.ContainsKey(texStack[i]) ? txs[texStack[i]] : default;
 				var sz = tex == default ? new Vector2() : new(tex.Size.X, tex.Size.Y);
 
 				var verts = new Vertex[]
@@ -33,6 +77,21 @@
 
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
 			}
+		}
+		internal override Hitbox GetBoundingBox()
+		{
+			var tl = -Origin;
+			var tr = new Vector2(LocalSize.X, 0) - Origin;
+			var br = LocalSize - Origin;
+			var bl = new Vector2(0, LocalSize.Y) - Origin;
+
+			bb.Lines.Clear();
+			bb.LocalLines.Clear();
+			bb.LocalLines.Add(new(tl, tr));
+			bb.LocalLines.Add(new(tr, br));
+			bb.LocalLines.Add(new(br, bl));
+			bb.LocalLines.Add(new(bl, tl));
+			return bb;
 		}
 		#endregion
 	}

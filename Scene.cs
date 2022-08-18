@@ -142,22 +142,16 @@
 			for(int i = 0; i < assetPaths?.Length; i++)
 				assetQueue.TryAdd(assetPaths[i], assetPaths[i]);
 		}
-		public string[] LoadSpriteStack(string objModelPath, string texturePath, Vector3 modelScale, Vector3 modelRotation = default,
+		public void LoadTextureStack(string objModelPath, string texturePath, Vector3 modelScale, Vector3 modelRotation = default,
 			int stackCount = 20, float stackDetail = 10)
 		{
 			if(objModelPath == null || texturePath == null || File.Exists(objModelPath) == false || File.Exists(texturePath) == false ||
 				stackCount <= 1 || stackDetail <= 0)
-				return default;
+				return;
 
-			var spriteStackInfo = new SpriteStackInfo(objModelPath, texturePath, modelScale, modelRotation, stackCount, stackDetail);
+			var spriteStackInfo = new TextureStackInfo(objModelPath, texturePath, modelScale, modelRotation, stackCount, stackDetail);
 			var name = spriteStackInfo.Name;
-			spriteStackQueue.TryAdd(name, spriteStackInfo);
-
-			var result = new string[stackCount];
-			for(int i = 0; i < result.Length; i++)
-				result[i] = $"{name}-{i}";
-
-			return result;
+			textureStackQueue.TryAdd(name, spriteStackInfo);
 		}
 		public void UnloadAssets(params string[] paths)
 		{
@@ -172,8 +166,8 @@
 					Remove(path);
 
 					var sprStID = path.Length > 2 ? path[..^2] : "";
-					loadedSpriteStacks.TryRemove(sprStID, out _);
-					spriteStackQueue.TryRemove(sprStID, out _);
+					loadedTextureStacks.TryRemove(sprStID, out _);
+					textureStackQueue.TryRemove(sprStID, out _);
 					continue;
 				}
 
@@ -225,7 +219,7 @@
 		}
 
 		#region Backend
-		internal struct SpriteStackInfo
+		internal struct TextureStackInfo
 		{
 			public string Name => Path.GetFileNameWithoutExtension(ObjModelPath);
 			public string ObjModelPath { get; set; }
@@ -235,7 +229,7 @@
 			public int TextureCount { get; set; }
 			public float TextureDetail { get; set; }
 
-			public SpriteStackInfo(string objModelPath, string texturePath, Vector3 scale, Vector3 rot = default, int textureCount = 20, float textureDetail = 20)
+			public TextureStackInfo(string objModelPath, string texturePath, Vector3 scale, Vector3 rot = default, int textureCount = 20, float textureDetail = 20)
 			{
 				ObjModelPath = objModelPath;
 				TexturePath = texturePath;
@@ -254,14 +248,14 @@
 
 		internal Dictionary<string, ThingInstance> objs = new();
 		internal readonly ConcurrentDictionary<string, string> loadedAssets = new();
-		internal readonly ConcurrentDictionary<string, SpriteStackInfo> loadedSpriteStacks = new();
+		internal readonly ConcurrentDictionary<string, List<string>> loadedTextureStacks = new();
 		internal ConcurrentDictionary<string, Texture> Textures { get; } = new();
 		internal ConcurrentDictionary<string, Music> Music { get; } = new();
 		internal ConcurrentDictionary<string, Sound> Sounds { get; } = new();
 		internal ConcurrentDictionary<string, Font> Fonts { get; } = new();
 
 		[JsonProperty]
-		private readonly ConcurrentDictionary<string, SpriteStackInfo> spriteStackQueue = new();
+		private readonly ConcurrentDictionary<string, TextureStackInfo> textureStackQueue = new();
 		[JsonProperty]
 		private readonly ConcurrentDictionary<string, string> assetQueue = new();
 		[JsonProperty]
@@ -276,7 +270,7 @@
 		[JsonConstructor]
 		internal Scene() { }
 
-		internal void LoadSpriteStackBackground(SpriteStackInfo spriteStackInfo)
+		internal void LoadSpriteStackBackground(TextureStackInfo spriteStackInfo)
 		{
 			var texturePath = spriteStackInfo.TexturePath;
 			var objModelPath = spriteStackInfo.ObjModelPath;
@@ -357,6 +351,7 @@
 				var detail = textureDetail;
 				boundingBoxB -= vertsOffset;
 				var textureSize = boundingBoxB * detail;
+				var stack = new List<string>();
 
 				for(int i = 0; i < textureCount; i++)
 					layeredImages.Add(new Image((uint)textureSize.X, (uint)textureSize.Z, Color.Transparent));
@@ -372,10 +367,10 @@
 
 					layeredImages[textureIndex].SetPixel(resultTexCoordsX, resultTexCoordsY, color);
 				}
-
 				for(int i = 0; i < layeredImages.Count; i++)
 				{
 					var id = $"{spriteStackInfo.Name}-{i}";
+					stack.Add(id);
 					Textures[id] = new Texture(layeredImages[i]);
 					assetQueue.TryAdd(id, id);
 					loadedAssets.TryAdd(id, id);
@@ -384,7 +379,7 @@
 				}
 
 				img?.Dispose();
-				loadedSpriteStacks.TryAdd(spriteStackInfo.Name, spriteStackInfo);
+				loadedTextureStacks.TryAdd(spriteStackInfo.Name, stack);
 			}
 			catch(Exception) { Console.LogError(-1, $"Could not load textured model at '{objModelPath}' / '{texturePath}'."); }
 		}
@@ -476,8 +471,8 @@
 				if(CurrentScene != null)
 				{
 					// sprite stack loading has to be before the rest to prevent scenes looking for the stacked textures
-					if(CurrentScene.loadedSpriteStacks.Count < CurrentScene.spriteStackQueue.Count)
-						foreach(var spriteStack in CurrentScene.spriteStackQueue)
+					if(CurrentScene.loadedTextureStacks.Count < CurrentScene.textureStackQueue.Count)
+						foreach(var spriteStack in CurrentScene.textureStackQueue)
 							CurrentScene.LoadSpriteStackBackground(spriteStack.Value);
 
 					if(CurrentScene.loadedAssets.Count < CurrentScene.assetQueue.Count)

@@ -172,11 +172,9 @@
 			var t = new SpriteInstance(uid) { TexturePath = texturePath };
 			return t.UID;
 		}
-		public static string CreateSpriteStack(string uid, params string[] texturePaths)
+		public static string CreateSpriteStack(string uid, string textureStack)
 		{
-			var t = new SpriteStackInstance(uid);
-			for(int i = 0; i < texturePaths?.Length; i++)
-				t.TexturePaths.Add(texturePaths[i]);
+			var t = new SpriteStackInstance(uid) { TexturePath = textureStack };
 			return t.UID;
 		}
 		public static string CreateCube(string uid, string texturePath)

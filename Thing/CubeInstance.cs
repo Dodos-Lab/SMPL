@@ -57,17 +57,70 @@
 			}
 			internal bool HasTexture(string trySetTexture = null)
 			{
-				if(trySetTexture != null && TexturePath != trySetTexture)
+				var texs = Scene.CurrentScene.Textures;
+
+				if((TexturePath == null || texs.ContainsKey(TexturePath) == false) && trySetTexture != null && texs.ContainsKey(trySetTexture))
 					TexturePath = trySetTexture;
 
 				var path = TexturePath.ToBackslashPath();
-				return path != null && Scene.CurrentScene.Textures.ContainsKey(path);
+				return path != null && texs.ContainsKey(path);
 			}
 		}
 	}
 
 	internal class CubeInstance : Pseudo3DInstance
 	{
+		public float PerspectiveUnit { get; set; } = 1.2f;
+		public Hitbox BoundingBox3D
+		{
+			get
+			{
+				var baseBB = BoundingBox;
+
+				if(baseBB.Lines.Count != 4)
+					return bb;
+
+				var h = Depth * Scale;
+				var tl = baseBB.Lines[0].A.PointMoveAtAngle(Tilt, h, false);
+				var tr = baseBB.Lines[1].A.PointMoveAtAngle(Tilt, h, false);
+				var br = baseBB.Lines[2].A.PointMoveAtAngle(Tilt, h, false);
+				var bl = baseBB.Lines[3].A.PointMoveAtAngle(Tilt, h, false);
+				var center = tr.PointPercentTowardPoint(bl, new(50));
+				var percent = new Vector2(PerspectiveUnit.Map(1, 0, 0, 100));
+
+				tl = tl.PointPercentTowardPoint(center, percent);
+				tr = tr.PointPercentTowardPoint(center, percent);
+				br = br.PointPercentTowardPoint(center, percent);
+				bl = bl.PointPercentTowardPoint(center, percent);
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.Lines.Add(new(tl, tr));
+				bb.Lines.Add(new(tr, br));
+				bb.Lines.Add(new(br, bl));
+				bb.Lines.Add(new(bl, tl));
+
+				return bb;
+			}
+		}
+
+		public Vector2 LocalSize { get; set; } = new(100);
+		[JsonIgnore]
+		public Vector2 Size
+		{
+			get => LocalSize * Scale;
+			set => LocalSize = value / Scale;
+		}
+
+		public Vector2 OriginUnit { get; set; } = new(0.5f);
+		[JsonIgnore]
+		public Vector2 Origin
+		{
+			get => OriginUnit * LocalSize;
+			set => OriginUnit = value / LocalSize;
+		}
+
+		public Thing.CubeSide SideFar { get; set; } = defCubeSide;
 		public Thing.CubeSide SideNear { get; set; } = defCubeSide;
 		public Thing.CubeSide SideLeft { get; set; } = defCubeSide;
 		public Thing.CubeSide SideRight { get; set; } = defCubeSide;
@@ -75,6 +128,7 @@
 		public Thing.CubeSide SideBottom { get; set; } = defCubeSide;
 
 		#region Backend
+		private readonly new Hitbox bb = new();
 		private static Thing.CubeSide defCubeSide = new() { TexCoordUnitB = new(1) };
 		private readonly SortedDictionary<float, List<Action>> sortedSides = new();
 
@@ -84,9 +138,6 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			if(IsHidden == false)
-				base.OnDraw(renderTarget);
-
 			if(PerspectiveUnit == 1f)
 				PerspectiveUnit = 1.01f;
 
@@ -119,6 +170,8 @@
 			sortedSides[b].Add(TryDrawBottom);
 
 			var enumerable = PerspectiveUnit < 1 ? sortedSides : sortedSides.Reverse();
+
+			TryDrawSide(SideFar, farTl, farTr, farBr, farBl);
 
 			foreach(var side in enumerable)
 				for(int i = 0; i < side.Value.Count; i++)
@@ -154,6 +207,21 @@
 
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, cubeSide.GetTexture(), GetShader(renderTarget)));
 			}
+		}
+		internal override Hitbox GetBoundingBox()
+		{
+			var tl = -Origin;
+			var tr = new Vector2(LocalSize.X, 0) - Origin;
+			var br = LocalSize - Origin;
+			var bl = new Vector2(0, LocalSize.Y) - Origin;
+
+			base.bb.Lines.Clear();
+			base.bb.LocalLines.Clear();
+			base.bb.LocalLines.Add(new(tl, tr));
+			base.bb.LocalLines.Add(new(tr, br));
+			base.bb.LocalLines.Add(new(br, bl));
+			base.bb.LocalLines.Add(new(bl, tl));
+			return base.bb;
 		}
 		#endregion
 	}
