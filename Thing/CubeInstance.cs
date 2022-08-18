@@ -104,22 +104,6 @@
 			}
 		}
 
-		public Vector2 LocalSize { get; set; } = new(100);
-		[JsonIgnore]
-		public Vector2 Size
-		{
-			get => LocalSize * Scale;
-			set => LocalSize = value / Scale;
-		}
-
-		public Vector2 OriginUnit { get; set; } = new(0.5f);
-		[JsonIgnore]
-		public Vector2 Origin
-		{
-			get => OriginUnit * LocalSize;
-			set => OriginUnit = value / LocalSize;
-		}
-
 		public Thing.CubeSide SideFar { get; set; } = defCubeSide;
 		public Thing.CubeSide SideNear { get; set; } = defCubeSide;
 		public Thing.CubeSide SideLeft { get; set; } = defCubeSide;
@@ -185,11 +169,12 @@
 			void TryDrawBottom() => TryDrawSide(SideBottom, nearBl, nearBr, farBr, farBl);
 			void TryDrawSide(Thing.CubeSide cubeSide, Vector2 tl, Vector2 tr, Vector2 br, Vector2 bl)
 			{
-				if(cubeSide.IsHidden || cubeSide.HasTexture(TexturePath) == false)
+				if(cubeSide.IsHidden)
 					return;
 
-				var sz = cubeSide.GetTexSize();
-				var tex = cubeSide.GetTexture();
+				var hasTexture = cubeSide.HasTexture(TexturePath);
+				var sz = hasTexture ? cubeSide.GetTexSize() : default;
+				var tex = hasTexture ? cubeSide.GetTexture() : default;
 				var w = tex == null ? 0 : sz.X;
 				var h = tex == null ? 0 : sz.Y;
 				var w0 = w * cubeSide.TexCoordUnitA.X;

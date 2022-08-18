@@ -29,22 +29,6 @@
 			}
 		}
 
-		public Vector2 LocalSize { get; set; } = new(100);
-		[JsonIgnore]
-		public Vector2 Size
-		{
-			get => LocalSize * Scale;
-			set => LocalSize = value / Scale;
-		}
-
-		public Vector2 OriginUnit { get; set; } = new(0.5f);
-		[JsonIgnore]
-		public Vector2 Origin
-		{
-			get => OriginUnit * LocalSize;
-			set => OriginUnit = value / LocalSize;
-		}
-
 		#region Backend
 		private readonly new Hitbox bb = new();
 
