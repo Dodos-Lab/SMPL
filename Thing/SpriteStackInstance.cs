@@ -51,6 +51,13 @@
 				var tex = txs.ContainsKey(texStack[i]) ? txs[texStack[i]] : default;
 				var sz = tex == default ? new Vector2() : new(tex.Size.X, tex.Size.Y);
 
+				var prevSmooth = false;
+				if(tex != null)
+				{
+					prevSmooth = tex.Smooth;
+					tex.Smooth = IsSmooth;
+				}
+
 				var verts = new Vertex[]
 				{
 					new(bb[0].A.PointMoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(0, 0)),
@@ -60,6 +67,9 @@
 				};
 
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
+
+				if(tex != null)
+					tex.Smooth = prevSmooth;
 			}
 		}
 		internal override Hitbox GetBoundingBox()

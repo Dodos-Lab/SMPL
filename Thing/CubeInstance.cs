@@ -122,6 +122,9 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
+			if(IsHidden)
+				return;
+
 			if(PerspectiveUnit == 1f)
 				PerspectiveUnit = 1.01f;
 
@@ -182,6 +185,13 @@
 				var h0 = h * cubeSide.TexCoordUnitA.Y;
 				var hh = h * cubeSide.TexCoordUnitB.Y;
 
+				var prevSmooth = false;
+				if(tex != null)
+				{
+					prevSmooth = tex.Smooth;
+					tex.Smooth = IsSmooth;
+				}
+
 				var verts = new Vertex[]
 				{
 					new(tl.ToSFML(), Tint, new(w0, h0)),
@@ -191,6 +201,9 @@
 				};
 
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, cubeSide.GetTexture(), GetShader(renderTarget)));
+
+				if(tex != null)
+					tex.Smooth = prevSmooth;
 			}
 		}
 		internal override Hitbox GetBoundingBox()

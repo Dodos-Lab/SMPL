@@ -83,10 +83,15 @@
 		}
 		public Vector2 GetTileIndexes(Vector2 position)
 		{
-			return (GetLocalPositionFromSelf(position) / (TileSize + TileGap)).PointToGrid(new(1));
+			var local = GetLocalPositionFromSelf(position);
+			// no need to include the tile gap since it is used only in texture space, not in world space
+			var rawIndexes = local / TileSize; // there is no gap in the world tilemap
+			return rawIndexes.PointToGrid(new(1));
 		}
 		public Vector2 GetTilePosition(Vector2 tileIndexes)
 		{
+			// no need to include the tile gap since it is used only in texture space, not in world space
+			// there is no gap in the world tilemap
 			return GetPositionFromSelf(tileIndexes * TileSize + (TileSize * 0.5f));
 		}
 
@@ -97,7 +102,7 @@
 		private readonly Dictionary<Vector2, string> map = new();
 
 		[JsonProperty]
-		private readonly Dictionary<string, string> jsonMap = new();
+		private readonly Dictionary<string, string> rawMap = new();
 
 		[JsonConstructor]
 		internal TilemapInstance() { }
@@ -154,18 +159,23 @@
 
 		internal void MapToJSON()
 		{
-			jsonMap.Clear();
+			rawMap.Clear();
 
 			foreach(var kvp in map)
-				jsonMap[JsonConvert.SerializeObject(kvp.Key)] = kvp.Value;
+			{
+				var key = $"{kvp.Key.X} {kvp.Key.Y}";
+				rawMap[key] = kvp.Value;
+			}
 		}
 		internal void MapFromJSON()
 		{
 			map.Clear();
 
-			foreach(var kvp in jsonMap)
+			foreach(var kvp in rawMap)
 			{
-				map[JsonConvert.DeserializeObject<Vector2>(kvp.Key)] = kvp.Value;
+				var split = kvp.Key.Split();
+				var vec = new Vector2(split[0].ToNumber(), split[1].ToNumber());
+				map[vec] = kvp.Value;
 				tileCount++;
 			}
 

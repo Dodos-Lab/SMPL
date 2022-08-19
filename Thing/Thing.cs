@@ -322,8 +322,9 @@
 					MissingMethodError(obj, getMethodName, false);
 			}
 
-			return Info.returnMethodParamTypes.ContainsKey(key) == false ||
-				TryTypeMismatchError(obj, key, Info.returnMethodParamTypes[key], parameters) ?
+			return Info.returnMethodParamTypes.ContainsKey(key) == false || // no params found on that method
+				Info.returnMethodParamTypes[key].Count != parameters.Length || // provided params are different than method params
+				TryTypeMismatchError(obj, key, Info.returnMethodParamTypes[key], parameters) ? // provided param types are different than desired
 				default : Info.returnMethods[key].Invoke(obj, parameters);
 		}
 
