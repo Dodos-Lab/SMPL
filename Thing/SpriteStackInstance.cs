@@ -66,7 +66,9 @@
 					new(bb[3].A.PointMoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(0, sz.Y)),
 				};
 
-				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
+				var shader = GetShader(renderTarget);
+				shader?.SetUniform("Texture", tex); // different than the main visual texture, should be able to use effects on it
+				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, shader));
 
 				if(tex != null)
 					tex.Smooth = prevSmooth;

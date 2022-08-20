@@ -200,7 +200,9 @@
 					new(bl.ToSFML(), Tint, new(w0, hh))
 				};
 
-				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, cubeSide.GetTexture(), GetShader(renderTarget)));
+				var shader = GetShader(renderTarget);
+				shader?.SetUniform("Texture", tex); // different than the main visual texture, should be able to use effects on it
+				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, shader));
 
 				if(tex != null)
 					tex.Smooth = prevSmooth;
