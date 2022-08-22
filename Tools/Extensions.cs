@@ -1,8 +1,4 @@
-﻿using System.Globalization;
-using System.IO.Compression;
-using System.Text;
-
-namespace SMPL.Tools
+﻿namespace SMPL.Tools
 {
 	/// <summary>
 	/// Various methods that extend the primitive types, structs and collections.

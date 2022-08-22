@@ -3,13 +3,16 @@ global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.Collections.ObjectModel;
 global using System.Diagnostics;
+global using System.Globalization;
 global using System.IO;
+global using System.IO.Compression;
 global using System.Linq;
 global using System.Numerics;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Serialization;
+global using System.Text;
 global using System.Threading;
 global using System.Windows.Forms;
 
@@ -28,6 +31,7 @@ global using SMPL.Prefabs;
 global using SMPL.Tools;
 global using SMPL.UI;
 
+global using Color = SFML.Graphics.Color;
 global using Console = SMPL.Tools.Console;
 global using Time = SMPL.Tools.Time;
 

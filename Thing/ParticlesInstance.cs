@@ -18,6 +18,7 @@
 	}
 	internal class ParticleManagerInstance : VisualInstance
 	{
+		[JsonIgnore]
 		public int Count => particles == null ? 0 : particles.Count;
 
 		public void Spawn(Thing.Particle particle)

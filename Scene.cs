@@ -52,8 +52,7 @@
 				var prevScene = scene;
 				scene = def;
 
-				var json = File.ReadAllText(filePath);
-				var loadedScene = JsonConvert.DeserializeObject<Scene>(json, jsonSettings);
+				var loadedScene = File.ReadAllText(filePath).FromJSON<Scene>();
 
 				loadedScene.objs = def.objs;
 				loadedScene.IsLoaded = true;
@@ -93,8 +92,7 @@
 					}
 				}
 
-				var json = JsonConvert.SerializeObject(this, jsonSettings);
-				File.WriteAllText(filePath, json);
+				File.WriteAllText(filePath, this.ToJSON());
 				return true;
 			}
 			catch(Exception)
@@ -241,7 +239,6 @@
 			}
 		}
 
-		private readonly static JsonSerializerSettings jsonSettings = new() { TypeNameHandling = TypeNameHandling.All };
 		private bool hasStarted;
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		internal static Thread assetsLoading;

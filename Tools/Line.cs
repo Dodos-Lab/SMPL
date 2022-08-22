@@ -13,14 +13,17 @@
 		/// The second (ending) point of the line.
 		/// </summary>
 		public Vector2 B { get; set; }
+		[JsonIgnore]
 		/// <summary>
 		/// The distance between <see cref="A"/> and <see cref="B"/>.
 		/// </summary>
 		public float Length => Vector2.Distance(A, B);
+		[JsonIgnore]
 		/// <summary>
 		/// The angle between <see cref="A"/> and <see cref="B"/>.
 		/// </summary>
 		public float Angle => A.AngleBetweenPoints(B);
+		[JsonIgnore]
 		/// <summary>
 		/// The direction between <see cref="A"/> and <see cref="B"/>.
 		/// </summary>
