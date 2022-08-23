@@ -15,71 +15,10 @@
 	{
 		public Color BackgroundColor { get; set; } = new(100, 100, 100);
 
-		public new string FontPath
-		{
-			get => font;
-			set
-			{
-				font = value;
-				Value = left; // recalculate alignments
-			}
-		}
-		public new string Value
-		{
-			get => left;
-			set
-			{
-				left = value;
-				if(left == null)
-					return;
+		public new string FontPath { get; set; }
+		public new string Value { get; set; }
 
-				textInstance.Font = GetFont();
-				textInstance.CharacterSize = (uint)SymbolSize;
-				textInstance.LetterSpacing = SymbolSpace;
-				textInstance.LineSpacing = LineSpace;
-				textInstance.Style = Style;
-				textInstance.Position = new(textOffsetX, 0);
-				textInstance.Rotation = 0;
-				textInstance.Scale = new(1, 1);
-
-				textInstance.DisplayedString = " ";
-				var spaceWidth = textInstance.GetGlobalBounds().Width;
-
-				formatSpaceRangesCenter.Clear();
-				formatSpaceRangesRight.Clear();
-				right = "";
-				center = "";
-
-				var lines = left.Split('\n');
-				lineCount = lines.Length;
-				for(int i = 0; i < lines.Length; i++)
-				{
-					var line = lines[i];
-					textInstance.DisplayedString = line;
-					var width = LineWidth - textInstance.GetGlobalBounds().Width;
-					var spaces = spaceWidth == 0 ? 0 : (int)(width / spaceWidth).Limit(0, 9999).Round() - 1;
-					var centerLeft = (int)(((float)spaces) / 2).Round();
-					var centerRight = (int)(((float)spaces) / 2).Round();
-
-					spaces = Math.Max(spaces, 1);
-					centerLeft = Math.Max(centerLeft, 1);
-					centerRight = Math.Max(centerRight, 1);
-
-					formatSpaceRangesRight.Add((right.Length, right.Length - 1 + spaces));
-					right += $"{" ".Repeat(spaces)}{line}\n";
-
-					formatSpaceRangesCenter.Add((center.Length, center.Length - 1 + centerLeft));
-					center += $"{" ".Repeat(centerLeft)}{line}";
-					formatSpaceRangesCenter.Add((center.Length, center.Length - 1 + centerRight));
-					center += $"{" ".Repeat(centerRight)}\n";
-				}
-			}
-		}
-
-		public string CameraUID => cameraUID;
-
-		public float LineWidth { get; set; }
-		public int LineCount => lineCount;
+		public string CameraUID { get; set; }
 
 		public Thing.TextboxAlignment Alignment { get; set; }
 
@@ -103,7 +42,7 @@
 		{
 			var result = new List<Vector2>();
 
-			if(characterIndex < 0 || characterIndex > left.Length - 1)
+			if(characterIndex < 0 || characterIndex > Value.Length - 1)
 				return result.AsReadOnly();
 
 			Update();
@@ -113,7 +52,7 @@
 			var tl = (textInstance.Position + textInstance.FindCharacterPos((uint)characterIndex)).ToSystem();
 			var tr = (textInstance.Position + textInstance.FindCharacterPos((uint)characterIndex + 1)).ToSystem();
 
-			if(prevIndex < left.Length && left[prevIndex] == '\n') // end of line
+			if(prevIndex < Value.Length && Value[prevIndex] == '\n') // end of line
 				tr = new(GetRes().X, tl.Y);
 
 			var sc = Scale;
@@ -222,13 +161,9 @@
 		}
 
 		#region Backend
-		private int lineCount;
 		private List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
-		private string left, center, right, font;
 
 		protected bool skipParentRender;
-		[JsonProperty]
-		protected string cameraUID;
 		protected float textOffsetX;
 
 		[JsonConstructor]
@@ -240,10 +175,10 @@
 
 		private void Init(string cameraUID)
 		{
-			this.cameraUID = cameraUID;
+			CameraUID = cameraUID;
 			TexturePath = cameraUID;
 			Alignment = Thing.TextboxAlignment.Center;
-			left = "Hello, World!";
+			Value = "Hello, World!";
 		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
@@ -255,18 +190,17 @@
 
 			if(skipParentRender == false)
 				camera.RenderTexture.Clear(BackgroundColor);
-			if(ShadowOffset != default)
+			if(ShadowOffset != default || ShadowColor.A == 0)
 			{
 				var tr = Transform.Identity;
 				var col = textInstance.FillColor;
-				var prevTh = textInstance.OutlineThickness;
+				var outCol = textInstance.OutlineColor;
 				tr.Translate(ShadowOffset.ToSFML());
 				textInstance.FillColor = ShadowColor;
-				textInstance.OutlineThickness = 0;
+				textInstance.OutlineColor = ShadowColor;
 				camera.RenderTexture.Draw(textInstance, new(tr));
-
 				textInstance.FillColor = col;
-				textInstance.OutlineThickness = prevTh;
+				textInstance.OutlineColor = outCol;
 			}
 			if(string.IsNullOrWhiteSpace(textInstance.DisplayedString) == false)
 				camera.RenderTexture.Draw(textInstance);
@@ -280,23 +214,6 @@
 			GetCamera()?.Destroy(false);
 			formatSpaceRangesCenter = null;
 			formatSpaceRangesRight = null;
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			var res = GetRes() * new Vector2(0.5f);
-			var or = res * OriginUnit;
-			var tl = new Vector2(0) - or;
-			var tr = new Vector2(res.X, 0) - or;
-			var br = new Vector2(res.X, res.Y) - or;
-			var bl = new Vector2(0, res.Y) - or;
-
-			bb.Lines.Clear();
-			bb.LocalLines.Clear();
-			bb.LocalLines.Add(new(tl, tr));
-			bb.LocalLines.Add(new(tr, br));
-			bb.LocalLines.Add(new(br, bl));
-			bb.LocalLines.Add(new(bl, tl));
-			return bb;
 		}
 
 		protected void Update()
@@ -316,41 +233,29 @@
 			textInstance.OutlineColor = OutlineColor;
 			textInstance.OutlineThickness = OutlineSize;
 			textInstance.Style = Style;
+			textInstance.DisplayedString = Value;
 
-			switch(Alignment)
-			{
-				case Thing.TextboxAlignment.TopLeft: Left(); break;
-				case Thing.TextboxAlignment.TopRight: Right(); break;
-				case Thing.TextboxAlignment.Top: CenterX(); break;
-				case Thing.TextboxAlignment.Left: Left(); break;
-				case Thing.TextboxAlignment.Right: Right(); break;
-				case Thing.TextboxAlignment.Center: CenterX(); break;
-				case Thing.TextboxAlignment.BottomLeft: Left(); break;
-				case Thing.TextboxAlignment.BottomRight: Right(); break;
-				case Thing.TextboxAlignment.Bottom: CenterX(); break;
-			}
 			var b = textInstance.GetLocalBounds();
+			textInstance.Origin = new(b.Width / 2f, b.Height / 2f);
 			var sz = camera.RenderTexture.Size;
-			var x = -sz.X * 0.5f + textOffsetX;
+			var smallOffset = SymbolSize / 4f;
+			var top = -sz.Y / 2f + b.Height / 2f - smallOffset / 2f;
+			var left = -sz.X / 2f + b.Width / 2f + smallOffset / 2f;
+			var right = sz.X / 2f - b.Width / 2f - smallOffset / 2f;
+			var bot = sz.Y / 2f - b.Height / 2f - smallOffset * 1.5f;
+
 			switch(Alignment)
 			{
-				case Thing.TextboxAlignment.TopLeft: Top(); break;
-				case Thing.TextboxAlignment.TopRight: Top(); break;
-				case Thing.TextboxAlignment.Top: Top(); break;
-				case Thing.TextboxAlignment.Left: CenterY(); break;
-				case Thing.TextboxAlignment.Right: CenterY(); break;
-				case Thing.TextboxAlignment.Center: CenterY(); break;
-				case Thing.TextboxAlignment.BottomLeft: Bottom(); break;
-				case Thing.TextboxAlignment.BottomRight: Bottom(); break;
-				case Thing.TextboxAlignment.Bottom: Bottom(); break;
+				case Thing.TextboxAlignment.TopLeft: textInstance.Position = new(left, top); break;
+				case Thing.TextboxAlignment.TopRight: textInstance.Position = new(right, top); break;
+				case Thing.TextboxAlignment.Top: textInstance.Position = new(0, top); break;
+				case Thing.TextboxAlignment.Left: textInstance.Position = new(left, -smallOffset); break;
+				case Thing.TextboxAlignment.Right: textInstance.Position = new(right, -smallOffset); break;
+				case Thing.TextboxAlignment.Center: textInstance.Position = new(0, -smallOffset); break;
+				case Thing.TextboxAlignment.BottomLeft: textInstance.Position = new(left, bot); break;
+				case Thing.TextboxAlignment.BottomRight: textInstance.Position = new(right, bot); break;
+				case Thing.TextboxAlignment.Bottom: textInstance.Position = new(0, bot); break;
 			}
-
-			void Top() => textInstance.Position = new Vector2f(x, -camera.RenderTexture.Size.Y * 0.5f - b.Top * 0.5f);
-			void CenterX() => textInstance.DisplayedString = center;
-			void CenterY() => textInstance.Position = new(x, -b.Height * 0.5f - (Alignment == Thing.TextboxAlignment.Left ? b.Top : 0));
-			void Bottom() => textInstance.Position = new(x, camera.RenderTexture.Size.Y * 0.5f - b.Height + b.Top);
-			void Left() => textInstance.DisplayedString = left;
-			void Right() => textInstance.DisplayedString = right;
 		}
 		protected void DrawTextbox(RenderTarget renderTarget)
 		{
@@ -373,7 +278,7 @@
 		}
 		protected CameraInstance GetCamera()
 		{
-			return Get<CameraInstance>(cameraUID);
+			return Get<CameraInstance>(CameraUID);
 		}
 		private Font GetFont()
 		{
@@ -413,7 +318,7 @@
 		}
 		internal Vector2 GetRes()
 		{
-			var cam = Get<CameraInstance>(cameraUID);
+			var cam = Get<CameraInstance>(CameraUID);
 			return cam == null ? default : cam.Resolution;
 		}
 		#endregion

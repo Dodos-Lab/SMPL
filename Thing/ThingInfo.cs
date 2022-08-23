@@ -123,9 +123,7 @@
 			public const string UI_PROGRESS_BAR_VALUE = nameof(ProgressBarInstance.Value);
 			public const string UI_PROGRESS_BAR_MAX_LENGTH = nameof(ProgressBarInstance.MaxLength);
 
-			public const string UI_TEXTBOX_LINE_WIDTH = nameof(TextboxInstance.LineWidth);
 			public const string UI_TEXTBOX_LINE_SPACE = nameof(TextboxInstance.LineSpace);
-			public const string UI_TEXTBOX_LINE_COUNT = nameof(TextboxInstance.LineCount);
 			public const string UI_TEXTBOX_ALIGNMENT = nameof(TextboxInstance.Alignment);
 			public const string UI_TEXTBOX_BACKGROUND_COLOR = nameof(TextboxInstance.BackgroundColor);
 			public const string UI_TEXTBOX_SHADOW_OFFSET = nameof(TextboxInstance.ShadowOffset);
