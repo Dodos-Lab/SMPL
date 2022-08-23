@@ -256,7 +256,7 @@
           }
         }
       },
-      "NetCoreServer/6.2.0": {
+      "NetCoreServer/6.5.0": {
         "type": "package",
         "compile": {
           "lib/net6.0/NetCoreServer.dll": {}
@@ -466,15 +466,15 @@
         "lib/netstandard20/netstandard20/Fasterflect.pdb"
       ]
     },
-    "NetCoreServer/6.2.0": {
-      "sha512": "QQGs4YlGhE3dC3IZbEiNBN/ckUqdKdl8URQDDpLGQfW7Qu+oJ1bBG071ULg7z4ti3khdV+DHGo7+8NLCCD8yoQ==",
+    "NetCoreServer/6.5.0": {
+      "sha512": "qlrnwKXpOn49Ekgvxufqc4NbpiyrnNacOaaSpDll+WbskkzLIHrRdQBfNZbrMZjM/wyEkOQzRnewj2KhSbfCeg==",
       "type": "package",
-      "path": "netcoreserver/6.2.0",
+      "path": "netcoreserver/6.5.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/net6.0/NetCoreServer.dll",
-        "netcoreserver.6.2.0.nupkg.sha512",
+        "netcoreserver.6.5.0.nupkg.sha512",
         "netcoreserver.nuspec"
       ]
     },
@@ -687,7 +687,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0-windows7.0": [
-      "NetCoreServer >= 6.2.0",
+      "NetCoreServer >= 6.5.0",
       "Newtonsoft.Json >= 13.0.1",
       "SFML.Net >= 2.5.0",
       "fasterflect >= 3.0.0"
@@ -740,7 +740,7 @@
         "dependencies": {
           "NetCoreServer": {
             "target": "Package",
-            "version": "[6.2.0, )"
+            "version": "[6.5.0, )"
           },
           "Newtonsoft.Json": {
             "target": "Package",

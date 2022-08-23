@@ -8,6 +8,7 @@
 			public List<Type> KnownTypes { get; set; } = new();
 			public JsonBinder()
 			{
+				KnownTypes.Add(typeof(object));
 				KnownTypes.Add(typeof(bool));
 				KnownTypes.Add(typeof(byte));
 				KnownTypes.Add(typeof(int));
@@ -28,6 +29,7 @@
 				KnownTypes.Add(typeof(Hitbox));
 				KnownTypes.Add(typeof(Database));
 				KnownTypes.Add(typeof(Scene));
+				KnownTypes.Add(typeof(Settings));
 
 				var types = new List<Type>(KnownTypes);
 				for(int i = 0; i < types.Count; i++)
@@ -140,7 +142,14 @@
 				wt += $".\nAs well as any generic Array, List, ReadOnlyCollection and Dictionary of those.\n" +
 					$"Also internal {nameof(SMPL)} stuff.";
 
-				Console.LogError(1, $"Could not turn {nameof(JSON)} into {typeof(T).Name}.\n{ex.Message}",
+				var msg = ex.Message;
+				if(msg.Contains("was not resolved."))
+				{
+					msg = msg.Split("was not resolved.")[0];
+					msg += "is not whitelisted.";
+				}
+
+				Console.LogError(1, $"Could not turn {nameof(JSON)} into {typeof(T).Name}.\n{msg}",
 					$"It may be an invalid JSON or contain/be a non-whitelisted {nameof(Type)}.\n\n" +
 					$"The whitelisted {nameof(Type)}s are:\n{wt}\n\n" +
 					$"Make sure to whitelist any required {nameof(Type)} by 'typeof(MyType).Whitelist()'.\n" +
@@ -161,6 +170,38 @@
 				SerializationBinder = JsonBinder.Instance,
 			};
 			return JsonConvert.SerializeObject(instance, settings);
+		}
+		public static T Load<T>(this string filePath)
+		{
+			byte[] decompressedBytes;
+			var compressedStream = new MemoryStream(File.ReadAllBytes(filePath));
+
+			using(var decompressorStream = new DeflateStream(compressedStream, CompressionMode.Decompress))
+			{
+				using var decompressedStream = new MemoryStream();
+				decompressorStream.CopyTo(decompressedStream);
+
+				decompressedBytes = decompressedStream.ToArray();
+			}
+
+			var json = Encoding.UTF8.GetString(decompressedBytes);
+			return json.FromJSON<T>();
+		}
+		public static void Save(this object instance, string filePath)
+		{
+			byte[] compressedBytes;
+			using(var uncompressedStream = new MemoryStream(Encoding.UTF8.GetBytes(instance.ToJSON())))
+			{
+				using var compressedStream = new MemoryStream();
+				using(var compressorStream = new DeflateStream(compressedStream, CompressionLevel.Fastest, true))
+				{
+					uncompressedStream.CopyTo(compressorStream);
+				}
+
+				compressedBytes = compressedStream.ToArray();
+			}
+
+			File.WriteAllBytes(filePath, compressedBytes);
 		}
 	}
 }

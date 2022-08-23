@@ -52,7 +52,7 @@
 				var prevScene = scene;
 				scene = def;
 
-				var loadedScene = File.ReadAllText(filePath).FromJSON<Scene>();
+				var loadedScene = filePath.Load<Scene>();
 
 				loadedScene.objs = def.objs;
 				loadedScene.IsLoaded = true;
@@ -92,7 +92,8 @@
 					}
 				}
 
-				File.WriteAllText(filePath, this.ToJSON());
+				Storage.Save(this, filePath);
+				//File.WriteAllText(filePath, this.ToJSON());
 				return true;
 			}
 			catch(Exception)

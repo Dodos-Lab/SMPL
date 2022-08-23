@@ -47,7 +47,7 @@
           "dependencies": {
             "NetCoreServer": {
               "target": "Package",
-              "version": "[6.2.0, )"
+              "version": "[6.5.0, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",

@@ -164,38 +164,39 @@
 		/// </summary>
 		public static string Compress(this string text)
 		{
-			var buffer = Encoding.UTF8.GetBytes(text);
-			var memoryStream = new MemoryStream();
-			using(var gZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
-				gZipStream.Write(buffer, 0, buffer.Length);
+			byte[] compressedBytes;
 
-			memoryStream.Position = 0;
+			using(var uncompressedStream = new MemoryStream(Encoding.UTF8.GetBytes(text)))
+			{
+				using var compressedStream = new MemoryStream();
+				using(var compressorStream = new DeflateStream(compressedStream, CompressionLevel.Fastest, true))
+				{
+					uncompressedStream.CopyTo(compressorStream);
+				}
 
-			var compressedData = new byte[memoryStream.Length];
-			memoryStream.Read(compressedData, 0, compressedData.Length);
+				compressedBytes = compressedStream.ToArray();
+			}
 
-			var gZipBuffer = new byte[compressedData.Length + 4];
-			Buffer.BlockCopy(compressedData, 0, gZipBuffer, 4, compressedData.Length);
-			Buffer.BlockCopy(BitConverter.GetBytes(buffer.Length), 0, gZipBuffer, 0, 4);
-			return Convert.ToBase64String(gZipBuffer);
+			return Convert.ToBase64String(compressedBytes);
 		}
 		/// <summary>
 		/// Decrypts and decompresses a <paramref name="compressedText"/> and returns it. See <see cref="Compress(string)"/>.
 		/// </summary>
 		public static string Decompress(this string compressedText)
 		{
-			var gZipBuffer = Convert.FromBase64String(compressedText);
-			using var memoryStream = new MemoryStream();
-			var dataLength = BitConverter.ToInt32(gZipBuffer, 0);
-			memoryStream.Write(gZipBuffer, 4, gZipBuffer.Length - 4);
+			byte[] decompressedBytes;
 
-			var buffer = new byte[dataLength];
+			var compressedStream = new MemoryStream(Convert.FromBase64String(compressedText));
 
-			memoryStream.Position = 0;
-			using(var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
-				gZipStream.Read(buffer, 0, buffer.Length);
+			using(var decompressorStream = new DeflateStream(compressedStream, CompressionMode.Decompress))
+			{
+				using var decompressedStream = new MemoryStream();
+				decompressorStream.CopyTo(decompressedStream);
 
-			return Encoding.UTF8.GetString(buffer);
+				decompressedBytes = decompressedStream.ToArray();
+			}
+
+			return Encoding.UTF8.GetString(decompressedBytes);
 		}
 		/// <summary>
 		/// Tries to convert <paramref name="text"/> to a <see cref="float"/> and returns the result (<see cref="float.NaN"/> if unsuccessful).
@@ -208,6 +209,21 @@
 			var parsed = float.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
 
 			return parsed ? result : float.NaN;
+		}
+		public static string Load(this string filePath)
+		{
+			var gZipBuffer = File.ReadAllBytes(filePath);
+			using var memoryStream = new MemoryStream();
+			var dataLength = BitConverter.ToInt32(gZipBuffer, 0);
+			memoryStream.Write(gZipBuffer, 4, gZipBuffer.Length - 4);
+
+			var buffer = new byte[dataLength];
+
+			memoryStream.Position = 0;
+			using(var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+				gZipStream.Read(buffer, 0, buffer.Length);
+
+			return Encoding.UTF8.GetString(buffer);
 		}
 
 		/// <summary>
