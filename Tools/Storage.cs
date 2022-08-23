@@ -26,6 +26,8 @@
 				KnownTypes.Add(typeof(Thing.BlendMode));
 				KnownTypes.Add(typeof(Thing.Effect));
 				KnownTypes.Add(typeof(Text.Styles));
+				KnownTypes.Add(typeof(UI.Thing.TextboxAlignment));
+				KnownTypes.Add(typeof(UI.Thing.TextboxSymbolCollection));
 				KnownTypes.Add(typeof(Hitbox));
 				KnownTypes.Add(typeof(Database));
 				KnownTypes.Add(typeof(Scene));

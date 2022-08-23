@@ -130,6 +130,7 @@
 			public const string UI_TEXTBOX_BACKGROUND_COLOR = nameof(TextboxInstance.BackgroundColor);
 			public const string UI_TEXTBOX_SHADOW_OFFSET = nameof(TextboxInstance.ShadowOffset);
 			public const string UI_TEXTBOX_SHADOW_COLOR = nameof(TextboxInstance.ShadowColor);
+			public const string UI_TEXTBOX_CAMERA_UID = nameof(TextboxInstance.CameraUID);
 
 			public const string UI_INPUTBOX_IS_FOCUSED = nameof(InputboxInstance.IsFocused);
 			public const string UI_INPUTBOX_IS_DISABLED = nameof(InputboxInstance.IsDisabled);

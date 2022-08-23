@@ -30,6 +30,8 @@
 			set
 			{
 				left = value;
+				if(left == null)
+					return;
 
 				textInstance.Font = GetFont();
 				textInstance.CharacterSize = (uint)SymbolSize;
@@ -49,7 +51,7 @@
 				center = "";
 
 				var lines = left.Split('\n');
-				lineCount = (uint)lines.Length;
+				lineCount = lines.Length;
 				for(int i = 0; i < lines.Length; i++)
 				{
 					var line = lines[i];
@@ -76,8 +78,8 @@
 
 		public string CameraUID => cameraUID;
 
-		public uint LineWidth { get; set; }
-		public uint LineCount => lineCount;
+		public float LineWidth { get; set; }
+		public int LineCount => lineCount;
 
 		public Thing.TextboxAlignment Alignment { get; set; }
 
@@ -220,11 +222,12 @@
 		}
 
 		#region Backend
-		private uint lineCount;
+		private int lineCount;
 		private List<(int, int)> formatSpaceRangesRight = new(), formatSpaceRangesCenter = new();
 		private string left, center, right, font;
 
 		protected bool skipParentRender;
+		[JsonProperty]
 		protected string cameraUID;
 		protected float textOffsetX;
 
@@ -250,18 +253,21 @@
 			if(camera == null)
 				return;
 
+			if(skipParentRender == false)
+				camera.RenderTexture.Clear(BackgroundColor);
 			if(ShadowOffset != default)
 			{
 				var tr = Transform.Identity;
 				var col = textInstance.FillColor;
+				var prevTh = textInstance.OutlineThickness;
 				tr.Translate(ShadowOffset.ToSFML());
 				textInstance.FillColor = ShadowColor;
-				camera.RenderTexture.Draw(textInstance, new(SFML.Graphics.BlendMode.Alpha, tr, null, null));
-				textInstance.FillColor = col;
-			}
-			if(skipParentRender == false)
-				camera.RenderTexture.Clear(BackgroundColor);
+				textInstance.OutlineThickness = 0;
+				camera.RenderTexture.Draw(textInstance, new(tr));
 
+				textInstance.FillColor = col;
+				textInstance.OutlineThickness = prevTh;
+			}
 			if(string.IsNullOrWhiteSpace(textInstance.DisplayedString) == false)
 				camera.RenderTexture.Draw(textInstance);
 
