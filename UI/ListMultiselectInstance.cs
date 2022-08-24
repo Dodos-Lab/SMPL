@@ -8,12 +8,13 @@
 			get
 			{
 				var result = new List<string>();
+				var btnUIDs = GetButtonUIDs();
 				for(int i = 0; i < SelectionIndexes.Count; i++)
 				{
-					if(i >= ButtonUIDs.Count)
+					if(i >= btnUIDs.Count)
 						break;
 
-					result.Add(ButtonUIDs[SelectionIndexes[i]]);
+					result.Add(btnUIDs[SelectionIndexes[i]]);
 				}
 				return result.AsReadOnly();
 			}
@@ -32,10 +33,11 @@
 
 		private void OnButtonClick(string thingUID)
 		{
-			if(ButtonUIDs.Contains(thingUID) == false)
+			var btnUIDs = GetButtonUIDs();
+			if(btnUIDs.Contains(thingUID) == false)
 				return;
 
-			var index = ButtonUIDs.IndexOf(thingUID);
+			var index = btnUIDs.IndexOf(thingUID);
 			var contains = selectionIndexes.Contains(index);
 
 			if(contains)

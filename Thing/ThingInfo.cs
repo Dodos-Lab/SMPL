@@ -115,11 +115,11 @@
 			public const string UI_TEXT_BUTTON_IS_HYPERLINK = nameof(TextButtonInstance.IsHyperlink);
 			public const string UI_TEXT_BUTTON_TEXT_UID = nameof(TextButtonInstance.TextUID);
 
-			public const string UI_CHECKBOX_IS_ACTIVE = nameof(CheckboxInstance.IsActive);
+			public const string UI_CHECKBOX_IS_CHECKED = nameof(CheckboxInstance.IsChecked);
 
 			public const string UI_PROGRESS_BAR_RANGE_A = nameof(ProgressBarInstance.RangeA);
 			public const string UI_PROGRESS_BAR_RANGE_B = nameof(ProgressBarInstance.RangeB);
-			public const string UI_PROGRESS_BAR_PROGRESS = nameof(ProgressBarInstance.ProgressUnit);
+			public const string UI_PROGRESS_BAR_UNIT = nameof(ProgressBarInstance.ProgressUnit);
 			public const string UI_PROGRESS_BAR_VALUE = nameof(ProgressBarInstance.Value);
 			public const string UI_PROGRESS_BAR_MAX_LENGTH = nameof(ProgressBarInstance.MaxLength);
 
@@ -149,7 +149,7 @@
 			public const string UI_SCROLL_BAR_BUTTON_UP_UID = nameof(ScrollBarInstance.ButtonUpUID);
 			public const string UI_SCROLL_BAR_BUTTON_DOWN_UID = nameof(ScrollBarInstance.ButtonDownUID);
 
-			public const string UI_LIST_BUTTON_UIDS = nameof(ListInstance.ButtonUIDs);
+			public const string UI_LIST_BUTTONS_TAG = nameof(ListInstance.ButtonsTag);
 			public const string UI_LIST_VISIBLE_BUTTON_COUNT_MAX = nameof(ListInstance.VisibleButtonCountMax);
 			public const string UI_LIST_VISIBLE_BUTTON_COUNT_CURRENT = nameof(ListInstance.VisibleButtonCountCurrent);
 			public const string UI_LIST_BUTTON_WIDTH = nameof(ListInstance.ButtonWidth);
@@ -157,11 +157,11 @@
 			public const string UI_LIST_BUTTON_SPACING = nameof(ListInstance.ButtonSpacing);
 			public const string UI_LIST_SCROLL_INDEX = nameof(ListInstance.ScrollIndex);
 
-			public const string UI_LIST_CAROUSEL_SELECTION_IS_REPEATING = nameof(ListCarouselInstance.SelectionIsRepeating);
+			public const string UI_LIST_CAROUSEL_IS_REPEATING = nameof(ListCarouselInstance.IsRepeating);
 			public const string UI_LIST_CAROUSEL_SELECTION_INDEX = nameof(ListCarouselInstance.SelectionIndex);
 			public const string UI_LIST_CAROUSEL_SELECTION_UID = nameof(ListCarouselInstance.SelectionUID);
 
-			public const string UI_LIST_DROPDOWN_SHOW_BUTTON_UID = nameof(ListDropdownInstance.ShowButtonUID);
+			public const string UI_LIST_DROPDOWN_BUTTON_SHOW_UID = nameof(ListDropdownInstance.ButtonShowUID);
 			public const string UI_LIST_DROPDOWN_SELECTION_UID = nameof(ListDropdownInstance.SelectionUID);
 			public const string UI_LIST_DROPDOWN_SELECTION_INDEX = nameof(ListDropdownInstance.SelectionIndex);
 

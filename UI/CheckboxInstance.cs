@@ -2,18 +2,18 @@
 {
 	internal class CheckboxInstance : ButtonInstance
 	{
-		public bool IsActive
+		public bool IsChecked
 		{
-			get => active;
+			get => isChecked;
 			set
 			{
-				active = value;
+				isChecked = value;
 				SMPL.Event.CheckboxCheck(UID);
 			}
 		}
 
 		#region Backend
-		private bool active;
+		private bool isChecked;
 
 		[JsonConstructor]
 		internal CheckboxInstance()
@@ -35,7 +35,7 @@
 			if(thingUID != UID)
 				return;
 
-			IsActive = !IsActive;
+			IsChecked = !IsChecked;
 		}
 		internal override void OnDestroy()
 		{

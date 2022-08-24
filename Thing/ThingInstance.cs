@@ -237,7 +237,7 @@
 		private readonly int numUID;
 
 		[JsonConstructor]
-		internal ThingInstance() { }
+		internal ThingInstance() => Init();
 		internal ThingInstance(string uid)
 		{
 			var objs = Scene.CurrentScene.objs;
@@ -246,17 +246,10 @@
 			UID = Thing.GetFreeUID(uid);
 			LocalScale = 1;
 
-			// i just got born, do i have any children before i was even born? claim ownership if so
-			// or perhaps i am a child of theirs before i was even born? approve their parentship if so
-			// (the longer living object wins parentship if both cases are true for some reason)
-			foreach(var kvp in objs)
-			{
-				if(kvp.Value.parentUID == uid)
-					childrenUIDs.Add(kvp.Key);
-				else if(kvp.Value.childrenUIDs.Contains(uid))
-					ParentUID = kvp.Value.UID;
-			}
-
+			Init();
+		}
+		private void Init()
+		{
 			Event.ThingCreate(UID);
 		}
 
@@ -376,6 +369,16 @@
 		internal static void MissingError(string uid)
 		{
 			Console.LogError(0, $"Thing{{{uid}}} does not exist.");
+		}
+
+		internal void TryUpdateParency()
+		{
+			var objs = Scene.CurrentScene.objs;
+			foreach(var kvp in objs)
+				if(kvp.Value.parentUID == uid && childrenUIDs.Contains(kvp.Key) == false)
+					childrenUIDs.Add(kvp.Key);
+				else if(kvp.Value.childrenUIDs.Contains(uid))
+					ParentUID = kvp.Value.UID;
 		}
 		#endregion
 	}

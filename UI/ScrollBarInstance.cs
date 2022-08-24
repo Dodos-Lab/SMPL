@@ -18,6 +18,7 @@
 		public void GoDown() => OnDown();
 
 		#region Backend
+		[JsonProperty]
 		private string scrollUpUID, scrollDownUID;
 
 		[JsonConstructor]
@@ -47,10 +48,7 @@
 			Event.ButtonClicked += OnButtonClick;
 			Event.ButtonHeld += OnButtonHold;
 
-			if(Game.Window == null)
-				Console.LogError(1, $"The {nameof(Game.Window)} is not yet created but this {nameof(ScrollBarInstance)} is trying to subscribe to its events.\n" +
-					$"Consider creating it after the {nameof(Scene)} starts.");
-			else
+			if(Game.Window != null)
 				Game.Window.MouseWheelScrolled += OnScroll;
 
 			Update();
@@ -129,7 +127,8 @@
 		{
 			base.OnDestroy();
 
-			Game.Window.MouseWheelScrolled -= OnScroll;
+			if(Game.Window != null)
+				Game.Window.MouseWheelScrolled -= OnScroll;
 			Event.ButtonClicked -= OnButtonClick;
 			Event.ButtonHeld -= OnButtonHold;
 		}

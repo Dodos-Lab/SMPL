@@ -2,7 +2,7 @@
 {
 	internal class InputboxInstance : TextboxInstance
 	{
-		public static bool IsFocused { get; set; }
+		public bool IsFocused { get; set; }
 		public bool IsDisabled { get; set; }
 
 		public Color CursorColor { get; set; }
@@ -12,7 +12,7 @@
 			set => cursorIndex = value.Limit(0, Value.Length);
 		}
 
-		public string PlaceholderValue { get; set; } = "Type...";
+		public string PlaceholderValue { get; set; } = "Type here...";
 		public Color PlaceholderColor { get; set; } = new(255, 255, 255, 70);
 
 		public void Submit()
@@ -36,8 +36,6 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			Alignment = Thing.TextboxAlignment.TopLeft;
-
 			GetCamera()?.RenderTexture.Clear(BackgroundColor);
 
 			TryInput();
@@ -55,12 +53,14 @@
 			cursorBlinkTimer.Dispose();
 			holdTimer.Dispose();
 			holdTickTimer.Dispose();
-			Game.Window.TextEntered -= OnInput;
+			if(Game.Window != null)
+				Game.Window.TextEntered -= OnInput;
 		}
 
 		private void Init()
 		{
-			Game.Window.TextEntered += OnInput;
+			if(Game.Window != null)
+				Game.Window.TextEntered += OnInput;
 			Value = "";
 			CursorColor = Color.White;
 			skipParentRender = true;
@@ -109,13 +109,13 @@
 			Update();
 			textInstance.OutlineThickness = 0;
 			textInstance.FillColor = PlaceholderColor;
-			textInstance.DisplayedString = "  " + PlaceholderValue;
+			textInstance.DisplayedString = PlaceholderValue;
 
 			GetCamera()?.RenderTexture.Draw(textInstance, new(SFML.Graphics.BlendMode.Alpha));
 		}
 		private void TryInput()
 		{
-			if(IsDisabled || Game.Window.HasFocus() == false)
+			if(IsDisabled || Game.Window == null || Game.Window.HasFocus() == false)
 				return;
 
 			var left = Keyboard.IsKeyPressed(Keyboard.Key.Left);
@@ -123,7 +123,7 @@
 
 			TryMoveCursorLeftRight();
 
-			if(Mouse.IsButtonPressed(Mouse.Button.Left).Once($"press-{GetHashCode()}"))
+			if(Mouse.IsButtonPressed(Mouse.Button.Left).Once($"press-{UID}"))
 			{
 				IsFocused = BoundingBox.IsHovered;
 				ShowCursor();
@@ -131,21 +131,21 @@
 				var index = GetSymbolIndex(Scene.MouseCursorPosition);
 				CursorPositionIndex = index == -1 ? Value.Length : index;
 			}
-			if(left.Once($"left-{GetHashCode()}"))
+			if(left.Once($"left-{UID}"))
 			{
 				holdTimer.Restart();
 				SetIndex(CursorPositionIndex - 1);
 			}
-			if(right.Once($"right-{GetHashCode()}"))
+			if(right.Once($"right-{UID}"))
 			{
 				holdTimer.Restart();
 				SetIndex(CursorPositionIndex + 1);
 			}
-			if(Keyboard.IsKeyPressed(Keyboard.Key.Up).Once($"up-{GetHashCode()}"))
+			if(Keyboard.IsKeyPressed(Keyboard.Key.Up).Once($"up-{UID}"))
 				SetIndex(0);
-			if(Keyboard.IsKeyPressed(Keyboard.Key.Down).Once($"down-{GetHashCode()}"))
+			if(Keyboard.IsKeyPressed(Keyboard.Key.Down).Once($"down-{UID}"))
 				SetIndex(Value.Length);
-			if(Keyboard.IsKeyPressed(Keyboard.Key.Delete).Once($"delete-{GetHashCode()}") && CursorPositionIndex < Value.Length)
+			if(Keyboard.IsKeyPressed(Keyboard.Key.Delete).Once($"delete-{UID}") && CursorPositionIndex < Value.Length)
 			{
 				ShowCursor();
 				Value = Value.Remove((int)CursorPositionIndex, 1);

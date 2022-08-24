@@ -55,19 +55,22 @@ namespace SMPL
 				return;
 
 			Scene.CurrentScene = new(sceneName);
-			Start();
+			Run();
 		}
 		public static void Load(string scenePath)
 		{
-			Scene.Load(scenePath);
-			Start();
+			Run(scenePath);
 		}
 		public static void UpdateEngine(RenderTarget mainCamera)
 		{
 			Time.Update();
 
+			var objs = Scene.CurrentScene.objs;
 			var visuals = VisualInstance.visuals.Reverse();
 			var cameras = CameraInstance.cameras;
+
+			foreach(var kvp in objs)
+				kvp.Value.TryUpdateParency();
 
 			for(int i = 0; i < cameras.Count; i++)
 				cameras[i].RenderTexture.Clear(Color.Transparent);
@@ -135,13 +138,15 @@ namespace SMPL
 		internal static Settings settings = new();
 		internal static Styles currWindowStyle;
 		private static void Main() { }
-		private static void Start()
+		private static void Run(string loadScene = null)
 		{
 			if(Window != null)
 				return;
 
 			Settings.Load();
 			InitWindow(Settings.WindowState, Settings.Resolution);
+			if(string.IsNullOrWhiteSpace(loadScene) == false)
+				Scene.Load(loadScene);
 
 			if(Thing.Exists(Scene.MAIN_CAMERA_UID) == false)
 				Thing.CreateCamera(Scene.MAIN_CAMERA_UID, Settings.ScreenResolution);

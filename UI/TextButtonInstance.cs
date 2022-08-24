@@ -48,7 +48,7 @@
 			{
 				text.UpdateGlobalText();
 				var b = TextInstance.textInstance.GetLocalBounds();
-				Size = new(b.Width * Scale, b.Height * Scale);
+				Size = new((b.Width + text.SymbolSize / 2f) * text.Scale, (text.SymbolSize + text.SymbolSize / 5f) * text.Scale);
 			}
 			base.OnDraw(renderTarget);
 

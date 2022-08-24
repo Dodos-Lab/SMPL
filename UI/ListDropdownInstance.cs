@@ -2,16 +2,16 @@
 {
 	internal class ListDropdownInstance : ListInstance
 	{
-		public string ShowButtonUID { get; private set; }
+		public string ButtonShowUID { get; private set; }
 		[JsonIgnore]
-		public string SelectionUID => ButtonUIDs.Count == 0 ? null : ButtonUIDs[SelectionIndex];
+		public string SelectionUID => GetButtonUIDs().Count == 0 ? null : GetButtonUIDs()[SelectionIndex];
 		public int SelectionIndex
 		{
 			get => selectionIndex;
 			set
 			{
 				UpdateDefaultValues();
-				selectionIndex = value.Limit(0, ButtonUIDs.Count, Extensions.Limitation.ClosestBound);
+				selectionIndex = value.Limit(0, GetButtonUIDs().Count, Extensions.Limitation.ClosestBound);
 				TryUpdateSelection();
 			}
 		}
@@ -26,7 +26,7 @@
 		{
 			Event.ButtonClicked += OnButtonClick;
 
-			ShowButtonUID = btnShowUID;
+			ButtonShowUID = btnShowUID;
 			var btn = GetShowButton();
 			if(btn == null)
 				return;
@@ -37,11 +37,12 @@
 
 		private void OnButtonClick(string thingUID)
 		{
-			if(thingUID == ShowButtonUID || thingUID == SelectionUID)
+			var btnUIDs = GetButtonUIDs();
+			if(thingUID == ButtonShowUID || thingUID == SelectionUID)
 				isOpen = !isOpen;
-			else if(ButtonUIDs.Contains(thingUID))
+			else if(btnUIDs.Contains(thingUID))
 			{
-				SelectionIndex = ButtonUIDs.IndexOf(thingUID);
+				SelectionIndex = btnUIDs.IndexOf(thingUID);
 				isOpen = false;
 				GetSelection()?.Unhover();
 			}
@@ -50,12 +51,14 @@
 		{
 			UpdateDefaultValues();
 
-			var hidden = ButtonUIDs.Count == 0 || isOpen == false;
+			var btnUIDs = GetButtonUIDs();
+			var hidden = btnUIDs.Count == 0 || isOpen == false;
 
 			TryUpdateSelection();
 
 			var showBtn = GetShowButton();
-			showBtn.Position = GetButtonUp().BoundingBox.Lines[3].A;
+			if(showBtn != null)
+				showBtn.Position = GetButtonUp().BoundingBox.Lines[3].A;
 
 			var sel = GetSelection();
 			if(sel != null)
@@ -69,8 +72,8 @@
 			TrySetButtonVisibility(GetButtonUp(), false);
 			TrySetButtonVisibility(GetButtonDown(), false);
 
-			for(int i = 0; i < ButtonUIDs.Count; i++)
-				TrySetButtonVisibility(Get<ButtonInstance>(ButtonUIDs[i]));
+			for(int i = 0; i < btnUIDs.Count; i++)
+				TrySetButtonVisibility(Get<ButtonInstance>(btnUIDs[i]));
 
 			void TrySetButtonVisibility(ButtonInstance btn, bool inList = true)
 			{
@@ -100,7 +103,7 @@
 
 		private ButtonInstance GetShowButton()
 		{
-			return Get<ButtonInstance>(ShowButtonUID);
+			return Get<ButtonInstance>(ButtonShowUID);
 		}
 		private ButtonInstance GetSelection()
 		{
@@ -109,7 +112,7 @@
 		private void UpdateDefaultValues()
 		{
 			RangeA = 0;
-			RangeB = ButtonUIDs.Count - 1;
+			RangeB = GetButtonUIDs().Count - 1;
 			OriginUnit = new(0, 0.5f);
 		}
 		private void TryUpdateSelection()
@@ -118,7 +121,7 @@
 			if(sel == null)
 				return;
 
-			var index = ButtonUIDs.IndexOf(sel.UID);
+			var index = GetButtonUIDs().IndexOf(sel.UID);
 			var hidden = index.IsBetween((int)Value, (int)Value + VisibleButtonCountCurrent, true) == false && isOpen;
 
 			sel.IsDisabled = hidden;

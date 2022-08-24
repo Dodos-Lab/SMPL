@@ -4,17 +4,17 @@
 	{
 		public new Hitbox BoundingBox => GetBoundingBox();
 
-		public bool SelectionIsRepeating { get; set; } = true;
+		public bool IsRepeating { get; set; } = true;
 		public int SelectionIndex
 		{
 			get => (int)Value;
 			set
 			{
 				UpdateDefaultValues();
-				Value = value.Limit(0, ButtonUIDs.Count, SelectionIsRepeating ? Extensions.Limitation.Overflow : Extensions.Limitation.ClosestBound);
+				Value = value.Limit(0, GetButtonUIDs().Count, IsRepeating ? Extensions.Limitation.Overflow : Extensions.Limitation.ClosestBound);
 			}
 		}
-		public string SelectionUID => ButtonUIDs.Count == 0 ? null : ButtonUIDs[(int)Value];
+		public string SelectionUID => GetButtonUIDs().Count == 0 ? null : GetButtonUIDs()[(int)Value];
 
 		#region Backend
 		internal ListCarouselInstance() => Init();
@@ -50,10 +50,11 @@
 			var prev = GetButtonDown();
 			var next = GetButtonUp();
 			var selection = Get<ButtonInstance>(SelectionUID);
+			var btnUIDs = GetButtonUIDs();
 
-			for(int i = 0; i < ButtonUIDs.Count; i++)
+			for(int i = 0; i < btnUIDs.Count; i++)
 			{
-				var btn = Get<ButtonInstance>(ButtonUIDs[i]);
+				var btn = Get<ButtonInstance>(btnUIDs[i]);
 				btn.Position = new Vector2().NaN();
 			}
 
@@ -87,10 +88,11 @@
 		{
 			var prev = GetButtonDown();
 			var next = GetButtonUp();
-			var tl = prev.BoundingBox.Lines[0].A;
-			var tr = next.BoundingBox.Lines[1].A;
-			var br = next.BoundingBox.Lines[2].A;
-			var bl = prev.BoundingBox.Lines[3].A;
+			var baseBB = base.bb;
+			var tl = prev == null ? baseBB.Lines[0].A : prev.BoundingBox.Lines[0].A;
+			var tr = next == null ? baseBB.Lines[1].A : next.BoundingBox.Lines[1].A;
+			var br = next == null ? baseBB.Lines[2].A : next.BoundingBox.Lines[2].A;
+			var bl = prev == null ? baseBB.Lines[3].A : prev.BoundingBox.Lines[3].A;
 
 			bb.Lines.Clear();
 			bb.Lines.Add(new(tl, tr));
@@ -104,7 +106,7 @@
 		{
 			Step = 1;
 			RangeA = 0;
-			RangeB = ButtonUIDs.Count - 1;
+			RangeB = GetButtonUIDs().Count - 1;
 		}
 		#endregion
 	}
