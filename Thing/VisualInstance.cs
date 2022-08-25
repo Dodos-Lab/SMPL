@@ -102,10 +102,11 @@ void main()
 	}
 	internal abstract class VisualInstance : ThingInstance
 	{
-		public Color Tint { get; set; } = Color.White;
 		public bool IsHidden { get; set; }
 		public bool IsSmooth { get; set; }
 		public bool IsRepeated { get; set; } = true;
+
+		public string TexturePath { get; set; }
 		public int Order
 		{
 			get => depth;
@@ -127,7 +128,7 @@ void main()
 				}
 			}
 		}
-		public string TexturePath { get; set; }
+		public Color Tint { get; set; } = Color.White;
 		public Thing.Effect Effect
 		{
 			get => effect;
@@ -139,8 +140,9 @@ void main()
 					SetShader(effect);
 			}
 		}
-		public string CameraTag { get; set; }
 		public Thing.BlendMode BlendMode { get; set; } = Thing.BlendMode.Alpha;
+
+		public string CameraTag { get; set; }
 
 		public Thing.CodeGLSL GetEffectCode(Thing.Effect effect)
 		{

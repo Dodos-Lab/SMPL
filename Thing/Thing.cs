@@ -216,7 +216,7 @@
 		public static void Set(string uid, string setPropertyName, object value)
 		{
 			var obj = ThingInstance.GetTryError(uid);
-			if(obj == null)
+			if(obj == null || value == null)
 				return;
 			var type = obj.GetType();
 			var key = (type, setPropertyName);

@@ -194,6 +194,9 @@
 			public const string DESTROY = nameof(ThingInstance.Destroy);
 
 			public const string CAMERA_SNAP = nameof(CameraInstance.Snap);
+			public const string CAMERA_POINT_TO_CAMERA = nameof(CameraInstance.PointToCamera);
+			public const string CAMERA_POINT_TO_WORLD = nameof(CameraInstance.PointToWorld);
+			public const string CAMERA_POINT_TO_PARALLAX = nameof(CameraInstance.PointToParallax);
 
 			public const string PARTICLE_MANAGER_SPAWN = nameof(ParticleManagerInstance.Spawn);
 			public const string PARTICLE_MANAGER_DESTROY = nameof(ParticleManagerInstance.Destroy);

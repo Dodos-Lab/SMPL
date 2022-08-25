@@ -2,8 +2,8 @@
 {
 	internal class TextInstance : VisualInstance
 	{
-		public string FontPath { get; set; }
-		public string Value { get; set; } = "Hello, World!";
+		public virtual string FontPath { get; set; }
+		public virtual string Value { get; set; } = "Hello, World!";
 		public Color Color { get; set; } = Color.White;
 		public int SymbolSize
 		{

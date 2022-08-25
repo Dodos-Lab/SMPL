@@ -2,7 +2,7 @@
 {
 	internal class ListInstance : ScrollBarInstance
 	{
-		public new Hitbox BoundingBox
+		public override Hitbox BoundingBox
 		{
 			get
 			{

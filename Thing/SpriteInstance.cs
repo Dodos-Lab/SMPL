@@ -34,9 +34,9 @@
 		public Vector2 TexCoordUnitA { get; set; }
 		public Vector2 TexCoordUnitB { get; set; } = new(1);
 
-		public Vector2 LocalSize { get; set; } = new(100);
+		public virtual Vector2 LocalSize { get; set; } = new(100);
 		[JsonIgnore]
-		public Vector2 Size
+		public virtual Vector2 Size
 		{
 			get => LocalSize * Scale;
 			set => LocalSize = value / Scale;

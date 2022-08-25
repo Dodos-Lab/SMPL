@@ -62,6 +62,10 @@
 			var p = Game.Window.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
 			return Game.Window == null ? default : new(p.X, p.Y);
 		}
+		public Vector2 PointToParallax(Vector2 point, float parallaxUnit)
+		{
+			return point.PointPercentTowardPoint(Position, new(parallaxUnit * 100f));
+		}
 
 		#region Backend
 		internal static readonly List<CameraInstance> cameras = new();
@@ -85,15 +89,6 @@
 			Resolution = new(resolutionX, resolutionY);
 		}
 
-		internal override void OnDestroy()
-		{
-			base.OnDestroy();
-
-			cameras.Remove(this);
-			if(Scene.CurrentScene.Textures.ContainsKey(UID))
-				Scene.CurrentScene.Textures.Remove(UID, out _);
-			renderTexture.Dispose();
-		}
 		internal override Hitbox GetBoundingBox()
 		{
 			var sz = renderTexture.GetView().Size * 0.5f;

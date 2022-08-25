@@ -2,7 +2,7 @@
 {
 	internal class ListCarouselInstance : ListInstance
 	{
-		public new Hitbox BoundingBox => GetBoundingBox();
+		public override Hitbox BoundingBox => GetBoundingBox();
 
 		public bool IsRepeating { get; set; } = true;
 		public int SelectionIndex

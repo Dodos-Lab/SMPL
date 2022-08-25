@@ -15,8 +15,8 @@
 	{
 		public Color BackgroundColor { get; set; } = new(100, 100, 100);
 
-		public new string FontPath { get; set; }
-		public new string Value { get; set; }
+		public override string FontPath { get; set; }
+		public override string Value { get; set; }
 
 		public string CameraUID { get; set; }
 

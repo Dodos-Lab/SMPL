@@ -7,19 +7,19 @@
 			get => borderSz;
 			set { borderSz = value; base.LocalSize = rawLocalSz - new Vector2(value) * 2; }
 		}
-		public new Vector2 LocalSize
+		public override Vector2 LocalSize
 		{
 			get => rawLocalSz;
 			set { rawLocalSz = value; base.LocalSize = value - new Vector2(BorderSize) * 2; }
 		}
 		[JsonIgnore]
-		public new Vector2 Size
+		public override Vector2 Size
 		{
 			get => LocalSize * Scale;
 			set => LocalSize = value / Scale;
 		}
 
-		public new Hitbox BoundingBox
+		public override Hitbox BoundingBox
 		{
 			get
 			{

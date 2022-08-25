@@ -65,12 +65,8 @@ namespace SMPL
 		{
 			Time.Update();
 
-			var objs = Scene.CurrentScene.objs;
 			var visuals = VisualInstance.visuals.Reverse();
 			var cameras = CameraInstance.cameras;
-
-			foreach(var kvp in objs)
-				kvp.Value.TryUpdateParency();
 
 			for(int i = 0; i < cameras.Count; i++)
 				cameras[i].RenderTexture.Clear(Color.Transparent);

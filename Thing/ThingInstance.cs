@@ -60,11 +60,7 @@
 		}
 		public string OldUID => oldUID;
 		public int NumericUID => numUID;
-
 		public List<string> Tags { get; } = new();
-
-		[JsonIgnore]
-		public float Age => age.ElapsedTime.AsSeconds();
 
 		public string ParentUID
 		{
@@ -104,6 +100,9 @@
 		public string ParentOldUID => parOldUID;
 		[JsonIgnore]
 		public ReadOnlyCollection<string> ChildrenUIDs => childrenUIDs.AsReadOnly();
+
+		[JsonIgnore]
+		public float Age => age.ElapsedTime.AsSeconds();
 
 		public Vector2 LocalPosition
 		{
@@ -160,7 +159,7 @@
 			}
 		}
 		[JsonIgnore]
-		public Hitbox BoundingBox
+		public virtual Hitbox BoundingBox
 		{
 			get
 			{
@@ -234,6 +233,7 @@
 		private float localAng, localSc;
 		private Matrix3x2 global;
 		private string uid;
+		[JsonProperty]
 		private readonly int numUID;
 
 		[JsonConstructor]
@@ -251,9 +251,17 @@
 		private void Init()
 		{
 			Event.ThingCreate(UID);
+			Event.SceneStarted += OnSceneStart;
+		}
+		private void OnSceneStart(string sceneName)
+		{
+			UpdateParency();
 		}
 
-		internal virtual void OnDestroy() { }
+		internal virtual void OnDestroy()
+		{
+			Event.SceneStarted -= OnSceneStart;
+		}
 		internal virtual Hitbox GetBoundingBox()
 		{
 			var sz = DEFAULT_BB_SIZE;
@@ -319,6 +327,15 @@
 			return inverseParent;
 		}
 
+		private void UpdateParency()
+		{
+			var objs = Scene.CurrentScene.objs;
+			foreach(var kvp in objs)
+				if(kvp.Value.parentUID == uid && childrenUIDs.Contains(kvp.Key) == false)
+					childrenUIDs.Add(kvp.Key);
+				else if(kvp.Value.childrenUIDs.Contains(uid))
+					ParentUID = kvp.Value.UID;
+		}
 		private void UpdateSelfAndChildren()
 		{
 			UpdateGlobalMatrix();
@@ -369,16 +386,6 @@
 		internal static void MissingError(string uid)
 		{
 			Console.LogError(0, $"Thing{{{uid}}} does not exist.");
-		}
-
-		internal void TryUpdateParency()
-		{
-			var objs = Scene.CurrentScene.objs;
-			foreach(var kvp in objs)
-				if(kvp.Value.parentUID == uid && childrenUIDs.Contains(kvp.Key) == false)
-					childrenUIDs.Add(kvp.Key);
-				else if(kvp.Value.childrenUIDs.Contains(uid))
-					ParentUID = kvp.Value.UID;
 		}
 		#endregion
 	}
