@@ -16,10 +16,10 @@
 
 		/// <summary>
 		/// Returns whether this <see cref="Hitbox"/> contains the mouse cursor in the <see cref="Scene.CurrentScene"/>.
-		/// This is a shortcut for <see cref="ConvexContains"/> -> <see cref="Scene.MouseCursorPosition"/>.
+		/// This is a shortcut for <see cref="Contains"/> -> <see cref="Scene.MouseCursorPosition"/>.
 		/// </summary>
 		[JsonIgnore]
-		public bool IsHovered => ConvexContains(Scene.MouseCursorPosition);
+		public bool IsHovered => Contains(Scene.MouseCursorPosition);
 
 		/// <summary>
 		/// Constructs both <see cref="LocalLines"/> and <see cref="Lines"/> from between the <paramref name="points"/>.
@@ -77,18 +77,17 @@
 		}
 		/// <summary>
 		/// A shortcut for
-		/// <code>var overlaps = Crosses(hitbox) || ConvexContains(hitbox) || hitbox.ConvexContains(this);</code>
+		/// <code>var overlaps = Crosses(hitbox) || Contains(hitbox) || hitbox.Contains(this);</code>
 		/// </summary>
-		public bool ConvexOverlaps(Hitbox hitbox)
+		public bool Overlaps(Hitbox hitbox)
 		{
-			return Crosses(hitbox) || ConvexContains(hitbox) || hitbox.ConvexContains(this);
+			return Crosses(hitbox) || Contains(hitbox) || hitbox.Contains(this);
 		}
 		/// <summary>
 		/// Whether <see cref="Lines"/> surround <paramref name="point"/>.
-		/// Or in other words: whether this <see cref="Hitbox"/> contains <paramref name="point"/>. Some of the results will
-		/// be wrong if <see cref="Lines"/> are forming a concave shape.
+		/// Or in other words: whether this <see cref="Hitbox"/> contains <paramref name="point"/>.
 		/// </summary>
-		public bool ConvexContains(Vector2 point)
+		public bool Contains(Vector2 point)
 		{
 			if(Lines == null || Lines.Count < 3)
 				return false;
@@ -116,14 +115,13 @@
 		}
 		/// <summary>
 		/// Whether <see cref="Lines"/> completely surround <paramref name="hitbox"/>'s <see cref="Lines"/>.
-		/// Or in other words: whether this <see cref="Hitbox"/> contains <paramref name="hitbox"/>. Some of the results will be wrong
-		/// if <see cref="Lines"/> or <paramref name="hitbox"/>'s <see cref="Lines"/> are forming a concave shape.
+		/// Or in other words: whether this <see cref="Hitbox"/> contains <paramref name="hitbox"/>.
 		/// </summary>
-		public bool ConvexContains(Hitbox hitbox)
+		public bool Contains(Hitbox hitbox)
 		{
 			for(int i = 0; i < hitbox.Lines.Count; i++)
 				for(int j = 0; j < Lines.Count; j++)
-					if((ConvexContains(hitbox.Lines[i].A) == false || ConvexContains(hitbox.Lines[i].B) == false))
+					if((Contains(hitbox.Lines[i].A) == false || Contains(hitbox.Lines[i].B) == false))
 						return false;
 			return true;
 		}

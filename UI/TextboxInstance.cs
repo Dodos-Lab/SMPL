@@ -33,7 +33,7 @@
 				if(corners.Count == 4)
 					corners.Add(corners[0]);
 				var hitbox = new Hitbox(corners.ToArray());
-				if(hitbox.ConvexContains(worldPoint))
+				if(hitbox.Contains(worldPoint))
 					return i;
 			}
 			return -1;
@@ -95,7 +95,7 @@
 
 				corners.Add(corners[0]);
 				var hitbox = new Hitbox(corners.ToArray());
-				if(hitbox.ConvexContains(worldPoint))
+				if(hitbox.Contains(worldPoint))
 				{
 					var left = "";
 					var right = "";
