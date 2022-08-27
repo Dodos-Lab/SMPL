@@ -35,36 +35,34 @@
 		{
 			Event.SceneUpdated += OnSceneUpdate;
 		}
-
 		private void OnSceneUpdate(string sceneName)
 		{
 			var z = GetUnitZ().X;
+			var cam = GetCamera();
 			Position = Z < -1000f || Z > 1000f ? new Vector2().NaN() : GetPosZ();
 			Scale = 1f - z / 100f;
+			Tilt = cam.Position.AngleBetweenPoints(Position);
+			Depth = Position.DistanceBetweenPoints(cam.Position) / 10f;
+
+			Vector2 GetUnitZ()
+			{
+				var z = Z.Map(-1000, 1000, 0, 1);
+				var anim = z.Animate(Extensions.Animation.Circle, Extensions.AnimationWay.Forward);
+				return new(anim.Map(0, 1, -646.41f, 100));
+			}
+			Vector2 GetPosZ()
+			{
+				var cam = GetCamera();
+				return Position2D.PointPercentTowardPoint(cam.Position, GetUnitZ());
+			}
+			CameraInstance GetCamera()
+			{
+				var cam = Get<CameraInstance>(CameraUID);
+				cam ??= Scene.MainCamera;
+				return cam;
+			}
 		}
 
-		private Vector2 GetUnitZ()
-		{
-			var z = Z.Map(-1000, 1000, 0, 1);
-			var anim = z.Animate(Extensions.Animation.Circle, Extensions.AnimationWay.Forward);
-			return new(anim.Map(0, 1, -646.41f, 100));
-		}
-		private Vector2 GetPosZ()
-		{
-			var cam = GetCamera();
-			return Position2D.PointPercentTowardPoint(cam.Position, GetUnitZ());
-		}
-		private Vector2 GetRealPos()
-		{
-			var cam = GetCamera();
-			return Position2D.PointPercentTowardPoint(cam.Position, GetUnitZ());
-		}
-		private CameraInstance GetCamera()
-		{
-			var cam = Get<CameraInstance>(CameraUID);
-			cam ??= Scene.MainCamera;
-			return cam;
-		}
 		internal override void OnDraw(RenderTarget renderTarget) { }
 		#endregion
 	}

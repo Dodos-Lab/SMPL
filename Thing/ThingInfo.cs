@@ -49,6 +49,7 @@
 			public const string SPRITE_ORIGIN = nameof(SpriteInstance.Origin);
 			public const string SPRITE_ORIGIN_UNIT = nameof(SpriteInstance.OriginUnit);
 
+			public const string PSEUDO_3D_CAMERA_UID = nameof(Pseudo3DInstance.CameraUID);
 			public const string PSEUDO_3D_Z = nameof(Pseudo3DInstance.Z);
 			public const string PSEUDO_3D_POSITION_2D = nameof(Pseudo3DInstance.Position2D);
 			public const string PSEUDO_3D_TILT = nameof(Pseudo3DInstance.Tilt);

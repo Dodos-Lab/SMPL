@@ -2,16 +2,13 @@
 {
 	internal class ListInstance : ScrollBarInstance
 	{
-		public override Hitbox BoundingBox
+		public new Hitbox BoundingBox
 		{
 			get
 			{
 				var u = GetButtonUp();
 				var d = GetButtonDown();
-				var baseBB = base.GetBoundingBox();
-				baseBB.TransformLocalLines(UID);
-				if(baseBB.Lines.Count == 0)
-					return bb;
+				var baseBB = base.BoundingBox;
 				var up = u == null ? baseBB.Lines : u.BoundingBox.Lines;
 				var down = d == null ? baseBB.Lines : d.BoundingBox.Lines;
 
