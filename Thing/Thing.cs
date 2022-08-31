@@ -31,7 +31,7 @@
 				return t.UID;
 			}
 			public static string CreateInputbox(string uid, string cameraUID, string fontPath, string value = "Hello, World!",
-				uint resolutionX = 300, uint resolutionY = 40)
+				uint resolutionX = 300, uint resolutionY = 60)
 			{
 				var t = new InputboxInstance(uid, CreateCamera(cameraUID, new(resolutionX, resolutionY))) { FontPath = fontPath, Value = value };
 				return t.UID;

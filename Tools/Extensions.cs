@@ -210,21 +210,6 @@
 
 			return parsed ? result : float.NaN;
 		}
-		public static string Load(this string filePath)
-		{
-			var gZipBuffer = File.ReadAllBytes(filePath);
-			using var memoryStream = new MemoryStream();
-			var dataLength = BitConverter.ToInt32(gZipBuffer, 0);
-			memoryStream.Write(gZipBuffer, 4, gZipBuffer.Length - 4);
-
-			var buffer = new byte[dataLength];
-
-			memoryStream.Position = 0;
-			using(var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
-				gZipStream.Read(buffer, 0, buffer.Length);
-
-			return Encoding.UTF8.GetString(buffer);
-		}
 
 		/// <summary>
 		/// Wraps a <paramref name="number"/> around the range 0-360 and returns it.
@@ -505,7 +490,7 @@
 			return n <= percent;
 		}
 		/// <summary>
-		/// Converts a 360 degrees <paramref name="angle"/> into a normalized direction <see cref="Vector2"/> then returns the result.
+		/// Converts a 360 degrees <paramref name="angle"/> into a normalized <see cref="Vector2"/> direction then returns the result.
 		/// </summary>
 		public static Vector2 AngleToDirection(this float angle)
 		{
@@ -743,6 +728,8 @@
 		/// </summary>
 		public static Vertex[] PointsToVertices(this IList<Vector2> points, Color color = default, float size = 4)
 		{
+			if(points == null)
+				return Array.Empty<Vertex>();
 			var result = new Vertex[points.Count * 4];
 			for(int i = 0; i < points.Count; i++)
 			{

@@ -16,6 +16,10 @@
 				KnownTypes.Add(typeof(string));
 
 				KnownTypes.Add(typeof(Vector2));
+				KnownTypes.Add(typeof(Vector3));
+				KnownTypes.Add(typeof(Vec2));
+				KnownTypes.Add(typeof(Vec3));
+				KnownTypes.Add(typeof(Vec4));
 				KnownTypes.Add(typeof(Color));
 				KnownTypes.Add(typeof(Line));
 				KnownTypes.Add(typeof(Thing.CodeGLSL));

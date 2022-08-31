@@ -80,7 +80,7 @@
 				if(baseBB.Lines.Count != 4)
 					return bb;
 
-				var h = Depth * Scale;
+				var h = currDepth * Scale;
 				var tl = baseBB.Lines[0].A.PointMoveAtAngle(Tilt, h, false);
 				var tr = baseBB.Lines[1].A.PointMoveAtAngle(Tilt, h, false);
 				var br = baseBB.Lines[2].A.PointMoveAtAngle(Tilt, h, false);
@@ -166,11 +166,11 @@
 
 			TryDrawSide(SideNear, nearTl, nearTr, nearBr, nearBl);
 
-			void TryDrawRight() => TryDrawSide(SideRight, nearBr, nearTr, farTr, farBr);
-			void TryDrawLeft() => TryDrawSide(SideLeft, nearTl, nearBl, farBl, farTl);
-			void TryDrawTop() => TryDrawSide(SideTop, nearTr, nearTl, farTl, farTr);
-			void TryDrawBottom() => TryDrawSide(SideBottom, nearBl, nearBr, farBr, farBl);
-			void TryDrawSide(Thing.CubeSide cubeSide, Vector2 tl, Vector2 tr, Vector2 br, Vector2 bl)
+			void TryDrawRight() => TryDrawSide(SideRight, nearBr, nearTr, farTr, farBr, Angle);
+			void TryDrawLeft() => TryDrawSide(SideLeft, nearTl, nearBl, farBl, farTl, Angle + 180);
+			void TryDrawTop() => TryDrawSide(SideTop, nearTr, nearTl, farTl, farTr, Angle + 270);
+			void TryDrawBottom() => TryDrawSide(SideBottom, nearBl, nearBr, farBr, farBl, Angle + 90);
+			void TryDrawSide(Thing.CubeSide cubeSide, Vector2 tl, Vector2 tr, Vector2 br, Vector2 bl, float sideAngle = float.NaN)
 			{
 				if(cubeSide.IsHidden)
 					return;
@@ -192,6 +192,31 @@
 					tex.Smooth = IsSmooth;
 				}
 
+				var dirLight = float.IsNaN(Thing.SunAngle) ? default : Thing.SunAngle.AngleToDirection();
+				var sunValue = 0f;
+
+				var sideDir = sideAngle.AngleToDirection();
+				var dot = Vector2.Dot(dirLight, sideDir);
+				const float MINIMUM_LIGHT = 0.2f;
+
+				sunValue = dot.Map(-1, 1, MINIMUM_LIGHT, 1); // 0.2 -> 1 means even dark spots receive some sun
+
+				if(float.IsNaN(sunValue))
+					sunValue = MINIMUM_LIGHT;
+
+				if(dirLight == default)
+					sunValue = float.IsNaN(sideAngle) ? 1f : MINIMUM_LIGHT;
+
+				var overallSunEffect = Thing.SunColor.A / 255f;
+				sunValue *= overallSunEffect;
+
+				var amb = Thing.AmbientColor;
+				var sun = Thing.SunColor;
+				var ambVec = new Vector3(amb.R, amb.G, amb.B);
+				var sunCol = new Vector3(sun.R, sun.G, sun.B);
+				var lerp = Vector3.Lerp(ambVec, sunCol, sunValue);
+				var resultCol = new Color((byte)lerp.X, (byte)lerp.Y, (byte)lerp.Z);
+
 				var verts = new Vertex[]
 				{
 					new(tl.ToSFML(), Tint, new(w0, h0)),
@@ -201,7 +226,10 @@
 				};
 
 				var shader = GetShader(renderTarget);
-				shader?.SetUniform("Texture", tex); // different than the main visual texture, should be able to use effects on it
+				if(tex != null)
+					shader?.SetUniform("Texture", tex); // different than the main visual texture, should be able to use effects on it
+
+				SetEffectColor("AmbientColor", resultCol);
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, shader));
 
 				if(tex != null)

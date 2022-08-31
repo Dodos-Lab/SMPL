@@ -2,7 +2,9 @@
 {
 	public static partial class Thing
 	{
-		public static Color AmbientColor { get; set; } = new Color(50, 50, 50);
+		public static Color AmbientColor { get; set; } = new(50, 50, 50);
+		public static Color SunColor { get; set; } = new(255, 255, 255, 0);
+		public static float SunAngle { get; set; } = 45f;
 	}
 
 	internal class LightInstance : ThingInstance

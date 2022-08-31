@@ -64,6 +64,7 @@ namespace SMPL
 		public static void UpdateEngine(RenderTarget mainCamera)
 		{
 			Time.Update();
+			Pseudo3DInstance.Update();
 
 			var visuals = VisualInstance.visuals.Reverse();
 			var cameras = CameraInstance.cameras;

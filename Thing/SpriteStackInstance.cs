@@ -42,7 +42,7 @@
 				return;
 
 			var texStack = Scene.CurrentScene.loadedTextureStacks[TexturePath];
-			var h = Depth * Scale / texStack.Count;
+			var h = currDepth * Scale / texStack.Count;
 			var txs = Scene.CurrentScene.Textures;
 			var bb = BoundingBox.Lines;
 

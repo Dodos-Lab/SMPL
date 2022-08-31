@@ -46,32 +46,22 @@
 				return result.AsReadOnly();
 
 			Update();
-			var prevIndex = (int)characterIndex;
-			characterIndex = GetNextNonFormatChar(characterIndex);
+			var prevIndex = characterIndex;
+			characterIndex = (characterIndex + 1).Limit(0, Value.Length);
 
-			var tl = (textInstance.Position + textInstance.FindCharacterPos((uint)characterIndex)).ToSystem();
-			var tr = (textInstance.Position + textInstance.FindCharacterPos((uint)characterIndex + 1)).ToSystem();
+			var tl = (textInstance.FindCharacterPos((uint)characterIndex - 1)).ToSystem();
+			var tr = (textInstance.FindCharacterPos((uint)characterIndex)).ToSystem();
+
+			tl += (textInstance.Position - textInstance.Origin).ToSystem();
+			tr += (textInstance.Position - textInstance.Origin).ToSystem();
 
 			if(prevIndex < Value.Length && Value[prevIndex] == '\n') // end of line
 				tr = new(GetRes().X, tl.Y);
 
 			var sc = Scale;
-			var boundTop = textInstance.GetLocalBounds().Top;
-			var y = new Vector2(0, SymbolSize + boundTop);
+			var y = new Vector2(0, SymbolSize);
 			var bl = tl + y;
 			var br = tr + y;
-
-			tl.Y += boundTop;
-			tr.Y += boundTop;
-
-			//var view = camera.RenderTexture.GetView();
-			//var camA = view.Center - view.Size * 0.5f;
-			//var camB = view.Center + view.Size * 0.5f;
-			//
-			//Limit(ref tl);
-			//Limit(ref tr);
-			//Limit(ref br);
-			//Limit(ref bl);
 
 			if(tl.X == tr.X || tl.Y == bl.Y)
 				return result.AsReadOnly();
@@ -82,8 +72,6 @@
 			result.Add(GetPositionFromSelf(bl / sc));
 
 			return result.AsReadOnly();
-
-			//void Limit(ref Vector2 corner) => corner = new(corner.X.Limit(camA.X, camB.X), corner.Y.Limit(camA.Y, camB.Y));
 		}
 		public string GetSymbols(Vector2 worldPoint, Thing.TextboxSymbolCollection symbols)
 		{
@@ -208,6 +196,13 @@
 			if(skipParentRender == false)
 				DrawTextbox(renderTarget);
 		}
+		internal override Hitbox GetBoundingBox()
+		{
+			bb.LocalLines.Clear();
+			bb.Lines.Clear();
+			bb.LocalLines.AddRange(GetCamera().BoundingBox.LocalLines);
+			return bb;
+		}
 		internal override void OnDestroy()
 		{
 			base.OnDestroy();
@@ -235,27 +230,31 @@
 			textInstance.Style = Style;
 			textInstance.DisplayedString = Value;
 
-			var b = textInstance.GetLocalBounds();
+			var b = GetLocalBounds();
 			textInstance.Origin = new(b.Width / 2f, b.Height / 2f);
 			var sz = camera.RenderTexture.Size;
 			var smallOffset = SymbolSize / 4f;
 			var top = -sz.Y / 2f + b.Height / 2f - smallOffset / 2f;
-			var left = -sz.X / 2f + b.Width / 2f + smallOffset / 2f;
-			var right = sz.X / 2f - b.Width / 2f - smallOffset / 2f;
+			var left = -sz.X / 2f + b.Width / 2f + smallOffset;
+			var right = sz.X / 2f - b.Width / 2f - smallOffset;
 			var bot = sz.Y / 2f - b.Height / 2f - smallOffset * 1.5f;
 
 			switch(Alignment)
 			{
-				case Thing.TextboxAlignment.TopLeft: textInstance.Position = new(left, top); break;
-				case Thing.TextboxAlignment.TopRight: textInstance.Position = new(right, top); break;
-				case Thing.TextboxAlignment.Top: textInstance.Position = new(0, top); break;
-				case Thing.TextboxAlignment.Left: textInstance.Position = new(left, -smallOffset); break;
-				case Thing.TextboxAlignment.Right: textInstance.Position = new(right, -smallOffset); break;
-				case Thing.TextboxAlignment.Center: textInstance.Position = new(0, -smallOffset); break;
-				case Thing.TextboxAlignment.BottomLeft: textInstance.Position = new(left, bot); break;
-				case Thing.TextboxAlignment.BottomRight: textInstance.Position = new(right, bot); break;
-				case Thing.TextboxAlignment.Bottom: textInstance.Position = new(0, bot); break;
+				case Thing.TextboxAlignment.TopLeft: textInstance.Position = new(textOffsetX + left, top); break;
+				case Thing.TextboxAlignment.TopRight: textInstance.Position = new(textOffsetX + right, top); break;
+				case Thing.TextboxAlignment.Top: textInstance.Position = new(textOffsetX, top); break;
+				case Thing.TextboxAlignment.Left: textInstance.Position = new(textOffsetX + left, -smallOffset); break;
+				case Thing.TextboxAlignment.Right: textInstance.Position = new(textOffsetX + right, -smallOffset); break;
+				case Thing.TextboxAlignment.Center: textInstance.Position = new(textOffsetX, -smallOffset); break;
+				case Thing.TextboxAlignment.BottomLeft: textInstance.Position = new(textOffsetX + left, bot); break;
+				case Thing.TextboxAlignment.BottomRight: textInstance.Position = new(textOffsetX + right, bot); break;
+				case Thing.TextboxAlignment.Bottom: textInstance.Position = new(textOffsetX, bot); break;
 			}
+		}
+		protected virtual FloatRect GetLocalBounds()
+		{
+			return textInstance.GetLocalBounds();
 		}
 		protected void DrawTextbox(RenderTarget renderTarget)
 		{
@@ -285,36 +284,6 @@
 			var fonts = Scene.CurrentScene.Fonts;
 			var path = FontPath.ToBackslashPath();
 			return path != null && fonts.ContainsKey(path) ? fonts[path] : null;
-		}
-		private int GetNextNonFormatChar(int charIndex)
-		{
-			if(Alignment == Thing.TextboxAlignment.TopRight || Alignment == Thing.TextboxAlignment.Right || Alignment == Thing.TextboxAlignment.BottomRight)
-				return Execute(formatSpaceRangesRight, true);
-			else if(Alignment == Thing.TextboxAlignment.Top || Alignment == Thing.TextboxAlignment.Center || Alignment == Thing.TextboxAlignment.Bottom)
-				return Execute(formatSpaceRangesCenter);
-
-			return charIndex;
-
-			int Execute(List<(int, int)> ranges, bool isRight = false)
-			{
-				var realIndex = 0;
-				for(int i = 0; i < textInstance.DisplayedString.Length; i++)
-				{
-					var lastRange = (0, 0);
-					for(int j = 0; j < ranges.Count; j++)
-						if(i.IsBetween(ranges[j].Item1, ranges[j].Item2, true, true))
-						{
-							i = ranges[j].Item2 + 1;
-							lastRange = ranges[j];
-							break;
-						}
-					if(realIndex == charIndex)
-						return textInstance.DisplayedString[i] == '\n' && isRight == false ? lastRange.Item1 : i;
-
-					realIndex++;
-				}
-				return charIndex;
-			}
 		}
 		internal Vector2 GetRes()
 		{

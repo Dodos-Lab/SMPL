@@ -15,6 +15,16 @@
 		public string PlaceholderValue { get; set; } = "Type here...";
 		public Color PlaceholderColor { get; set; } = new(255, 255, 255, 70);
 
+		public override string Value
+		{
+			get => base.Value;
+			set
+			{
+				value = value.Replace("\r", "").Replace("\n", "");
+				base.Value = value;
+			}
+		}
+
 		public void Submit()
 		{
 			Event.InputboxSubmit(UID);
@@ -33,6 +43,15 @@
 		{
 			Init();
 		}
+		private void Init()
+		{
+			if(Game.Window != null)
+				Game.Window.TextEntered += OnInput;
+			Value = "";
+			CursorColor = Color.White;
+			Alignment = Thing.TextboxAlignment.Center;
+			skipParentRender = true;
+		}
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
@@ -41,7 +60,7 @@
 			TryInput();
 			TryDrawPlaceholder();
 			base.OnDraw(renderTarget);
-			TryDrawCursor();
+			TryDrawCursor(renderTarget);
 
 			TryMoveTextWhenCursorOut();
 
@@ -57,14 +76,6 @@
 				Game.Window.TextEntered -= OnInput;
 		}
 
-		private void Init()
-		{
-			if(Game.Window != null)
-				Game.Window.TextEntered += OnInput;
-			Value = "";
-			CursorColor = Color.White;
-			skipParentRender = true;
-		}
 		private void OnInput(object sender, TextEventArgs e)
 		{
 			if(IsFocused == false || Keyboard.IsKeyPressed(Keyboard.Key.LControl) || Keyboard.IsKeyPressed(Keyboard.Key.RControl))
@@ -88,6 +99,9 @@
 
 				Value = Value.Remove((int)CursorPositionIndex - 1, 1);
 				CursorPositionIndex--;
+
+				if(Value.Length == 0) // this helps visually when deleting the last symbol
+					textOffsetX = 0;
 			}
 			else
 			{
@@ -101,6 +115,27 @@
 			cursorIsVisible = true;
 		}
 
+		protected override FloatRect GetLocalBounds()
+		{
+			var isEmpty = string.IsNullOrWhiteSpace(Value);
+			var bb = textInstance.GetLocalBounds();
+			if(isEmpty)
+			{
+				var th = textInstance.OutlineThickness;
+				var fillCol = textInstance.FillColor;
+				var text = textInstance.DisplayedString;
+
+				textInstance.OutlineThickness = 0;
+				textInstance.FillColor = PlaceholderColor;
+				textInstance.DisplayedString = $"  {PlaceholderValue}";
+				bb = textInstance.GetLocalBounds();
+
+				textInstance.OutlineThickness = th;
+				textInstance.FillColor = fillCol;
+				textInstance.DisplayedString = text;
+			}
+			return bb;
+		}
 		private void TryDrawPlaceholder()
 		{
 			if(Value.Length != 0)
@@ -109,7 +144,7 @@
 			Update();
 			textInstance.OutlineThickness = 0;
 			textInstance.FillColor = PlaceholderColor;
-			textInstance.DisplayedString = PlaceholderValue;
+			textInstance.DisplayedString = $"  {PlaceholderValue}";
 
 			GetCamera()?.RenderTexture.Draw(textInstance, new(SFML.Graphics.BlendMode.Alpha));
 		}
@@ -148,7 +183,7 @@
 			if(Keyboard.IsKeyPressed(Keyboard.Key.Delete).Once($"delete-{UID}") && CursorPositionIndex < Value.Length)
 			{
 				ShowCursor();
-				Value = Value.Remove((int)CursorPositionIndex, 1);
+				Value = Value.Remove(CursorPositionIndex, 1);
 			}
 
 			void SetIndex(int index)
@@ -177,7 +212,7 @@
 				}
 			}
 		}
-		private void TryDrawCursor()
+		private void TryDrawCursor(RenderTarget renderTarget)
 		{
 			if(IsFocused == false || IsDisabled)
 				return;
@@ -210,24 +245,32 @@
 			var br = bl.PointMoveAtAngle(Angle, sz, false);
 			var tr = tl.PointMoveAtAngle(Angle, sz, false);
 
-			cursorPosX = tl.X * Scale;
+
+			tl = GetLocalPositionFromSelf(tl);
+			tr = GetLocalPositionFromSelf(tr);
+			br = GetLocalPositionFromSelf(br);
+			bl = GetLocalPositionFromSelf(bl);
+
+			cursorPosX = tl.X;
 
 			var verts = new Vertex[]
 			{
 				new(tl.ToSFML(), CursorColor),
-				new(bl.ToSFML(), CursorColor),
-				new(br.ToSFML(), CursorColor),
 				new(tr.ToSFML(), CursorColor),
+				new(br.ToSFML(), CursorColor),
+				new(bl.ToSFML(), CursorColor),
 			};
 			GetCamera()?.RenderTexture.Draw(verts, PrimitiveType.Quads);
 		}
 		private void TryMoveTextWhenCursorOut()
 		{
-			var res = GetRes();
-			if(cursorPosX >= res.X)
-				textOffsetX -= SymbolSize * 0.3f;
-			else if(cursorPosX < -res.X)
-				textOffsetX += SymbolSize * 0.3f;
+			var w = GetRes().X / 2f;
+			var value = SymbolSize * 0.3f;
+
+			if(cursorPosX >= w)
+				textOffsetX -= value;
+			else if(cursorPosX < -w)
+				textOffsetX += value;
 		}
 		#endregion
 	}
