@@ -6,8 +6,7 @@
 		{
 			get
 			{
-				var baseBB = base.GetBoundingBox();
-				baseBB.TransformLocalLines(UID);
+				var baseBB = BoundingBox;
 
 				if(baseBB.Lines.Count != 4)
 					return bb;
@@ -73,21 +72,6 @@
 				if(tex != null)
 					tex.Smooth = prevSmooth;
 			}
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			var tl = -Origin;
-			var tr = new Vector2(LocalSize.X, 0) - Origin;
-			var br = LocalSize - Origin;
-			var bl = new Vector2(0, LocalSize.Y) - Origin;
-
-			bb.Lines.Clear();
-			bb.LocalLines.Clear();
-			bb.LocalLines.Add(new(tl, tr));
-			bb.LocalLines.Add(new(tr, br));
-			bb.LocalLines.Add(new(br, bl));
-			bb.LocalLines.Add(new(bl, tl));
-			return bb;
 		}
 		#endregion
 	}

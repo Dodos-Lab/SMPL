@@ -78,7 +78,7 @@
 				var baseBB = BoundingBox;
 
 				if(baseBB.Lines.Count != 4)
-					return bb;
+					return bb3D;
 
 				var h = currDepth * Scale;
 				var tl = baseBB.Lines[0].A.PointMoveAtAngle(Tilt, h, false);
@@ -93,14 +93,14 @@
 				br = br.PointPercentTowardPoint(center, percent);
 				bl = bl.PointPercentTowardPoint(center, percent);
 
-				bb.Lines.Clear();
-				bb.LocalLines.Clear();
-				bb.Lines.Add(new(tl, tr));
-				bb.Lines.Add(new(tr, br));
-				bb.Lines.Add(new(br, bl));
-				bb.Lines.Add(new(bl, tl));
+				bb3D.Lines.Clear();
+				bb3D.LocalLines.Clear();
+				bb3D.Lines.Add(new(tl, tr));
+				bb3D.Lines.Add(new(tr, br));
+				bb3D.Lines.Add(new(br, bl));
+				bb3D.Lines.Add(new(bl, tl));
 
-				return bb;
+				return bb3D;
 			}
 		}
 
@@ -111,8 +111,28 @@
 		public Thing.CubeSide SideTop { get; set; } = defCubeSide;
 		public Thing.CubeSide SideBottom { get; set; } = defCubeSide;
 
+		public override Hitbox BoundingBox
+		{
+			get
+			{
+				var tl = -Origin;
+				var tr = new Vector2(LocalSize.X, 0) - Origin;
+				var br = LocalSize - Origin;
+				var bl = new Vector2(0, LocalSize.Y) - Origin;
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.LocalLines.Add(new(tl, tr));
+				bb.LocalLines.Add(new(tr, br));
+				bb.LocalLines.Add(new(br, bl));
+				bb.LocalLines.Add(new(bl, tl));
+				bb.TransformLocalLines(UID);
+				return bb;
+			}
+		}
+
 		#region Backend
-		private readonly new Hitbox bb = new();
+		private readonly Hitbox bb3D = new();
 		private static Thing.CubeSide defCubeSide = new() { TexCoordUnitB = new(1) };
 		private readonly SortedDictionary<float, List<Action>> sortedSides = new();
 
@@ -233,21 +253,6 @@
 				if(tex != null)
 					tex.Smooth = prevSmooth;
 			}
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			var tl = -Origin;
-			var tr = new Vector2(LocalSize.X, 0) - Origin;
-			var br = LocalSize - Origin;
-			var bl = new Vector2(0, LocalSize.Y) - Origin;
-
-			base.bb.Lines.Clear();
-			base.bb.LocalLines.Clear();
-			base.bb.LocalLines.Add(new(tl, tr));
-			base.bb.LocalLines.Add(new(tr, br));
-			base.bb.LocalLines.Add(new(br, bl));
-			base.bb.LocalLines.Add(new(bl, tl));
-			return base.bb;
 		}
 		#endregion
 	}

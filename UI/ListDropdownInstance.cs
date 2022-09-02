@@ -47,10 +47,10 @@
 		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			TryUpdate();
-
 			if(IsHidden == false)
 				base.OnDraw(renderTarget);
+
+			TryUpdate(); // has to be after draw
 		}
 		internal override void OnDestroy()
 		{
@@ -104,15 +104,15 @@
 				if(btn == null || btn.UID == SelectionUID)
 					return;
 
-				btn.IsHidden = hidden;
-				btn.IsDisabled = hidden;
+				btn.IsHiddenSelf = hidden;
+				btn.IsDisabledSelf = hidden;
 			}
 		}
 		private void Show(bool isOpen)
 		{
 			this.isOpen = isOpen;
-			IsHidden = isOpen == false;
-			IsDisabled = isOpen == false;
+			IsHiddenSelf = isOpen == false;
+			IsDisabledSelf = isOpen == false;
 		}
 		private ButtonInstance GetShowButton()
 		{
@@ -137,8 +137,8 @@
 			var index = GetButtonUIDs().IndexOf(sel.UID);
 			var hidden = index.IsBetween((int)Value, (int)Value + VisibleButtonCountCurrent, true) == false && isOpen;
 
-			sel.IsDisabled = hidden;
-			sel.IsHidden = hidden;
+			sel.IsDisabledSelf = hidden;
+			sel.IsHiddenSelf = hidden;
 
 			sel.ParentUID = UID;
 			sel.LocalSize = new(ButtonWidth, ButtonHeight);

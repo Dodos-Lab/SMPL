@@ -122,10 +122,10 @@
 		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			TryUpdate();
-
 			if(IsHidden == false)
 				base.OnDraw(renderTarget);
+
+			TryUpdate(); // has to be after draw
 		}
 		internal override void OnDestroy()
 		{
@@ -133,6 +133,7 @@
 
 			if(Game.Window != null)
 				Game.Window.MouseWheelScrolled -= OnScroll;
+
 			Event.ButtonClicked -= OnButtonClick;
 			Event.ButtonHeld -= OnButtonHold;
 		}

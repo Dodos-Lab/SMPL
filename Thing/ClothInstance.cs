@@ -48,6 +48,25 @@
 			set => rope.Gravity = value;
 		}
 
+		public override Hitbox BoundingBox
+		{
+			get
+			{
+				var tl = rope.Points[0].Position;
+				var tr = rope.Points[GetIndex(new((int)segCount.X - 1, 0))].Position;
+				var br = rope.Points[^1].Position;
+				var bl = rope.Points[GetIndex(new(0, (int)segCount.Y - 1))].Position;
+
+				bb.LocalLines.Clear();
+				bb.Lines.Clear();
+				bb.Lines.Add(new(tl, tr));
+				bb.Lines.Add(new(tr, br));
+				bb.Lines.Add(new(br, bl));
+				bb.Lines.Add(new(bl, tl));
+				return bb;
+			}
+		}
+
 		public void Pin(Vector2 indexes, bool isPinned)
 		{
 			if(indexes == default)
@@ -179,21 +198,6 @@
 					((float)x).Map(0, segCount.X - 1, w0, ww),
 					((float)y).Map(0, segCount.Y - 1, h0, hh));
 			}
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			var tl = rope.Points[0].Position;
-			var tr = rope.Points[GetIndex(new((int)segCount.X - 1, 0))].Position;
-			var br = rope.Points[^1].Position;
-			var bl = rope.Points[GetIndex(new(0, (int)segCount.Y - 1))].Position;
-
-			bb.LocalLines.Clear();
-			bb.Lines.Clear();
-			bb.Lines.Add(new(tl, tr));
-			bb.Lines.Add(new(tr, br));
-			bb.Lines.Add(new(br, bl));
-			bb.Lines.Add(new(bl, tl));
-			return bb;
 		}
 		internal override void OnDestroy()
 		{

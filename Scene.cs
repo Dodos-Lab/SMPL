@@ -64,8 +64,8 @@
 
 				CurrentScene = loadedScene;
 
-				foreach(var kvp in CurrentScene.objs)
-					kvp.Value.UpdateParency();
+				//foreach(var kvp in CurrentScene.objs)
+				//	kvp.Value.UpdateParency();
 			}
 			catch(Exception) { Console.LogError(1, $"Could not load {nameof(Scene)} from '{filePath}'."); }
 		}

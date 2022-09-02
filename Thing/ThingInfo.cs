@@ -6,6 +6,7 @@
 		{
 			#region Property Names
 			public const string IS_DISABLED = nameof(ThingInstance.IsDisabled);
+			public const string IS_DISABLED_SELF = nameof(ThingInstance.IsDisabledSelf);
 			public const string TYPES = nameof(ThingInstance.Types);
 			public const string UID = nameof(ThingInstance.UID);
 			public const string OLD_UID = nameof(ThingInstance.OldUID);
@@ -33,6 +34,7 @@
 
 			public const string VISUAL_TINT = nameof(VisualInstance.Tint);
 			public const string VISUAL_IS_HIDDEN = nameof(VisualInstance.IsHidden);
+			public const string VISUAL_IS_HIDDEN_SELF = nameof(VisualInstance.IsHiddenSelf);
 			public const string VISUAL_IS_SMOOTH = nameof(VisualInstance.IsSmooth);
 			public const string VISUAL_IS_REPEATED = nameof(VisualInstance.IsRepeated);
 			public const string VISUAL_ORDER = nameof(VisualInstance.Order);

@@ -41,7 +41,7 @@
 			var ww = w * TexCoordUnitB.X;
 			var h0 = h * TexCoordUnitA.Y;
 			var hh = h * TexCoordUnitB.Y;
-			var bb = BoundingBox.Lines;
+			var bb = base.BoundingBox.Lines;
 
 			var tl = bb[0].A.PointPercentTowardPoint(bb[1].A, new(ProgressUnit * 100 - LengthUnit * 50));
 			var tr = bb[0].A.PointPercentTowardPoint(bb[1].A, new(ProgressUnit * 100 + LengthUnit * 50));

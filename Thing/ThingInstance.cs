@@ -4,20 +4,16 @@
 	{
 		public bool IsDisabled
 		{
-			get => isDisabled;
-			set
+			get
 			{
-				isDisabled = value;
-
-				for(int i = 0; i < childrenUIDs.Count; i++)
-				{
-					var child = Get(childrenUIDs[i]);
-					if(child == null)
-						continue;
-
-					child.isDisabled = value;
-				}
+				var parent = Get(ParentUID);
+				return parent == null ? isDisabled : isDisabled || parent.IsDisabled;
 			}
+		}
+		public bool IsDisabledSelf
+		{
+			get => isDisabled;
+			set => isDisabled = value;
 		}
 
 		public ReadOnlyCollection<string> Types
@@ -183,10 +179,19 @@
 		{
 			get
 			{
-				var bb = GetBoundingBox();
+				var sz = DEFAULT_BB_SIZE;
+				var tl = new Vector2(-sz, -sz);
+				var tr = new Vector2(sz, -sz);
+				var br = new Vector2(sz, sz);
+				var bl = new Vector2(-sz, sz);
 
-				if(bb.Lines.Count == 0 && bb.LocalLines.Count != 0)
-					bb.TransformLocalLines(uid);
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.LocalLines.Add(new(tl, tr));
+				bb.LocalLines.Add(new(tr, br));
+				bb.LocalLines.Add(new(br, bl));
+				bb.LocalLines.Add(new(bl, tl));
+				bb.TransformLocalLines(uid);
 				return bb;
 			}
 		}
@@ -276,22 +281,6 @@
 		}
 
 		internal virtual void OnDestroy() { }
-		internal virtual Hitbox GetBoundingBox()
-		{
-			var sz = DEFAULT_BB_SIZE;
-			var tl = new Vector2(-sz, -sz);
-			var tr = new Vector2(sz, -sz);
-			var br = new Vector2(sz, sz);
-			var bl = new Vector2(-sz, sz);
-
-			bb.Lines.Clear();
-			bb.LocalLines.Clear();
-			bb.LocalLines.Add(new(tl, tr));
-			bb.LocalLines.Add(new(tr, br));
-			bb.LocalLines.Add(new(br, bl));
-			bb.LocalLines.Add(new(bl, tl));
-			return bb;
-		}
 
 		internal Matrix3x2 LocalToGlobal(float localScale, float localAngle, Vector2 localPosition)
 		{
@@ -345,6 +334,7 @@
 		{
 			var objs = Scene.CurrentScene.objs;
 			foreach(var kvp in objs)
+			{
 				if(kvp.Value.parentUID == uid && childrenUIDs.Contains(kvp.Key) == false)
 				{
 					kvp.Value.ParentUID = null;
@@ -355,6 +345,7 @@
 					ParentUID = null;
 					ParentUID = kvp.Value.UID;
 				}
+			}
 		}
 		private void UpdateSelfAndChildren()
 		{

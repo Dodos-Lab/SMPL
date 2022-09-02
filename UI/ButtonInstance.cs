@@ -19,10 +19,10 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			TryUpdate();
-
 			if(IsHidden == false)
 				base.OnDraw(renderTarget);
+
+			TryUpdate(); // has to be after draw
 		}
 		private void TryUpdate()
 		{

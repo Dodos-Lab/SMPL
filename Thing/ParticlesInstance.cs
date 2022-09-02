@@ -93,10 +93,6 @@
 			if(IsHidden == false)
 				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
 		}
-		internal override Hitbox GetBoundingBox()
-		{
-			throw new NotImplementedException();
-		}
 		internal override void OnDestroy()
 		{
 			base.OnDestroy();

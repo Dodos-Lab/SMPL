@@ -22,6 +22,29 @@
 		[JsonIgnore]
 		public int TileCount => tileCount;
 
+		public override Hitbox BoundingBox
+		{
+			get
+			{
+				if(tileCount == 0)
+					return base.BoundingBox;
+
+				var tl = new Vector2(topLeftIndexes.X, topLeftIndexes.Y) * TileSize;
+				var tr = new Vector2(botRightIndexes.X, topLeftIndexes.Y) * TileSize;
+				var br = new Vector2(botRightIndexes.X, botRightIndexes.Y) * TileSize;
+				var bl = new Vector2(topLeftIndexes.X, botRightIndexes.Y) * TileSize;
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.LocalLines.Add(new(tl, tr));
+				bb.LocalLines.Add(new(tr, br));
+				bb.LocalLines.Add(new(br, bl));
+				bb.LocalLines.Add(new(bl, tl));
+				bb.TransformLocalLines(UID);
+				return bb;
+			}
+		}
+
 		public void SetTile(Vector2 tilePositionIndexes, string tilePaletteUID)
 		{
 			if(TryTilePaletteError(tilePaletteUID))
@@ -137,24 +160,6 @@
 			}
 
 			renderTarget.Draw(vertsArr, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			if(tileCount == 0)
-				return base.GetBoundingBox();
-
-			var tl = new Vector2(topLeftIndexes.X, topLeftIndexes.Y) * TileSize;
-			var tr = new Vector2(botRightIndexes.X, topLeftIndexes.Y) * TileSize;
-			var br = new Vector2(botRightIndexes.X, botRightIndexes.Y) * TileSize;
-			var bl = new Vector2(topLeftIndexes.X, botRightIndexes.Y) * TileSize;
-
-			bb.Lines.Clear();
-			bb.LocalLines.Clear();
-			bb.LocalLines.Add(new(tl, tr));
-			bb.LocalLines.Add(new(tr, br));
-			bb.LocalLines.Add(new(br, bl));
-			bb.LocalLines.Add(new(bl, tl));
-			return bb;
 		}
 
 		internal void MapToJSON()

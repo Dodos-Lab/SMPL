@@ -102,7 +102,20 @@ void main()
 	}
 	internal abstract class VisualInstance : ThingInstance
 	{
-		public bool IsHidden { get; set; }
+		public bool IsHidden
+		{
+			get
+			{
+				var parent = Get(ParentUID);
+				return parent != null && parent is VisualInstance v ? isHidden || v.IsHidden /*important recursion*/ : isHidden;
+			}
+		}
+		public bool IsHiddenSelf
+		{
+			get => isHidden;
+			set => isHidden = value;
+		}
+
 		public bool IsSmooth { get; set; }
 		public bool IsRepeated { get; set; } = true;
 
@@ -192,6 +205,7 @@ void main()
 		}
 
 		#region Backend
+		private bool isHidden;
 		private Thing.Effect effect;
 		private int depth;
 		private Shader shader;
@@ -505,7 +519,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 		{
 			var textures = Scene.CurrentScene.Textures;
 			var path = TexturePath.ToBackslashPath();
-			return path != null && textures.ContainsKey(path) ? textures[path] : null;
+			return path != null && textures.ContainsKey(path) ? textures[path] : Game.defaultTexture;
 		}
 		internal void SetShader(Thing.Effect effect)
 		{

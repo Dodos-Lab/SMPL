@@ -43,6 +43,27 @@
 			}
 		}
 
+		public override Hitbox BoundingBox
+		{
+			get
+			{
+				var sz = renderTexture.GetView().Size * 0.5f;
+				var tl = new Vector2(-sz.X, -sz.Y);
+				var tr = new Vector2(sz.X, -sz.Y);
+				var br = new Vector2(sz.X, sz.Y);
+				var bl = new Vector2(-sz.X, sz.Y);
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.LocalLines.Add(new(tl, tr));
+				bb.LocalLines.Add(new(tr, br));
+				bb.LocalLines.Add(new(br, bl));
+				bb.LocalLines.Add(new(bl, tl));
+				bb.TransformLocalLines(UID);
+				return bb;
+			}
+		}
+
 		public void Snap(string imagePath)
 		{
 			var img = renderTexture.Texture.CopyToImage();
@@ -87,23 +108,6 @@
 			renderTexture = new(resolutionX, resolutionY);
 			Position = new();
 			Resolution = new(resolutionX, resolutionY);
-		}
-
-		internal override Hitbox GetBoundingBox()
-		{
-			var sz = renderTexture.GetView().Size * 0.5f;
-			var tl = new Vector2(-sz.X, -sz.Y);
-			var tr = new Vector2(sz.X, -sz.Y);
-			var br = new Vector2(sz.X, sz.Y);
-			var bl = new Vector2(-sz.X, sz.Y);
-
-			bb.Lines.Clear();
-			bb.LocalLines.Clear();
-			bb.LocalLines.Add(new(tl, tr));
-			bb.LocalLines.Add(new(tr, br));
-			bb.LocalLines.Add(new(br, bl));
-			bb.LocalLines.Add(new(bl, tl));
-			return bb;
 		}
 
 		internal static void DrawMainCameraToWindow(RenderWindow window, bool mainCameraIsWindow)

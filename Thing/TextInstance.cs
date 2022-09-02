@@ -22,6 +22,32 @@
 		public Text.Styles Style { get; set; }
 		public Vector2 OriginUnit { get; set; } = new(0.5f);
 
+		public override Hitbox BoundingBox
+		{
+			get
+			{
+				if(GetFont() == null)
+					return base.BoundingBox;
+
+				UpdateGlobalText();
+				var bounds = textInstance.GetLocalBounds();
+				bounds.Left -= textInstance.Origin.X;
+				bounds.Top -= textInstance.Origin.Y;
+				var tl = new Vector2(bounds.Left, bounds.Top);
+				var tr = new Vector2(bounds.Left + bounds.Width, bounds.Top);
+				var br = new Vector2(bounds.Left + bounds.Width, bounds.Top + bounds.Height);
+				var bl = new Vector2(bounds.Left, bounds.Top + bounds.Height);
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.LocalLines.Add(new(tl, tr));
+				bb.LocalLines.Add(new(tr, br));
+				bb.LocalLines.Add(new(br, bl));
+				bb.LocalLines.Add(new(bl, tl));
+				bb.TransformLocalLines(UID);
+				return bb;
+			}
+		}
 		#region Backend
 		private int symbolSize = 32;
 		internal static Text textInstance = new();
@@ -37,28 +63,6 @@
 
 			UpdateGlobalText();
 			renderTarget.Draw(textInstance, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			if(GetFont() == null)
-				return base.GetBoundingBox();
-
-			UpdateGlobalText();
-			var bounds = textInstance.GetLocalBounds();
-			bounds.Left -= textInstance.Origin.X;
-			bounds.Top -= textInstance.Origin.Y;
-			var tl = new Vector2(bounds.Left, bounds.Top);
-			var tr = new Vector2(bounds.Left + bounds.Width, bounds.Top);
-			var br = new Vector2(bounds.Left + bounds.Width, bounds.Top + bounds.Height);
-			var bl = new Vector2(bounds.Left, bounds.Top + bounds.Height);
-
-			bb.Lines.Clear();
-			bb.LocalLines.Clear();
-			bb.LocalLines.Add(new(tl, tr));
-			bb.LocalLines.Add(new(tr, br));
-			bb.LocalLines.Add(new(br, bl));
-			bb.LocalLines.Add(new(bl, tl));
-			return bb;
 		}
 
 		internal void UpdateGlobalText()

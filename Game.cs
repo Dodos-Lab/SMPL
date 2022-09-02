@@ -132,8 +132,20 @@ namespace SMPL
 		}
 
 		#region Backend
+		internal static readonly Texture defaultTexture;
 		internal static Settings settings = new();
 		internal static Styles currWindowStyle;
+
+		static Game()
+		{
+			var img = new Image(2, 2);
+			img.SetPixel(0, 0, Color.Magenta);
+			img.SetPixel(1, 0, Color.Black);
+			img.SetPixel(1, 1, Color.Magenta);
+			img.SetPixel(0, 1, Color.Black);
+			defaultTexture = new Texture(img);
+			img.Dispose();
+		}
 		private static void Main() { }
 		private static void Run(string loadScene = null)
 		{

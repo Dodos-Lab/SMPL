@@ -50,6 +50,26 @@
 			set => OriginUnit = value / LocalSize;
 		}
 
+		public override Hitbox BoundingBox
+		{
+			get
+			{
+				var tl = -Origin;
+				var tr = new Vector2(LocalSize.X, 0) - Origin;
+				var br = LocalSize - Origin;
+				var bl = new Vector2(0, LocalSize.Y) - Origin;
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.LocalLines.Add(new(tl, tr));
+				bb.LocalLines.Add(new(tr, br));
+				bb.LocalLines.Add(new(br, bl));
+				bb.LocalLines.Add(new(bl, tl));
+				bb.TransformLocalLines(UID);
+				return bb;
+			}
+		}
+
 		#region Backend
 		[JsonConstructor]
 		internal SpriteInstance() { }
@@ -79,21 +99,6 @@
 			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
 		}
 
-		internal override Hitbox GetBoundingBox()
-		{
-			var tl = -Origin;
-			var tr = new Vector2(LocalSize.X, 0) - Origin;
-			var br = LocalSize - Origin;
-			var bl = new Vector2(0, LocalSize.Y) - Origin;
-
-			bb.Lines.Clear();
-			bb.LocalLines.Clear();
-			bb.LocalLines.Add(new(tl, tr));
-			bb.LocalLines.Add(new(tr, br));
-			bb.LocalLines.Add(new(br, bl));
-			bb.LocalLines.Add(new(bl, tl));
-			return bb;
-		}
 		#endregion
 	}
 }

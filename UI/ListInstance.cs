@@ -26,7 +26,6 @@
 				bb.Lines.Add(new(tr, br));
 				bb.Lines.Add(new(br, bl));
 				bb.Lines.Add(new(bl, tl));
-
 				return bb;
 			}
 		}
@@ -92,13 +91,13 @@
 			var sz = up == null ? 0 : up.LocalSize.X;
 			if(up != null)
 			{
-				up.IsHidden = nothingToScroll;
-				up.IsDisabled = nothingToScroll;
+				up.IsHiddenSelf = nothingToScroll;
+				up.IsDisabledSelf = nothingToScroll;
 			}
 			if(down != null)
 			{
-				down.IsHidden = nothingToScroll;
-				down.IsDisabled = nothingToScroll;
+				down.IsHiddenSelf = nothingToScroll;
+				down.IsDisabledSelf = nothingToScroll;
 			}
 
 			for(int i = 0; i < btnUIDs.Count; i++)
@@ -109,8 +108,8 @@
 
 				var isVisible = i >= scrollIndex && i < scrollIndex + VisibleButtonCountMax;
 				btn.ParentUID = UID;
-				btn.IsHidden = isVisible == false;
-				btn.IsDisabled = isVisible == false;
+				btn.IsHiddenSelf = isVisible == false;
+				btn.IsDisabledSelf = isVisible == false;
 
 				if(isVisible == false)
 					continue;
@@ -159,10 +158,10 @@
 		protected virtual void OnUnfocus() { }
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			TryUpdate();
-
 			if(IsHidden == false)
 				base.OnDraw(renderTarget);
+
+			TryUpdate(); // has to be after draw
 		}
 		internal List<string> GetButtonUIDs()
 		{

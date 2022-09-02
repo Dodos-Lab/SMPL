@@ -25,6 +25,18 @@
 		public Vector2 ShadowOffset { get; set; }
 		public Color ShadowColor { get; set; } = Color.Black;
 
+		public override Hitbox BoundingBox
+		{
+			get
+			{
+				bb.LocalLines.Clear();
+				bb.Lines.Clear();
+				bb.LocalLines.AddRange(GetCamera().BoundingBox.LocalLines);
+				bb.TransformLocalLines(UID);
+				return bb;
+			}
+		}
+
 		public int GetSymbolIndex(Vector2 worldPoint)
 		{
 			for(int i = 0; i < Value.Length; i++)
@@ -201,13 +213,6 @@
 
 			if(skipParentRender == false)
 				DrawTextbox(renderTarget);
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			bb.LocalLines.Clear();
-			bb.Lines.Clear();
-			bb.LocalLines.AddRange(GetCamera().BoundingBox.LocalLines);
-			return bb;
 		}
 		internal override void OnDestroy()
 		{

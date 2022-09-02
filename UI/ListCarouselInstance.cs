@@ -2,7 +2,27 @@
 {
 	internal class ListCarouselInstance : ListInstance
 	{
-		public new Hitbox BoundingBox => GetBoundingBox();
+		public new Hitbox BoundingBox
+		{
+			get
+			{
+				var prev = GetButtonDown();
+				var next = GetButtonUp();
+				var baseBB = base.bb;
+				var tl = prev == null ? baseBB.Lines[0].A : prev.BoundingBox.Lines[0].A;
+				var tr = next == null ? baseBB.Lines[1].A : next.BoundingBox.Lines[1].A;
+				var br = next == null ? baseBB.Lines[2].A : next.BoundingBox.Lines[2].A;
+				var bl = prev == null ? baseBB.Lines[3].A : prev.BoundingBox.Lines[3].A;
+
+				bb.Lines.Clear();
+				bb.Lines.Add(new(tl, tr));
+				bb.Lines.Add(new(tr, br));
+				bb.Lines.Add(new(br, bl));
+				bb.Lines.Add(new(bl, tl));
+				bb.TransformLocalLines(UID);
+				return bb;
+			}
+		}
 
 		public bool IsRepeating { get; set; } = true;
 		public int SelectionIndex
@@ -61,8 +81,8 @@
 			for(int i = 0; i < btnUIDs.Count; i++)
 			{
 				var btn = Get<ButtonInstance>(btnUIDs[i]);
-				btn.IsHidden = false;
-				btn.IsDisabled = false;
+				btn.IsHiddenSelf = false;
+				btn.IsDisabledSelf = false;
 			}
 
 			if(prev != null)
@@ -90,23 +110,6 @@
 		internal override void OnDestroy()
 		{
 			base.OnDestroy();
-		}
-		internal override Hitbox GetBoundingBox()
-		{
-			var prev = GetButtonDown();
-			var next = GetButtonUp();
-			var baseBB = base.bb;
-			var tl = prev == null ? baseBB.Lines[0].A : prev.BoundingBox.Lines[0].A;
-			var tr = next == null ? baseBB.Lines[1].A : next.BoundingBox.Lines[1].A;
-			var br = next == null ? baseBB.Lines[2].A : next.BoundingBox.Lines[2].A;
-			var bl = prev == null ? baseBB.Lines[3].A : prev.BoundingBox.Lines[3].A;
-
-			bb.Lines.Clear();
-			bb.Lines.Add(new(tl, tr));
-			bb.Lines.Add(new(tr, br));
-			bb.Lines.Add(new(br, bl));
-			bb.Lines.Add(new(bl, tl));
-			return bb;
 		}
 
 		private void UpdateDefaultValues()
