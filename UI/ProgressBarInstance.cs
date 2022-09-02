@@ -65,6 +65,9 @@
 		}
 		private void Update()
 		{
+			if(IsDisabled)
+				return;
+
 			Size = new(Value.Map(RangeA, RangeB, 0, MaxLength) * Scale, Size.Y);
 			TexCoordUnitB = new(ProgressUnit, TexCoordUnitB.Y);
 		}

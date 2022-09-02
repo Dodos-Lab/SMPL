@@ -2,7 +2,7 @@
 {
 	internal class ListDropdownInstance : ListInstance
 	{
-		public string ButtonShowUID { get; private set; }
+		public string ButtonShowUID { get; set; }
 		[JsonIgnore]
 		public string SelectionUID => GetButtonUIDs().Count == 0 ? null : GetButtonUIDs()[SelectionIndex];
 		public int SelectionIndex
@@ -21,70 +21,36 @@
 		private int selectionIndex;
 
 		[JsonConstructor]
-		internal ListDropdownInstance() { }
+		internal ListDropdownInstance() => Init();
 		internal ListDropdownInstance(string uid, string btnUpUID, string btnDownUID, string btnShowUID) : base(uid, btnUpUID, btnDownUID)
 		{
-			Event.ButtonClicked += OnButtonClick;
+			Init();
 
 			ButtonShowUID = btnShowUID;
-			var btn = GetShowButton();
-			if(btn == null)
-				return;
-
-			btn.ParentUID = UID;
-			btn.OriginUnit = new(0, 1);
+		}
+		private void Init()
+		{
+			Event.ButtonClicked += OnButtonClick;
 		}
 
 		private void OnButtonClick(string thingUID)
 		{
 			var btnUIDs = GetButtonUIDs();
 			if(thingUID == ButtonShowUID || thingUID == SelectionUID)
-				isOpen = !isOpen;
+				Show(isOpen == false);
 			else if(btnUIDs.Contains(thingUID))
 			{
 				SelectionIndex = btnUIDs.IndexOf(thingUID);
-				isOpen = false;
+				Show(false);
 				GetSelection()?.Unhover();
 			}
 		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			UpdateDefaultValues();
+			TryUpdate();
 
-			var btnUIDs = GetButtonUIDs();
-			var hidden = btnUIDs.Count == 0 || isOpen == false;
-
-			TryUpdateSelection();
-
-			var showBtn = GetShowButton();
-			if(showBtn != null)
-				showBtn.Position = GetButtonUp().BoundingBox.Lines[3].A;
-
-			var sel = GetSelection();
-			if(sel != null)
-				showBtn.LocalSize = new(sel.LocalSize.Y);
-
-			base.OnDraw(renderTarget);
-
-			IsHidden = isOpen == false;
-			IsDisabled = isOpen == false;
-
-			TrySetButtonVisibility(GetButtonUp(), false);
-			TrySetButtonVisibility(GetButtonDown(), false);
-
-			for(int i = 0; i < btnUIDs.Count; i++)
-				TrySetButtonVisibility(Get<ButtonInstance>(btnUIDs[i]));
-
-			void TrySetButtonVisibility(ButtonInstance btn, bool inList = true)
-			{
-				if(btn == null || btn.UID == SelectionUID)
-					return;
-
-				btn.IsHidden = hidden;
-				btn.IsDisabled = hidden;
-				if(hidden && inList)
-					btn.Position = new Vector2().NaN();
-			}
+			if(IsHidden == false)
+				base.OnDraw(renderTarget);
 		}
 		internal override void OnDestroy()
 		{
@@ -98,9 +64,56 @@
 			if(showBtn == null || showBtn.BoundingBox.IsHovered)
 				return;
 
-			isOpen = false;
+			Show(false);
 		}
 
+		private void TryUpdate()
+		{
+			if(IsDisabled)
+				return;
+
+			UpdateDefaultValues();
+
+			var btnUIDs = GetButtonUIDs();
+			var hidden = btnUIDs.Count == 0 || isOpen == false;
+
+			TryUpdateSelection();
+
+			var showBtn = GetShowButton();
+			if(showBtn != null)
+			{
+				showBtn.Position = GetButtonUp().BoundingBox.Lines[3].A;
+				showBtn.OriginUnit = new(0, 1);
+			}
+
+			var sel = GetSelection();
+			if(sel != null && showBtn != null)
+				showBtn.LocalSize = new(sel.LocalSize.Y);
+
+			TrySetButtonVisibility(GetButtonUp(), false);
+			TrySetButtonVisibility(GetButtonDown(), false);
+
+			for(int i = 0; i < btnUIDs.Count; i++)
+				TrySetButtonVisibility(Get<ButtonInstance>(btnUIDs[i]));
+
+			if(Age < 2f)
+				Show(false);
+
+			void TrySetButtonVisibility(ButtonInstance btn, bool inList = true)
+			{
+				if(btn == null || btn.UID == SelectionUID)
+					return;
+
+				btn.IsHidden = hidden;
+				btn.IsDisabled = hidden;
+			}
+		}
+		private void Show(bool isOpen)
+		{
+			this.isOpen = isOpen;
+			IsHidden = isOpen == false;
+			IsDisabled = isOpen == false;
+		}
 		private ButtonInstance GetShowButton()
 		{
 			return Get<ButtonInstance>(ButtonShowUID);
@@ -130,9 +143,6 @@
 			sel.ParentUID = UID;
 			sel.LocalSize = new(ButtonWidth, ButtonHeight);
 			sel.LocalPosition = new(-ButtonHeight * 0.5f - GetButtonUp().LocalSize.X, ButtonWidth * 0.5f + GetButtonUp().LocalSize.Y * 0.5f);
-
-			if(hidden)
-				sel.Position = new Vector2().NaN();
 		}
 		#endregion
 	}

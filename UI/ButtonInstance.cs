@@ -3,7 +3,6 @@
 	internal class ButtonInstance : SpriteInstance
 	{
 		public bool IsDraggable { get; set; }
-		public bool IsDisabled { get; set; }
 		public float HoldDelay { get; set; } = 0.5f;
 		public float HoldTriggerSpeed { get; set; } = 0.1f;
 
@@ -20,10 +19,12 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			Update();
-			base.OnDraw(renderTarget);
+			TryUpdate();
+
+			if(IsHidden == false)
+				base.OnDraw(renderTarget);
 		}
-		private void Update()
+		private void TryUpdate()
 		{
 			if(IsDisabled)
 				return;

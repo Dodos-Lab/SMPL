@@ -33,6 +33,9 @@
 
 		private void OnButtonClick(string thingUID)
 		{
+			if(IsDisabled)
+				return;
+
 			var btnUIDs = GetButtonUIDs();
 			if(btnUIDs.Contains(thingUID) == false)
 				return;

@@ -79,7 +79,7 @@ namespace SMPL
 					for(int j = 0; j < camUIDs.Count; j++)
 					{
 						var cam = ThingInstance.Get<CameraInstance>(camUIDs[j]);
-						if(cam != null)
+						if(cam != null && cam.IsDisabled == false)
 							kvp.Value[i].Draw(cam.RenderTexture);
 					}
 				}

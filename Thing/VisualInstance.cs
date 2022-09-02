@@ -106,7 +106,7 @@ void main()
 		public bool IsSmooth { get; set; }
 		public bool IsRepeated { get; set; } = true;
 
-		public string TexturePath { get; set; }
+		public virtual string TexturePath { get; set; }
 		public int Order
 		{
 			get => depth;
@@ -475,6 +475,9 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 
 		internal void Draw(RenderTarget renderTarget)
 		{
+			if(renderTarget == null)
+				return;
+
 			var tex = GetTexture();
 			var prev = (false, false);
 

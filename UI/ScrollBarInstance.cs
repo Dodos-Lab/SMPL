@@ -51,10 +51,13 @@
 			if(Game.Window != null)
 				Game.Window.MouseWheelScrolled += OnScroll;
 
-			Update();
+			TryUpdate();
 		}
-		private void Update()
+		private void TryUpdate()
 		{
+			if(IsDisabled)
+				return;
+
 			var up = GetButtonUp();
 			var down = GetButtonDown();
 
@@ -119,9 +122,10 @@
 		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			base.OnDraw(renderTarget);
+			TryUpdate();
 
-			Update();
+			if(IsHidden == false)
+				base.OnDraw(renderTarget);
 		}
 		internal override void OnDestroy()
 		{

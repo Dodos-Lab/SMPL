@@ -54,9 +54,9 @@
 			if(IsHidden)
 				return;
 
-			var Texture = GetTexture();
-			var w = Texture == null ? 0 : Texture.Size.X;
-			var h = Texture == null ? 0 : Texture.Size.Y;
+			var tex = GetTexture();
+			var w = tex == null ? 0 : tex.Size.X;
+			var h = tex == null ? 0 : tex.Size.Y;
 			var topLeft = new Vector2f(w * TexCoordUnitA.X, h * TexCoordUnitA.Y);
 			var bottomRight = new Vector2f(w * TexCoordUnitB.X, h * TexCoordUnitB.Y);
 			var topRight = new Vector2f(bottomRight.X, topLeft.Y);

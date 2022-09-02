@@ -12,6 +12,9 @@
 				var up = u == null ? baseBB.Lines : u.BoundingBox.Lines;
 				var down = d == null ? baseBB.Lines : d.BoundingBox.Lines;
 
+				if(up.Count == 0 || down.Count == 0)
+					return bb;
+
 				var tl = up[0].A;
 				var tr = down[1].A;
 				var br = down[2].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
@@ -66,16 +69,66 @@
 		{
 			Value = 0;
 		}
-		internal void Update()
+		private void TryUpdate()
 		{
-			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
+			if(IsDisabled)
+				return;
 
+			OriginUnit = new(0, 0.5f);
+
+			var btnUIDs = GetButtonUIDs();
+			VisibleButtonCountMax = Math.Max(VisibleButtonCountMax, 1);
 			IsFocused = BoundingBox.IsHovered;
 
+			Step = 1;
+			RangeA = 0;
+			RangeB = MathF.Max((btnUIDs.Count - VisibleButtonCountMax).Limit(0, btnUIDs.Count - 1), RangeA);
+
+			scrollIndex = (int)Value;
+
+			var nothingToScroll = btnUIDs.Count != 0 && RangeA == RangeB;
+			var up = GetButtonUp();
+			var down = GetButtonDown();
+			var sz = up == null ? 0 : up.LocalSize.X;
+			if(up != null)
+			{
+				up.IsHidden = nothingToScroll;
+				up.IsDisabled = nothingToScroll;
+			}
+			if(down != null)
+			{
+				down.IsHidden = nothingToScroll;
+				down.IsDisabled = nothingToScroll;
+			}
+
+			for(int i = 0; i < btnUIDs.Count; i++)
+			{
+				var btn = Get<ButtonInstance>(btnUIDs[i]);
+				if(btn == null)
+					continue;
+
+				var isVisible = i >= scrollIndex && i < scrollIndex + VisibleButtonCountMax;
+				btn.ParentUID = UID;
+				btn.IsHidden = isVisible == false;
+				btn.IsDisabled = isVisible == false;
+
+				if(isVisible == false)
+					continue;
+
+				var x = ButtonHeight * 0.5f - sz + ((ButtonHeight + ButtonSpacing) * (i - scrollIndex));
+				var y = -LocalSize.Y * OriginUnit.Y + ButtonWidth * 0.5f + LocalSize.Y;
+
+				btn.LocalSize = new(ButtonWidth, ButtonHeight);
+				btn.LocalAngle = 270;
+				btn.Scale = Scale;
+				btn.OriginUnit = new(0.5f);
+				btn.LocalPosition = new(x, y);
+			}
+
+			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
 			if(left.Once($"click-list-{GetHashCode()}"))
 			{
 				clickedUID = null;
-				var btnUIDs = GetButtonUIDs();
 				var first = ScrollIndex.Limit(0, btnUIDs.Count);
 				var last = (ScrollIndex + VisibleButtonCountMax).Limit(0, btnUIDs.Count);
 				for(int i = first; i < last; i++)
@@ -106,62 +159,10 @@
 		protected virtual void OnUnfocus() { }
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			OriginUnit = new(0, 0.5f);
+			TryUpdate();
 
-			if(IsHidden)
-				return;
-
-			var btnUIDs = GetButtonUIDs();
-			VisibleButtonCountMax = Math.Max(VisibleButtonCountMax, 1);
-
-			Step = 1;
-			RangeA = 0;
-			RangeB = MathF.Max((btnUIDs.Count - VisibleButtonCountMax).Limit(0, btnUIDs.Count - 1), RangeA);
-
-			scrollIndex = (int)Value;
-
-			var nothingToScroll = btnUIDs.Count != 0 && RangeA == RangeB;
-			var up = GetButtonUp();
-			var down = GetButtonDown();
-			var sz = up == null ? 0 : up.LocalSize.X;
-			if(up != null)
-			{
-				up.IsHidden = nothingToScroll;
-				up.IsDisabled = nothingToScroll;
-			}
-			if(down != null)
-			{
-				down.IsHidden = nothingToScroll;
-				down.IsDisabled = nothingToScroll;
-			}
-
-			base.OnDraw(renderTarget);
-
-			for(int i = 0; i < btnUIDs.Count; i++)
-			{
-				var btn = Get<ButtonInstance>(btnUIDs[i]);
-				if(btn == null)
-					continue;
-
-				var isVisible = i >= scrollIndex && i < scrollIndex + VisibleButtonCountMax;
-				btn.ParentUID = UID;
-				if(isVisible == false)
-				{
-					btn.Position = new Vector2().NaN();
-					continue;
-				}
-
-				var x = ButtonHeight * 0.5f - sz + ((ButtonHeight + ButtonSpacing) * (i - scrollIndex));
-				var y = -LocalSize.Y * OriginUnit.Y + ButtonWidth * 0.5f + LocalSize.Y;
-
-				btn.LocalSize = new(ButtonWidth, ButtonHeight);
-				btn.LocalAngle = 270;
-				btn.Scale = Scale;
-				btn.OriginUnit = new(0.5f);
-				btn.LocalPosition = new(x, y);
-			}
-
-			Update();
+			if(IsHidden == false)
+				base.OnDraw(renderTarget);
 		}
 		internal List<string> GetButtonUIDs()
 		{

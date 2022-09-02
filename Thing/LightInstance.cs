@@ -3,7 +3,7 @@
 	public static partial class Thing
 	{
 		public static Color AmbientColor { get; set; } = new(50, 50, 50);
-		public static Color SunColor { get; set; } = new(255, 255, 255, 0);
+		public static Color SunColor { get; set; } = Color.White;
 		public static float SunAngle { get; set; } = 45f;
 	}
 
@@ -60,7 +60,11 @@
 				positionsInShader[j] = new Vector2(p.X, p.Y);
 			}
 
-			visual.SetEffectColor("AmbientColor", Thing.AmbientColor);
+			var amb = Thing.AmbientColor;
+			var ambientVec = new Vector3(amb.R, amb.G, amb.B);
+			var lerp = Vector3.Lerp(new(), ambientVec, amb.A / 255f);
+			var resultCol = new Color((byte)lerp.X, (byte)lerp.Y, (byte)lerp.Z);
+			visual.SetEffectColor("AmbientColor", resultCol);
 			visual.SetShaderColorArray("Colors", colors);
 			visual.SetShaderVector2Array("Positions", positionsInShader);
 			visual.SetShaderFloatArray("Scales", scales);

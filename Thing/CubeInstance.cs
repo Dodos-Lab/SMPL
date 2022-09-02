@@ -125,9 +125,6 @@
 			if(IsHidden)
 				return;
 
-			if(PerspectiveUnit == 1f)
-				PerspectiveUnit = 1.01f;
-
 			var farBB = BoundingBox;
 			var nearBB = BoundingBox3D;
 
@@ -156,7 +153,8 @@
 			sortedSides[t].Add(TryDrawTop);
 			sortedSides[b].Add(TryDrawBottom);
 
-			var enumerable = PerspectiveUnit < 1 ? sortedSides : sortedSides.Reverse();
+			var persp = PerspectiveUnit == 1f ? 1.01f : PerspectiveUnit;
+			var enumerable = persp < 1 ? sortedSides : sortedSides.Reverse();
 
 			TryDrawSide(SideFar, farTl, farTr, farBr, farBl);
 
@@ -212,7 +210,7 @@
 
 				var amb = Thing.AmbientColor;
 				var sun = Thing.SunColor;
-				var ambVec = new Vector3(amb.R, amb.G, amb.B);
+				var ambVec = Vector3.Lerp(new(), new Vector3(amb.R, amb.G, amb.B), amb.A / 255f);
 				var sunCol = new Vector3(sun.R, sun.G, sun.B);
 				var lerp = Vector3.Lerp(ambVec, sunCol, sunValue);
 				var resultCol = new Color((byte)lerp.X, (byte)lerp.Y, (byte)lerp.Z);

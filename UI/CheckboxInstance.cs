@@ -32,7 +32,7 @@
 		}
 		private void OnClick(string thingUID)
 		{
-			if(thingUID != UID)
+			if(IsDisabled || thingUID != UID)
 				return;
 
 			IsChecked = !IsChecked;

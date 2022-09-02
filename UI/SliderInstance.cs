@@ -2,8 +2,6 @@
 {
 	internal class SliderInstance : ProgressBarInstance
 	{
-		public bool IsDisabled { get; set; }
-
 		public float LengthUnit { get; set; }
 		public float Length
 		{
@@ -29,7 +27,7 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			Update();
+			TryUpdate();
 
 			if(IsHidden)
 				return;
@@ -84,12 +82,12 @@
 			renderTarget.Draw(fill, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, null, null));
 			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
 		}
-		private void Update()
+		private void TryUpdate()
 		{
-			Size = new(MaxLength * Scale, Size.Y);
-
 			if(IsDisabled)
 				return;
+
+			Size = new(MaxLength * Scale, Size.Y);
 
 			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
 			if(left.Once($"slider-click-{GetHashCode()}") && BoundingBox.IsHovered)

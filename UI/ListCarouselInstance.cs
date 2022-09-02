@@ -44,6 +44,12 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
+			if(IsDisabled)
+			{
+				IsFocused = false;
+				return;
+			}
+
 			IsFocused = BoundingBox.IsHovered;
 			UpdateDefaultValues();
 
@@ -55,7 +61,8 @@
 			for(int i = 0; i < btnUIDs.Count; i++)
 			{
 				var btn = Get<ButtonInstance>(btnUIDs[i]);
-				btn.Position = new Vector2().NaN();
+				btn.IsHidden = false;
+				btn.IsDisabled = false;
 			}
 
 			if(prev != null)

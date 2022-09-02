@@ -51,18 +51,24 @@
 				if(p == null)
 					continue;
 
-				if(p.Lifetime <= 0)
+				if(IsDisabled == false)
 				{
-					p.Lifetime = 0;
-					particles.Remove(p);
-					continue;
+					if(p.Lifetime <= 0)
+					{
+						p.Lifetime = 0;
+						particles.Remove(p);
+						continue;
+					}
+					p.Lifetime -= Time.Delta;
+
+					if(p.Speed != 0)
+						p.Position = p.Position.PointMoveAtAngle(p.MoveAngle, p.Speed);
+
+					Event.ParticleUpdate(UID, p);
 				}
-				p.Lifetime -= Time.Delta;
 
-				if(p.Speed != 0)
-					p.Position = p.Position.PointMoveAtAngle(p.MoveAngle, p.Speed);
-
-				Event.ParticleUpdate(UID, p);
+				if(IsHidden)
+					continue;
 
 				var texture = GetTexture();
 				var txSz = texture == null ? new Vector2() : new Vector2(texture.Size.X, texture.Size.Y);
@@ -84,7 +90,8 @@
 				verts[i + 3] = new(botLeft.ToSFML(), c, new(txA.X, txB.Y));
 			}
 
-			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
+			if(IsHidden == false)
+				renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, GetTexture(), GetShader(renderTarget)));
 		}
 		internal override Hitbox GetBoundingBox()
 		{

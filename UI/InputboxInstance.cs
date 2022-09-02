@@ -3,7 +3,6 @@
 	internal class InputboxInstance : TextboxInstance
 	{
 		public bool IsFocused { get; set; }
-		public bool IsDisabled { get; set; }
 
 		public Color CursorColor { get; set; }
 		public int CursorPositionIndex
@@ -49,21 +48,25 @@
 				Game.Window.TextEntered += OnInput;
 			Value = "";
 			CursorColor = Color.White;
-			Alignment = Thing.TextboxAlignment.Center;
+			Alignment = Thing.TextboxAlignment.Left;
 			skipParentRender = true;
 		}
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			GetCamera()?.RenderTexture.Clear(BackgroundColor);
+			if(IsDisabled == false)
+			{
+				TryInput();
+				TryMoveTextWhenCursorOut();
+			}
 
-			TryInput();
+			if(IsHidden)
+				return;
+
+			GetCamera()?.RenderTexture.Clear(BackgroundColor);
 			TryDrawPlaceholder();
 			base.OnDraw(renderTarget);
 			TryDrawCursor(renderTarget);
-
-			TryMoveTextWhenCursorOut();
-
 			DrawTextbox(renderTarget);
 		}
 		internal override void OnDestroy()
@@ -78,7 +81,7 @@
 
 		private void OnInput(object sender, TextEventArgs e)
 		{
-			if(IsFocused == false || Keyboard.IsKeyPressed(Keyboard.Key.LControl) || Keyboard.IsKeyPressed(Keyboard.Key.RControl))
+			if(IsFocused == false || IsDisabled)
 				return;
 
 			var keyStr = e.Unicode;
@@ -103,6 +106,13 @@
 				if(Value.Length == 0) // this helps visually when deleting the last symbol
 					textOffsetX = 0;
 			}
+			else if(keyStr == "\u001b") // is escape
+			{
+				IsFocused = false;
+				return;
+			}
+			else if(keyStr[0] < 32) // shows as square
+				return;
 			else
 			{
 				Value = Value.Insert((int)CursorPositionIndex, keyStr);
@@ -241,15 +251,15 @@
 
 			var tl = corners[isLast ? 1 : 0];
 			var bl = corners[isLast ? 2 : 3];
-			var sz = SymbolSize * Scale * 0.05f;
+			var sc = Scale;
+			var sz = SymbolSize * sc * 0.05f;
 			var br = bl.PointMoveAtAngle(Angle, sz, false);
 			var tr = tl.PointMoveAtAngle(Angle, sz, false);
 
-
-			tl = GetLocalPositionFromSelf(tl);
-			tr = GetLocalPositionFromSelf(tr);
-			br = GetLocalPositionFromSelf(br);
-			bl = GetLocalPositionFromSelf(bl);
+			tl = GetLocalPositionFromSelf(tl * sc);
+			tr = GetLocalPositionFromSelf(tr * sc);
+			br = GetLocalPositionFromSelf(br * sc);
+			bl = GetLocalPositionFromSelf(bl * sc);
 
 			cursorPosX = tl.X;
 

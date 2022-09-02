@@ -423,8 +423,8 @@
 			return result;
 		}
 		/// <summary>
-		/// Maps a <paramref name="number"/> from [<paramref name="a1"/> - <paramref name="b1"/>] to
-		/// [<paramref name="b1"/> - <paramref name="b2"/>] and returns it. Similar to Lerping (linear interpolation).<br></br>
+		/// Maps a <paramref name="number"/> from one range to another ([<paramref name="a1"/> - <paramref name="a2"/>] to
+		/// [<paramref name="b1"/> - <paramref name="b2"/>]) and returns it. Similar to Lerping (linear interpolation).<br></br>
 		/// - Example: 50 mapped from [0 - 100] and [0 - 1] results to 0.5<br></br>
 		/// - Example: 25 mapped from [30 - 20] and [1 - 5] results to 3
 		/// </summary>

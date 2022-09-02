@@ -32,7 +32,10 @@
 				var corners = GetSymbolCorners(i).ToList();
 				if(corners.Count == 4)
 					corners.Add(corners[0]);
+
 				var hitbox = new Hitbox(corners.ToArray());
+				hitbox.TransformLocalLines(UID);
+
 				if(hitbox.Contains(worldPoint))
 					return i;
 			}
@@ -170,6 +173,9 @@
 		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
+			if(IsHidden)
+				return;
+
 			Update();
 
 			var camera = GetCamera();

@@ -2,6 +2,24 @@
 {
 	internal abstract class ThingInstance
 	{
+		public bool IsDisabled
+		{
+			get => isDisabled;
+			set
+			{
+				isDisabled = value;
+
+				for(int i = 0; i < childrenUIDs.Count; i++)
+				{
+					var child = Get(childrenUIDs[i]);
+					if(child == null)
+						continue;
+
+					child.isDisabled = value;
+				}
+			}
+		}
+
 		public ReadOnlyCollection<string> Types
 		{
 			get
@@ -31,10 +49,10 @@
 			get => uid;
 			set
 			{
-				if(value == uid)
-					return;
-
 				var objs = Scene.CurrentScene.objs;
+
+				if(value == uid || objs.ContainsKey(value))
+					return;
 
 				if(uid != null)
 					objs.Remove(uid);
@@ -58,6 +76,7 @@
 				}
 			}
 		}
+		[JsonIgnore]
 		public string OldUID => oldUID;
 		public int NumericUID => numUID;
 		public List<string> Tags { get; } = new();
@@ -119,6 +138,7 @@
 			get => localAng.AngleTo360();
 			set { localAng = value; UpdateSelfAndChildren(); }
 		}
+		[JsonIgnore]
 		public Vector2 LocalDirection
 		{
 			get => Vector2.Normalize(LocalAngle.AngleToDirection());
@@ -224,11 +244,13 @@
 		}
 
 		#region Backend
+		private bool isDisabled;
 		private const float DEFAULT_BB_SIZE = 50f;
 		private readonly Clock age = new();
 		protected readonly Hitbox hitbox = new(), bb = new();
-		private readonly List<string> childrenUIDs = new();
-		private string parentUID, oldUID, parOldUID;
+		[JsonProperty]
+		internal readonly List<string> childrenUIDs = new();
+		internal string parentUID, oldUID, parOldUID;
 		private Vector2 localPos;
 		private float localAng, localSc;
 		private Matrix3x2 global;
@@ -246,22 +268,14 @@
 			UID = Thing.GetFreeUID(uid);
 			LocalScale = 1;
 
-			Init();
+			Event.ThingCreate(UID);
 		}
 		private void Init()
 		{
 			Event.ThingCreate(UID);
-			Event.SceneStarted += OnSceneStart;
-		}
-		private void OnSceneStart(string sceneName)
-		{
-			UpdateParency();
 		}
 
-		internal virtual void OnDestroy()
-		{
-			Event.SceneStarted -= OnSceneStart;
-		}
+		internal virtual void OnDestroy() { }
 		internal virtual Hitbox GetBoundingBox()
 		{
 			var sz = DEFAULT_BB_SIZE;
@@ -327,14 +341,20 @@
 			return inverseParent;
 		}
 
-		private void UpdateParency()
+		internal void UpdateParency()
 		{
 			var objs = Scene.CurrentScene.objs;
 			foreach(var kvp in objs)
 				if(kvp.Value.parentUID == uid && childrenUIDs.Contains(kvp.Key) == false)
-					childrenUIDs.Add(kvp.Key);
+				{
+					kvp.Value.ParentUID = null;
+					kvp.Value.ParentUID = uid;
+				}
 				else if(kvp.Value.childrenUIDs.Contains(uid))
+				{
+					ParentUID = null;
 					ParentUID = kvp.Value.UID;
+				}
 		}
 		private void UpdateSelfAndChildren()
 		{
@@ -385,7 +405,7 @@
 		}
 		internal static void MissingError(string uid)
 		{
-			Console.LogError(0, $"Thing{{{uid}}} does not exist.");
+			Console.LogError(0, $"Thing '{uid}' does not exist.");
 		}
 		#endregion
 	}

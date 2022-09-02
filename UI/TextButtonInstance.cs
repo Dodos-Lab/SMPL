@@ -32,27 +32,30 @@
 		{
 			Size = new(250, 60);
 			TextUID = textUID;
+
+			var text = Get<TextInstance>(TextUID);
+			if(text != null)
+				text.ParentUID = UID;
 		}
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
+			if(IsHidden)
+				return;
+
 			var text = Get<TextInstance>(TextUID);
 
 			if(text != null)
-			{
-				text.ParentUID = UID;
 				text.UpdateGlobalText();
-			}
 
-			if(IsHyperlink)
+			if(IsDisabled == false && IsHyperlink && text != null)
 			{
-				text.UpdateGlobalText();
 				var b = TextInstance.textInstance.GetLocalBounds();
 				Size = new((b.Width + text.SymbolSize / 2f) * text.Scale, (text.SymbolSize + text.SymbolSize / 5f) * text.Scale);
 			}
 			base.OnDraw(renderTarget);
 
-			if(IsHidden == false)
+			if(text != null)
 				text.Draw(renderTarget);
 		}
 		internal override void OnDestroy()
@@ -66,6 +69,7 @@
 				text.Destroy(false);
 			}
 		}
+
 		#endregion
 	}
 }

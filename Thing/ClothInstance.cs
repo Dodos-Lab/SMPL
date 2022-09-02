@@ -2,7 +2,6 @@
 {
 	internal class ClothInstance : VisualInstance
 	{
-		public bool IsSimulating { get; set; }
 		public bool HasThreads { get; set; } = true;
 
 		[JsonIgnore]
@@ -66,7 +65,7 @@
 		}
 
 		#region Backend
-		private bool prevSim;
+		private bool prevDisabled;
 		private Vector2 prevPos;
 		private float prevAng, prevSc;
 		private Vector2 segCount, segSize;
@@ -118,18 +117,21 @@
 		{
 			rope.Position = Position;
 
-			if(IsSimulating)
+			if(IsDisabled == false)
 			{
 				rope.Update();
 				TryTear();
 			}
-			else if((IsSimulating == false && prevSim) || prevPos != Position || prevAng != Angle || prevSc != Scale)
+			else if((IsDisabled && prevDisabled == false) || prevPos != Position || prevAng != Angle || prevSc != Scale)
 				NonSimulationUpdate();
 
 			prevPos = Position;
 			prevAng = Angle;
 			prevSc = Scale;
-			prevSim = IsSimulating;
+			prevDisabled = IsDisabled;
+
+			if(IsHidden)
+				return;
 
 			var tex = GetTexture();
 			var w = tex == null ? 0 : tex.Size.X;

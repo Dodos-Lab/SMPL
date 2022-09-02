@@ -5,6 +5,7 @@
 		public class Property
 		{
 			#region Property Names
+			public const string IS_DISABLED = nameof(ThingInstance.IsDisabled);
 			public const string TYPES = nameof(ThingInstance.Types);
 			public const string UID = nameof(ThingInstance.UID);
 			public const string OLD_UID = nameof(ThingInstance.OldUID);
@@ -73,7 +74,6 @@
 			public const string NINE_PATCH_BORDER_SIZE = nameof(NinePatchInstance.BorderSize);
 			public const string PARTICLE_MANAGER_COUNT = nameof(ParticleManagerInstance.Count);
 
-			public const string CLOTH_IS_SIMULATING = nameof(ClothInstance.IsSimulating);
 			public const string CLOTH_HAS_THREADS = nameof(ClothInstance.HasThreads);
 			public const string CLOTH_TEX_COORD_A = nameof(ClothInstance.TexCoordA);
 			public const string CLOTH_TEX_COORD_B = nameof(ClothInstance.TexCoordB);
@@ -110,7 +110,6 @@
 			public const string TILEMAP_TILE_COUNT = nameof(TilemapInstance.TileCount);
 			public const string TILEMAP_TILE_PALETTE = nameof(TilemapInstance.TilePalette);
 
-			public const string UI_BUTTON_IS_DISABLED = nameof(ButtonInstance.IsDisabled);
 			public const string UI_BUTTON_IS_DRAGGABLE = nameof(ButtonInstance.IsDraggable);
 			public const string UI_BUTTON_HOLD_DELAY = nameof(ButtonInstance.HoldDelay);
 			public const string UI_BUTTON_HOLD_TRIGGER_SPEED = nameof(ButtonInstance.HoldTriggerSpeed);
@@ -134,13 +133,11 @@
 			public const string UI_TEXTBOX_CAMERA_UID = nameof(TextboxInstance.CameraUID);
 
 			public const string UI_INPUTBOX_IS_FOCUSED = nameof(InputboxInstance.IsFocused);
-			public const string UI_INPUTBOX_IS_DISABLED = nameof(InputboxInstance.IsDisabled);
 			public const string UI_INPUTBOX_CURSOR_COLOR = nameof(InputboxInstance.CursorColor);
 			public const string UI_INPUTBOX_CURSOR_POSITION_INDEX = nameof(InputboxInstance.CursorPositionIndex);
 			public const string UI_INPUTBOX_PLACEHOLDER_VALUE = nameof(InputboxInstance.PlaceholderValue);
 			public const string UI_INPUTBOX_PLACEHOLDER_COLOR = nameof(InputboxInstance.PlaceholderColor);
 
-			public const string UI_SLIDER_IS_DISABLED = nameof(SliderInstance.IsDisabled);
 			public const string UI_SLIDER_LENGTH_UNIT = nameof(SliderInstance.LengthUnit);
 			public const string UI_SLIDER_LENGTH = nameof(SliderInstance.Length);
 			public const string UI_SLIDER_PROGRESS_COLOR = nameof(SliderInstance.ProgressColor);

@@ -2,6 +2,11 @@
 {
 	internal class TextInstance : VisualInstance
 	{
+		public override string TexturePath
+		{
+			get => FontPath;
+			set => FontPath = value;
+		}
 		public virtual string FontPath { get; set; }
 		public virtual string Value { get; set; } = "Hello, World!";
 		public Color Color { get; set; } = Color.White;
@@ -27,7 +32,7 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			if(GetFont() == null)
+			if(IsHidden || GetFont() == null)
 				return;
 
 			UpdateGlobalText();

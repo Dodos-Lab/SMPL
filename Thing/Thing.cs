@@ -136,13 +136,24 @@
 		{
 			var thing = ThingInstance.Get(uid);
 			var prevUID = uid;
+			var prevOldUID = thing.oldUID;
+			var children = new List<string>(thing.childrenUIDs);
+
 			thing.UID = GetFreeUID(newUID);
 
 			var settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
 			var json = JsonConvert.SerializeObject(thing, settings);
 
 			thing.UID = prevUID;
+			thing.oldUID = prevOldUID;
 			var newThing = JsonConvert.DeserializeObject<ThingInstance>(json, settings);
+
+			for(int i = 0; i < children.Count; i++)
+			{
+				var child = ThingInstance.Get(children[i]);
+				child.ParentUID = prevUID;
+			}
+
 			return newThing.UID;
 		}
 		public static void Destroy(string uid, bool destroyChildren)

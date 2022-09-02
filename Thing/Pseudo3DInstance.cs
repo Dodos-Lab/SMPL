@@ -3,7 +3,7 @@
 	internal class Pseudo3DInstance : VisualInstance
 	{
 		public string CameraUID { get; set; }
-		public float Depth { get; set; } = 50;
+		public float Depth { get; set; } = 100;
 		public float Tilt { get; set; } = 45f;
 		public float Z { get; set; }
 
@@ -42,12 +42,16 @@
 			for(int i = 0; i < pseudo3Ds.Count; i++)
 			{
 				var instance = pseudo3Ds[i];
+
+				if(instance.IsDisabled)
+					continue;
+
 				var z = GetUnitZ().X;
 				var cam = GetCamera();
 				instance.Position = instance.Z < -1000f || instance.Z > 1000f ? new Vector2().NaN() : GetPosZ();
 				instance.Scale = 1f - z / 100f;
 				instance.Tilt = cam.Position.AngleBetweenPoints(instance.Position);
-				instance.currDepth = instance.Position.DistanceBetweenPoints(cam.Position) * (instance.Depth / 1500f);
+				instance.currDepth = instance.Position.DistanceBetweenPoints(cam.Position) * (instance.Depth / 500f);
 
 				Vector2 GetUnitZ()
 				{
