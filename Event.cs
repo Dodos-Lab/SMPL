@@ -10,6 +10,7 @@
 		public delegate void MultiplayerMessageEventHandler(LAN.Message message);
 		public delegate void ParticleEventHandler(string particleManagerUID, Thing.Particle particle);
 		public delegate void ListMultiselectEventHandler(string buttonUID, bool isSelected);
+		public delegate void GUIEventHandler(GUI.Body body);
 
 		public static event MultiplayerClientEventHandler MultiplayerClientConnected;
 		public static event MultiplayerClientEventHandler MultiplayerClientDisconnected;
@@ -25,6 +26,16 @@
 		public static event SceneEventHandler SceneStopped;
 
 		public static event ThingEventHandler ThingCreated;
+
+		public static event GUIEventHandler _CheckboxChecked;
+		public static event GUIEventHandler _CheckboxUnchecked;
+
+		public static event GUIEventHandler _ButtonClicked;
+		public static event GUIEventHandler _ButtonHeld;
+		public static event GUIEventHandler _ButtonHovered;
+		public static event GUIEventHandler _ButtonUnhovered;
+		public static event GUIEventHandler _ButtonPressed;
+		public static event GUIEventHandler _ButtonReleased;
 
 		public static event ThingEventHandler ButtonClicked;
 		public static event ThingEventHandler ButtonHeld;
@@ -50,6 +61,16 @@
 		internal static void SceneStop(string name) => SceneStopped?.Invoke(name);
 
 		internal static void ThingCreate(string uid) => ThingCreated?.Invoke(uid);
+
+		internal static void _CheckboxCheck(GUI.Body body) => _CheckboxChecked?.Invoke(body);
+		internal static void _CheckboxUncheck(GUI.Body body) => _CheckboxUnchecked?.Invoke(body);
+
+		internal static void _ButtonClick(GUI.Body body) => _ButtonClicked?.Invoke(body);
+		internal static void _ButtonHold(GUI.Body body) => _ButtonHeld?.Invoke(body);
+		internal static void _ButtonHover(GUI.Body body) => _ButtonHovered?.Invoke(body);
+		internal static void _ButtonUnhover(GUI.Body body) => _ButtonUnhovered?.Invoke(body);
+		internal static void _ButtonPress(GUI.Body body) => _ButtonPressed?.Invoke(body);
+		internal static void _ButtonRelease(GUI.Body body) => _ButtonReleased?.Invoke(body);
 
 		internal static void ButtonClick(string uid) => ButtonClicked?.Invoke(uid);
 		internal static void ButtonHold(string uid) => ButtonHeld?.Invoke(uid);

@@ -138,11 +138,20 @@ namespace SMPL
 
 		static Game()
 		{
-			var img = new Image(2, 2);
-			img.SetPixel(0, 0, Color.Magenta);
-			img.SetPixel(1, 0, Color.Black);
-			img.SetPixel(1, 1, Color.Magenta);
-			img.SetPixel(0, 1, Color.Black);
+			const uint SIZE = 8;
+			var img = new Image(SIZE, SIZE);
+			for(uint y = 0; y < SIZE; y++)
+				for(uint x = 0; x < SIZE; x++)
+				{
+					var col = Color.Black;
+					if(x % 2 == 1)
+						col = y % 2 == 0 ? Color.Magenta : Color.Black;
+					else
+						col = y % 2 == 0 ? Color.Black : Color.Magenta;
+
+					img.SetPixel(x, y, col);
+				}
+
 			defaultTexture = new Texture(img);
 			img.Dispose();
 		}
