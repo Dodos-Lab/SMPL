@@ -83,7 +83,6 @@
 
 			var local = text.GetLocalBounds(); // has to be after everything
 			text.Origin = new(local.Width * OriginUnit.X, local.Height * OriginUnit.Y * 1.4f);
-			text.Position = text.Position;
 		}
 		private Font GetFont()
 		{
