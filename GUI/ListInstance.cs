@@ -1,4 +1,4 @@
-﻿namespace SMPL.UI
+﻿namespace SMPL.GUI
 {
 	internal class ListInstance : ScrollBarInstance
 	{
@@ -6,26 +6,26 @@
 		{
 			get
 			{
-				var u = GetButtonUp();
-				var d = GetButtonDown();
-				var baseBB = base.BoundingBox;
-				var up = u == null ? baseBB.Lines : u.BoundingBox.Lines;
-				var down = d == null ? baseBB.Lines : d.BoundingBox.Lines;
-
-				if(up.Count == 0 || down.Count == 0)
-					return bb;
-
-				var tl = up[0].A;
-				var tr = down[1].A;
-				var br = down[2].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
-				var bl = up[3].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
-
-				bb.Lines.Clear();
-				bb.LocalLines.Clear();
-				bb.Lines.Add(new(tl, tr));
-				bb.Lines.Add(new(tr, br));
-				bb.Lines.Add(new(br, bl));
-				bb.Lines.Add(new(bl, tl));
+				//var u = GetButtonUp();
+				//var d = GetButtonDown();
+				//var baseBB = base.BoundingBox;
+				//var up = u == null ? baseBB.Lines : u.BoundingBox.Lines;
+				//var down = d == null ? baseBB.Lines : d.BoundingBox.Lines;
+				//
+				//if(up.Count == 0 || down.Count == 0)
+				//	return bb;
+				//
+				//var tl = up[0].A;
+				//var tr = down[1].A;
+				//var br = down[2].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
+				//var bl = up[3].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
+				//
+				//bb.Lines.Clear();
+				//bb.LocalLines.Clear();
+				//bb.Lines.Add(new(tl, tr));
+				//bb.Lines.Add(new(tr, br));
+				//bb.Lines.Add(new(br, bl));
+				//bb.Lines.Add(new(bl, tl));
 				return bb;
 			}
 		}
@@ -39,10 +39,11 @@
 		{
 			get
 			{
-				var max = Math.Max(VisibleButtonCountMax, 1);
-				var down = GetButtonDown();
-				var sz = down == null ? 0 : down.LocalSize.X * 2;
-				return (MaxLength + sz) / max - (ButtonSpacing - (ButtonSpacing / max));
+				//var max = Math.Max(VisibleButtonCountMax, 1);
+				//var down = GetButtonDown();
+				//var sz = down == null ? 0 : down.LocalSize.X * 2;
+				//return (MaxLength + sz) / max - (ButtonSpacing - (ButtonSpacing / max));
+				return 0;
 			}
 		}
 		public float ButtonSpacing
@@ -60,7 +61,7 @@
 
 		[JsonConstructor]
 		internal ListInstance() => Init();
-		internal ListInstance(string uid, string btnUpUID, string btnDownUID) : base(uid, btnUpUID, btnDownUID)
+		internal ListInstance(string uid) : base(uid)
 		{
 			Init();
 		}
@@ -86,8 +87,8 @@
 			scrollIndex = (int)Value;
 
 			var nothingToScroll = btnUIDs.Count != 0 && RangeA == RangeB;
-			var up = GetButtonUp();
-			var down = GetButtonDown();
+			var up = default(ButtonInstance);//GetButtonUp();
+			var down = default(ButtonInstance);//GetButtonDown();
 			var sz = up == null ? 0 : up.LocalSize.X;
 			if(up != null)
 			{

@@ -1,4 +1,4 @@
-﻿namespace SMPL.UI
+﻿namespace SMPL.GUI
 {
 	internal class InputboxInstance : TextboxInstance
 	{
@@ -38,7 +38,7 @@
 
 		[JsonConstructor]
 		internal InputboxInstance() => Init();
-		internal InputboxInstance(string uid, string fontPath) : base(uid, fontPath)
+		internal InputboxInstance(string uid, uint resX, uint resY) : base(uid, resX, resY)
 		{
 			Init();
 		}
@@ -48,7 +48,7 @@
 				Game.Window.TextEntered += OnInput;
 			Value = "";
 			CursorColor = Color.White;
-			Alignment = Thing.TextboxAlignment.Left;
+			Alignment = Thing.GUI.TextboxAlignment.Left;
 			skipParentRender = true;
 		}
 
@@ -63,7 +63,7 @@
 			if(IsHidden)
 				return;
 
-			GetCamera()?.RenderTexture.Clear(BackgroundColor);
+			rend.Clear(BackgroundColor);
 			TryDrawPlaceholder();
 			base.OnDraw(renderTarget);
 			TryDrawCursor(renderTarget);
@@ -156,7 +156,7 @@
 			textInstance.FillColor = PlaceholderColor;
 			textInstance.DisplayedString = $"  {PlaceholderValue}";
 
-			GetCamera()?.RenderTexture.Draw(textInstance, new(SFML.Graphics.BlendMode.Alpha));
+			rend.Draw(textInstance);
 		}
 		private void TryInput()
 		{
@@ -270,11 +270,11 @@
 				new(br.ToSFML(), CursorColor),
 				new(bl.ToSFML(), CursorColor),
 			};
-			GetCamera()?.RenderTexture.Draw(verts, PrimitiveType.Quads);
+			rend.Draw(verts, PrimitiveType.Quads);
 		}
 		private void TryMoveTextWhenCursorOut()
 		{
-			var w = GetRes().X / 2f;
+			var w = rend.Size.X / 2f;
 			var value = SymbolSize * 0.3f;
 
 			if(cursorPosX >= w)

@@ -4,13 +4,13 @@
 	{
 		public delegate void EventHandler();
 		public delegate void ThingEventHandler(string thingUID);
+		public delegate void ScrollBarEventHandler(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection);
 		public delegate void SceneEventHandler(string sceneName);
 		public delegate void MultiplayerClientEventHandler(string clientUniqueID);
 		public delegate void MultiplayerServerEventHandler();
 		public delegate void MultiplayerMessageEventHandler(LAN.Message message);
 		public delegate void ParticleEventHandler(string particleManagerUID, Thing.Particle particle);
 		public delegate void ListMultiselectEventHandler(string buttonUID, bool isSelected);
-		public delegate void GUIEventHandler(GUI.Body body);
 
 		public static event MultiplayerClientEventHandler MultiplayerClientConnected;
 		public static event MultiplayerClientEventHandler MultiplayerClientDisconnected;
@@ -27,16 +27,6 @@
 
 		public static event ThingEventHandler ThingCreated;
 
-		public static event GUIEventHandler _CheckboxChecked;
-		public static event GUIEventHandler _CheckboxUnchecked;
-
-		public static event GUIEventHandler _ButtonClicked;
-		public static event GUIEventHandler _ButtonHeld;
-		public static event GUIEventHandler _ButtonHovered;
-		public static event GUIEventHandler _ButtonUnhovered;
-		public static event GUIEventHandler _ButtonPressed;
-		public static event GUIEventHandler _ButtonReleased;
-
 		public static event ThingEventHandler ButtonClicked;
 		public static event ThingEventHandler ButtonHeld;
 		public static event ThingEventHandler ButtonHovered;
@@ -45,6 +35,14 @@
 		public static event ThingEventHandler ButtonReleased;
 		public static event ThingEventHandler ButtonDragged;
 		public static event ThingEventHandler ButtonDropped;
+
+		public static event ScrollBarEventHandler ScrollBarButtonClicked;
+		public static event ScrollBarEventHandler ScrollBarButtonHeld;
+		public static event ScrollBarEventHandler ScrollBarButtonHovered;
+		public static event ScrollBarEventHandler ScrollBarButtonUnhovered;
+		public static event ScrollBarEventHandler ScrollBarButtonPressed;
+		public static event ScrollBarEventHandler ScrollBarButtonReleased;
+		public static event ScrollBarEventHandler ScrollBarScrolled;
 
 		public static event ThingEventHandler CheckboxChecked;
 		public static event ThingEventHandler InputboxSubmitted;
@@ -62,16 +60,6 @@
 
 		internal static void ThingCreate(string uid) => ThingCreated?.Invoke(uid);
 
-		internal static void _CheckboxCheck(GUI.Body body) => _CheckboxChecked?.Invoke(body);
-		internal static void _CheckboxUncheck(GUI.Body body) => _CheckboxUnchecked?.Invoke(body);
-
-		internal static void _ButtonClick(GUI.Body body) => _ButtonClicked?.Invoke(body);
-		internal static void _ButtonHold(GUI.Body body) => _ButtonHeld?.Invoke(body);
-		internal static void _ButtonHover(GUI.Body body) => _ButtonHovered?.Invoke(body);
-		internal static void _ButtonUnhover(GUI.Body body) => _ButtonUnhovered?.Invoke(body);
-		internal static void _ButtonPress(GUI.Body body) => _ButtonPressed?.Invoke(body);
-		internal static void _ButtonRelease(GUI.Body body) => _ButtonReleased?.Invoke(body);
-
 		internal static void ButtonClick(string uid) => ButtonClicked?.Invoke(uid);
 		internal static void ButtonHold(string uid) => ButtonHeld?.Invoke(uid);
 		internal static void ButtonHover(string uid) => ButtonHovered?.Invoke(uid);
@@ -80,6 +68,21 @@
 		internal static void ButtonRelease(string uid) => ButtonReleased?.Invoke(uid);
 		internal static void ButtonDrag(string uid) => ButtonDragged?.Invoke(uid);
 		internal static void ButtonDrop(string uid) => ButtonDropped?.Invoke(uid);
+
+		internal static void ScrollBarButtonClick(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
+			=> ScrollBarButtonClicked?.Invoke(scrollBarUID, scrollDirection);
+		internal static void ScrollBarButtonHold(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
+			=> ScrollBarButtonHeld?.Invoke(scrollBarUID, scrollDirection);
+		internal static void ScrollBarButtonHover(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
+			=> ScrollBarButtonHovered?.Invoke(scrollBarUID, scrollDirection);
+		internal static void ScrollBarButtonUnhover(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
+			=> ScrollBarButtonUnhovered?.Invoke(scrollBarUID, scrollDirection);
+		internal static void ScrollBarButtonPress(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
+			=> ScrollBarButtonPressed?.Invoke(scrollBarUID, scrollDirection);
+		internal static void ScrollBarButtonRelease(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
+			=> ScrollBarButtonReleased?.Invoke(scrollBarUID, scrollDirection);
+		internal static void ScrollBarScroll(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
+			=> ScrollBarScrolled?.Invoke(scrollBarUID, scrollDirection);
 
 		internal static void CheckboxCheck(string uid) => CheckboxChecked?.Invoke(uid);
 		internal static void InputboxSubmit(string uid) => InputboxSubmitted?.Invoke(uid);

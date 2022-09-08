@@ -1,4 +1,4 @@
-﻿namespace SMPL.UI
+﻿namespace SMPL.GUI
 {
 	internal class ListCarouselInstance : ListInstance
 	{
@@ -6,20 +6,20 @@
 		{
 			get
 			{
-				var prev = GetButtonDown();
-				var next = GetButtonUp();
-				var baseBB = base.bb;
-				var tl = prev == null ? baseBB.Lines[0].A : prev.BoundingBox.Lines[0].A;
-				var tr = next == null ? baseBB.Lines[1].A : next.BoundingBox.Lines[1].A;
-				var br = next == null ? baseBB.Lines[2].A : next.BoundingBox.Lines[2].A;
-				var bl = prev == null ? baseBB.Lines[3].A : prev.BoundingBox.Lines[3].A;
+				//var prev = GetButtonDown();
+				//var next = GetButtonUp();
+				//var baseBB = base.bb;
+				//var tl = prev == null ? baseBB.Lines[0].A : prev.BoundingBox.Lines[0].A;
+				//var tr = next == null ? baseBB.Lines[1].A : next.BoundingBox.Lines[1].A;
+				//var br = next == null ? baseBB.Lines[2].A : next.BoundingBox.Lines[2].A;
+				//var bl = prev == null ? baseBB.Lines[3].A : prev.BoundingBox.Lines[3].A;
 
-				bb.Lines.Clear();
-				bb.Lines.Add(new(tl, tr));
-				bb.Lines.Add(new(tr, br));
-				bb.Lines.Add(new(br, bl));
-				bb.Lines.Add(new(bl, tl));
-				bb.TransformLocalLines(UID);
+				//bb.Lines.Clear();
+				//bb.Lines.Add(new(tl, tr));
+				//bb.Lines.Add(new(tr, br));
+				//bb.Lines.Add(new(br, bl));
+				//bb.Lines.Add(new(bl, tl));
+				//bb.TransformLocalLines(UID);
 				return bb;
 			}
 		}
@@ -38,7 +38,7 @@
 
 		#region Backend
 		internal ListCarouselInstance() => Init();
-		internal ListCarouselInstance(string uid, string buttonPreviousUID, string buttonNextUID) : base(uid, buttonPreviousUID, buttonNextUID)
+		internal ListCarouselInstance(string uid) : base(uid)
 		{
 			Init();
 		}
@@ -73,8 +73,8 @@
 			IsFocused = BoundingBox.IsHovered;
 			UpdateDefaultValues();
 
-			var prev = GetButtonDown();
-			var next = GetButtonUp();
+			var prev = default(ButtonInstance);//GetButtonDown();
+			var next = default(ButtonInstance);//GetButtonUp();
 			var selection = Get<ButtonInstance>(SelectionUID);
 			var btnUIDs = GetButtonUIDs();
 

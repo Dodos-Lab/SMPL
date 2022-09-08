@@ -98,7 +98,6 @@
 
 			renderTarget.Draw(verts, PrimitiveType.Quads, new(GetBlendMode(), Transform.Identity, tex, GetShader(renderTarget)));
 		}
-
 		#endregion
 	}
 }

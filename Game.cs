@@ -27,9 +27,9 @@ global using SFML.Graphics.Glsl;
 global using SFML.System;
 global using SFML.Window;
 
+global using SMPL.GUI;
 global using SMPL.Prefabs;
 global using SMPL.Tools;
-global using SMPL.UI;
 
 global using Color = SFML.Graphics.Color;
 global using Console = SMPL.Tools.Console;
@@ -143,11 +143,9 @@ namespace SMPL
 			for(uint y = 0; y < SIZE; y++)
 				for(uint x = 0; x < SIZE; x++)
 				{
-					var col = Color.Black;
-					if(x % 2 == 1)
-						col = y % 2 == 0 ? Color.Magenta : Color.Black;
-					else
-						col = y % 2 == 0 ? Color.Black : Color.Magenta;
+					var col = x % 2 == 1 ?
+						(y % 2 == 0 ? Color.Magenta : Color.Black) :
+						(y % 2 == 0 ? Color.Black : Color.Magenta);
 
 					img.SetPixel(x, y, col);
 				}

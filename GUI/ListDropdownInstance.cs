@@ -1,4 +1,4 @@
-﻿namespace SMPL.UI
+﻿namespace SMPL.GUI
 {
 	internal class ListDropdownInstance : ListInstance
 	{
@@ -22,11 +22,9 @@
 
 		[JsonConstructor]
 		internal ListDropdownInstance() => Init();
-		internal ListDropdownInstance(string uid, string btnUpUID, string btnDownUID, string btnShowUID) : base(uid, btnUpUID, btnDownUID)
+		internal ListDropdownInstance(string uid) : base(uid)
 		{
 			Init();
-
-			ButtonShowUID = btnShowUID;
 		}
 		private void Init()
 		{
@@ -82,7 +80,7 @@
 			var showBtn = GetShowButton();
 			if(showBtn != null)
 			{
-				showBtn.Position = GetButtonUp().BoundingBox.Lines[3].A;
+				//showBtn.Position = GetButtonUp().BoundingBox.Lines[3].A;
 				showBtn.OriginUnit = new(0, 1);
 			}
 
@@ -90,8 +88,8 @@
 			if(sel != null && showBtn != null)
 				showBtn.LocalSize = new(sel.LocalSize.Y);
 
-			TrySetButtonVisibility(GetButtonUp(), false);
-			TrySetButtonVisibility(GetButtonDown(), false);
+			//TrySetButtonVisibility(GetButtonUp(), false);
+			//TrySetButtonVisibility(GetButtonDown(), false);
 
 			for(int i = 0; i < btnUIDs.Count; i++)
 				TrySetButtonVisibility(Get<ButtonInstance>(btnUIDs[i]));
@@ -142,7 +140,7 @@
 
 			sel.ParentUID = UID;
 			sel.LocalSize = new(ButtonWidth, ButtonHeight);
-			sel.LocalPosition = new(-ButtonHeight * 0.5f - GetButtonUp().LocalSize.X, ButtonWidth * 0.5f + GetButtonUp().LocalSize.Y * 0.5f);
+			//sel.LocalPosition = new(-ButtonHeight * 0.5f - GetButtonUp().LocalSize.X, ButtonWidth * 0.5f + GetButtonUp().LocalSize.Y * 0.5f);
 		}
 		#endregion
 	}

@@ -1,16 +1,16 @@
-﻿namespace SMPL.UI
+﻿namespace SMPL.GUI
 {
 	internal class SliderInstance : ProgressBarInstance
 	{
-		public float LengthUnit { get; set; }
+		public float LengthUnit { get; set; } = 0.2f;
 		public float Length
 		{
 			get => LengthUnit.Map(0, 1, 0, MaxLength);
 			set => LengthUnit = value.Map(0, MaxLength, 0, 1);
 		}
 
-		public Color ProgressColor { get; set; }
-		public Color EmptyColor { get; set; }
+		public Color ProgressColor { get; set; } = new(255, 255, 255, 100);
+		public Color EmptyColor { get; set; } = new(0, 0, 0, 100);
 
 		#region Backend
 		private bool isClicked;
@@ -19,9 +19,6 @@
 		internal SliderInstance() { }
 		internal SliderInstance(string uid) : base(uid)
 		{
-			ProgressColor = new(255, 255, 255, 100);
-			EmptyColor = new(0, 0, 0, 100);
-			LengthUnit = 0.2f;
 			OriginUnit = new(0.5f);
 		}
 

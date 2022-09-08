@@ -1,4 +1,4 @@
-﻿namespace SMPL.UI
+﻿namespace SMPL.GUI
 {
 	internal class ListMultiselectInstance : ListInstance
 	{
@@ -26,7 +26,7 @@
 
 		[JsonConstructor]
 		internal ListMultiselectInstance() { }
-		internal ListMultiselectInstance(string uid, string btnUpUID, string btnDownUID) : base(uid, btnUpUID, btnDownUID)
+		internal ListMultiselectInstance(string uid) : base(uid)
 		{
 			Event.ButtonClicked += OnButtonClick;
 		}

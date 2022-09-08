@@ -2,8 +2,150 @@
 {
 	public static partial class Thing
 	{
-		public static class UI
+		public static class GUI
 		{
+			public class ButtonDetails
+			{
+				public bool IsHidden { get; set; }
+				public bool IsSmooth { get; set; }
+				public bool IsRepeated { get; set; } = true;
+
+				public virtual string TexturePath { get; set; }
+				public Color Tint { get; set; } = Color.White;
+
+				[JsonIgnore]
+				public Vector2 TexCoordA
+				{
+					set
+					{
+						var tex = GetTexture();
+						TexCoordUnitA = tex == null ? value : value / new Vector2(tex.Size.X, tex.Size.Y);
+					}
+					get
+					{
+						var tex = GetTexture();
+						return tex == null ? TexCoordUnitA : new Vector2(tex.Size.X, tex.Size.Y) * TexCoordUnitA;
+					}
+				}
+				[JsonIgnore]
+				public Vector2 TexCoordB
+				{
+					set
+					{
+						var tex = GetTexture();
+						TexCoordUnitB = tex == null ? value : value / new Vector2(tex.Size.X, tex.Size.Y);
+					}
+					get
+					{
+						var tex = GetTexture();
+						return tex == null ? TexCoordUnitB : new Vector2(tex.Size.X, tex.Size.Y) * TexCoordUnitB;
+					}
+				}
+
+				public Vector2 TexCoordUnitA { get; set; }
+				public Vector2 TexCoordUnitB { get; set; } = new(1);
+
+				#region Backend
+				internal readonly Hitbox boundingBox = new();
+
+				internal Texture GetTexture()
+				{
+					var textures = Scene.CurrentScene.Textures;
+					var path = TexturePath.ToBackslashPath();
+					return path != null && textures.ContainsKey(path) ? textures[path] : Game.defaultTexture;
+				}
+				internal void Draw(RenderTarget renderTarget)
+				{
+					if(IsHidden)
+						return;
+
+					var tex = GetTexture();
+					var w = tex == null ? 0 : tex.Size.X;
+					var h = tex == null ? 0 : tex.Size.Y;
+					var w0 = w * TexCoordUnitA.X;
+					var ww = w * TexCoordUnitB.X;
+					var h0 = h * TexCoordUnitA.Y;
+					var hh = h * TexCoordUnitB.Y;
+
+					var lines = boundingBox.Lines;
+					var verts = new Vertex[]
+					{
+						new(lines[0].A.ToSFML(), Tint, new(w0, h0)),
+						new(lines[1].A.ToSFML(), Tint, new(ww, h0)),
+						new(lines[2].A.ToSFML(), Tint, new(ww, hh)),
+						new(lines[3].A.ToSFML(), Tint, new(w0, hh)),
+					};
+
+					renderTarget.Draw(verts, PrimitiveType.Quads, new(tex));
+				}
+				#endregion
+			}
+			public class TextDetails
+			{
+				public bool IsHidden { get; set; }
+				public string FontPath { get; set; }
+				public string Value { get; set; } = "Hello, World!";
+				public Color Color { get; set; } = Color.White;
+				public int SymbolSize
+				{
+					get => symbolSize;
+					set => symbolSize = value.Limit(0, 2048, Extensions.Limitation.Overflow);
+				}
+				public float SymbolSpace { get; set; } = 1;
+				public float LineSpace { get; set; } = 1;
+				public Color OutlineColor { get; set; } = Color.Black;
+				public float OutlineSize { get; set; } = 1;
+				public Text.Styles Style { get; set; }
+				public Vector2 OriginUnit { get; set; } = new(0.5f);
+
+				#region Backend
+				private int symbolSize = 32;
+
+				internal void OnDraw(RenderTarget renderTarget)
+				{
+					if(IsHidden || GetFont() == null)
+						return;
+
+					renderTarget.Draw(TextInstance.textInstance);
+				}
+
+				internal void UpdateGlobalText(float scale)
+				{
+					var text = TextInstance.textInstance;
+					text.Font = GetFont();
+					text.CharacterSize = (uint)SymbolSize.Limit(0, int.MaxValue);
+					text.FillColor = Color;
+					text.LetterSpacing = SymbolSpace;
+					text.LineSpacing = LineSpace;
+					text.OutlineColor = OutlineColor;
+					text.OutlineThickness = OutlineSize;
+					text.Style = Style;
+					text.DisplayedString = Value;
+					text.Position = new();
+					text.Rotation = 0;
+					text.Scale = new(scale, scale);
+
+					var local = text.GetLocalBounds(); // has to be after everything
+					text.Origin = new(local.Width * OriginUnit.X, local.Height * OriginUnit.Y * 1.4f);
+				}
+				private Font GetFont()
+				{
+					var fonts = Scene.CurrentScene.Fonts;
+					var path = FontPath.ToBackslashPath();
+					return path != null && fonts.ContainsKey(path) ? fonts[path] : null;
+				}
+				#endregion
+			}
+
+			public enum ScrollDirection { Up, Down }
+			public enum TextboxAlignment
+			{
+				TopLeft, Top, TopRight,
+				Left, Center, Right,
+				BottomLeft, Bottom, BottomRight
+			}
+			public enum TextboxSymbolCollection { Character, Word, Line }
+
 			public static string CreateButton(string uid, string texturePath)
 			{
 				var t = new ButtonInstance(uid) { TexturePath = texturePath };
@@ -19,21 +161,23 @@
 				var t = new ProgressBarInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
-			public static string CreateTextButton(string uid, string textUID, string texturePath, string fontPath, string value = "Hello, World!")
+			public static string CreateTextButton(string uid, string texturePath, string fontPath, string value = "Hello, World!")
 			{
-				var t = new TextButtonInstance(uid, CreateText(textUID, fontPath, value)) { TexturePath = texturePath };
+				var t = new TextButtonInstance(uid) { TexturePath = texturePath };
+				t.TextDetails.FontPath = fontPath;
+				t.TextDetails.Value = value;
 				return t.UID;
 			}
-			public static string CreateTextbox(string uid, string cameraUID, string fontPath, string value = "Hello, World!",
+			public static string CreateTextbox(string uid, string fontPath, string value = "Hello, World!",
 				uint resolutionX = 200, uint resolutionY = 200)
 			{
-				var t = new TextboxInstance(uid, CreateCamera(cameraUID, new(resolutionX, resolutionY))) { FontPath = fontPath, Value = value };
+				var t = new TextboxInstance(uid, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
-			public static string CreateInputbox(string uid, string cameraUID, string fontPath, string value = "Hello, World!",
+			public static string CreateInputbox(string uid, string fontPath, string value = "Hello, World!",
 				uint resolutionX = 300, uint resolutionY = 60)
 			{
-				var t = new InputboxInstance(uid, CreateCamera(cameraUID, new(resolutionX, resolutionY))) { FontPath = fontPath, Value = value };
+				var t = new InputboxInstance(uid, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
 			public static string CreateSlider(string uid, string texturePath)
@@ -41,40 +185,29 @@
 				var t = new SliderInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
-			public static string CreateScrollBar(string uid, string texturePath, string buttonUpUID, string buttonDownUID)
+			public static string CreateScrollBar(string uid, string texturePath)
 			{
-				var up = CreateButton(buttonUpUID, texturePath);
-				var down = CreateButton(buttonDownUID, texturePath);
-				var t = new ScrollBarInstance(uid, up, down) { TexturePath = texturePath };
+				var t = new ScrollBarInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
-			public static string CreateList(string uid, string texturePath, string buttonUpUID, string buttonDownUID)
+			public static string CreateList(string uid, string texturePath)
 			{
-				var up = CreateButton(buttonUpUID, texturePath);
-				var down = CreateButton(buttonDownUID, texturePath);
-				var t = new ListInstance(uid, up, down) { TexturePath = texturePath };
+				var t = new ListInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
-			public static string CreateListCarousel(string uid, string texturePath, string buttonPreviousUID, string buttonNextUID)
+			public static string CreateListCarousel(string uid, string texturePath)
 			{
-				var up = CreateButton(buttonPreviousUID, texturePath);
-				var down = CreateButton(buttonNextUID, texturePath);
-				var t = new ListCarouselInstance(uid, up, down) { TexturePath = texturePath };
+				var t = new ListCarouselInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
-			public static string CreateListDropdown(string uid, string texturePath, string buttonUpUID, string buttonDownUID, string buttonShowUID)
+			public static string CreateListDropdown(string uid, string texturePath)
 			{
-				var up = CreateButton(buttonUpUID, texturePath);
-				var down = CreateButton(buttonDownUID, texturePath);
-				var show = CreateButton(buttonShowUID, texturePath);
-				var t = new ListDropdownInstance(uid, up, down, show) { TexturePath = texturePath };
+				var t = new ListDropdownInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
-			public static string CreateListMultiselect(string uid, string texturePath, string buttonUpUID, string buttonDownUID)
+			public static string CreateListMultiselect(string uid, string texturePath)
 			{
-				var up = CreateButton(buttonUpUID, texturePath);
-				var down = CreateButton(buttonDownUID, texturePath);
-				var t = new ListMultiselectInstance(uid, up, down) { TexturePath = texturePath };
+				var t = new ListMultiselectInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
 		}

@@ -117,7 +117,6 @@
 			public const string UI_BUTTON_HOLD_TRIGGER_SPEED = nameof(ButtonInstance.HoldTriggerSpeed);
 
 			public const string UI_TEXT_BUTTON_IS_HYPERLINK = nameof(TextButtonInstance.IsHyperlink);
-			public const string UI_TEXT_BUTTON_TEXT_UID = nameof(TextButtonInstance.TextUID);
 
 			public const string UI_CHECKBOX_IS_CHECKED = nameof(CheckboxInstance.IsChecked);
 
@@ -132,7 +131,6 @@
 			public const string UI_TEXTBOX_BACKGROUND_COLOR = nameof(TextboxInstance.BackgroundColor);
 			public const string UI_TEXTBOX_SHADOW_OFFSET = nameof(TextboxInstance.ShadowOffset);
 			public const string UI_TEXTBOX_SHADOW_COLOR = nameof(TextboxInstance.ShadowColor);
-			public const string UI_TEXTBOX_CAMERA_UID = nameof(TextboxInstance.CameraUID);
 
 			public const string UI_INPUTBOX_IS_FOCUSED = nameof(InputboxInstance.IsFocused);
 			public const string UI_INPUTBOX_CURSOR_COLOR = nameof(InputboxInstance.CursorColor);
@@ -148,8 +146,6 @@
 			public const string UI_SCROLL_BAR_IS_FOCUSED = nameof(ScrollBarInstance.IsFocused);
 			public const string UI_SCROLL_BAR_STEP = nameof(ScrollBarInstance.Step);
 			public const string UI_SCROLL_BAR_STEP_UNIT = nameof(ScrollBarInstance.StepUnit);
-			public const string UI_SCROLL_BAR_BUTTON_UP_UID = nameof(ScrollBarInstance.ButtonUpUID);
-			public const string UI_SCROLL_BAR_BUTTON_DOWN_UID = nameof(ScrollBarInstance.ButtonDownUID);
 
 			public const string UI_LIST_BUTTONS_TAG = nameof(ListInstance.ButtonsTag);
 			public const string UI_LIST_VISIBLE_BUTTON_COUNT_MAX = nameof(ListInstance.VisibleButtonCountMax);

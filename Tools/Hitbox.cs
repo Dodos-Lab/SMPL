@@ -147,5 +147,84 @@
 			}
 			return result;
 		}
+
+		#region Backend
+		internal struct ButtonResult
+		{
+			public Vector2 DragDelta { get; set; }
+			public bool IsHeld { get; set; }
+			public bool IsPressed { get; set; }
+			public bool IsReleased { get; set; }
+			public bool IsHovered { get; set; }
+			public bool IsUnhovered { get; set; }
+			public bool IsDragged { get; set; }
+			public bool IsClicked { get; set; }
+			public bool IsDropped { get; set; }
+		}
+
+		private float holdDelayTimer, holdTriggerTimer;
+		private bool isClicked, preventClick;
+
+		internal ButtonResult TryButton(float holdDelay = 0.5f, float holdTriggerSpeed = 0.1f, bool isDraggable = false)
+		{
+			var result = new ButtonResult();
+			holdDelayTimer -= Time.Delta;
+			holdTriggerTimer = holdTriggerTimer < 0 ? holdTriggerSpeed : holdTriggerTimer - Time.Delta;
+
+			var hovered = IsHovered;
+			var leftClicked = Mouse.IsButtonPressed(Mouse.Button.Left);
+			var id = GetHashCode();
+			var isTime = holdTriggerTimer < 0 && holdDelayTimer < 0;
+
+			if(isTime && hovered && isClicked)
+				result.IsHeld = true;
+
+			if(hovered.Once($"{id}-hovered"))
+			{
+				if(isClicked)
+					result.IsPressed = true;
+
+				result.IsHovered = true;
+			}
+
+			if((hovered == false).Once($"{id}-unhovered"))
+				result.IsUnhovered = true;
+
+			if(leftClicked.Once($"{id}-press") && hovered)
+			{
+				isClicked = true;
+				holdDelayTimer = holdDelay;
+				result.IsPressed = true;
+
+				if(isDraggable)
+					result.IsDragged = true;
+			}
+
+			if((leftClicked == false).Once($"{id}-release"))
+			{
+				if(hovered)
+				{
+					if(isClicked && preventClick == false)
+						result.IsClicked = true;
+
+					if(isClicked && isDraggable)
+						result.IsDropped = true;
+
+					result.IsReleased = true;
+					result.IsHovered = true;
+				}
+				isClicked = false;
+				preventClick = false;
+			}
+
+			if(isClicked && isDraggable)
+				result.DragDelta = Scene.MouseCursorDelta;
+
+			if(result.IsHeld)
+				preventClick = true;
+
+			return result;
+		}
+		#endregion
 	}
 }

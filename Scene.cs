@@ -2,6 +2,7 @@
 {
 	public sealed class Scene
 	{
+		public static Vector2 MouseCursorDelta => mouseDelta;
 		public static Vector2 MouseCursorPosition
 		{
 			get => MainCamera.MouseCursorPosition;
@@ -243,6 +244,7 @@
 			}
 		}
 
+		private static Vector2 mouseDelta, prevMousePos;
 		private bool hasStarted;
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		internal static Thread assetsLoading;
@@ -463,6 +465,10 @@
 				Event.SceneUpdate(LoadingScene.Name);
 			else if(CurrentScene.hasStarted && CurrentScene != null)
 				Event.SceneUpdate(CurrentScene.Name);
+
+			var mousePos = MouseCursorPosition;
+			mouseDelta = MouseCursorPosition - prevMousePos;
+			prevMousePos = mousePos;
 		}
 		internal static void ThreadLoadAssets()
 		{
