@@ -7,16 +7,15 @@
 		public delegate void ScrollBarEventHandler(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection);
 		public delegate void SceneEventHandler(string sceneName);
 		public delegate void MultiplayerClientEventHandler(string clientUniqueID);
-		public delegate void MultiplayerServerEventHandler();
 		public delegate void MultiplayerMessageEventHandler(LAN.Message message);
 		public delegate void ParticleEventHandler(string particleManagerUID, Thing.Particle particle);
-		public delegate void ListMultiselectEventHandler(string buttonUID, bool isSelected);
+		public delegate void ListItemEventHandler(string listUID, int itemIndex, Thing.GUI.ListItem item);
 
 		public static event MultiplayerClientEventHandler MultiplayerClientConnected;
 		public static event MultiplayerClientEventHandler MultiplayerClientDisconnected;
 		public static event MultiplayerClientEventHandler MultiplayerClientTakenUID;
-		public static event MultiplayerServerEventHandler MultiplayerServerStarted;
-		public static event MultiplayerServerEventHandler MultiplayerServerStopped;
+		public static event EventHandler MultiplayerServerStarted;
+		public static event EventHandler MultiplayerServerStopped;
 		public static event MultiplayerMessageEventHandler MultiplayerMessageReceived;
 
 		public static event EventHandler GameStopped;
@@ -44,10 +43,15 @@
 		public static event ScrollBarEventHandler ScrollBarButtonReleased;
 		public static event ScrollBarEventHandler ScrollBarScrolled;
 
+		public static event ListItemEventHandler ListItemClicked;
+		public static event ListItemEventHandler ListItemHeld;
+		public static event ListItemEventHandler ListItemHovered;
+		public static event ListItemEventHandler ListItemUnhovered;
+		public static event ListItemEventHandler ListItemPressed;
+		public static event ListItemEventHandler ListItemReleased;
+
 		public static event ThingEventHandler CheckboxChecked;
 		public static event ThingEventHandler InputboxSubmitted;
-		public static event ThingEventHandler ListButtonClicked;
-		public static event ListMultiselectEventHandler ListMultiselectionChange;
 
 		public static event ParticleEventHandler ParticleUpdated;
 
@@ -69,6 +73,13 @@
 		internal static void ButtonDrag(string uid) => ButtonDragged?.Invoke(uid);
 		internal static void ButtonDrop(string uid) => ButtonDropped?.Invoke(uid);
 
+		internal static void ListItemClick(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemClicked?.Invoke(listUID, itemIndex, item);
+		internal static void ListItemHold(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemHeld?.Invoke(listUID, itemIndex, item);
+		internal static void ListItemHover(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemHovered?.Invoke(listUID, itemIndex, item);
+		internal static void ListItemUnhover(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemUnhovered?.Invoke(listUID, itemIndex, item);
+		internal static void ListItemPress(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemPressed?.Invoke(listUID, itemIndex, item);
+		internal static void ListItemRelease(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemReleased?.Invoke(listUID, itemIndex, item);
+
 		internal static void ScrollBarButtonClick(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
 			=> ScrollBarButtonClicked?.Invoke(scrollBarUID, scrollDirection);
 		internal static void ScrollBarButtonHold(string scrollBarUID, Thing.GUI.ScrollDirection scrollDirection)
@@ -86,8 +97,6 @@
 
 		internal static void CheckboxCheck(string uid) => CheckboxChecked?.Invoke(uid);
 		internal static void InputboxSubmit(string uid) => InputboxSubmitted?.Invoke(uid);
-		internal static void ListButtonClick(string uid) => ListButtonClicked?.Invoke(uid);
-		internal static void ListMultiselectionChanged(string buttonUID, bool isSelected) => ListMultiselectionChange?.Invoke(buttonUID, isSelected);
 
 		internal static void ParticleUpdate(string uid, Thing.Particle particle) => ParticleUpdated?.Invoke(uid, particle);
 

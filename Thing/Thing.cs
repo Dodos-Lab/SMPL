@@ -4,6 +4,11 @@
 	{
 		public static class GUI
 		{
+			public class ListItem
+			{
+				public ButtonDetails ButtonDetails { get; } = new();
+				public TextDetails TextDetails { get; } = new();
+			}
 			public class ButtonDetails
 			{
 				public bool IsHidden { get; set; }
@@ -101,7 +106,7 @@
 				#region Backend
 				private int symbolSize = 32;
 
-				internal void OnDraw(RenderTarget renderTarget)
+				internal void Draw(RenderTarget renderTarget)
 				{
 					if(IsHidden || GetFont() == null)
 						return;
@@ -109,7 +114,7 @@
 					renderTarget.Draw(TextInstance.textInstance);
 				}
 
-				internal void UpdateGlobalText(float scale)
+				internal void UpdateGlobalText(Vector2f position, float scale)
 				{
 					var text = TextInstance.textInstance;
 					text.Font = GetFont();
@@ -121,7 +126,7 @@
 					text.OutlineThickness = OutlineSize;
 					text.Style = Style;
 					text.DisplayedString = Value;
-					text.Position = new();
+					text.Position = position;
 					text.Rotation = 0;
 					text.Scale = new(scale, scale);
 
@@ -174,7 +179,7 @@
 				var t = new TextboxInstance(uid, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
-			public static string CreateInputbox(string uid, string fontPath, string value = "Hello, World!",
+			public static string CreateInputbox(string uid, string fontPath, string value = "",
 				uint resolutionX = 300, uint resolutionY = 60)
 			{
 				var t = new InputboxInstance(uid, resolutionX, resolutionY) { FontPath = fontPath, Value = value };

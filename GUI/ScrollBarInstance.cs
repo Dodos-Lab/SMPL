@@ -2,6 +2,32 @@
 {
 	internal class ScrollBarInstance : SliderInstance
 	{
+		public new Hitbox BoundingBox
+		{
+			get
+			{
+				var prev = Value;
+				Value = RangeB;
+				var baseBB = base.BoundingBox.LocalLines;
+
+				var tl = baseBB[0].A;
+				var tr = baseBB[1].A;
+				var br = baseBB[2].A;
+				var bl = baseBB[3].A;
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.LocalLines.Add(new(tl, tr));
+				bb.LocalLines.Add(new(tr, br));
+				bb.LocalLines.Add(new(br, bl));
+				bb.LocalLines.Add(new(bl, tl));
+				bb.TransformLocalLines(UID);
+
+				Value = prev;
+				return bb;
+			}
+		}
+
 		public Thing.GUI.ButtonDetails ButtonUp { get; } = new();
 		public Thing.GUI.ButtonDetails ButtonDown { get; } = new();
 
@@ -20,17 +46,19 @@
 		#region Backend
 		[JsonConstructor]
 		internal ScrollBarInstance() => Init();
-		internal ScrollBarInstance(string uid) : base(uid) => Init();
-
-		private void Init()
+		internal ScrollBarInstance(string uid) : base(uid)
 		{
 			Angle = 90;
-
 			StepUnit = 0.1f;
 
 			EmptyColor = new(255, 255, 255, 100);
 			ProgressColor = new(255, 255, 255, 100);
 
+			Init();
+		}
+
+		private void Init()
+		{
 			Event.ScrollBarButtonClicked += OnButtonClick;
 			Event.ScrollBarButtonHeld += OnButtonHold;
 
@@ -86,16 +114,18 @@
 		}
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			if(IsHidden)
-				return;
-
-			base.OnDraw(renderTarget);
+			if(IsHidden == false)
+				base.OnDraw(renderTarget);
 
 			UpdateButtonBoundingBoxes();
-			TryButtonEvents();
+			if(IsDisabled == false)
+				TryButtonEvents();
 
-			ButtonUp.Draw(renderTarget);
-			ButtonDown.Draw(renderTarget);
+			if(IsHidden == false)
+			{
+				ButtonUp.Draw(renderTarget);
+				ButtonDown.Draw(renderTarget);
+			}
 		}
 		internal override void OnDestroy()
 		{
@@ -119,7 +149,7 @@
 			bbD.Lines.Clear();
 			bbD.LocalLines.Clear();
 
-			var sz = Size.Y;
+			var sz = LocalSize.Y;
 			var a = local[0].A;
 			var b = local[1].A;
 			var c = local[2].A;

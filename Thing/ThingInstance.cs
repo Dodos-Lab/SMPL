@@ -129,7 +129,7 @@
 			get => localSc;
 			set { localSc = value; UpdateSelfAndChildren(); }
 		}
-		public float LocalAngle
+		public virtual float LocalAngle
 		{
 			get => localAng.AngleTo360();
 			set { localAng = value; UpdateSelfAndChildren(); }

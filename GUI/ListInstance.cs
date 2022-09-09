@@ -6,47 +6,39 @@
 		{
 			get
 			{
-				//var u = GetButtonUp();
-				//var d = GetButtonDown();
-				//var baseBB = base.BoundingBox;
-				//var up = u == null ? baseBB.Lines : u.BoundingBox.Lines;
-				//var down = d == null ? baseBB.Lines : d.BoundingBox.Lines;
-				//
-				//if(up.Count == 0 || down.Count == 0)
-				//	return bb;
-				//
-				//var tl = up[0].A;
-				//var tr = down[1].A;
-				//var br = down[2].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
-				//var bl = up[3].A.PointMoveAtAngle(Angle + 90, ButtonWidth * Scale, false);
-				//
-				//bb.Lines.Clear();
-				//bb.LocalLines.Clear();
-				//bb.Lines.Add(new(tl, tr));
-				//bb.Lines.Add(new(tr, br));
-				//bb.Lines.Add(new(br, bl));
-				//bb.Lines.Add(new(bl, tl));
+				var baseBB = base.BoundingBox.Lines;
+
+				var tl = baseBB[0].A.PointMoveAtAngle(Angle + 90, Size.Y, false).PointMoveAtAngle(Angle + 180, Size.Y, false);
+				var tr = baseBB[1].A.PointMoveAtAngle(Angle + 90, Size.Y, false).PointMoveAtAngle(Angle, Size.Y, false);
+				var br = tr.PointMoveAtAngle(Angle + 90, ItemWidth * Scale, false);
+				var bl = tl.PointMoveAtAngle(Angle + 90, ItemWidth * Scale, false);
+
+				bb.Lines.Clear();
+				bb.LocalLines.Clear();
+				bb.Lines.Add(new(tl, tr));
+				bb.Lines.Add(new(tr, br));
+				bb.Lines.Add(new(br, bl));
+				bb.Lines.Add(new(bl, tl));
 				return bb;
 			}
 		}
-		public string ButtonsTag { get; set; }
 
-		public int VisibleButtonCountMax { get; set; } = 5;
-		public int VisibleButtonCountCurrent => Math.Min(GetButtonUIDs().Count, VisibleButtonCountMax);
+		public List<Thing.GUI.ListItem> Items { get; } = new();
 
-		public float ButtonWidth { get; set; } = 400;
-		public float ButtonHeight
+		public int VisibleItemCountMax { get; set; } = 5;
+		public int VisibleItemCountCurrent => Math.Min(Items.Count, VisibleItemCountMax);
+
+		public float ItemWidth { get; set; } = 300;
+		public float ItemHeight
 		{
 			get
 			{
-				//var max = Math.Max(VisibleButtonCountMax, 1);
-				//var down = GetButtonDown();
-				//var sz = down == null ? 0 : down.LocalSize.X * 2;
-				//return (MaxLength + sz) / max - (ButtonSpacing - (ButtonSpacing / max));
-				return 0;
+				var max = Math.Max(VisibleItemCountMax, 1);
+				var sp = ItemSpacing;
+				return (MaxLength + LocalSize.Y * 2f) / max - (sp - (sp / max));
 			}
 		}
-		public float ButtonSpacing
+		public float ItemSpacing
 		{
 			get => spacing;
 			set => spacing = value.Limit(0, MaxLength);
@@ -57,7 +49,6 @@
 		#region Backend
 		private float spacing = 5;
 		private int scrollIndex;
-		private string clickedUID;
 
 		[JsonConstructor]
 		internal ListInstance() => Init();
@@ -69,104 +60,93 @@
 		{
 			Value = 0;
 		}
+		private void UpdateButtonBoundingBoxes()
+		{
+			for(int i = 0; i < Items.Count; i++)
+			{
+				var item = Items[i];
+				var itemBB = item.ButtonDetails.boundingBox;
+				var corners = GetItemCorners(i);
+
+				itemBB.LocalLines.Clear();
+				itemBB.Lines.Clear();
+				itemBB.Lines.Add(new(corners[0], corners[1]));
+				itemBB.Lines.Add(new(corners[1], corners[2]));
+				itemBB.Lines.Add(new(corners[2], corners[3]));
+				itemBB.Lines.Add(new(corners[3], corners[0]));
+
+				var hidden = i.IsBetween(ScrollIndex, ScrollIndex + VisibleItemCountCurrent - 1, true, true) == false;
+				item.ButtonDetails.IsHidden = hidden;
+				item.TextDetails.IsHidden = hidden;
+			}
+		}
 		private void TryUpdate()
 		{
-			if(IsDisabled)
-				return;
-
-			OriginUnit = new(0, 0.5f);
-
-			var btnUIDs = GetButtonUIDs();
-			VisibleButtonCountMax = Math.Max(VisibleButtonCountMax, 1);
+			VisibleItemCountMax = Math.Max(VisibleItemCountMax, 1);
 			IsFocused = BoundingBox.IsHovered;
 
 			Step = 1;
 			RangeA = 0;
-			RangeB = MathF.Max((btnUIDs.Count - VisibleButtonCountMax).Limit(0, btnUIDs.Count - 1), RangeA);
+			RangeB = MathF.Max((Items.Count - VisibleItemCountMax).Limit(1, Items.Count - 1), RangeA);
 
 			scrollIndex = (int)Value;
 
-			var nothingToScroll = btnUIDs.Count != 0 && RangeA == RangeB;
-			var up = default(ButtonInstance);//GetButtonUp();
-			var down = default(ButtonInstance);//GetButtonDown();
-			var sz = up == null ? 0 : up.LocalSize.X;
-			if(up != null)
+			UpdateButtonBoundingBoxes();
+		}
+		private void TryButtonEvents()
+		{
+			for(int i = 0; i < Items.Count; i++)
 			{
-				up.IsHiddenSelf = nothingToScroll;
-				up.IsDisabledSelf = nothingToScroll;
-			}
-			if(down != null)
-			{
-				down.IsHiddenSelf = nothingToScroll;
-				down.IsDisabledSelf = nothingToScroll;
-			}
-
-			for(int i = 0; i < btnUIDs.Count; i++)
-			{
-				var btn = Get<ButtonInstance>(btnUIDs[i]);
-				if(btn == null)
+				var item = Items[i];
+				if(item.ButtonDetails.IsHidden && item.TextDetails.IsHidden)
 					continue;
 
-				var isVisible = i >= scrollIndex && i < scrollIndex + VisibleButtonCountMax;
-				btn.ParentUID = UID;
-				btn.IsHiddenSelf = isVisible == false;
-				btn.IsDisabledSelf = isVisible == false;
+				var itemBB = item.ButtonDetails.boundingBox;
+				var buttonResult = itemBB.TryButton();
 
-				if(isVisible == false)
-					continue;
-
-				var x = ButtonHeight * 0.5f - sz + ((ButtonHeight + ButtonSpacing) * (i - scrollIndex));
-				var y = -LocalSize.Y * OriginUnit.Y + ButtonWidth * 0.5f + LocalSize.Y;
-
-				btn.LocalSize = new(ButtonWidth, ButtonHeight);
-				btn.LocalAngle = 270;
-				btn.Scale = Scale;
-				btn.OriginUnit = new(0.5f);
-				btn.LocalPosition = new(x, y);
-			}
-
-			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
-			if(left.Once($"click-list-{GetHashCode()}"))
-			{
-				clickedUID = null;
-				var first = ScrollIndex.Limit(0, btnUIDs.Count);
-				var last = (ScrollIndex + VisibleButtonCountMax).Limit(0, btnUIDs.Count);
-				for(int i = first; i < last; i++)
+				var events = new List<(bool, Action<string, int, Thing.GUI.ListItem>)>()
 				{
-					var btn = Get<ButtonInstance>(btnUIDs[i]);
-					if(btn == null)
-						continue;
+					(buttonResult.IsHovered, Event.ListItemHover), (buttonResult.IsUnhovered, Event.ListItemUnhover),
+					(buttonResult.IsPressed, Event.ListItemPress), (buttonResult.IsReleased, Event.ListItemRelease),
+					(buttonResult.IsClicked, Event.ListItemClick), (buttonResult.IsHeld, Event.ListItemHold),
+				};
 
-					if(btn.BoundingBox.IsHovered)
-						clickedUID = btnUIDs[i];
-				}
-
-				if(BoundingBox.IsHovered == false)
-					OnUnfocus();
-			}
-
-			var clicked = Get<ButtonInstance>(clickedUID);
-			if(clicked == null)
-				return;
-
-			if((left == false).Once($"release-list-{GetHashCode()}") && clickedUID != null && clicked.BoundingBox.IsHovered)
-			{
-				clicked.Hover();
-				Event.ListButtonClick(clickedUID);
+				for(int j = 0; j < events.Count; j++)
+					if(events[j].Item1)
+						events[j].Item2.Invoke(UID, i, item);
 			}
 		}
 
-		protected virtual void OnUnfocus() { }
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
 			if(IsHidden == false)
 				base.OnDraw(renderTarget);
 
-			TryUpdate(); // has to be after draw
+			if(IsDisabled == false)
+				TryButtonEvents();
+
+			TryUpdate();
+
+			if(IsHidden == false)
+				for(int i = 0; i < Items.Count; i++)
+				{
+					var item = Items[i];
+					item.ButtonDetails.Draw(renderTarget);
+
+					var itemCorners = GetItemCorners(i);
+					var itemCenter = itemCorners[0].PointPercentTowardPoint(itemCorners[2], new(50));
+					item.TextDetails.UpdateGlobalText(itemCenter.ToSFML(), Scale);
+					item.TextDetails.Draw(renderTarget);
+				}
 		}
-		internal List<string> GetButtonUIDs()
+		private List<Vector2> GetItemCorners(int index)
 		{
-			return SMPL.Thing.GetUIDsByTag(ButtonsTag);
+			var bb = BoundingBox.Lines;
+			var tl = bb[3].A.PointMoveAtAngle(Angle, ((ItemHeight + ItemSpacing) * Scale) * (index - ScrollIndex), false);
+			var tr = bb[0].A.PointMoveAtAngle(Angle, ((ItemHeight + ItemSpacing) * Scale) * (index - ScrollIndex), false);
+			var br = tr.PointMoveAtAngle(Angle, ItemHeight * Scale, false);
+			var bl = tl.PointMoveAtAngle(Angle, ItemHeight * Scale, false);
+			return new() { tl, tr, br, bl };
 		}
 		#endregion
 	}

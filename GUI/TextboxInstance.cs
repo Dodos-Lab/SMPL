@@ -172,6 +172,7 @@
 		private void Init(Vector2 res)
 		{
 			rend = new((uint)res.X, (uint)res.Y);
+			this.res = res;
 			var view = rend.GetView();
 			view.Center = new();
 			rend.SetView(view);

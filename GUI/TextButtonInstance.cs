@@ -20,7 +20,7 @@
 			if(IsHidden)
 				return;
 
-			TextDetails.UpdateGlobalText(Scale);
+			TextDetails.UpdateGlobalText(new(), Scale);
 			var text = TextInstance.textInstance;
 
 			if(IsDisabled == false && IsHyperlink)

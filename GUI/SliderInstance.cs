@@ -81,10 +81,10 @@
 		}
 		private void TryUpdate()
 		{
+			Size = new(MaxLength * Scale, Size.Y);
+
 			if(IsDisabled)
 				return;
-
-			Size = new(MaxLength * Scale, Size.Y);
 
 			var left = Mouse.IsButtonPressed(Mouse.Button.Left);
 			if(left.Once($"slider-click-{GetHashCode()}") && BoundingBox.IsHovered)

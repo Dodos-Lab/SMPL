@@ -3,18 +3,17 @@
 	internal class ListMultiselectInstance : ListInstance
 	{
 		[JsonIgnore]
-		public ReadOnlyCollection<string> SelectionUIDs
+		public ReadOnlyCollection<Thing.GUI.ListItem> SelectedItems
 		{
 			get
 			{
-				var result = new List<string>();
-				var btnUIDs = GetButtonUIDs();
+				var result = new List<Thing.GUI.ListItem>();
 				for(int i = 0; i < SelectionIndexes.Count; i++)
 				{
-					if(i >= btnUIDs.Count)
+					if(i >= Items.Count)
 						break;
 
-					result.Add(btnUIDs[SelectionIndexes[i]]);
+					result.Add(Items[SelectionIndexes[i]]);
 				}
 				return result.AsReadOnly();
 			}
@@ -33,22 +32,22 @@
 
 		private void OnButtonClick(string thingUID)
 		{
-			if(IsDisabled)
-				return;
-
-			var btnUIDs = GetButtonUIDs();
-			if(btnUIDs.Contains(thingUID) == false)
-				return;
-
-			var index = btnUIDs.IndexOf(thingUID);
-			var contains = selectionIndexes.Contains(index);
-
-			if(contains)
-				selectionIndexes.Remove(index);
-			else
-				selectionIndexes.Add(index);
-
-			Event.ListMultiselectionChanged(thingUID, contains == false);
+			//if(IsDisabled)
+			//	return;
+			//
+			//var btnUIDs = GetButtonUIDs();
+			//if(btnUIDs.Contains(thingUID) == false)
+			//	return;
+			//
+			//var index = btnUIDs.IndexOf(thingUID);
+			//var contains = selectionIndexes.Contains(index);
+			//
+			//if(contains)
+			//	selectionIndexes.Remove(index);
+			//else
+			//	selectionIndexes.Add(index);
+			//
+			//Event.ListMultiselectionChanged(thingUID, contains == false);
 		}
 		#endregion
 	}

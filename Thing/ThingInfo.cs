@@ -147,24 +147,20 @@
 			public const string UI_SCROLL_BAR_STEP = nameof(ScrollBarInstance.Step);
 			public const string UI_SCROLL_BAR_STEP_UNIT = nameof(ScrollBarInstance.StepUnit);
 
-			public const string UI_LIST_BUTTONS_TAG = nameof(ListInstance.ButtonsTag);
-			public const string UI_LIST_VISIBLE_BUTTON_COUNT_MAX = nameof(ListInstance.VisibleButtonCountMax);
-			public const string UI_LIST_VISIBLE_BUTTON_COUNT_CURRENT = nameof(ListInstance.VisibleButtonCountCurrent);
-			public const string UI_LIST_BUTTON_WIDTH = nameof(ListInstance.ButtonWidth);
-			public const string UI_LIST_BUTTON_HEIGHT = nameof(ListInstance.ButtonHeight);
-			public const string UI_LIST_BUTTON_SPACING = nameof(ListInstance.ButtonSpacing);
+			public const string UI_LIST_VISIBLE_BUTTON_COUNT_MAX = nameof(ListInstance.VisibleItemCountMax);
+			public const string UI_LIST_VISIBLE_BUTTON_COUNT_CURRENT = nameof(ListInstance.VisibleItemCountCurrent);
+			public const string UI_LIST_BUTTON_WIDTH = nameof(ListInstance.ItemWidth);
+			public const string UI_LIST_BUTTON_HEIGHT = nameof(ListInstance.ItemHeight);
+			public const string UI_LIST_BUTTON_SPACING = nameof(ListInstance.ItemSpacing);
 			public const string UI_LIST_SCROLL_INDEX = nameof(ListInstance.ScrollIndex);
 
 			public const string UI_LIST_CAROUSEL_IS_REPEATING = nameof(ListCarouselInstance.IsRepeating);
 			public const string UI_LIST_CAROUSEL_SELECTION_INDEX = nameof(ListCarouselInstance.SelectionIndex);
-			public const string UI_LIST_CAROUSEL_SELECTION_UID = nameof(ListCarouselInstance.SelectionUID);
 
 			public const string UI_LIST_DROPDOWN_BUTTON_SHOW_UID = nameof(ListDropdownInstance.ButtonShowUID);
-			public const string UI_LIST_DROPDOWN_SELECTION_UID = nameof(ListDropdownInstance.SelectionUID);
 			public const string UI_LIST_DROPDOWN_SELECTION_INDEX = nameof(ListDropdownInstance.SelectionIndex);
 
 			public const string UI_LIST_MULTISELECT_SELECTION_INDEXES = nameof(ListMultiselectInstance.SelectionIndexes);
-			public const string UI_LIST_MULTISELECT_SELECTION_UIDS = nameof(ListMultiselectInstance.SelectionUIDs);
 			#endregion
 
 			public string Name { get; internal set; }

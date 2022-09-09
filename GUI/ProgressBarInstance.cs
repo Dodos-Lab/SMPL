@@ -46,23 +46,16 @@
 		#region Backend
 		private float val, max, rangeA, rangeB;
 		[JsonConstructor]
-		internal ProgressBarInstance()
-		{
-			Init();
-		}
+		internal ProgressBarInstance() { }
 		internal ProgressBarInstance(string uid) : base(uid)
-		{
-			Init();
-		}
-
-		private void Init()
 		{
 			Size = new Vector2(MaxLength, 40);
 			RangeB = 1;
 			OriginUnit = new(0, 0.5f);
-			MaxLength = 400;
+			MaxLength = 300;
 			ProgressUnit = 0.5f;
 		}
+
 		private void Update()
 		{
 			if(IsDisabled)

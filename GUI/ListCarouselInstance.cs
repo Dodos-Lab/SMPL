@@ -31,10 +31,10 @@
 			set
 			{
 				UpdateDefaultValues();
-				Value = value.Limit(0, GetButtonUIDs().Count, IsRepeating ? Extensions.Limitation.Overflow : Extensions.Limitation.ClosestBound);
+				Value = value.Limit(0, Items.Count, IsRepeating ? Extensions.Limitation.Overflow : Extensions.Limitation.ClosestBound);
 			}
 		}
-		public string SelectionUID => GetButtonUIDs().Count == 0 ? null : GetButtonUIDs()[(int)Value];
+		public Thing.GUI.ListItem SelectedItem => Items.Count == 0 ? null : Items[(int)Value];
 
 		#region Backend
 		internal ListCarouselInstance() => Init();
@@ -64,48 +64,48 @@
 
 		internal override void OnDraw(RenderTarget renderTarget)
 		{
-			if(IsDisabled)
-			{
-				IsFocused = false;
-				return;
-			}
-
-			IsFocused = BoundingBox.IsHovered;
-			UpdateDefaultValues();
-
-			var prev = default(ButtonInstance);//GetButtonDown();
-			var next = default(ButtonInstance);//GetButtonUp();
-			var selection = Get<ButtonInstance>(SelectionUID);
-			var btnUIDs = GetButtonUIDs();
-
-			for(int i = 0; i < btnUIDs.Count; i++)
-			{
-				var btn = Get<ButtonInstance>(btnUIDs[i]);
-				btn.IsHiddenSelf = false;
-				btn.IsDisabledSelf = false;
-			}
-
-			if(prev != null)
-			{
-				prev.ParentUID = UID;
-				prev.OriginUnit = new(0.5f);
-				prev.Size = new Vector2(ButtonHeight, ButtonHeight) * Scale;
-				prev.LocalPosition = new(-ButtonWidth * 0.5f - ButtonHeight * 0.5f, 0);
-			}
-			if(next != null)
-			{
-				next.ParentUID = UID;
-				next.OriginUnit = new(0.5f);
-				next.Size = new Vector2(ButtonHeight, ButtonHeight) * Scale;
-				next.LocalPosition = new(ButtonWidth * 0.5f + ButtonHeight * 0.5f, 0);
-			}
-			if(selection != null)
-			{
-				selection.ParentUID = UID;
-				selection.Size = new Vector2(ButtonWidth, ButtonHeight) * Scale;
-				selection.LocalPosition = new();
-				selection.Angle = Angle;
-			}
+			//if(IsDisabled)
+			//{
+			//	IsFocused = false;
+			//	return;
+			//}
+			//
+			//IsFocused = BoundingBox.IsHovered;
+			//UpdateDefaultValues();
+			//
+			//var prev = default(ButtonInstance);//GetButtonDown();
+			//var next = default(ButtonInstance);//GetButtonUp();
+			//var selection = Get<ButtonInstance>(SelectionUID);
+			//var btnUIDs = GetButtonUIDs();
+			//
+			//for(int i = 0; i < btnUIDs.Count; i++)
+			//{
+			//	var btn = Get<ButtonInstance>(btnUIDs[i]);
+			//	btn.IsHiddenSelf = false;
+			//	btn.IsDisabledSelf = false;
+			//}
+			//
+			//if(prev != null)
+			//{
+			//	prev.ParentUID = UID;
+			//	prev.OriginUnit = new(0.5f);
+			//	prev.Size = new Vector2(ItemHeight, ItemHeight) * Scale;
+			//	prev.LocalPosition = new(-ItemWidth * 0.5f - ItemHeight * 0.5f, 0);
+			//}
+			//if(next != null)
+			//{
+			//	next.ParentUID = UID;
+			//	next.OriginUnit = new(0.5f);
+			//	next.Size = new Vector2(ItemHeight, ItemHeight) * Scale;
+			//	next.LocalPosition = new(ItemWidth * 0.5f + ItemHeight * 0.5f, 0);
+			//}
+			//if(selection != null)
+			//{
+			//	selection.ParentUID = UID;
+			//	selection.Size = new Vector2(ItemWidth, ItemHeight) * Scale;
+			//	selection.LocalPosition = new();
+			//	selection.Angle = Angle;
+			//}
 		}
 		internal override void OnDestroy()
 		{
@@ -116,7 +116,7 @@
 		{
 			Step = 1;
 			RangeA = 0;
-			RangeB = GetButtonUIDs().Count - 1;
+			RangeB = Items.Count - 1;
 		}
 		#endregion
 	}
