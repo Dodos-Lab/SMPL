@@ -9,12 +9,8 @@
 			{
 				var result = new List<Thing.GUI.ListItem>();
 				for(int i = 0; i < SelectionIndexes.Count; i++)
-				{
-					if(i >= Items.Count)
-						break;
-
 					result.Add(Items[SelectionIndexes[i]]);
-				}
+
 				return result.AsReadOnly();
 			}
 		}
@@ -27,28 +23,29 @@
 		internal ListMultiselectInstance() { }
 		internal ListMultiselectInstance(string uid) : base(uid)
 		{
-			Event.ButtonClicked += OnButtonClick;
+			Event.ListItemClicked += OnItemClick;
 		}
 
-		private void OnButtonClick(string thingUID)
+		private void OnItemClick(string listUID, int itemIndex, Thing.GUI.ListItem item)
 		{
-			//if(IsDisabled)
-			//	return;
-			//
-			//var btnUIDs = GetButtonUIDs();
-			//if(btnUIDs.Contains(thingUID) == false)
-			//	return;
-			//
-			//var index = btnUIDs.IndexOf(thingUID);
-			//var contains = selectionIndexes.Contains(index);
-			//
-			//if(contains)
-			//	selectionIndexes.Remove(index);
-			//else
-			//	selectionIndexes.Add(index);
-			//
-			//Event.ListMultiselectionChanged(thingUID, contains == false);
+			if(IsDisabled || listUID != UID)
+				return;
+
+			var contains = selectionIndexes.Contains(itemIndex);
+
+			if(contains)
+			{
+				selectionIndexes.Remove(itemIndex);
+				Event.ListItemDeselect(listUID, itemIndex, item);
+			}
+			else
+			{
+				selectionIndexes.Add(itemIndex);
+				Event.ListItemSelect(listUID, itemIndex, item);
+			}
+
 		}
+
 		#endregion
 	}
 }

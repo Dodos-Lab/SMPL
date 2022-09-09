@@ -11,6 +11,7 @@
 			}
 			public class ButtonDetails
 			{
+				public bool IsDisabled { get; set; }
 				public bool IsHidden { get; set; }
 				public bool IsSmooth { get; set; }
 				public bool IsRepeated { get; set; } = true;
@@ -114,7 +115,7 @@
 					renderTarget.Draw(TextInstance.textInstance);
 				}
 
-				internal void UpdateGlobalText(Vector2f position, float scale)
+				internal void UpdateGlobalText(Vector2f position, float angle, float scale)
 				{
 					var text = TextInstance.textInstance;
 					text.Font = GetFont();
@@ -127,7 +128,7 @@
 					text.Style = Style;
 					text.DisplayedString = Value;
 					text.Position = position;
-					text.Rotation = 0;
+					text.Rotation = angle;
 					text.Scale = new(scale, scale);
 
 					var local = text.GetLocalBounds(); // has to be after everything
@@ -142,7 +143,6 @@
 				#endregion
 			}
 
-			public enum ScrollDirection { Up, Down }
 			public enum TextboxAlignment
 			{
 				TopLeft, Top, TopRight,
@@ -200,9 +200,9 @@
 				var t = new ListInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
-			public static string CreateListCarousel(string uid, string texturePath)
+			public static string CreateListCarousel(string uid)
 			{
-				var t = new ListCarouselInstance(uid) { TexturePath = texturePath };
+				var t = new ListCarouselInstance(uid);
 				return t.UID;
 			}
 			public static string CreateListDropdown(string uid, string texturePath)

@@ -157,7 +157,6 @@
 			public const string UI_LIST_CAROUSEL_IS_REPEATING = nameof(ListCarouselInstance.IsRepeating);
 			public const string UI_LIST_CAROUSEL_SELECTION_INDEX = nameof(ListCarouselInstance.SelectionIndex);
 
-			public const string UI_LIST_DROPDOWN_BUTTON_SHOW_UID = nameof(ListDropdownInstance.ButtonShowUID);
 			public const string UI_LIST_DROPDOWN_SELECTION_INDEX = nameof(ListDropdownInstance.SelectionIndex);
 
 			public const string UI_LIST_MULTISELECT_SELECTION_INDEXES = nameof(ListMultiselectInstance.SelectionIndexes);

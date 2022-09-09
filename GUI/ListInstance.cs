@@ -48,19 +48,16 @@
 
 		#region Backend
 		private float spacing = 5;
-		private int scrollIndex;
+		protected int scrollIndex;
 
 		[JsonConstructor]
-		internal ListInstance() => Init();
+		internal ListInstance() { }
 		internal ListInstance(string uid) : base(uid)
-		{
-			Init();
-		}
-		private void Init()
 		{
 			Value = 0;
 		}
-		private void UpdateButtonBoundingBoxes()
+
+		protected void UpdateItemBoundingBoxes()
 		{
 			for(int i = 0; i < Items.Count; i++)
 			{
@@ -80,7 +77,7 @@
 				item.TextDetails.IsHidden = hidden;
 			}
 		}
-		private void TryUpdate()
+		protected virtual void UpdateDefaultValues()
 		{
 			VisibleItemCountMax = Math.Max(VisibleItemCountMax, 1);
 			IsFocused = BoundingBox.IsHovered;
@@ -90,15 +87,13 @@
 			RangeB = MathF.Max((Items.Count - VisibleItemCountMax).Limit(1, Items.Count - 1), RangeA);
 
 			scrollIndex = (int)Value;
-
-			UpdateButtonBoundingBoxes();
 		}
-		private void TryButtonEvents()
+		protected void TryItemEvents()
 		{
 			for(int i = 0; i < Items.Count; i++)
 			{
 				var item = Items[i];
-				if(item.ButtonDetails.IsHidden && item.TextDetails.IsHidden)
+				if(item.ButtonDetails.IsDisabled)
 					continue;
 
 				var itemBB = item.ButtonDetails.boundingBox;
@@ -123,9 +118,10 @@
 				base.OnDraw(renderTarget);
 
 			if(IsDisabled == false)
-				TryButtonEvents();
+				TryItemEvents();
 
-			TryUpdate();
+			UpdateDefaultValues();
+			UpdateItemBoundingBoxes();
 
 			if(IsHidden == false)
 				for(int i = 0; i < Items.Count; i++)
@@ -135,7 +131,7 @@
 
 					var itemCorners = GetItemCorners(i);
 					var itemCenter = itemCorners[0].PointPercentTowardPoint(itemCorners[2], new(50));
-					item.TextDetails.UpdateGlobalText(itemCenter.ToSFML(), Scale);
+					item.TextDetails.UpdateGlobalText(itemCenter.ToSFML(), Angle - 90, Scale);
 					item.TextDetails.Draw(renderTarget);
 				}
 		}
