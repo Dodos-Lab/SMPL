@@ -73,6 +73,7 @@
 				itemBB.Lines.Add(new(corners[3], corners[0]));
 
 				var hidden = i.IsBetween(ScrollIndex, ScrollIndex + VisibleItemCountCurrent - 1, true, true) == false;
+				item.ButtonDetails.IsDisabled = hidden;
 				item.ButtonDetails.IsHidden = hidden;
 				item.TextDetails.IsHidden = hidden;
 			}
@@ -80,13 +81,16 @@
 		protected virtual void UpdateDefaultValues()
 		{
 			VisibleItemCountMax = Math.Max(VisibleItemCountMax, 1);
-			IsFocused = BoundingBox.IsHovered;
+			IsFocused = BoundingBox.IsHovered || base.BoundingBox.IsHovered ||
+				ButtonUp.boundingBox.IsHovered || ButtonDown.boundingBox.IsHovered;
 
 			Step = 1;
 			RangeA = 0;
 			RangeB = MathF.Max((Items.Count - VisibleItemCountMax).Limit(1, Items.Count - 1), RangeA);
 
 			scrollIndex = (int)Value;
+
+			Size = new(MaxLength * Scale, Size.Y);
 		}
 		protected void TryItemEvents()
 		{
@@ -97,7 +101,7 @@
 					continue;
 
 				var itemBB = item.ButtonDetails.boundingBox;
-				var buttonResult = itemBB.TryButton();
+				var buttonResult = itemBB.TryButton(isHoldable: false);
 
 				var events = new List<(bool, Action<string, int, Thing.GUI.ListItem>)>()
 				{
@@ -131,7 +135,7 @@
 
 					var itemCorners = GetItemCorners(i);
 					var itemCenter = itemCorners[0].PointPercentTowardPoint(itemCorners[2], new(50));
-					item.TextDetails.UpdateGlobalText(itemCenter.ToSFML(), Angle - 90, Scale);
+					item.TextDetails.UpdateGlobalText(itemCenter, Angle - 90, Scale);
 					item.TextDetails.Draw(renderTarget);
 				}
 		}

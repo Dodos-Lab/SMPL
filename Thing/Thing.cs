@@ -115,7 +115,7 @@
 					renderTarget.Draw(TextInstance.textInstance);
 				}
 
-				internal void UpdateGlobalText(Vector2f position, float angle, float scale)
+				internal void UpdateGlobalText(Vector2 position, float angle, float scale)
 				{
 					var text = TextInstance.textInstance;
 					text.Font = GetFont();
@@ -127,7 +127,7 @@
 					text.OutlineThickness = OutlineSize;
 					text.Style = Style;
 					text.DisplayedString = Value;
-					text.Position = position;
+					text.Position = position.ToSFML();
 					text.Rotation = angle;
 					text.Scale = new(scale, scale);
 

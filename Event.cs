@@ -52,12 +52,12 @@
 		public static event ListItemEventHandler ListItemSelected;
 		public static event ListItemEventHandler ListItemDeselected;
 
-		public static event GUIButtonEventHandler DropdownListButtonClicked;
-		public static event GUIButtonEventHandler DropdownListButtonHovered;
-		public static event GUIButtonEventHandler DropdownListButtonUnhovered;
-		public static event GUIButtonEventHandler DropdownListButtonPressed;
-		public static event GUIButtonEventHandler DropdownListButtonReleased;
-		public static event ThingEventHandler DropdownListToggled;
+		public static event GUIButtonEventHandler ListDropdownButtonClicked;
+		public static event GUIButtonEventHandler ListDropdownButtonHovered;
+		public static event GUIButtonEventHandler ListDropdownButtonUnhovered;
+		public static event GUIButtonEventHandler ListDropdownButtonPressed;
+		public static event GUIButtonEventHandler ListDropdownButtonReleased;
+		public static event ThingEventHandler ListDropdownToggled;
 
 		public static event ThingEventHandler CheckboxChecked;
 		public static event ThingEventHandler InputboxSubmitted;
@@ -91,12 +91,12 @@
 		internal static void ListItemSelect(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemSelected?.Invoke(listUID, itemIndex, item);
 		internal static void ListItemDeselect(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemDeselected?.Invoke(listUID, itemIndex, item);
 
-		internal static void DropdownListButtonClick(string uid, Thing.GUI.ButtonDetails btn) => DropdownListButtonClicked?.Invoke(uid, btn);
-		internal static void DropdownListButtonHover(string uid, Thing.GUI.ButtonDetails btn) => DropdownListButtonHovered?.Invoke(uid, btn);
-		internal static void DropdownListButtonUnhover(string uid, Thing.GUI.ButtonDetails btn) => DropdownListButtonUnhovered?.Invoke(uid, btn);
-		internal static void DropdownListButtonPress(string uid, Thing.GUI.ButtonDetails btn) => DropdownListButtonPressed?.Invoke(uid, btn);
-		internal static void DropdownListButtonRelease(string uid, Thing.GUI.ButtonDetails btn) => DropdownListButtonReleased?.Invoke(uid, btn);
-		internal static void DropdownListToggle(string uid) => DropdownListToggled?.Invoke(uid);
+		internal static void ListDropdownButtonClick(string uid, Thing.GUI.ButtonDetails btn) => ListDropdownButtonClicked?.Invoke(uid, btn);
+		internal static void ListDropdownButtonHover(string uid, Thing.GUI.ButtonDetails btn) => ListDropdownButtonHovered?.Invoke(uid, btn);
+		internal static void ListDropdownButtonUnhover(string uid, Thing.GUI.ButtonDetails btn) => ListDropdownButtonUnhovered?.Invoke(uid, btn);
+		internal static void ListDropdownButtonPress(string uid, Thing.GUI.ButtonDetails btn) => ListDropdownButtonPressed?.Invoke(uid, btn);
+		internal static void ListDropdownButtonRelease(string uid, Thing.GUI.ButtonDetails btn) => ListDropdownButtonReleased?.Invoke(uid, btn);
+		internal static void ListDropdownToggle(string uid) => ListDropdownToggled?.Invoke(uid);
 
 		internal static void ScrollBarButtonClick(string uid, Thing.GUI.ButtonDetails btn) => ScrollBarButtonClicked?.Invoke(uid, btn);
 		internal static void ScrollBarButtonHold(string uid, Thing.GUI.ButtonDetails btn) => ScrollBarButtonHeld?.Invoke(uid, btn);

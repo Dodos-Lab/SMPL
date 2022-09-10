@@ -99,7 +99,8 @@
 				sel.ButtonDetails.Draw(renderTarget);
 			if(sel.TextDetails.IsHidden == false)
 			{
-				sel.TextDetails.UpdateGlobalText(selBB.Lines[0].A.PointPercentTowardPoint(selBB.Lines[2].A, new(50)).ToSFML(), Angle, Scale);
+				var center = selBB.Lines[0].A.PointPercentTowardPoint(selBB.Lines[2].A, new(50));
+				sel.TextDetails.UpdateGlobalText(center, Angle, Scale);
 				sel.TextDetails.Draw(renderTarget);
 			}
 

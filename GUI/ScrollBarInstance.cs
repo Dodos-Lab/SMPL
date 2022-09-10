@@ -166,7 +166,7 @@
 			bbD.LocalLines.Add(new(c, b));
 			bbD.TransformLocalLines(UID);
 		}
-		protected void TryButtonEvents()
+		protected virtual void TryButtonEvents()
 		{
 			TryProcessButton(ButtonUp);
 			TryProcessButton(ButtonDown);

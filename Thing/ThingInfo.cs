@@ -112,54 +112,60 @@
 			public const string TILEMAP_TILE_COUNT = nameof(TilemapInstance.TileCount);
 			public const string TILEMAP_TILE_PALETTE = nameof(TilemapInstance.TilePalette);
 
-			public const string UI_BUTTON_IS_DRAGGABLE = nameof(ButtonInstance.IsDraggable);
-			public const string UI_BUTTON_HOLD_DELAY = nameof(ButtonInstance.HoldDelay);
-			public const string UI_BUTTON_HOLD_TRIGGER_SPEED = nameof(ButtonInstance.HoldTriggerSpeed);
+			public const string GUI_BUTTON_IS_DRAGGABLE = nameof(ButtonInstance.IsDraggable);
+			public const string GUI_BUTTON_HOLD_DELAY = nameof(ButtonInstance.HoldDelay);
+			public const string GUI_BUTTON_HOLD_TRIGGER_SPEED = nameof(ButtonInstance.HoldTriggerSpeed);
 
-			public const string UI_TEXT_BUTTON_IS_HYPERLINK = nameof(TextButtonInstance.IsHyperlink);
+			public const string GUI_TEXT_BUTTON_IS_HYPERLINK = nameof(TextButtonInstance.IsHyperlink);
 
-			public const string UI_CHECKBOX_IS_CHECKED = nameof(CheckboxInstance.IsChecked);
+			public const string GUI_CHECKBOX_IS_CHECKED = nameof(CheckboxInstance.IsChecked);
 
-			public const string UI_PROGRESS_BAR_RANGE_A = nameof(ProgressBarInstance.RangeA);
-			public const string UI_PROGRESS_BAR_RANGE_B = nameof(ProgressBarInstance.RangeB);
-			public const string UI_PROGRESS_BAR_UNIT = nameof(ProgressBarInstance.ProgressUnit);
-			public const string UI_PROGRESS_BAR_VALUE = nameof(ProgressBarInstance.Value);
-			public const string UI_PROGRESS_BAR_MAX_LENGTH = nameof(ProgressBarInstance.MaxLength);
+			public const string GUI_PROGRESS_BAR_RANGE_A = nameof(ProgressBarInstance.RangeA);
+			public const string GUI_PROGRESS_BAR_RANGE_B = nameof(ProgressBarInstance.RangeB);
+			public const string GUI_PROGRESS_BAR_UNIT = nameof(ProgressBarInstance.ProgressUnit);
+			public const string GUI_PROGRESS_BAR_VALUE = nameof(ProgressBarInstance.Value);
+			public const string GUI_PROGRESS_BAR_MAX_LENGTH = nameof(ProgressBarInstance.MaxLength);
 
-			public const string UI_TEXTBOX_LINE_SPACE = nameof(TextboxInstance.LineSpace);
-			public const string UI_TEXTBOX_ALIGNMENT = nameof(TextboxInstance.Alignment);
-			public const string UI_TEXTBOX_BACKGROUND_COLOR = nameof(TextboxInstance.BackgroundColor);
-			public const string UI_TEXTBOX_SHADOW_OFFSET = nameof(TextboxInstance.ShadowOffset);
-			public const string UI_TEXTBOX_SHADOW_COLOR = nameof(TextboxInstance.ShadowColor);
+			public const string GUI_TEXTBOX_ALIGNMENT = nameof(TextboxInstance.Alignment);
+			public const string GUI_TEXTBOX_BACKGROUND_COLOR = nameof(TextboxInstance.BackgroundColor);
+			public const string GUI_TEXTBOX_SHADOW_OFFSET = nameof(TextboxInstance.ShadowOffset);
+			public const string GUI_TEXTBOX_SHADOW_COLOR = nameof(TextboxInstance.ShadowColor);
 
-			public const string UI_INPUTBOX_IS_FOCUSED = nameof(InputboxInstance.IsFocused);
-			public const string UI_INPUTBOX_CURSOR_COLOR = nameof(InputboxInstance.CursorColor);
-			public const string UI_INPUTBOX_CURSOR_POSITION_INDEX = nameof(InputboxInstance.CursorPositionIndex);
-			public const string UI_INPUTBOX_PLACEHOLDER_VALUE = nameof(InputboxInstance.PlaceholderValue);
-			public const string UI_INPUTBOX_PLACEHOLDER_COLOR = nameof(InputboxInstance.PlaceholderColor);
+			public const string GUI_INPUTBOX_IS_FOCUSED = nameof(InputboxInstance.IsFocused);
+			public const string GUI_INPUTBOX_CURSOR_COLOR = nameof(InputboxInstance.CursorColor);
+			public const string GUI_INPUTBOX_CURSOR_POSITION_INDEX = nameof(InputboxInstance.CursorPositionIndex);
+			public const string GUI_INPUTBOX_PLACEHOLDER_VALUE = nameof(InputboxInstance.PlaceholderValue);
+			public const string GUI_INPUTBOX_PLACEHOLDER_COLOR = nameof(InputboxInstance.PlaceholderColor);
 
-			public const string UI_SLIDER_LENGTH_UNIT = nameof(SliderInstance.LengthUnit);
-			public const string UI_SLIDER_LENGTH = nameof(SliderInstance.Length);
-			public const string UI_SLIDER_PROGRESS_COLOR = nameof(SliderInstance.ProgressColor);
-			public const string UI_SLIDER_EMPTY_COLOR = nameof(SliderInstance.EmptyColor);
+			public const string GUI_SLIDER_LENGTH_UNIT = nameof(SliderInstance.LengthUnit);
+			public const string GUI_SLIDER_LENGTH = nameof(SliderInstance.Length);
+			public const string GUI_SLIDER_PROGRESS_COLOR = nameof(SliderInstance.ProgressColor);
+			public const string GUI_SLIDER_EMPTY_COLOR = nameof(SliderInstance.EmptyColor);
 
-			public const string UI_SCROLL_BAR_IS_FOCUSED = nameof(ScrollBarInstance.IsFocused);
-			public const string UI_SCROLL_BAR_STEP = nameof(ScrollBarInstance.Step);
-			public const string UI_SCROLL_BAR_STEP_UNIT = nameof(ScrollBarInstance.StepUnit);
+			public const string GUI_SCROLL_BAR_IS_FOCUSED = nameof(ScrollBarInstance.IsFocused);
+			public const string GUI_SCROLL_BAR_STEP = nameof(ScrollBarInstance.Step);
+			public const string GUI_SCROLL_BAR_STEP_UNIT = nameof(ScrollBarInstance.StepUnit);
+			public const string GUI_SCROLL_BAR_BUTTON_UP = nameof(ScrollBarInstance.ButtonUp);
+			public const string GUI_SCROLL_BAR_BUTTON_DOWN = nameof(ScrollBarInstance.ButtonDown);
 
-			public const string UI_LIST_VISIBLE_BUTTON_COUNT_MAX = nameof(ListInstance.VisibleItemCountMax);
-			public const string UI_LIST_VISIBLE_BUTTON_COUNT_CURRENT = nameof(ListInstance.VisibleItemCountCurrent);
-			public const string UI_LIST_BUTTON_WIDTH = nameof(ListInstance.ItemWidth);
-			public const string UI_LIST_BUTTON_HEIGHT = nameof(ListInstance.ItemHeight);
-			public const string UI_LIST_BUTTON_SPACING = nameof(ListInstance.ItemSpacing);
-			public const string UI_LIST_SCROLL_INDEX = nameof(ListInstance.ScrollIndex);
+			public const string GUI_LIST_VISIBLE_ITEM_COUNT_MAX = nameof(ListInstance.VisibleItemCountMax);
+			public const string GUI_LIST_VISIBLE_ITEM_COUNT_CURRENT = nameof(ListInstance.VisibleItemCountCurrent);
+			public const string GUI_LIST_ITEM_WIDTH = nameof(ListInstance.ItemWidth);
+			public const string GUI_LIST_ITEM_HEIGHT = nameof(ListInstance.ItemHeight);
+			public const string GUI_LIST_ITEM_SPACING = nameof(ListInstance.ItemSpacing);
+			public const string GUI_LIST_ITEMS = nameof(ListInstance.Items);
+			public const string GUI_LIST_SCROLL_INDEX = nameof(ListInstance.ScrollIndex);
 
-			public const string UI_LIST_CAROUSEL_IS_REPEATING = nameof(ListCarouselInstance.IsRepeating);
-			public const string UI_LIST_CAROUSEL_SELECTION_INDEX = nameof(ListCarouselInstance.SelectionIndex);
+			public const string GUI_LIST_CAROUSEL_IS_REPEATING = nameof(ListCarouselInstance.IsRepeating);
+			public const string GUI_LIST_CAROUSEL_SELECTION_INDEX = nameof(ListCarouselInstance.SelectionIndex);
+			public const string GUI_LIST_CAROUSEL_SELECTED_ITEM = nameof(ListCarouselInstance.SelectedItem);
 
-			public const string UI_LIST_DROPDOWN_SELECTION_INDEX = nameof(ListDropdownInstance.SelectionIndex);
+			public const string GUI_LIST_DROPDOWN_SELECTION_INDEX = nameof(ListDropdownInstance.SelectionIndex);
+			public const string GUI_LIST_DROPDOWN_SELECTED_ITEM = nameof(ListDropdownInstance.SelectedItem);
+			public const string GUI_LIST_DROPDOWN_BUTTON = nameof(ListDropdownInstance.Button);
 
-			public const string UI_LIST_MULTISELECT_SELECTION_INDEXES = nameof(ListMultiselectInstance.SelectionIndexes);
+			public const string GUI_LIST_MULTISELECT_SELECTION_INDEXES = nameof(ListMultiselectInstance.SelectionIndexes);
+			public const string GUI_LIST_MULTISELECT_SELECTED_ITEMS = nameof(ListMultiselectInstance.SelectedItems);
 			#endregion
 
 			public string Name { get; internal set; }

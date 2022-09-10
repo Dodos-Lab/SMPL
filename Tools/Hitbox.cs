@@ -165,7 +165,7 @@
 		private float holdDelayTimer, holdTriggerTimer;
 		private bool isClicked, preventClick;
 
-		internal ButtonResult TryButton(float holdDelay = 0.5f, float holdTriggerSpeed = 0.1f, bool isDraggable = false)
+		internal ButtonResult TryButton(float holdDelay = 0.5f, float holdTriggerSpeed = 0.1f, bool isDraggable = false, bool isHoldable = true)
 		{
 			var result = new ButtonResult();
 			holdDelayTimer -= Time.Delta;
@@ -176,7 +176,7 @@
 			var id = GetHashCode();
 			var isTime = holdTriggerTimer < 0 && holdDelayTimer < 0;
 
-			if(isTime && hovered && isClicked)
+			if(isHoldable && isTime && hovered && isClicked)
 				result.IsHeld = true;
 
 			if(hovered.Once($"{id}-hovered"))
