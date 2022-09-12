@@ -179,10 +179,10 @@
 				var t = new TextboxInstance(uid, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
 				return t.UID;
 			}
-			public static string CreateInputbox(string uid, string fontPath, string value = "",
+			public static string CreateInputbox(string uid, string fontPath,
 				uint resolutionX = 300, uint resolutionY = 60)
 			{
-				var t = new InputboxInstance(uid, resolutionX, resolutionY) { FontPath = fontPath, Value = value };
+				var t = new InputboxInstance(uid, resolutionX, resolutionY) { FontPath = fontPath };
 				return t.UID;
 			}
 			public static string CreateSlider(string uid, string texturePath)

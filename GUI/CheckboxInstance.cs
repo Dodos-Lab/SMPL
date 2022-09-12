@@ -8,7 +8,7 @@
 			set
 			{
 				isChecked = value;
-				SMPL.Event.CheckboxCheck(UID);
+				Event.CheckboxCheck(UID);
 			}
 		}
 
@@ -28,9 +28,9 @@
 		private void Init()
 		{
 			Size = new(50);
-			SMPL.Event.ButtonClicked += OnClick;
+			Event.ButtonClicked += OnClick;
 		}
-		private void OnClick(string thingUID)
+		private void OnClick(string thingUID, Thing.GUI.ButtonDetails btn)
 		{
 			if(IsDisabled || thingUID != UID)
 				return;
@@ -40,7 +40,7 @@
 		internal override void OnDestroy()
 		{
 			base.OnDestroy();
-			SMPL.Event.ButtonClicked -= OnClick;
+			Event.ButtonClicked -= OnClick;
 		}
 		#endregion
 	}

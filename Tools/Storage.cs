@@ -32,6 +32,9 @@
 				KnownTypes.Add(typeof(Text.Styles));
 				KnownTypes.Add(typeof(Thing.GUI.TextboxAlignment));
 				KnownTypes.Add(typeof(Thing.GUI.TextboxSymbolCollection));
+				KnownTypes.Add(typeof(Thing.GUI.ListItem));
+				KnownTypes.Add(typeof(Thing.GUI.ButtonDetails));
+				KnownTypes.Add(typeof(Thing.GUI.TextDetails));
 				KnownTypes.Add(typeof(Hitbox));
 				KnownTypes.Add(typeof(Database));
 				KnownTypes.Add(typeof(Scene));

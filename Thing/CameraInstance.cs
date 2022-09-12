@@ -24,8 +24,19 @@
 		[JsonIgnore]
 		public Vector2 MouseCursorPosition
 		{
-			get { var p = Mouse.GetPosition(Game.Window); return PointToCamera(new(p.X, p.Y)); }
-			set { var p = PointToWorld(value); Mouse.SetPosition(new((int)p.X, (int)p.Y), Game.Window); }
+			get
+			{
+				if(Game.Window == null)
+					return new Vector2().NaN();
+
+				var p = Mouse.GetPosition(Game.Window);
+				return PointToCamera(new(p.X, p.Y));
+			}
+			set
+			{
+				var p = PointToWorld(value);
+				Mouse.SetPosition(new((int)p.X, (int)p.Y), Game.Window);
+			}
 		}
 		[JsonIgnore]
 		public RenderTexture RenderTexture

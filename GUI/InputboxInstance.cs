@@ -102,6 +102,7 @@
 
 				Value = Value.Remove((int)CursorPositionIndex - 1, 1);
 				CursorPositionIndex--;
+				Event.InputboxType(UID, null);
 
 				if(Value.Length == 0) // this helps visually when deleting the last symbol
 					textOffsetX = 0;
@@ -115,8 +116,9 @@
 				return;
 			else
 			{
-				Value = Value.Insert((int)CursorPositionIndex, keyStr);
+				Value = Value.Insert(CursorPositionIndex, keyStr);
 				CursorPositionIndex++;
+				Event.InputboxType(UID, keyStr);
 			}
 		}
 		private void ShowCursor()

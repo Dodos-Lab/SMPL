@@ -42,7 +42,7 @@ namespace SMPL
 		public enum WindowState { Windowed, Borderless, Fullscreen }
 		public static Settings Settings => settings;
 
-		public static RenderWindow Window { get; internal set; }
+		public static RenderWindow Window => window;
 		public static Vector2 MouseCursorPosition
 		{
 			get { var p = Mouse.GetPosition(Window); return new(p.X, p.Y); }
@@ -132,6 +132,7 @@ namespace SMPL
 		}
 
 		#region Backend
+		private static RenderWindow window;
 		internal static readonly Texture defaultTexture;
 		internal static Settings settings = new();
 		internal static Styles currWindowStyle;
@@ -186,7 +187,7 @@ namespace SMPL
 			}
 
 			currWindowStyle = windowState.ToWindowStyles();
-			Window = new(new((uint)resolution.X, (uint)resolution.Y), "SMPL Game", currWindowStyle) { Position = new() };
+			window = new(new((uint)resolution.X, (uint)resolution.Y), "SMPL Game", currWindowStyle) { Position = new() };
 			Window.Clear();
 			Window.Display();
 			Window.Closed += OnClose;

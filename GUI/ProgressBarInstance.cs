@@ -2,6 +2,7 @@
 {
 	internal class ProgressBarInstance : SpriteInstance
 	{
+		[JsonIgnore]
 		public float RangeA
 		{
 			get => rangeA;
@@ -12,6 +13,7 @@
 				Update();
 			}
 		}
+		[JsonIgnore]
 		public float RangeB
 		{
 			get => rangeB;
@@ -22,17 +24,20 @@
 				Update();
 			}
 		}
+		[JsonIgnore]
 		public float MaxLength
 		{
 			get => max;
 			set { max = value; Update(); }
 		}
 
+		[JsonIgnore]
 		public float ProgressUnit
 		{
 			get => Value.Map(RangeA, RangeB, 0, 1);
 			set => Value = value.Map(0, 1, RangeA, RangeB);
 		}
+		[JsonIgnore]
 		public float Value
 		{
 			get => val;
@@ -44,7 +49,9 @@
 		}
 
 		#region Backend
+		[JsonProperty]
 		private float val, max, rangeA, rangeB;
+
 		[JsonConstructor]
 		internal ProgressBarInstance() { }
 		internal ProgressBarInstance(string uid) : base(uid)
@@ -61,7 +68,8 @@
 			if(IsDisabled)
 				return;
 
-			Size = new(Value.Map(RangeA, RangeB, 0, MaxLength) * Scale, Size.Y);
+			var value = Value.Map(RangeA, RangeB, 0, MaxLength);
+			Size = new(value * Scale, Size.Y);
 			TexCoordUnitB = new(ProgressUnit, TexCoordUnitB.Y);
 		}
 		#endregion

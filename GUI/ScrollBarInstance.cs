@@ -59,8 +59,8 @@
 
 		private void Init()
 		{
-			Event.ScrollBarButtonClicked += OnButtonClick;
-			Event.ScrollBarButtonHeld += OnButtonHold;
+			Event.ButtonClicked += OnButtonClick;
+			Event.ButtonHeld += OnButtonHold;
 
 			if(Game.Window != null)
 				Game.Window.MouseWheelScrolled += OnScroll;
@@ -91,7 +91,7 @@
 				return;
 
 			Value -= Step;
-			Event.ScrollBarScroll(UID, ButtonUp);
+			Event.ScrollBarMove(UID);
 		}
 		protected virtual void OnDown()
 		{
@@ -99,7 +99,7 @@
 				return;
 
 			Value += Step;
-			Event.ScrollBarScroll(UID, ButtonDown);
+			Event.ScrollBarMove(UID);
 		}
 
 		internal void OnScroll(object sender, MouseWheelScrollEventArgs e)
@@ -134,8 +134,8 @@
 			if(Game.Window != null)
 				Game.Window.MouseWheelScrolled -= OnScroll;
 
-			Event.ScrollBarButtonClicked -= OnButtonClick;
-			Event.ScrollBarButtonHeld -= OnButtonHold;
+			Event.ButtonClicked -= OnButtonClick;
+			Event.ButtonHeld -= OnButtonHold;
 		}
 
 		protected void UpdateButtonBoundingBoxes()
@@ -179,9 +179,9 @@
 				var result = btn.boundingBox.TryButton();
 				var events = new List<(bool, Action<string, Thing.GUI.ButtonDetails>)>()
 				{
-					(result.IsHovered, Event.ScrollBarButtonHover), (result.IsUnhovered, Event.ScrollBarButtonUnhover),
-					(result.IsPressed, Event.ScrollBarButtonPress), (result.IsReleased, Event.ScrollBarButtonRelease),
-					(result.IsClicked, Event.ScrollBarButtonClick), (result.IsHeld, Event.ScrollBarButtonHold),
+					(result.IsHovered, Event.ButtonHover), (result.IsUnhovered, Event.ButtonUnhover),
+					(result.IsPressed, Event.ButtonPress), (result.IsReleased, Event.ButtonRelease),
+					(result.IsClicked, Event.ButtonClick), (result.IsHeld, Event.ButtonHold),
 				};
 
 				for(int i = 0; i < events.Count; i++)

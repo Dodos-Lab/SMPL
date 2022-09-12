@@ -10,7 +10,7 @@
 			set
 			{
 				UpdateDefaultValues();
-				var prev = (int)Value;
+				var prev = (int)selectionIndex;
 				selectionIndex = value.Limit(0, Items.Count, Extensions.Limitation.ClosestBound);
 				selectionIndex = Math.Max(selectionIndex, 0);
 
@@ -37,7 +37,7 @@
 		}
 		private void Init()
 		{
-			Event.ListDropdownButtonClicked += OnShowButtonClick;
+			Event.ButtonClicked += OnShowButtonClick;
 			Event.ListItemClicked += OnItemClick;
 		}
 
@@ -85,13 +85,13 @@
 		{
 			base.OnDestroy();
 
-			Event.ListDropdownButtonClicked -= OnShowButtonClick;
+			Event.ButtonClicked -= OnShowButtonClick;
 			Event.ListItemClicked -= OnItemClick;
 		}
 
 		private void TryClickOutside()
 		{
-			if(Mouse.IsButtonPressed(Mouse.Button.Left).Once("lg;akg-lmb"))
+			if(Mouse.IsButtonPressed(Mouse.Button.Left).Once($"lg;akg{GetHashCode()}-lmb"))
 			{
 				var btnUp = ButtonUp.boundingBox.Lines;
 				var btnDown = ButtonDown.boundingBox.Lines;
@@ -133,9 +133,9 @@
 			var result = Button.boundingBox.TryButton(isHoldable: false);
 			var events = new List<(bool, Action<string, Thing.GUI.ButtonDetails>)>()
 			{
-				(result.IsHovered, Event.ListDropdownButtonHover), (result.IsUnhovered, Event.ListDropdownButtonUnhover),
-				(result.IsPressed, Event.ListDropdownButtonPress), (result.IsReleased, Event.ListDropdownButtonRelease),
-				(result.IsClicked, Event.ListDropdownButtonClick),
+				(result.IsHovered, Event.ButtonHover), (result.IsUnhovered, Event.ButtonUnhover),
+				(result.IsPressed, Event.ButtonPress), (result.IsReleased, Event.ButtonRelease),
+				(result.IsClicked, Event.ButtonClick),
 			};
 
 			for(int i = 0; i < events.Count; i++)
@@ -179,6 +179,9 @@
 
 		private void DrawSelection(RenderTarget renderTarget)
 		{
+			if(Items.Count == 0)
+				return;
+
 			var selB = SelectedItem.ButtonDetails;
 			var selT = SelectedItem.TextDetails;
 			var selBB = selB.boundingBox;

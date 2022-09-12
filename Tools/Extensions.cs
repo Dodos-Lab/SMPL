@@ -424,13 +424,16 @@
 		}
 		/// <summary>
 		/// Maps a <paramref name="number"/> from one range to another ([<paramref name="a1"/> - <paramref name="a2"/>] to
-		/// [<paramref name="b1"/> - <paramref name="b2"/>]) and returns it. Similar to Lerping (linear interpolation).<br></br>
+		/// [<paramref name="b1"/> - <paramref name="b2"/>]) and returns it.<br></br>
+		/// The <paramref name="b1"/> value is returned if the result is <see cref="float.NaN"/>,
+		/// <see cref="float.NegativeInfinity"/> or <see cref="float.PositiveInfinity"/>.<br></br>
 		/// - Example: 50 mapped from [0 - 100] and [0 - 1] results to 0.5<br></br>
 		/// - Example: 25 mapped from [30 - 20] and [1 - 5] results to 3
 		/// </summary>
 		public static float Map(this float number, float a1, float a2, float b1, float b2)
 		{
-			return (number - a1) / (a2 - a1) * (b2 - b1) + b1;
+			var value = (number - a1) / (a2 - a1) * (b2 - b1) + b1;
+			return float.IsNaN(value) || float.IsInfinity(value) ? b1 : value;
 		}
 		/// <summary>
 		/// Rotates a 360 degrees <paramref name="angle"/> toward a <paramref name="targetAngle"/> with <paramref name="speed"/>

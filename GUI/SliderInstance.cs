@@ -26,7 +26,7 @@
 		{
 			TryUpdate();
 
-			if(IsHidden)
+			if(IsHidden || RangeA == RangeB)
 				return;
 
 			TexCoordUnitB = new(1);
@@ -103,6 +103,7 @@
 				var value = a.DistanceBetweenPoints(closest).Map(0, dist, RangeA, RangeB);
 				var sz = Size;
 
+				Console.Log("f");
 				Value = value;
 				Size = sz;
 			}

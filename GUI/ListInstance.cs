@@ -8,6 +8,9 @@
 			{
 				var baseBB = base.BoundingBox.Lines;
 
+				if(baseBB.Count == 0)
+					return bb;
+
 				var tl = baseBB[0].A.PointMoveAtAngle(Angle + 90, Size.Y, false).PointMoveAtAngle(Angle + 180, Size.Y, false);
 				var tr = baseBB[1].A.PointMoveAtAngle(Angle + 90, Size.Y, false).PointMoveAtAngle(Angle, Size.Y, false);
 				var br = tr.PointMoveAtAngle(Angle + 90, ItemWidth * Scale, false);
@@ -19,6 +22,7 @@
 				bb.Lines.Add(new(tr, br));
 				bb.Lines.Add(new(br, bl));
 				bb.Lines.Add(new(bl, tl));
+				bb.Draw();
 				return bb;
 			}
 		}
@@ -38,16 +42,20 @@
 				return (MaxLength + LocalSize.Y * 2f) / max - (sp - (sp / max));
 			}
 		}
+		[JsonIgnore]
 		public float ItemSpacing
 		{
 			get => spacing;
 			set => spacing = value.Limit(0, MaxLength);
 		}
 
+		[JsonIgnore]
 		public int ScrollIndex => scrollIndex;
 
 		#region Backend
+		[JsonProperty]
 		private float spacing = 5;
+		[JsonProperty]
 		protected int scrollIndex;
 
 		[JsonConstructor]
