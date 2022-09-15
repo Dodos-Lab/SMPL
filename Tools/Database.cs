@@ -16,7 +16,7 @@
 		}
 		public Database(string cdbFilePath) => path = cdbFilePath;
 
-		public List<T> GetSheet<T>(string sheetName)
+		public List<T> Get<T>(string sheetName)
 		{
 			var msg = "";
 			try
@@ -42,18 +42,18 @@
 			Console.LogError(1, $"Could not load {nameof(Sheet<T>)}<{typeof(T)}> with {nameof(sheetName)} '{sheetName}' in this {nameof(Database)}. Info:\n{msg}");
 			return default;
 		}
-		public List<T> AddSheet<T>(string sheetName)
+		public List<T> Add<T>(string sheetName)
 		{
 			cacheSheets[sheetName] = new Sheet<T>();
-			return GetSheet<T>(sheetName);
+			return Get<T>(sheetName);
 		}
-		public void SaveSheet<T>(string sheetName)
+		public void Save<T>(string sheetName)
 		{
 			if(cacheSheets.ContainsKey(sheetName) == false)
 			{
 				Console.LogError(1, $"No {nameof(Sheet)} with {nameof(sheetName)} '{sheetName}' was found in this {nameof(Database)}. " +
 					$"This may be because a {nameof(Sheet)}\nwith such name does not exist or it is not yet loaded into this {nameof(Database)} " +
-					$"(by {nameof(GetSheet)}({nameof(sheetName)})).");
+					$"(by {nameof(Get)}({nameof(sheetName)})).");
 				return;
 			}
 

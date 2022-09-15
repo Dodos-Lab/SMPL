@@ -43,7 +43,7 @@
 
 		private void OnItemClick(string listUID, int itemIndex, Thing.GUI.ListItem item)
 		{
-			if(Items.Contains(item) == false) // not from this list
+			if(Items.Count == 0 || Items.Contains(item) == false) // not from this list
 				return;
 
 			if(itemIndex != SelectionIndex || sel.IsHovered == false)
@@ -55,7 +55,7 @@
 
 		private void OnShowButtonClick(string guiUID, Thing.GUI.ButtonDetails buttonDetails)
 		{
-			if(buttonDetails == Button)
+			if(Items.Count > 0 && buttonDetails == Button)
 				Show(isOpen == false);
 		}
 
@@ -147,9 +147,9 @@
 		{
 			var bb = BoundingBox.Lines;
 			var btnBB = Button.boundingBox.Lines;
-			var tl = bb[3].A.PointMoveAtAngle(Angle + 180, ItemHeight * Scale, false);
+			var tl = bb[3].A.MoveAtAngle(Angle + 180, ItemHeight * Scale, false);
 			var br = btnBB[3].A;
-			var tr = br.PointMoveAtAngle(Angle + 180, ItemHeight * Scale, false);
+			var tr = br.MoveAtAngle(Angle + 180, ItemHeight * Scale, false);
 			var bl = bb[3].A;
 
 			sel.LocalLines.Clear();
@@ -165,9 +165,9 @@
 			var sz = Size.Y * 1.5f;
 			var btnBB = Button.boundingBox;
 			var bl = upBB[3].A;
-			var tl = bl.PointMoveAtAngle(Angle + 180, sz, false);
-			var br = bl.PointMoveAtAngle(Angle - 90, sz, false);
-			var tr = br.PointMoveAtAngle(Angle + 180, sz, false);
+			var tl = bl.MoveAtAngle(Angle + 180, sz, false);
+			var br = bl.MoveAtAngle(Angle - 90, sz, false);
+			var tr = br.MoveAtAngle(Angle + 180, sz, false);
 
 			btnBB.LocalLines.Clear();
 			btnBB.Lines.Clear();
@@ -189,7 +189,7 @@
 			var prevDisabledBtn = selB.IsDisabled;
 			var prevHiddenBtn = selB.IsHidden;
 			var prevHiddenTxt = selT.IsHidden;
-			var center = sel.Lines[0].A.PointPercentTowardPoint(sel.Lines[2].A, new(50));
+			var center = sel.Lines[0].A.PercentToTarget(sel.Lines[2].A, new(50));
 
 			selBB.Lines.Clear();
 			for(int i = 0; i < sel.Lines.Count; i++)

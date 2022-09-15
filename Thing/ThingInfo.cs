@@ -28,7 +28,7 @@
 			public const string BOUNDING_BOX = nameof(ThingInstance.BoundingBox);
 
 			public const string CAMERA_IS_SMOOTH = nameof(CameraInstance.IsSmooth);
-			public const string CAMERA_MOUSE_CURSOR_POSITION = nameof(CameraInstance.MouseCursorPosition);
+			public const string CAMERA_MOUSE_CURSOR_POSITION = nameof(CameraInstance.MousePosition);
 			public const string CAMERA_RENDER_TEXTURE = nameof(CameraInstance.RenderTexture);
 			public const string CAMERA_RESOLUTION = nameof(CameraInstance.Resolution);
 
@@ -186,15 +186,15 @@
 		public class Method
 		{
 			#region Method Names
-			public const string GET_LOCAL_POSITION_FROM_PARENT = nameof(ThingInstance.GetLocalPositionFromParent);
-			public const string GET_POSITION_FROM_PARENT = nameof(ThingInstance.GetPositionFromParent);
-			public const string GET_LOCAL_POSITION_FROM_SELF = nameof(ThingInstance.GetLocalPositionFromSelf);
-			public const string GET_POSITION_FROM_SELF = nameof(ThingInstance.GetPositionFromSelf);
+			public const string GET_LOCAL_POSITION_FROM_PARENT = nameof(ThingInstance.LocalPositionFromParent);
+			public const string GET_POSITION_FROM_PARENT = nameof(ThingInstance.PositionFromParent);
+			public const string GET_LOCAL_POSITION_FROM_SELF = nameof(ThingInstance.LocalPositionFromSelf);
+			public const string GET_POSITION_FROM_SELF = nameof(ThingInstance.PositionFromSelf);
 			public const string DESTROY = nameof(ThingInstance.Destroy);
 
 			public const string CAMERA_SNAP = nameof(CameraInstance.Snap);
-			public const string CAMERA_POINT_TO_CAMERA = nameof(CameraInstance.PointToCamera);
-			public const string CAMERA_POINT_TO_WORLD = nameof(CameraInstance.PointToWorld);
+			public const string CAMERA_POINT_TO_CAMERA = nameof(CameraInstance.WorldToCamera);
+			public const string CAMERA_POINT_TO_WORLD = nameof(CameraInstance.CameraToWorld);
 			public const string CAMERA_POINT_TO_PARALLAX = nameof(CameraInstance.PointToParallax);
 
 			public const string PARTICLE_MANAGER_SPAWN = nameof(ParticleManagerInstance.Spawn);
@@ -266,7 +266,7 @@
 		{
 			public static bool HasSetter(string uid, string setPropertyName)
 			{
-				var obj = ThingInstance.Get(uid);
+				var obj = ThingInstance.Get_(uid);
 				if(obj == null)
 				{
 					ThingInstance.MissingError(uid);
@@ -279,7 +279,7 @@
 			}
 			public static bool HasGetter(string uid, string getPropertyName)
 			{
-				var obj = ThingInstance.Get(uid);
+				var obj = ThingInstance.Get_(uid);
 				if(obj == null)
 				{
 					ThingInstance.MissingError(uid);
@@ -292,7 +292,7 @@
 			}
 			public static bool HasReturnMethod(string uid, string returnMethodName)
 			{
-				var obj = ThingInstance.Get(uid);
+				var obj = ThingInstance.Get_(uid);
 				if(obj == null)
 				{
 					ThingInstance.MissingError(uid);
@@ -305,7 +305,7 @@
 			}
 			public static bool HasVoidMethod(string uid, string voidMethodName)
 			{
-				var obj = ThingInstance.Get(uid);
+				var obj = ThingInstance.Get_(uid);
 				if(obj == null)
 				{
 					ThingInstance.MissingError(uid);

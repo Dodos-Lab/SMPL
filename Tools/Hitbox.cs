@@ -16,10 +16,10 @@
 
 		/// <summary>
 		/// Returns whether this <see cref="Hitbox"/> contains the mouse cursor in the <see cref="Scene.CurrentScene"/>.
-		/// This is a shortcut for <see cref="Contains"/> -> <see cref="Scene.MouseCursorPosition"/>.
+		/// This is a shortcut for <see cref="Contains"/> -> <see cref="Scene.MousePosition"/>.
 		/// </summary>
 		[JsonIgnore]
-		public bool IsHovered => Contains(Scene.MouseCursorPosition);
+		public bool IsHovered => Contains(Scene.MousePosition);
 
 		/// <summary>
 		/// Constructs both <see cref="LocalLines"/> and <see cref="Lines"/> from between the <paramref name="points"/>.
@@ -39,7 +39,7 @@
 		/// </summary>
 		public void TransformLocalLines(string thingUID)
 		{
-			var thing = ThingInstance.Get(thingUID);
+			var thing = ThingInstance.Get_(thingUID);
 			if(thing == null)
 				return;
 
@@ -47,8 +47,8 @@
 
 			for(int i = 0; i < LocalLines.Count; i++)
 			{
-				var a = thing.GetPositionFromSelf(LocalLines[i].A);
-				var b = thing.GetPositionFromSelf(LocalLines[i].B);
+				var a = thing.PositionFromSelf(LocalLines[i].A);
+				var b = thing.PositionFromSelf(LocalLines[i].B);
 				Lines.Add(new(a, b));
 			}
 		}
@@ -63,13 +63,13 @@
 		/// <summary>
 		/// Calculates and then returns all the cross points (if any) produced between <see cref="Lines"/> and <paramref name="hitbox"/>'s <see cref="Lines"/>.
 		/// </summary>
-		public List<Vector2> GetCrossPoints(Hitbox hitbox)
+		public List<Vector2> CrossPoints(Hitbox hitbox)
 		{
 			var result = new List<Vector2>();
 			for(int i = 0; i < Lines.Count; i++)
 				for(int j = 0; j < hitbox.Lines.Count; j++)
 				{
-					var p = Lines[i].GetCrossPoint(hitbox.Lines[j]);
+					var p = Lines[i].CrossPoint(hitbox.Lines[j]);
 					if(p.IsNaN() == false)
 						result.Add(p);
 				}
@@ -93,7 +93,7 @@
 				return false;
 
 			var crosses = 0;
-			var outsidePoint = Lines[0].A.PointPercentTowardPoint(Lines[0].B, new(-500, -500));
+			var outsidePoint = Lines[0].A.PercentToTarget(Lines[0].B, new(-500, -500));
 
 			for(int i = 0; i < Lines.Count; i++)
 				if(Lines[i].Crosses(new(point, outsidePoint)))
@@ -128,17 +128,17 @@
 		/// <summary>
 		/// Returns the closest point on the <see cref="Hitbox.Lines"/> to a certain <paramref name="point"/>.
 		/// </summary>
-		public Vector2 GetClosestPoint(Vector2 point)
+		public Vector2 ClosestPoint(Vector2 point)
 		{
 			var points = new List<Vector2>();
 			var result = new Vector2();
 			var bestDist = float.MaxValue;
 
 			for(int i = 0; i < Lines.Count; i++)
-				points.Add(Lines[i].GetClosestPoint(point));
+				points.Add(Lines[i].ClosestPoint(point));
 			for(int i = 0; i < points.Count; i++)
 			{
-				var dist = points[i].DistanceBetweenPoints(point);
+				var dist = points[i].Distance(point);
 				if(dist < bestDist)
 				{
 					bestDist = dist;
@@ -218,7 +218,7 @@
 			}
 
 			if(isClicked && isDraggable)
-				result.DragDelta = Scene.MouseCursorDelta;
+				result.DragDelta = Scene.MouseDelta;
 
 			if(result.IsHeld)
 				preventClick = true;

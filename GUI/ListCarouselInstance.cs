@@ -99,7 +99,7 @@
 				sel.ButtonDetails.Draw(renderTarget);
 			if(sel.TextDetails.IsHidden == false)
 			{
-				var center = selBB.Lines[0].A.PointPercentTowardPoint(selBB.Lines[2].A, new(50));
+				var center = selBB.Lines[0].A.PercentToTarget(selBB.Lines[2].A, new(50));
 				sel.TextDetails.UpdateGlobalText(center, Angle, Scale);
 				sel.TextDetails.Draw(renderTarget);
 			}

@@ -72,10 +72,10 @@
 			if(tl.X == tr.X || tl.Y == bl.Y)
 				return result.AsReadOnly();
 
-			result.Add(GetPositionFromSelf(tl / sc));
-			result.Add(GetPositionFromSelf(tr / sc));
-			result.Add(GetPositionFromSelf(br / sc));
-			result.Add(GetPositionFromSelf(bl / sc));
+			result.Add(PositionFromSelf(tl / sc));
+			result.Add(PositionFromSelf(tr / sc));
+			result.Add(PositionFromSelf(br / sc));
+			result.Add(PositionFromSelf(bl / sc));
 
 			return result.AsReadOnly();
 		}

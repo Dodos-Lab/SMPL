@@ -22,12 +22,12 @@
 		/// <summary>
 		/// The angle between <see cref="A"/> and <see cref="B"/>.
 		/// </summary>
-		public float Angle => A.AngleBetweenPoints(B);
+		public float Angle => A.Angle(B);
 		[JsonIgnore]
 		/// <summary>
 		/// The direction between <see cref="A"/> and <see cref="B"/>.
 		/// </summary>
-		public Vector2 Direction => Angle.AngleToDirection();
+		public Vector2 Direction => Angle.ToDirection();
 
 		/// <summary>
 		/// Creates the line from two points: <paramref name="a"/> and  <paramref name="b"/>.
@@ -48,10 +48,10 @@
 			color = color == default ? Color.White : color;
 			width /= 2;
 
-			var startLeft = A.PointMoveAtAngle(Angle - 90, width, false);
-			var startRight = A.PointMoveAtAngle(Angle + 90, width, false);
-			var endLeft = B.PointMoveAtAngle(Angle - 90, width, false);
-			var endRight = B.PointMoveAtAngle(Angle + 90, width, false);
+			var startLeft = A.MoveAtAngle(Angle - 90, width, false);
+			var startRight = A.MoveAtAngle(Angle + 90, width, false);
+			var endLeft = B.MoveAtAngle(Angle - 90, width, false);
+			var endRight = B.MoveAtAngle(Angle + 90, width, false);
 			var len = Length;
 
 			var verts = new Vertex[]
@@ -80,7 +80,7 @@
 		/// Returns the point where this line and another <paramref name="line"/> cross. Returns an invalid vector
 		/// (<see cref="Extensions.NaN(Vector2)"/>) if there is no such point.
 		/// </summary>
-		public Vector2 GetCrossPoint(Line line)
+		public Vector2 CrossPoint(Line line)
 		{
 			var p = CrossPoint(A, B, line.A, line.B);
 			return Contains(p) && line.Contains(p) ? p : new(float.NaN, float.NaN);
@@ -90,7 +90,7 @@
 		/// </summary>
 		public bool Crosses(Line line)
 		{
-			var result = GetCrossPoint(line);
+			var result = CrossPoint(line);
 			return float.IsNaN(result.X) == false && float.IsNaN(result.Y) == false;
 		}
 		/// <summary>
@@ -111,14 +111,14 @@
 		/// has no obstacles.<br></br><br></br>
 		/// May be used as:<br></br>
 		/// - Setting <see cref="A"/> to be the position of some <see cref="ThingInstance"/>/<see cref="SpriteInstance"/>.<br></br>
-		/// - Setting <see cref="B"/> to be some target point destination (for example <see cref="Scene.MouseCursorPosition"/>).<br></br>
+		/// - Setting <see cref="B"/> to be some target point destination (for example <see cref="Scene.MousePosition"/>).<br></br>
 		/// - Checking whether there is a clear path between them by calling this method and its result being invalid or not.<br></br>
 		/// - If invalid then this means it is time to handle the case where there is no path/the path is too complex to be taken
 		/// (with more than one turn).<br></br>
 		/// - Otherwise move toward the result.<br></br>
 		/// - Move directly toward <see cref="B"/> once the path is clear.
 		/// </summary>
-		public Vector2 GetPathfindResult(uint tries, Hitbox hitbox)
+		public Vector2 Pathfind(uint tries, Hitbox hitbox)
 		{
 			if(tries == 0)
 				return new Vector2().NaN();
@@ -130,7 +130,7 @@
 			var bestDist = double.MaxValue;
 			for(int i = 0; i < tries; i++)
 			{
-				var randPoint = A.PointMoveAtAngle(i * (360 / tries), Vector2.Distance(A, B), false);
+				var randPoint = A.MoveAtAngle(i * (360 / tries), Vector2.Distance(A, B), false);
 				var sumDist = Vector2.Distance(A, randPoint) + Vector2.Distance(randPoint, B);
 				if(IsCrossing(A, randPoint, B) == false && sumDist < bestDist)
 				{
@@ -141,7 +141,7 @@
 
 			for(int i = 0; i < tries; i++)
 			{
-				var curP = A.PointPercentTowardPoint(bestPoint, new(100 / tries * i, 100 / tries * i));
+				var curP = A.PercentToTarget(bestPoint, new(100 / tries * i, 100 / tries * i));
 				if(IsCrossing(curP, B, B) == false)
 					return curP;
 			}
@@ -163,7 +163,7 @@
 		/// <summary>
 		/// Returns the closest point on the line to a <paramref name="point"/>.
 		/// </summary>
-		public Vector2 GetClosestPoint(Vector2 point)
+		public Vector2 ClosestPoint(Vector2 point)
 		{
 			var AP = point - A;
 			var AB = B - A;

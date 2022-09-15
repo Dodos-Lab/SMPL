@@ -40,10 +40,10 @@
 			var hh = h * TexCoordUnitB.Y;
 			var bb = base.BoundingBox.Lines;
 
-			var tl = bb[0].A.PointPercentTowardPoint(bb[1].A, new(ProgressUnit * 100 - LengthUnit * 50));
-			var tr = bb[0].A.PointPercentTowardPoint(bb[1].A, new(ProgressUnit * 100 + LengthUnit * 50));
-			var bl = bb[3].A.PointPercentTowardPoint(bb[2].A, new(ProgressUnit * 100 - LengthUnit * 50));
-			var br = bb[3].A.PointPercentTowardPoint(bb[2].A, new(ProgressUnit * 100 + LengthUnit * 50));
+			var tl = bb[0].A.PercentToTarget(bb[1].A, new(ProgressUnit * 100 - LengthUnit * 50));
+			var tr = bb[0].A.PercentToTarget(bb[1].A, new(ProgressUnit * 100 + LengthUnit * 50));
+			var bl = bb[3].A.PercentToTarget(bb[2].A, new(ProgressUnit * 100 - LengthUnit * 50));
+			var br = bb[3].A.PercentToTarget(bb[2].A, new(ProgressUnit * 100 + LengthUnit * 50));
 
 			if(ProgressUnit < LengthUnit * 0.5f)
 			{
@@ -98,12 +98,11 @@
 				var bb = BoundingBox.Lines;
 				var a = bb[0].A;
 				var b = bb[0].B;
-				var closest = new Line(a, b).GetClosestPoint(Scene.MouseCursorPosition);
-				var dist = a.DistanceBetweenPoints(b);
-				var value = a.DistanceBetweenPoints(closest).Map(0, dist, RangeA, RangeB);
+				var closest = new Line(a, b).ClosestPoint(Scene.MousePosition);
+				var dist = a.Distance(b);
+				var value = a.Distance(closest).Map(0, dist, RangeA, RangeB);
 				var sz = Size;
 
-				Console.Log("f");
 				Value = value;
 				Size = sz;
 			}

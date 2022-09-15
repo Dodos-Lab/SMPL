@@ -47,7 +47,93 @@
 		/// <summary>
 		/// The type of number animation direction used by <see cref="AnimateUnit"/>.
 		/// </summary>
-		public enum AnimationWay { Backward, Forward, BackwardThenForward }
+		public enum AnimationCurve { Backward, Forward, BackwardThenForward }
+
+		/// <summary>
+		/// The horizontal directions in the world.<br></br>
+		/// # # #<br></br>
+		/// 1 # 0<br></br>
+		/// # # #<br></br>
+		/// </summary>
+		public enum DirectionH { Right, Left }
+		/// <summary>
+		/// The vertical directions in the world.<br></br>
+		/// # 1 #<br></br>
+		/// # # #<br></br>
+		/// # 0 #<br></br>
+		/// </summary>
+		public enum DirectionV { Down, Up }
+		/// <summary>
+		/// The 4 directions in the world.<br></br>
+		/// # 3 #<br></br>
+		/// 2 # 0<br></br>
+		/// # 1 #<br></br>
+		/// </summary>
+		public enum Direction4 { Right, Down, Left, Up }
+		/// <summary>
+		/// The 4 directions in the world + their diagonals.<br></br>
+		/// 5 6 7<br></br>
+		/// 4 # 0<br></br>
+		/// 3 2 1<br></br>
+		/// </summary>
+		public enum Direction8 { Right, DownRight, Down, DownLeft, Left, UpLeft, Up, UpRight }
+
+		/// <summary>
+		/// Converts a <see cref="DirectionH"/> to a 360 degrees angle and returns it.
+		/// </summary>
+		public static float ToAngle(this DirectionH direction)
+		{
+			return ((int)direction) * 180f;
+		}
+		/// <summary>
+		/// Converts a <see cref="DirectionV"/> to a 360 degrees angle and returns it.
+		/// </summary>
+		public static float ToAngle(this DirectionV direction)
+		{
+			return ((int)direction) * 180f + 90f;
+		}
+		/// <summary>
+		/// Converts a <see cref="Direction4"/> to a 360 degrees angle and returns it.
+		/// </summary>
+		public static float ToAngle(this Direction4 direction)
+		{
+			return ((int)direction) * 90f;
+		}
+		/// <summary>
+		/// Converts a <see cref="Direction8"/> to a 360 degrees angle and returns it.
+		/// </summary>
+		public static float ToAngle(this Direction8 direction)
+		{
+			return ((int)direction) * 45f;
+		}
+		/// <summary>
+		/// Converts a <see cref="Direction4"/> to a directional unit (normalized) <see cref="Vector2"/> and returns it.
+		/// </summary>
+		public static Vector2 ToDirection(this Direction4 direction)
+		{
+			return ToAngle(direction).ToDirection();
+		}
+		/// <summary>
+		/// Converts a <see cref="Direction8"/> to a directional unit (normalized) <see cref="Vector2"/> and returns it.
+		/// </summary>
+		public static Vector2 ToDirection(this Direction8 direction)
+		{
+			return ToAngle(direction).ToDirection();
+		}
+		/// <summary>
+		/// Converts a <see cref="DirectionH"/> to a directional unit (normalized) <see cref="Vector2"/> and returns it.
+		/// </summary>
+		public static Vector2 ToDirection(this DirectionH direction)
+		{
+			return ToAngle(direction).ToDirection();
+		}
+		/// <summary>
+		/// Converts a <see cref="DirectionV"/> to a directional unit (normalized) <see cref="Vector2"/> and returns it.
+		/// </summary>
+		public static Vector2 ToDirection(this DirectionV direction)
+		{
+			return ToAngle(direction).ToDirection();
+		}
 
 		/// <summary>
 		/// Returns true only the first time a <paramref name="condition"/> is <see langword="true"/>.
@@ -212,52 +298,56 @@
 		}
 
 		/// <summary>
-		/// Wraps a <paramref name="number"/> around the range 0-360 and returns it.
+		/// Wraps a <paramref name="number"/> around 0 to <paramref name="range"/> and returns it.
 		/// </summary>
-		public static float AngleTo360(this float number)
+		public static float Wrap(this float number, float range)
 		{
-			return ((number % 360) + 360) % 360;
+			return ((number % range) + range) % range;
 		}
-
-		public static float Animate(this float progress, Animation animationType, AnimationWay animationCurve, bool repeated = false)
+		/// <summary>
+		/// Transforms a <paramref name="progress"/> ranged [0-1] to an animated progress acording to an <paramref name="animation"/>
+		/// and a <paramref name="curve"/>. The animation might be <paramref name="repeated"/> (if the provided progress is outside of the range [0-1].
+		/// This is also known as easing functions.
+		/// </summary>
+		public static float Animate(this float progress, Animation animation, AnimationCurve curve, bool repeated = false)
 		{
 			var result = 0f;
 			var x = progress.Limit(0, 1, repeated ? Limitation.Overflow : Limitation.ClosestBound);
-			switch(animationType)
+			switch(animation)
 			{
 				case Animation.BendWeak:
 					{
-						result = animationCurve == AnimationWay.Backward ? 1 - MathF.Cos(x * MathF.PI / 2) :
-							animationCurve == AnimationWay.Forward ? 1 - MathF.Sin(x * MathF.PI / 2) :
+						result = curve == AnimationCurve.Backward ? 1 - MathF.Cos(x * MathF.PI / 2) :
+							curve == AnimationCurve.Forward ? 1 - MathF.Sin(x * MathF.PI / 2) :
 							-(MathF.Cos(MathF.PI * x) - 1) / 2;
 						break;
 					}
 				case Animation.Bend:
 					{
-						result = animationCurve == AnimationWay.Backward ? x * x * x :
-							animationCurve == AnimationWay.Forward ? 1 - MathF.Pow(1 - x, 3) :
+						result = curve == AnimationCurve.Backward ? x * x * x :
+							curve == AnimationCurve.Forward ? 1 - MathF.Pow(1 - x, 3) :
 							(x < 0.5 ? 4 * x * x * x : 1 - MathF.Pow(-2 * x + 2, 3) / 2);
 						break;
 					}
 				case Animation.BendStrong:
 					{
-						result = animationCurve == AnimationWay.Backward ? x * x * x * x :
-							animationCurve == AnimationWay.Forward ? 1 - MathF.Pow(1 - x, 5) :
+						result = curve == AnimationCurve.Backward ? x * x * x * x :
+							curve == AnimationCurve.Forward ? 1 - MathF.Pow(1 - x, 5) :
 							(x < 0.5 ? 16 * x * x * x * x * x : 1 - MathF.Pow(-2 * x + 2, 5) / 2);
 						break;
 					}
 				case Animation.Circle:
 					{
-						result = animationCurve == AnimationWay.Backward ? 1 - MathF.Sqrt(1 - MathF.Pow(x, 2)) :
-							animationCurve == AnimationWay.Forward ? MathF.Sqrt(1 - MathF.Pow(x - 1, 2)) :
+						result = curve == AnimationCurve.Backward ? 1 - MathF.Sqrt(1 - MathF.Pow(x, 2)) :
+							curve == AnimationCurve.Forward ? MathF.Sqrt(1 - MathF.Pow(x - 1, 2)) :
 							(x < 0.5 ? (1 - MathF.Sqrt(1 - MathF.Pow(2 * x, 2))) / 2 : (MathF.Sqrt(1 - MathF.Pow(-2 * x + 2, 2)) + 1) / 2);
 						break;
 					}
 				case Animation.Elastic:
 					{
-						result = animationCurve == AnimationWay.Backward ?
+						result = curve == AnimationCurve.Backward ?
 							(x == 0 ? 0 : x == 1 ? 1 : -MathF.Pow(2, 10 * x - 10) * MathF.Sin((x * 10 - 10.75f) * ((2 * MathF.PI) / 3))) :
-							animationCurve == AnimationWay.Forward ?
+							curve == AnimationCurve.Forward ?
 							(x == 0 ? 0 : x == 1 ? 1 : MathF.Pow(2, -10 * x) * MathF.Sin((x * 10 - 0.75f) * (2 * MathF.PI) / 3) + 1) :
 							(x == 0 ? 0 : x == 1 ? 1 : x < 0.5f ? -(MathF.Pow(2, 20 * x - 10) * MathF.Sin((20f * x - 11.125f) *
 							(2 * MathF.PI) / 4.5f)) / 2 :
@@ -266,16 +356,16 @@
 					}
 				case Animation.Swing:
 					{
-						result = animationCurve == AnimationWay.Backward ? 2.70158f * x * x * x - 1.70158f * x * x :
-							animationCurve == AnimationWay.Forward ? 1 + 2.70158f * MathF.Pow(x - 1, 3) + 1.70158f * MathF.Pow(x - 1, 2) :
+						result = curve == AnimationCurve.Backward ? 2.70158f * x * x * x - 1.70158f * x * x :
+							curve == AnimationCurve.Forward ? 1 + 2.70158f * MathF.Pow(x - 1, 3) + 1.70158f * MathF.Pow(x - 1, 2) :
 							(x < 0.5 ? (MathF.Pow(2 * x, 2) * ((2.59491f + 1) * 2 * x - 2.59491f)) / 2 :
 							(MathF.Pow(2 * x - 2, 2) * ((2.59491f + 1) * (x * 2 - 2) + 2.59491f) + 2) / 2);
 						break;
 					}
 				case Animation.Bounce:
 					{
-						result = animationCurve == AnimationWay.Backward ? 1 - easeOutBounce(1 - x) :
-							animationCurve == AnimationWay.Forward ? easeOutBounce(x) :
+						result = curve == AnimationCurve.Backward ? 1 - easeOutBounce(1 - x) :
+							curve == AnimationCurve.Forward ? easeOutBounce(x) :
 							(x < 0.5f ? (1 - easeOutBounce(1 - 2 * x)) / 2 : (1 + easeOutBounce(2 * x - 1)) / 2);
 						break;
 					}
@@ -411,7 +501,7 @@
 		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info).
 		/// The calculation ensures not to pass the <paramref name="targetNumber"/>. The result is then returned.
 		/// </summary>
-		public static float MoveTowardTarget(this float number, float targetNumber, float speed, bool fpsDependent = true)
+		public static float MoveToTarget(this float number, float targetNumber, float speed, bool fpsDependent = true)
 		{
 			var goingPos = number < targetNumber;
 			var result = Move(number, goingPos ? Sign(speed, false) : Sign(speed, true), fpsDependent);
@@ -440,10 +530,10 @@
 		/// taking the closest direction. May be <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info).
 		/// The calculation ensures not to pass the <paramref name="targetAngle"/>. The result is then returned.
 		/// </summary>
-		public static float MoveAngleTowardAngle(this float angle, float targetAngle, float speed, bool fpsDependent = true)
+		public static float MoveToAngle(this float angle, float targetAngle, float speed, bool fpsDependent = true)
 		{
-			angle = AngleTo360(angle);
-			targetAngle = AngleTo360(targetAngle);
+			angle = Wrap(angle, 360);
+			targetAngle = Wrap(targetAngle, 360);
 			speed = Math.Abs(speed);
 			var difference = angle - targetAngle;
 
@@ -495,7 +585,7 @@
 		/// <summary>
 		/// Converts a 360 degrees <paramref name="angle"/> into a normalized <see cref="Vector2"/> direction then returns the result.
 		/// </summary>
-		public static Vector2 AngleToDirection(this float angle)
+		public static Vector2 ToDirection(this float angle)
 		{
 			//Angle to Radians : (Math.PI / 180) * angle
 			//Radians to Vector2 : Vector2.x = cos(angle) ; Vector2.y = sin(angle)
@@ -508,23 +598,60 @@
 		/// <summary>
 		/// Converts <paramref name="radians"/> to a 360 degrees angle and returns the result.
 		/// </summary>
-		public static float RadiansToDegrees(this float radians)
+		public static float ToDegrees(this float radians)
 		{
 			return radians * (180f / MathF.PI);
 		}
 		/// <summary>
 		/// Converts a 360 <paramref name="degrees"/> angle into radians and returns the result.
 		/// </summary>
-		public static float DegreesToRadians(this float degrees)
+		public static float ToRadians(this float degrees)
 		{
 			return (MathF.PI / 180f) * degrees;
+		}
+		/// <summary>
+		/// Converts a 360 degrees angle to a <see cref="Direction4"/> and returns it.
+		/// </summary>
+		public static Direction4 ToDirection4(this float angle)
+		{
+			var a = (int)(angle.Wrap(360) / 90f).Round();
+			if(a >= Enum.GetNames<Direction4>().Length)
+				a = 0;
+			return (Direction4)a;
+
+		}
+		/// <summary>
+		/// Converts a 360 degrees angle to a <see cref="Direction4"/> and returns it.
+		/// </summary>
+		public static Direction8 ToDirection8(this float angle)
+		{
+			var a = (int)(angle.Wrap(360) / 45f).Round();
+			if(a >= Enum.GetNames<Direction8>().Length)
+				a = 0;
+			return (Direction8)a;
+		}
+		/// <summary>
+		/// Converts a 360 degrees angle to a <see cref="DirectionH"/> and returns it.
+		/// </summary>
+		public static DirectionH ToDirectionH(this float angle)
+		{
+			var a = angle.Wrap(360);
+			return a.IsBetween(90, 270) ? DirectionH.Left : DirectionH.Right;
+		}
+		/// <summary>
+		/// Converts a 360 degrees angle to a <see cref="DirectionV"/> and returns it.
+		/// </summary>
+		public static DirectionV ToDirectionV(this float angle)
+		{
+			var a = angle.Wrap(360);
+			return a.IsBetween(0, 180) ? DirectionV.Down : DirectionV.Up;
 		}
 
 		/// <summary>
 		/// Calculates a reflected normalized <paramref name="direction"/> <see cref="Vector2"/> as if it was to bounce off of a
 		/// <paramref name="surfaceNormal"/> (the direction the surface is facing) and returns it.
 		/// </summary>
-		public static Vector2 ReflectDirection(this Vector2 direction, Vector2 surfaceNormal)
+		public static Vector2 Reflect(this Vector2 direction, Vector2 surfaceNormal)
 		{
 			return Vector2.Reflect(direction, surfaceNormal);
 		}
@@ -532,14 +659,14 @@
 		/// Normalizes a <paramref name="direction"/> <see cref="Vector2"/>. Or in other words: sets the length (magnitude) of the
 		/// <paramref name="direction"/> <see cref="Vector2"/> to 1. Then the result is returned.
 		/// </summary>
-		public static Vector2 NormalizeDirection(this Vector2 direction)
+		public static Vector2 Normalize(this Vector2 direction)
 		{
 			return Vector2.Normalize(direction);
 		}
 		/// <summary>
 		/// Calculates the distance between a <paramref name="point"/> and a <paramref name="targetPoint"/> then returns it.
 		/// </summary>
-		public static float DistanceBetweenPoints(this Vector2 point, Vector2 targetPoint)
+		public static float Distance(this Vector2 point, Vector2 targetPoint)
 		{
 			return Vector2.Distance(point, targetPoint);
 		}
@@ -558,9 +685,9 @@
 			return new(float.NaN, float.NaN);
 		}
 		/// <summary>
-		/// Converts a directional unit <see cref="Vector2"/> into a 360 degrees angle and returns the result.
+		/// Converts a directional <see cref="Vector2"/> into a 360 degrees angle and returns the result.
 		/// </summary>
-		public static float DirectionToAngle(this Vector2 direction)
+		public static float ToAngle(this Vector2 direction)
 		{
 			//Vector2 to Radians: atan2(Vector2.y, Vector2.x)
 			//Radians to Angle: radians * (180 / Math.PI)
@@ -572,14 +699,14 @@
 		/// <summary>
 		/// Calculates the 360 degrees angle between two <see cref="Vector2"/> points and returns it.
 		/// </summary>
-		public static float AngleBetweenPoints(this Vector2 point, Vector2 targetPoint)
+		public static float Angle(this Vector2 point, Vector2 targetPoint)
 		{
-			return DirectionToAngle(targetPoint - point).AngleTo360();
+			return ToAngle(targetPoint - point).Wrap(360);
 		}
 		/// <summary>
 		/// Snaps a <paramref name="point"/> to the closest grid cell according to <paramref name="gridSize"/> and returns the result.
 		/// </summary>
-		public static Vector2 PointToGrid(this Vector2 point, Vector2 gridSize)
+		public static Vector2 ToGrid(this Vector2 point, Vector2 gridSize)
 		{
 			if(gridSize == default)
 				return point;
@@ -594,7 +721,7 @@
 		}
 		/// <summary>
 		/// Calculates the direction between <paramref name="point"/> and <paramref name="targetPoint"/>. The result may be
-		/// <paramref name="normalized"/> (see <see cref="NormalizeDirection"/> for info). Then it is returned.
+		/// <paramref name="normalized"/> (see <see cref="Normalize"/> for info). Then it is returned.
 		/// </summary>
 		public static Vector2 DirectionBetweenPoints(this Vector2 point, Vector2 targetPoint, bool normalized = true)
 		{
@@ -604,7 +731,7 @@
 		/// Moves a <paramref name="point"/> in <paramref name="direction"/> with <paramref name="speed"/>. May be <paramref name="fpsDependent"/>
 		/// (see <see cref="Time.Delta"/> for info). The result is then returned.
 		/// </summary>
-		public static Vector2 PointMoveInDirection(this Vector2 point, Vector2 direction, float speed, bool fpsDependent = true)
+		public static Vector2 MoveInDirection(this Vector2 point, Vector2 direction, float speed, bool fpsDependent = true)
 		{
 			point.X += direction.X * speed * (fpsDependent ? Time.Delta : 1);
 			point.Y += direction.Y * speed * (fpsDependent ? Time.Delta : 1);
@@ -614,9 +741,9 @@
 		/// Moves a <paramref name="point"/> at a 360 degrees <paramref name="angle"/> with <paramref name="speed"/>. May be
 		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info). The result is then returned.
 		/// </summary>
-		public static Vector2 PointMoveAtAngle(this Vector2 point, float angle, float speed, bool fpsDependent = true)
+		public static Vector2 MoveAtAngle(this Vector2 point, float angle, float speed, bool fpsDependent = true)
 		{
-			var result = PointMoveInDirection(point, Vector2.Normalize(angle.AngleTo360().AngleToDirection()), speed, fpsDependent);
+			var result = MoveInDirection(point, Vector2.Normalize(angle.Wrap(360).ToDirection()), speed, fpsDependent);
 			return result;
 		}
 		/// <summary>
@@ -624,9 +751,9 @@
 		/// <paramref name="fpsDependent"/> (see <see cref="Time.Delta"/> for info). The calculation ensures not to pass the
 		/// <paramref name="targetPoint"/>. The result is then returned.
 		/// </summary>
-		public static Vector2 PointMoveTowardPoint(this Vector2 point, Vector2 targetPoint, float speed, bool fpsDependent = true)
+		public static Vector2 MoveToTarget(this Vector2 point, Vector2 targetPoint, float speed, bool fpsDependent = true)
 		{
-			var result = point.PointMoveAtAngle(point.AngleBetweenPoints(targetPoint), speed, fpsDependent);
+			var result = point.MoveAtAngle(point.Angle(targetPoint), speed, fpsDependent);
 
 			speed *= fpsDependent ? Time.Delta : 1;
 			return Vector2.Distance(result, targetPoint) < speed * 1.1f ? targetPoint : result;
@@ -635,11 +762,39 @@
 		/// Calculates the <see cref="Vector2"/> point that is a certain <paramref name="percent"/> between <paramref name="point"/> and
 		/// <paramref name="targetPoint"/> then returns the result. Also known as Lerping (linear interpolation).
 		/// </summary>
-		public static Vector2 PointPercentTowardPoint(this Vector2 point, Vector2 targetPoint, Vector2 percent)
+		public static Vector2 PercentToTarget(this Vector2 point, Vector2 targetPoint, Vector2 percent)
 		{
 			point.X = percent.X.Map(0, 100, point.X, targetPoint.X);
 			point.Y = percent.Y.Map(0, 100, point.Y, targetPoint.Y);
 			return point;
+		}
+		/// <summary>
+		/// Converts a directional <see cref="Vector2"/> to a <see cref="Direction4"/> and returns it.
+		/// </summary>
+		public static Direction4 ToDirection4(this Vector2 direction)
+		{
+			return direction.ToAngle().ToDirection4();
+		}
+		/// <summary>
+		/// Converts a directional <see cref="Vector2"/> to a <see cref="Direction8"/> and returns it.
+		/// </summary>
+		public static Direction8 ToDirection8(this Vector2 direction)
+		{
+			return direction.ToAngle().ToDirection8();
+		}
+		/// <summary>
+		/// Converts a directional <see cref="Vector2"/> to a <see cref="DirectionH"/> and returns it.
+		/// </summary>
+		public static DirectionH ToDirectionH(this Vector2 direction)
+		{
+			return direction.ToAngle().ToDirectionH();
+		}
+		/// <summary>
+		/// Converts a directional <see cref="Vector2"/> to a <see cref="DirectionV"/> and returns it.
+		/// </summary>
+		public static DirectionV ToDirectionV(this Vector2 direction)
+		{
+			return direction.ToAngle().ToDirectionV();
 		}
 		/// <summary>
 		/// Converts a <see cref="Vector2f"/> into a <see cref="Vector2"/> and returns the result.
@@ -706,7 +861,7 @@
 		/// The texture coordinates are calculated acording to <paramref name="size"/>. The default <paramref name="color"/> is assumed to be white if no
 		/// <paramref name="color"/> is passed. These vertices are meant for drawing with <see cref="PrimitiveType.Quads"/>.
 		/// </summary>
-		public static Vertex[] PointToVertices(this Vector2 point, Color color = default, float size = 4)
+		public static Vertex[] ToVertices(this Vector2 point, Color color = default, float size = 4)
 		{
 			color = color == default ? Color.White : color;
 			size /= 2;
@@ -727,16 +882,16 @@
 			return verts;
 		}
 		/// <summary>
-		/// Calculates the vertices of a collection of <paramref name="points"/>. See <see cref="PointToVertices"/> for more info.
+		/// Calculates the vertices of a collection of <paramref name="points"/>. See <see cref="ToVertices"/> for more info.
 		/// </summary>
-		public static Vertex[] PointsToVertices(this IList<Vector2> points, Color color = default, float size = 4)
+		public static Vertex[] ToVertices(this IList<Vector2> points, Color color = default, float size = 4)
 		{
 			if(points == null)
 				return Array.Empty<Vertex>();
 			var result = new Vertex[points.Count * 4];
 			for(int i = 0; i < points.Count; i++)
 			{
-				var verts = points[i].PointToVertices(color, size);
+				var verts = points[i].ToVertices(color, size);
 				var j = i * 4;
 				result[j + 0] = verts[0];
 				result[j + 1] = verts[1];
@@ -744,34 +899,6 @@
 				result[j + 3] = verts[3];
 			}
 			return result;
-		}
-		/// <summary>
-		/// Draws <paramref name="point"/> to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
-		/// <paramref name="size"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Scene.MainCamera"/>'s <see cref="RenderTexture"/> if no
-		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
-		/// <paramref name="color"/> is passed.
-		/// </summary>
-		public static void DrawPoint(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
-		{
-			renderTarget ??= Scene.MainCamera.RenderTexture;
-			renderTarget.Draw(point.PointToVertices(color, size), PrimitiveType.Quads);
-		}
-		/// <summary>
-		/// Draws a collection of <paramref name="points"/>. See <see cref="DrawPoint"/> for more info.
-		/// </summary>
-		public static void DrawPoints(this IList<Vector2> points, RenderTarget renderTarget = default, Color color = default, float size = 4)
-		{
-			renderTarget ??= Scene.MainCamera.RenderTexture;
-			renderTarget.Draw(points.PointsToVertices(color, size), PrimitiveType.Quads);
-		}
-
-		/// <summary>
-		/// Draws a collection of <paramref name="lines"/>. See <see cref="Line.Draw"/> for more info.
-		/// </summary>
-		public static void Draw(this IList<Line> lines, RenderTarget renderTarget = default, Color color = default, float size = 4)
-		{
-			renderTarget ??= Scene.MainCamera.RenderTexture;
-			renderTarget.Draw(lines.ToVertices(color, size), PrimitiveType.Quads);
 		}
 		/// <summary>
 		/// Calculates the vertices of a collection of <paramref name="lines"/>. See <see cref="Line.ToVertices"/> for more info.
@@ -789,6 +916,33 @@
 				result[j + 3] = verts[3];
 			}
 			return result;
+		}
+		/// <summary>
+		/// Draws <paramref name="point"/> to a <paramref name="renderTarget"/> with <paramref name="color"/> having some
+		/// <paramref name="size"/>. The <paramref name="renderTarget"/> is assumed to be the <see cref="Scene.MainCamera"/>'s <see cref="RenderTexture"/> if no
+		/// <paramref name="renderTarget"/> is passed. The default <paramref name="color"/> is assumed to be white if no
+		/// <paramref name="color"/> is passed.
+		/// </summary>
+		public static void Draw(this Vector2 point, RenderTarget renderTarget = default, Color color = default, float size = 4)
+		{
+			renderTarget ??= Scene.MainCamera.RenderTexture;
+			renderTarget.Draw(point.ToVertices(color, size), PrimitiveType.Quads);
+		}
+		/// <summary>
+		/// Draws a collection of <paramref name="points"/>. See <see cref="Draw(Vector2, RenderTarget, SFML.Graphics.Color, float)"/> for more info.
+		/// </summary>
+		public static void Draw(this IList<Vector2> points, RenderTarget renderTarget = default, Color color = default, float size = 4)
+		{
+			renderTarget ??= Scene.MainCamera.RenderTexture;
+			renderTarget.Draw(points.ToVertices(color, size), PrimitiveType.Quads);
+		}
+		/// <summary>
+		/// Draws a collection of <paramref name="lines"/>. See <see cref="Line.Draw"/> for more info.
+		/// </summary>
+		public static void Draw(this IList<Line> lines, RenderTarget renderTarget = default, Color color = default, float size = 4)
+		{
+			renderTarget ??= Scene.MainCamera.RenderTexture;
+			renderTarget.Draw(lines.ToVertices(color, size), PrimitiveType.Quads);
 		}
 
 		/// <summary>

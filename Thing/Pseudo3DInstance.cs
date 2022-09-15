@@ -50,23 +50,23 @@
 				var cam = GetCamera();
 				instance.Position = instance.Z < -1000f || instance.Z > 1000f ? new Vector2().NaN() : GetPosZ();
 				instance.Scale = 1f - z / 100f;
-				instance.Tilt = cam.Position.AngleBetweenPoints(instance.Position);
-				instance.currDepth = instance.Position.DistanceBetweenPoints(cam.Position) * (instance.Depth / 500f);
+				instance.Tilt = cam.Position.Angle(instance.Position);
+				instance.currDepth = instance.Position.Distance(cam.Position) * (instance.Depth / 500f);
 
 				Vector2 GetUnitZ()
 				{
 					var z = instance.Z.Map(-1000, 1000, 0, 1);
-					var anim = z.Animate(Extensions.Animation.Circle, Extensions.AnimationWay.Forward);
+					var anim = z.Animate(Extensions.Animation.Circle, Extensions.AnimationCurve.Forward);
 					return new(anim.Map(0, 1, -646.41f, 100));
 				}
 				Vector2 GetPosZ()
 				{
 					var cam = GetCamera();
-					return instance.Position2D.PointPercentTowardPoint(cam.Position, GetUnitZ());
+					return instance.Position2D.PercentToTarget(cam.Position, GetUnitZ());
 				}
 				CameraInstance GetCamera()
 				{
-					var cam = Get<CameraInstance>(instance.CameraUID);
+					var cam = Get_<CameraInstance>(instance.CameraUID);
 					cam ??= Scene.MainCamera;
 					return cam;
 				}

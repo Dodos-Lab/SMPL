@@ -11,10 +11,10 @@
 				if(baseBB.Count == 0)
 					return bb;
 
-				var tl = baseBB[0].A.PointMoveAtAngle(Angle + 90, Size.Y, false).PointMoveAtAngle(Angle + 180, Size.Y, false);
-				var tr = baseBB[1].A.PointMoveAtAngle(Angle + 90, Size.Y, false).PointMoveAtAngle(Angle, Size.Y, false);
-				var br = tr.PointMoveAtAngle(Angle + 90, ItemWidth * Scale, false);
-				var bl = tl.PointMoveAtAngle(Angle + 90, ItemWidth * Scale, false);
+				var tl = baseBB[0].A.MoveAtAngle(Angle + 90, Size.Y, false).MoveAtAngle(Angle + 180, Size.Y, false);
+				var tr = baseBB[1].A.MoveAtAngle(Angle + 90, Size.Y, false).MoveAtAngle(Angle, Size.Y, false);
+				var br = tr.MoveAtAngle(Angle + 90, ItemWidth * Scale, false);
+				var bl = tl.MoveAtAngle(Angle + 90, ItemWidth * Scale, false);
 
 				bb.Lines.Clear();
 				bb.LocalLines.Clear();
@@ -22,7 +22,7 @@
 				bb.Lines.Add(new(tr, br));
 				bb.Lines.Add(new(br, bl));
 				bb.Lines.Add(new(bl, tl));
-				bb.Draw();
+
 				return bb;
 			}
 		}
@@ -94,7 +94,7 @@
 
 			Step = 1;
 			RangeA = 0;
-			RangeB = MathF.Max((Items.Count - VisibleItemCountMax).Limit(1, Items.Count - 1), RangeA);
+			RangeB = MathF.Max(Items.Count - VisibleItemCountMax, 1);
 
 			scrollIndex = (int)Value;
 
@@ -142,7 +142,7 @@
 					item.ButtonDetails.Draw(renderTarget);
 
 					var itemCorners = GetItemCorners(i);
-					var itemCenter = itemCorners[0].PointPercentTowardPoint(itemCorners[2], new(50));
+					var itemCenter = itemCorners[0].PercentToTarget(itemCorners[2], new(50));
 					item.TextDetails.UpdateGlobalText(itemCenter, Angle - 90, Scale);
 					item.TextDetails.Draw(renderTarget);
 				}
@@ -150,10 +150,10 @@
 		private List<Vector2> GetItemCorners(int index)
 		{
 			var bb = BoundingBox.Lines;
-			var tl = bb[3].A.PointMoveAtAngle(Angle, ((ItemHeight + ItemSpacing) * Scale) * (index - ScrollIndex), false);
-			var tr = bb[0].A.PointMoveAtAngle(Angle, ((ItemHeight + ItemSpacing) * Scale) * (index - ScrollIndex), false);
-			var br = tr.PointMoveAtAngle(Angle, ItemHeight * Scale, false);
-			var bl = tl.PointMoveAtAngle(Angle, ItemHeight * Scale, false);
+			var tl = bb[3].A.MoveAtAngle(Angle, ((ItemHeight + ItemSpacing) * Scale) * (index - ScrollIndex), false);
+			var tr = bb[0].A.MoveAtAngle(Angle, ((ItemHeight + ItemSpacing) * Scale) * (index - ScrollIndex), false);
+			var br = tr.MoveAtAngle(Angle, ItemHeight * Scale, false);
+			var bl = tl.MoveAtAngle(Angle, ItemHeight * Scale, false);
 			return new() { tl, tr, br, bl };
 		}
 		#endregion

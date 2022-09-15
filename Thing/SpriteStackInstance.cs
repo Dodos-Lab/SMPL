@@ -12,10 +12,10 @@
 					return bb;
 
 				var h = Depth * Scale;
-				var tl = baseBB.Lines[0].A.PointMoveAtAngle(Tilt, h, false);
-				var tr = baseBB.Lines[1].A.PointMoveAtAngle(Tilt, h, false);
-				var br = baseBB.Lines[2].A.PointMoveAtAngle(Tilt, h, false);
-				var bl = baseBB.Lines[3].A.PointMoveAtAngle(Tilt, h, false);
+				var tl = baseBB.Lines[0].A.MoveAtAngle(Tilt, h, false);
+				var tr = baseBB.Lines[1].A.MoveAtAngle(Tilt, h, false);
+				var br = baseBB.Lines[2].A.MoveAtAngle(Tilt, h, false);
+				var bl = baseBB.Lines[3].A.MoveAtAngle(Tilt, h, false);
 
 				bb.Lines.Clear();
 				bb.LocalLines.Clear();
@@ -59,10 +59,10 @@
 
 				var verts = new Vertex[]
 				{
-					new(bb[0].A.PointMoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(0, 0)),
-					new(bb[1].A.PointMoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(sz.X, 0)),
-					new(bb[2].A.PointMoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(sz.X, sz.Y)),
-					new(bb[3].A.PointMoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(0, sz.Y)),
+					new(bb[0].A.MoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(0, 0)),
+					new(bb[1].A.MoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(sz.X, 0)),
+					new(bb[2].A.MoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(sz.X, sz.Y)),
+					new(bb[3].A.MoveAtAngle(Tilt, i * h, false).ToSFML(), Tint, new(0, sz.Y)),
 				};
 
 				var shader = GetShader(renderTarget);

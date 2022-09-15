@@ -13,7 +13,7 @@
 			{
 				var result = 0f;
 				for(int i = 0; i < Points.Count; i++)
-					result += GetSegmentLength(i);
+					result += SegmentLength(i);
 				return result;
 			}
 		}
@@ -29,7 +29,7 @@
 			Points = points.ToList();
 		}
 
-		public Vector2 GetPoint(float index)
+		public Vector2 Point(float index)
 		{
 			if(Points.Count == 0)
 				return new Vector2().NaN();
@@ -76,7 +76,7 @@
 
 			return new(tx, ty);
 		}
-		public Vector2 GetDirection(float index)
+		public Vector2 Direction(float index)
 		{
 			if(Points.Count == 0)
 				return new Vector2().NaN();
@@ -120,10 +120,10 @@
 			var tx = 0.5f * (Points[p0].X * q1 + Points[p1].X * q2 + Points[p2].X * q3 + Points[p3].X * q4);
 			var ty = 0.5f * (Points[p0].Y * q1 + Points[p1].Y * q2 + Points[p2].Y * q3 + Points[p3].Y * q4);
 
-			return new Vector2(tx, ty).NormalizeDirection();
+			return new Vector2(tx, ty).Normalize();
 		}
-		public float GetAngle(float index) => GetDirection(index).DirectionToAngle();
-		public float GetSegmentLength(float index)
+		public float Angle(float index) => Direction(index).ToAngle();
+		public float SegmentLength(float index)
 		{
 			var length = 0.0f;
 			var stepSize = 0.005f;
@@ -131,22 +131,22 @@
 			index = (int)index;
 
 			Vector2 oldPoint, newPoint;
-			oldPoint = GetPoint(index);
+			oldPoint = Point(index);
 
 			for(float t = 0; t < 1.0f; t += stepSize)
 			{
-				newPoint = GetPoint(index + t);
-				length += oldPoint.DistanceBetweenPoints(newPoint);
+				newPoint = Point(index + t);
+				length += oldPoint.Distance(newPoint);
 				oldPoint = newPoint;
 			}
 
 			return length;
 		}
-		public float GetIndex(float distanceFromStart)
+		public float Index(float distanceFromStart)
 		{
 			var lengths = new float[Points.Count];
 			for(int j = 0; j < lengths.Length; j++)
-				lengths[j] = GetSegmentLength(j);
+				lengths[j] = SegmentLength(j);
 
 			var i = 0;
 			while(distanceFromStart > lengths[i])
@@ -180,7 +180,7 @@
 				if(i == 0 && IsLooping == false)
 					continue; // don't draw loop (0 - step = last index)
 
-				lines.Add(new(GetPoint(i), GetPoint(i - lineCount)));
+				lines.Add(new(Point(i), Point(i - lineCount)));
 			}
 			lines.Draw(renderTarget, color, width);
 		}
@@ -193,7 +193,7 @@
 		public void DrawPoints(RenderTarget renderTarget = default, Color color = default, float width = 4f)
 		{
 			for(int i = 0; i < Points.Count; i++)
-				Points[i].DrawPoint(renderTarget, color, width);
+				Points[i].Draw(renderTarget, color, width);
 		}
 
 		#region Backend

@@ -2,11 +2,11 @@
 {
 	public sealed class Scene
 	{
-		public static Vector2 MouseCursorDelta => mouseDelta;
-		public static Vector2 MouseCursorPosition
+		public static Vector2 MouseDelta => mouseDelta;
+		public static Vector2 MousePosition
 		{
-			get => MainCamera.MouseCursorPosition;
-			set => MainCamera.MouseCursorPosition = value;
+			get => MainCamera.MousePosition;
+			set => MainCamera.MousePosition = value;
 		}
 		public static Scene CurrentScene
 		{
@@ -35,6 +35,18 @@
 		public static Scene LoadingScene { get; set; }
 		public const string MAIN_CAMERA_UID = "MainCamera";
 
+		public ReadOnlyCollection<string> AssetPaths
+		{
+			get
+			{
+				var result = new List<string>();
+				result.AddRange(Textures.Keys.ToList());
+				result.AddRange(Fonts.Keys.ToList());
+				result.AddRange(Music.Keys.ToList());
+				result.AddRange(Sounds.Keys.ToList());
+				return result.AsReadOnly();
+			}
+		}
 		public bool IsLoaded { get; private set; }
 		public string Name { get; set; }
 
@@ -79,7 +91,7 @@
 				assetQueue.Clear();
 				things.Clear();
 
-				var assets = GetAssetPaths();
+				var assets = AssetPaths;
 				for(int i = 0; i < assets.Count; i++)
 					if(File.Exists(assets[i]))
 						assetQueue.TryAdd(assets[i], assets[i]);
@@ -107,18 +119,9 @@
 			}
 		}
 
-		public ReadOnlyCollection<string> GetAssetPaths()
-		{
-			var result = new List<string>();
-			result.AddRange(Textures.Keys.ToList());
-			result.AddRange(Fonts.Keys.ToList());
-			result.AddRange(Music.Keys.ToList());
-			result.AddRange(Sounds.Keys.ToList());
-			return result.AsReadOnly();
-		}
 		public bool AssetsAreLoaded(string path)
 		{
-			var assets = GetAssetPaths();
+			var assets = AssetPaths;
 			return Directory.Exists(path) ? Dir(path) : File(path);
 
 			bool Dir(string path)
@@ -248,7 +251,7 @@
 		private bool hasStarted;
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		internal static Thread assetsLoading;
-		internal static CameraInstance MainCamera => ThingInstance.Get<CameraInstance>(MAIN_CAMERA_UID);
+		internal static CameraInstance MainCamera => ThingInstance.Get_<CameraInstance>(MAIN_CAMERA_UID);
 
 		internal Dictionary<string, ThingInstance> objs = new();
 		internal readonly ConcurrentDictionary<string, string> loadedAssets = new();
@@ -282,9 +285,9 @@
 			var textureDetail = spriteStackInfo.TextureDetail;
 			var textureCount = spriteStackInfo.TextureCount;
 			var rot = spriteStackInfo.Rotation;
-			rot.X = rot.X.DegreesToRadians();
-			rot.Y = rot.Y.DegreesToRadians();
-			rot.Z = rot.Z.DegreesToRadians();
+			rot.X = rot.X.ToRadians();
+			rot.Y = rot.Y.ToRadians();
+			rot.Z = rot.Z.ToRadians();
 
 			try
 			{
@@ -466,8 +469,8 @@
 			else if(CurrentScene.hasStarted && CurrentScene != null)
 				Event.SceneUpdate(CurrentScene.Name);
 
-			var mousePos = MouseCursorPosition;
-			mouseDelta = MouseCursorPosition - prevMousePos;
+			var mousePos = MousePosition;
+			mouseDelta = MousePosition - prevMousePos;
 			prevMousePos = mousePos;
 		}
 		internal static void ThreadLoadAssets()

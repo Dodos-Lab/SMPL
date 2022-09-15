@@ -175,7 +175,7 @@
 				IsFocused = BoundingBox.IsHovered;
 				ShowCursor();
 
-				var index = GetSymbolIndex(Scene.MouseCursorPosition);
+				var index = GetSymbolIndex(Scene.MousePosition);
 				CursorPositionIndex = index == -1 ? Value.Length : index;
 			}
 			if(left.Once($"left-{UID}"))
@@ -255,13 +255,13 @@
 			var bl = corners[isLast ? 2 : 3];
 			var sc = Scale;
 			var sz = SymbolSize * sc * 0.05f;
-			var br = bl.PointMoveAtAngle(Angle, sz, false);
-			var tr = tl.PointMoveAtAngle(Angle, sz, false);
+			var br = bl.MoveAtAngle(Angle, sz, false);
+			var tr = tl.MoveAtAngle(Angle, sz, false);
 
-			tl = GetLocalPositionFromSelf(tl * sc);
-			tr = GetLocalPositionFromSelf(tr * sc);
-			br = GetLocalPositionFromSelf(br * sc);
-			bl = GetLocalPositionFromSelf(bl * sc);
+			tl = LocalPositionFromSelf(tl * sc);
+			tr = LocalPositionFromSelf(tr * sc);
+			br = LocalPositionFromSelf(br * sc);
+			bl = LocalPositionFromSelf(bl * sc);
 
 			cursorPosX = tl.X;
 

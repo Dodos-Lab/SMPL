@@ -106,7 +106,7 @@ void main()
 		{
 			get
 			{
-				var parent = Get(ParentUID);
+				var parent = Get_(ParentUID);
 				return parent != null && parent is VisualInstance v ? isHidden || v.IsHidden /*important recursion*/ : isHidden;
 			}
 		}

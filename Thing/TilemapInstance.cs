@@ -16,7 +16,7 @@
 	}
 	internal class TilemapInstance : VisualInstance
 	{
-		public Dictionary<string, Thing.Tile> TilePalette { get; } = new();
+		public Dictionary<string, Thing.Tile> TilePalette => tilePalette;
 		public Vector2 TileSize { get; set; } = new(32);
 		public Vector2 TileGap { get; set; }
 		[JsonIgnore]
@@ -106,19 +106,21 @@
 		}
 		public Vector2 GetTileIndexes(Vector2 position)
 		{
-			var local = GetLocalPositionFromSelf(position);
+			var local = LocalPositionFromSelf(position);
 			// no need to include the tile gap since it is used only in texture space, not in world space
 			var rawIndexes = local / TileSize; // there is no gap in the world tilemap
-			return rawIndexes.PointToGrid(new(1));
+			return rawIndexes.ToGrid(new(1));
 		}
 		public Vector2 GetTilePosition(Vector2 tileIndexes)
 		{
 			// no need to include the tile gap since it is used only in texture space, not in world space
 			// there is no gap in the world tilemap
-			return GetPositionFromSelf(tileIndexes * TileSize + (TileSize * 0.5f));
+			return PositionFromSelf(tileIndexes * TileSize + (TileSize * 0.5f));
 		}
 
 		#region Backend
+		[JsonProperty]
+		private readonly Dictionary<string, Thing.Tile> tilePalette = new();
 		private int tileCount;
 		private Vector2 topLeftIndexes = new(float.MaxValue, float.MaxValue), botRightIndexes = new(float.MinValue, float.MinValue);
 		private readonly VertexArray vertsArr = new(PrimitiveType.Quads);
@@ -144,10 +146,10 @@
 			foreach(var kvp in map)
 			{
 				var localPos = kvp.Key * TileSize;
-				var topLeft = GetPositionFromSelf(localPos).ToSFML();
-				var topRight = GetPositionFromSelf(localPos + new Vector2(TileSize.X, 0)).ToSFML();
-				var botRight = GetPositionFromSelf(localPos + TileSize).ToSFML();
-				var botLeft = GetPositionFromSelf(localPos + new Vector2(0, TileSize.Y)).ToSFML();
+				var topLeft = PositionFromSelf(localPos).ToSFML();
+				var topRight = PositionFromSelf(localPos + new Vector2(TileSize.X, 0)).ToSFML();
+				var botRight = PositionFromSelf(localPos + TileSize).ToSFML();
+				var botLeft = PositionFromSelf(localPos + new Vector2(0, TileSize.Y)).ToSFML();
 				var tile = TilePalette[kvp.Value];
 				var txCrdsA = tile.Indexes * TileSize + (TileGap * tile.Indexes);
 				var txCrdsB = txCrdsA + TileSize;

@@ -6,7 +6,7 @@
 		{
 			get
 			{
-				var parent = Get(ParentUID);
+				var parent = Get_(ParentUID);
 				return parent == null ? isDisabled : isDisabled || parent.IsDisabled;
 			}
 		}
@@ -57,7 +57,7 @@
 				uid = value;
 				objs[uid] = this;
 
-				var parent = Get(parentUID);
+				var parent = Get_(parentUID);
 				if(parent != null)
 				{
 					parent.childrenUIDs.Remove(oldUID);
@@ -66,7 +66,7 @@
 
 				for(int i = 0; i < childrenUIDs.Count; i++)
 				{
-					var child = Get(childrenUIDs[i]);
+					var child = Get_(childrenUIDs[i]);
 					if(child != null)
 						child.parentUID = uid;
 				}
@@ -87,11 +87,11 @@
 
 				if(childrenUIDs.Contains(value))
 				{
-					var child = Get(value);
+					var child = Get_(value);
 					child.ParentUID = null;
 				}
 
-				var parent = Get(parentUID);
+				var parent = Get_(parentUID);
 
 				if(parent != null)
 					parent.childrenUIDs.Remove(uid);
@@ -107,7 +107,7 @@
 				Angle = prevAng;
 				Scale = prevSc;
 
-				var newParent = Get(parentUID);
+				var newParent = Get_(parentUID);
 				if(newParent != null && newParent.childrenUIDs.Contains(uid) == false)
 					newParent.childrenUIDs.Add(uid);
 			}
@@ -131,21 +131,21 @@
 		}
 		public virtual float LocalAngle
 		{
-			get => localAng.AngleTo360();
+			get => localAng.Wrap(360);
 			set { localAng = value; UpdateSelfAndChildren(); }
 		}
 		[JsonIgnore]
 		public Vector2 LocalDirection
 		{
-			get => Vector2.Normalize(LocalAngle.AngleToDirection());
-			set => LocalAngle = Vector2.Normalize(value).DirectionToAngle();
+			get => Vector2.Normalize(LocalAngle.ToDirection());
+			set => LocalAngle = Vector2.Normalize(value).ToAngle();
 		}
 
 		[JsonIgnore]
 		public Vector2 Position
 		{
 			get => GetPosition(global);
-			set => LocalPosition = GetLocalPositionFromParent(value);
+			set => LocalPosition = LocalPositionFromParent(value);
 		}
 		[JsonIgnore]
 		public float Scale
@@ -156,14 +156,14 @@
 		[JsonIgnore]
 		public float Angle
 		{
-			get => GetAngle(global).AngleTo360();
+			get => GetAngle(global).Wrap(360);
 			set => LocalAngle = GetAngle(GlobalToLocal(Scale, value, Position));
 		}
 		[JsonIgnore]
 		public Vector2 Direction
 		{
-			get => Vector2.Normalize(Angle.AngleToDirection());
-			set => Angle = Vector2.Normalize(value).DirectionToAngle();
+			get => Vector2.Normalize(Angle.ToDirection());
+			set => Angle = Vector2.Normalize(value).ToAngle();
 		}
 
 		public Hitbox Hitbox
@@ -196,20 +196,20 @@
 			}
 		}
 
-		public Vector2 GetLocalPositionFromParent(Vector2 position)
+		public Vector2 LocalPositionFromParent(Vector2 position)
 		{
 			return GetPosition(GlobalToLocal(Scale, Angle, position));
 		}
-		public Vector2 GetPositionFromParent(Vector2 localPosition)
+		public Vector2 PositionFromParent(Vector2 localPosition)
 		{
 			return GetPosition(LocalToGlobal(LocalScale, LocalAngle, localPosition));
 		}
-		public Vector2 GetLocalPositionFromSelf(Vector2 position)
+		public Vector2 LocalPositionFromSelf(Vector2 position)
 		{
 			Matrix3x2.Invert(global, out var m);
 			return Vector2.Transform(position, m);
 		}
-		public Vector2 GetPositionFromSelf(Vector2 localPosition)
+		public Vector2 PositionFromSelf(Vector2 localPosition)
 		{
 			return Vector2.Transform(localPosition, global);
 		}
@@ -221,7 +221,7 @@
 			var children = new List<string>(childrenUIDs);
 			for(int i = 0; i < children.Count; i++)
 			{
-				var child = Get(children[i]);
+				var child = Get_(children[i]);
 				if(child == null)
 					continue;
 
@@ -236,7 +236,7 @@
 			// prevents hard jump to world coordinates
 			for(int i = 0; i < children.Count; i++)
 			{
-				var child = Get(children[i]);
+				var child = Get_(children[i]);
 				if(child == null)
 					continue;
 
@@ -270,7 +270,7 @@
 			var objs = Scene.CurrentScene.objs;
 			numUID = objs.Count; // before UID to be 0 based
 
-			UID = Thing.GetFreeUID(uid);
+			UID = Thing.FreeUID(uid);
 			LocalScale = 1;
 
 			Event.ThingCreate(UID);
@@ -286,7 +286,7 @@
 		{
 			var c = Matrix3x2.Identity;
 			c *= Matrix3x2.CreateScale(localScale);
-			c *= Matrix3x2.CreateRotation(localAngle.DegreesToRadians());
+			c *= Matrix3x2.CreateRotation(localAngle.ToRadians());
 			c *= Matrix3x2.CreateTranslation(localPosition);
 
 			return c * GetParentMatrix();
@@ -295,7 +295,7 @@
 		{
 			var c = Matrix3x2.Identity;
 			c *= Matrix3x2.CreateScale(scale);
-			c *= Matrix3x2.CreateRotation(angle.DegreesToRadians());
+			c *= Matrix3x2.CreateRotation(angle.ToRadians());
 			c *= Matrix3x2.CreateTranslation(position);
 
 			return c * GetInverseParentMatrix();
@@ -303,11 +303,11 @@
 		internal Matrix3x2 GetParentMatrix()
 		{
 			var p = Matrix3x2.Identity;
-			var parent = Get(parentUID);
+			var parent = Get_(parentUID);
 			if(parent != null)
 			{
 				p *= Matrix3x2.CreateScale(parent.Scale);
-				p *= Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians());
+				p *= Matrix3x2.CreateRotation(parent.Angle.ToRadians());
 				p *= Matrix3x2.CreateTranslation(parent.Position);
 			}
 			return p;
@@ -315,11 +315,11 @@
 		internal Matrix3x2 GetInverseParentMatrix()
 		{
 			var inverseParent = Matrix3x2.Identity;
-			var parent = Get(parentUID);
+			var parent = Get_(parentUID);
 			if(parent != null)
 			{
 				Matrix3x2.Invert(Matrix3x2.CreateScale(parent.Scale), out var s);
-				Matrix3x2.Invert(Matrix3x2.CreateRotation(parent.Angle.DegreesToRadians()), out var r);
+				Matrix3x2.Invert(Matrix3x2.CreateRotation(parent.Angle.ToRadians()), out var r);
 				Matrix3x2.Invert(Matrix3x2.CreateTranslation(parent.Position), out var t);
 
 				inverseParent *= t;
@@ -353,7 +353,7 @@
 
 			for(int i = 0; i < childrenUIDs.Count; i++)
 			{
-				var child = Get(childrenUIDs[i]);
+				var child = Get_(childrenUIDs[i]);
 				child?.UpdateSelfAndChildren();
 			}
 		}
@@ -364,7 +364,7 @@
 
 		internal static float GetAngle(Matrix3x2 matrix)
 		{
-			return MathF.Atan2(matrix.M12, matrix.M11).RadiansToDegrees();
+			return MathF.Atan2(matrix.M12, matrix.M11).ToDegrees();
 		}
 		internal static Vector2 GetPosition(Matrix3x2 matrix)
 		{
@@ -375,18 +375,18 @@
 			return MathF.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12);
 		}
 
-		internal static ThingInstance Get(string uid)
+		internal static ThingInstance Get_(string uid)
 		{
-			return Get<ThingInstance>(uid);
+			return Get_<ThingInstance>(uid);
 		}
-		internal static T Get<T>(string uid) where T : ThingInstance
+		internal static T Get_<T>(string uid) where T : ThingInstance
 		{
 			var objs = Scene.CurrentScene.objs;
 			return Thing.Exists(uid) == false || objs[uid] is not T ? default : (T)objs[uid];
 		}
 		internal static ThingInstance GetTryError(string uid)
 		{
-			var obj = Get(uid);
+			var obj = Get_(uid);
 			if(obj == null)
 			{
 				MissingError(uid);

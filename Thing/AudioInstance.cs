@@ -171,7 +171,7 @@
 		}
 		internal static void Update()
 		{
-			var thing = Get(Thing.ListenerUID);
+			var thing = Get_(Thing.ListenerUID);
 			Listener.Position = thing == null ? default : new Vector3f(thing.Position.X, thing.Position.Y, 0f);
 
 			for(int i = 0; i < audios.Count; i++)

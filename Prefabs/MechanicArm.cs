@@ -65,7 +65,7 @@
 					if(points[j] == points[j - 1])
 						points[j] += new Vector2(0.01f, -0.02f);
 
-					var dir = (points[j] - points[j - 1]).NormalizeDirection();
+					var dir = (points[j] - points[j - 1]).Normalize();
 					points[j] = points[j - 1] + dir * length;
 				}
 				var dstToTarget = (points[^1] - targetPosition).Length();

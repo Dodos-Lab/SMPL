@@ -221,10 +221,10 @@
 			var br = rope.Points[^1].Position;
 			var bl = rope.Points[GetIndex(new(0, (int)segCount.Y - 1))].Position;
 
-			var tltr = tl.DistanceBetweenPoints(tr);
-			var blbr = tl.DistanceBetweenPoints(bl);
-			var trbr = tr.DistanceBetweenPoints(br);
-			var tlbl = tl.DistanceBetweenPoints(bl);
+			var tltr = tl.Distance(tr);
+			var blbr = tl.Distance(bl);
+			var trbr = tr.Distance(br);
+			var tlbl = tl.Distance(bl);
 			var sz = segCount.X * segSize.X;
 			var tearStep = segCount / BreakThreshold;
 
@@ -253,7 +253,7 @@
 				for(int x = 0; x < segCount.X; x++)
 				{
 					var indexes = new Vector2(x, y);
-					var pos = GetPositionFromSelf(indexes * segSize);
+					var pos = PositionFromSelf(indexes * segSize);
 					var point = rope.Points[GetIndex(indexes)];
 					point.Position = pos;
 					point.prevPosition = pos;

@@ -22,7 +22,7 @@
 			set => renderTexture.Smooth = value;
 		}
 		[JsonIgnore]
-		public Vector2 MouseCursorPosition
+		public Vector2 MousePosition
 		{
 			get
 			{
@@ -30,12 +30,20 @@
 					return new Vector2().NaN();
 
 				var p = Mouse.GetPosition(Game.Window);
-				return PointToCamera(new(p.X, p.Y));
+				return WorldToCamera(new(p.X, p.Y));
 			}
 			set
 			{
-				var p = PointToWorld(value);
-				Mouse.SetPosition(new((int)p.X, (int)p.Y), Game.Window);
+				var p = CameraToWorld(value);
+				var val = new Vector2i((int)p.X, (int)p.Y);
+
+				if(Game.Window == null)
+				{
+					Mouse.SetPosition(val);
+					return;
+				}
+
+				Mouse.SetPosition(val, Game.Window);
 			}
 		}
 		[JsonIgnore]
@@ -85,18 +93,18 @@
 				Console.LogError(1, $"Could not save the image at '{imagePath}'.");
 		}
 
-		public Vector2 PointToCamera(Vector2 worldPoint)
+		public Vector2 WorldToCamera(Vector2 worldPoint)
 		{
 			return Game.Window == null ? default : Game.Window.MapPixelToCoords(new((int)worldPoint.X, (int)worldPoint.Y), renderTexture.GetView()).ToSystem();
 		}
-		public Vector2 PointToWorld(Vector2 cameraPoint)
+		public Vector2 CameraToWorld(Vector2 cameraPoint)
 		{
 			var p = Game.Window.MapCoordsToPixel(cameraPoint.ToSFML(), renderTexture.GetView());
 			return Game.Window == null ? default : new(p.X, p.Y);
 		}
 		public Vector2 PointToParallax(Vector2 point, float parallaxUnit)
 		{
-			return point.PointPercentTowardPoint(Position, new(parallaxUnit * 100f));
+			return point.PercentToTarget(Position, new(parallaxUnit * 100f));
 		}
 
 		#region Backend

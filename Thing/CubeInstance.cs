@@ -81,17 +81,17 @@
 					return bb3D;
 
 				var h = currDepth * Scale;
-				var tl = baseBB.Lines[0].A.PointMoveAtAngle(Tilt, h, false);
-				var tr = baseBB.Lines[1].A.PointMoveAtAngle(Tilt, h, false);
-				var br = baseBB.Lines[2].A.PointMoveAtAngle(Tilt, h, false);
-				var bl = baseBB.Lines[3].A.PointMoveAtAngle(Tilt, h, false);
-				var center = tr.PointPercentTowardPoint(bl, new(50));
+				var tl = baseBB.Lines[0].A.MoveAtAngle(Tilt, h, false);
+				var tr = baseBB.Lines[1].A.MoveAtAngle(Tilt, h, false);
+				var br = baseBB.Lines[2].A.MoveAtAngle(Tilt, h, false);
+				var bl = baseBB.Lines[3].A.MoveAtAngle(Tilt, h, false);
+				var center = tr.PercentToTarget(bl, new(50));
 				var percent = new Vector2(PerspectiveUnit.Map(1, 0, 0, 100));
 
-				tl = tl.PointPercentTowardPoint(center, percent);
-				tr = tr.PointPercentTowardPoint(center, percent);
-				br = br.PointPercentTowardPoint(center, percent);
-				bl = bl.PointPercentTowardPoint(center, percent);
+				tl = tl.PercentToTarget(center, percent);
+				tr = tr.PercentToTarget(center, percent);
+				br = br.PercentToTarget(center, percent);
+				bl = bl.PercentToTarget(center, percent);
 
 				bb3D.Lines.Clear();
 				bb3D.LocalLines.Clear();
@@ -156,12 +156,12 @@
 			var nearTr = nearBB.Lines[1].A;
 			var nearBr = nearBB.Lines[2].A;
 			var nearBl = nearBB.Lines[3].A;
-			var tilt = Tilt.AngleTo360();
+			var tilt = Tilt.Wrap(360);
 
-			var l = farTl.DistanceBetweenPoints(nearTl) + farBl.DistanceBetweenPoints(nearBl);
-			var r = farTr.DistanceBetweenPoints(nearTr) + farBr.DistanceBetweenPoints(nearBr);
-			var t = farTl.DistanceBetweenPoints(nearTl) + farTr.DistanceBetweenPoints(nearTr);
-			var b = farBl.DistanceBetweenPoints(nearBl) + farBr.DistanceBetweenPoints(nearBr);
+			var l = farTl.Distance(nearTl) + farBl.Distance(nearBl);
+			var r = farTr.Distance(nearTr) + farBr.Distance(nearBr);
+			var t = farTl.Distance(nearTl) + farTr.Distance(nearTr);
+			var b = farBl.Distance(nearBl) + farBr.Distance(nearBr);
 
 			sortedSides.Clear();
 			sortedSides[r] = new();
@@ -210,10 +210,10 @@
 					tex.Smooth = IsSmooth;
 				}
 
-				var dirLight = float.IsNaN(Thing.SunAngle) ? default : Thing.SunAngle.AngleToDirection();
+				var dirLight = float.IsNaN(Thing.SunAngle) ? default : Thing.SunAngle.ToDirection();
 				var sunValue = 0f;
 
-				var sideDir = sideAngle.AngleToDirection();
+				var sideDir = sideAngle.ToDirection();
 				var dot = Vector2.Dot(dirLight, sideDir);
 				const float MINIMUM_LIGHT = 0.2f;
 

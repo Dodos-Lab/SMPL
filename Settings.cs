@@ -110,9 +110,9 @@
 		internal static void Save()
 		{
 			var db = new Database(DB_PATH);
-			var sheet = db.AddSheet<Settings>(DB_SHEET_NAME);
+			var sheet = db.Add<Settings>(DB_SHEET_NAME);
 			sheet.Add(Game.Settings);
-			db.SaveSheet<Settings>(DB_SHEET_NAME);
+			db.Save<Settings>(DB_SHEET_NAME);
 		}
 		internal static void Load()
 		{
@@ -123,7 +123,7 @@
 			if(db == null)
 				return;
 
-			var sheet = db.GetSheet<Settings>(DB_SHEET_NAME);
+			var sheet = db.Get<Settings>(DB_SHEET_NAME);
 			if(sheet.Count == 1)
 				Game.settings = sheet[0];
 		}

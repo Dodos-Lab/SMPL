@@ -142,6 +142,14 @@
 				}
 				#endregion
 			}
+			public class ListGridCutDetails
+			{
+				public string NewItemUID { get; set; }
+				public string TargetItemUID { get; set; }
+				public float Size { get; set; }
+				public float Offset { get; set; } = 4f;
+				public Extensions.Direction4 Direction { get; set; }
+			}
 
 			public enum TextboxAlignment
 			{
@@ -215,13 +223,34 @@
 				var t = new ListMultiselectInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
+			public static string CreateListGrid(string uid, string texturePath)
+			{
+				var t = new ListGridInstance(uid) { TexturePath = texturePath };
+				return t.UID;
+			}
 		}
 
-		public static List<string> GetUIDs()
+		public static List<string> UIDs => Scene.CurrentScene.objs.Keys.ToList();
+		public static List<string> Tags
 		{
-			return Scene.CurrentScene.objs.Keys.ToList();
+			get
+			{
+				var tags = new List<string>();
+				var objs = Scene.CurrentScene.objs;
+				foreach(var kvp in objs)
+					for(int i = 0; i < kvp.Value.Tags.Count; i++)
+					{
+						var tag = kvp.Value.Tags[i];
+						if(tags.Contains(tag))
+							continue;
+
+						tags.Add(tag);
+					}
+				return tags;
+			}
 		}
-		public static List<string> GetUIDsByTag(string tag)
+
+		public static List<string> UIDsByTag(string tag)
 		{
 			var uids = new List<string>();
 			var objs = Scene.CurrentScene.objs;
@@ -230,22 +259,7 @@
 					uids.Add(kvp.Key);
 			return uids;
 		}
-		public static List<string> GetTags()
-		{
-			var tags = new List<string>();
-			var objs = Scene.CurrentScene.objs;
-			foreach(var kvp in objs)
-				for(int i = 0; i < kvp.Value.Tags.Count; i++)
-				{
-					var tag = kvp.Value.Tags[i];
-					if(tags.Contains(tag))
-						continue;
-
-					tags.Add(tag);
-				}
-			return tags;
-		}
-		public static string GetFreeUID(string uid)
+		public static string FreeUID(string uid)
 		{
 			if(Scene.CurrentScene == null)
 				return uid;
@@ -272,12 +286,12 @@
 		}
 		public static string Duplicate(string uid, string newUID)
 		{
-			var thing = ThingInstance.Get(uid);
+			var thing = ThingInstance.Get_(uid);
 			var prevUID = uid;
 			var prevOldUID = thing.oldUID;
 			var children = new List<string>(thing.childrenUIDs);
 
-			thing.UID = GetFreeUID(newUID);
+			thing.UID = FreeUID(newUID);
 
 			var settings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
 			var json = JsonConvert.SerializeObject(thing, settings);
@@ -288,7 +302,7 @@
 
 			for(int i = 0; i < children.Count; i++)
 			{
-				var child = ThingInstance.Get(children[i]);
+				var child = ThingInstance.Get_(children[i]);
 				child.ParentUID = prevUID;
 			}
 
@@ -299,7 +313,7 @@
 			if(uid == Scene.MAIN_CAMERA_UID)
 				return;
 
-			var obj = ThingInstance.Get(uid);
+			var obj = ThingInstance.Get_(uid);
 			if(obj == null)
 				return;
 

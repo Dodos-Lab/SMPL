@@ -75,10 +75,10 @@ namespace SMPL
 			foreach(var kvp in visuals)
 				for(int i = 0; i < kvp.Value.Count; i++)
 				{
-					var camUIDs = Thing.GetUIDsByTag(kvp.Value[i].CameraTag);
+					var camUIDs = Thing.UIDsByTag(kvp.Value[i].CameraTag);
 					for(int j = 0; j < camUIDs.Count; j++)
 					{
-						var cam = ThingInstance.Get<CameraInstance>(camUIDs[j]);
+						var cam = ThingInstance.Get_<CameraInstance>(camUIDs[j]);
 						if(cam != null && cam.IsDisabled == false)
 							kvp.Value[i].Draw(cam.RenderTexture);
 					}

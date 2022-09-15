@@ -33,7 +33,7 @@
 			}
 		}
 		/// <summary>
-		/// The current progress (from 0 to 1).
+		/// The current progress ranged [0-1].
 		/// </summary>
 		public float ProgressUnit
 		{
