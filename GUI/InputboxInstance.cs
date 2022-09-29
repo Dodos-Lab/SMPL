@@ -175,7 +175,7 @@
 				IsFocused = BoundingBox.IsHovered;
 				ShowCursor();
 
-				var index = GetSymbolIndex(Scene.MousePosition);
+				var index = SymbolIndex(Scene.MousePosition);
 				CursorPositionIndex = index == -1 ? Value.Length : index;
 			}
 			if(left.Once($"left-{UID}"))
@@ -244,7 +244,7 @@
 			if(addLetter)
 				Value += "|";
 
-			var corners = GetSymbolCorners(CursorPositionIndex - (isLast && addLetter == false ? 1 : 0));
+			var corners = SymbolCorners(CursorPositionIndex - (isLast && addLetter == false ? 1 : 0));
 			if(corners.Count == 0)
 				return;
 

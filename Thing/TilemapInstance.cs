@@ -96,22 +96,22 @@
 			return map.ContainsKey(tilePositionIndexes);
 		}
 
-		public string GetPaletteUIDsFromPosition(Vector2 position)
+		public string PaletteUIDsFromPosition(Vector2 position)
 		{
-			return GetPaletteUIDsFromTileIndexes(GetTileIndexes(position));
+			return PaletteUIDsFromTileIndexes(TileIndexes(position));
 		}
-		public string GetPaletteUIDsFromTileIndexes(Vector2 tileIndexes)
+		public string PaletteUIDsFromTileIndexes(Vector2 tileIndexes)
 		{
 			return map.ContainsKey(tileIndexes) == false ? default : map[tileIndexes];
 		}
-		public Vector2 GetTileIndexes(Vector2 position)
+		public Vector2 TileIndexes(Vector2 position)
 		{
 			var local = LocalPositionFromSelf(position);
 			// no need to include the tile gap since it is used only in texture space, not in world space
 			var rawIndexes = local / TileSize; // there is no gap in the world tilemap
 			return rawIndexes.ToGrid(new(1));
 		}
-		public Vector2 GetTilePosition(Vector2 tileIndexes)
+		public Vector2 TilePosition(Vector2 tileIndexes)
 		{
 			// no need to include the tile gap since it is used only in texture space, not in world space
 			// there is no gap in the world tilemap

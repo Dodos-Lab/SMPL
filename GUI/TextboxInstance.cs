@@ -28,11 +28,11 @@
 			}
 		}
 
-		public int GetSymbolIndex(Vector2 worldPoint)
+		public int SymbolIndex(Vector2 worldPoint)
 		{
 			for(int i = 0; i < Value.Length; i++)
 			{
-				var corners = GetSymbolCorners(i).ToList();
+				var corners = SymbolCorners(i).ToList();
 				if(corners.Count == 4)
 					corners.Add(corners[0]);
 
@@ -44,7 +44,7 @@
 			}
 			return -1;
 		}
-		public ReadOnlyCollection<Vector2> GetSymbolCorners(int characterIndex)
+		public ReadOnlyCollection<Vector2> SymbolCorners(int characterIndex)
 		{
 			var result = new List<Vector2>();
 
@@ -79,11 +79,11 @@
 
 			return result.AsReadOnly();
 		}
-		public string GetSymbols(Vector2 worldPoint, Thing.GUI.TextboxSymbolCollection symbols)
+		public string Symbols(Vector2 worldPoint, Thing.GUI.TextboxSymbolCollection symbols)
 		{
 			for(int i = 0; i < Value.Length; i++)
 			{
-				var corners = GetSymbolCorners(i).ToList();
+				var corners = SymbolCorners(i).ToList();
 				if(corners.Count == 0)
 					continue;
 

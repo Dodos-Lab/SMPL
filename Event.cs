@@ -10,6 +10,7 @@
 		public delegate void MultiplayerMessageEventHandler(LAN.Message message);
 		public delegate void ParticleEventHandler(string particleManagerUID, Thing.Particle particle);
 		public delegate void ListItemEventHandler(string listUID, int itemIndex, Thing.GUI.ListItem item);
+		public delegate void GridLayoutItemEventHandler(string listUID, string itemUID);
 		public delegate void InputboxEventHandler(string inputboxUID, string input);
 
 		public static event MultiplayerClientEventHandler MultiplayerClientConnected;
@@ -45,6 +46,13 @@
 		public static event ListItemEventHandler ListItemSelected;
 		public static event ListItemEventHandler ListItemDeselected;
 
+		public static event GridLayoutItemEventHandler GridLayoutItemClicked;
+		public static event GridLayoutItemEventHandler GridLayoutItemHeld;
+		public static event GridLayoutItemEventHandler GridLayoutItemHovered;
+		public static event GridLayoutItemEventHandler GridLayoutItemUnhovered;
+		public static event GridLayoutItemEventHandler GridLayoutItemPressed;
+		public static event GridLayoutItemEventHandler GridLayoutItemReleased;
+
 		public static event ThingEventHandler ScrollBarMoved;
 		public static event ThingEventHandler ListDropdownToggled;
 
@@ -72,14 +80,21 @@
 		internal static void ButtonDrag(string uid, Thing.GUI.ButtonDetails btn) => ButtonDragged?.Invoke(uid, btn);
 		internal static void ButtonDrop(string uid, Thing.GUI.ButtonDetails btn) => ButtonDropped?.Invoke(uid, btn);
 
-		internal static void ListItemClick(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemClicked?.Invoke(listUID, itemIndex, item);
-		internal static void ListItemHold(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemHeld?.Invoke(listUID, itemIndex, item);
-		internal static void ListItemHover(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemHovered?.Invoke(listUID, itemIndex, item);
-		internal static void ListItemUnhover(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemUnhovered?.Invoke(listUID, itemIndex, item);
-		internal static void ListItemPress(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemPressed?.Invoke(listUID, itemIndex, item);
-		internal static void ListItemRelease(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemReleased?.Invoke(listUID, itemIndex, item);
-		internal static void ListItemSelect(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemSelected?.Invoke(listUID, itemIndex, item);
-		internal static void ListItemDeselect(string listUID, int itemIndex, Thing.GUI.ListItem item) => ListItemDeselected?.Invoke(listUID, itemIndex, item);
+		internal static void ListItemClick(string uid, int itemIndex, Thing.GUI.ListItem item) => ListItemClicked?.Invoke(uid, itemIndex, item);
+		internal static void ListItemHold(string uid, int itemIndex, Thing.GUI.ListItem item) => ListItemHeld?.Invoke(uid, itemIndex, item);
+		internal static void ListItemHover(string uid, int itemIndex, Thing.GUI.ListItem item) => ListItemHovered?.Invoke(uid, itemIndex, item);
+		internal static void ListItemUnhover(string uid, int itemIndex, Thing.GUI.ListItem item) => ListItemUnhovered?.Invoke(uid, itemIndex, item);
+		internal static void ListItemPress(string uid, int itemIndex, Thing.GUI.ListItem item) => ListItemPressed?.Invoke(uid, itemIndex, item);
+		internal static void ListItemRelease(string uid, int itemIndex, Thing.GUI.ListItem item) => ListItemReleased?.Invoke(uid, itemIndex, item);
+		internal static void ListItemSelect(string uid, int itemIndex, Thing.GUI.ListItem item) => ListItemSelected?.Invoke(uid, itemIndex, item);
+		internal static void ListItemDeselect(string uid, int itemIndex, Thing.GUI.ListItem item) => ListItemDeselected?.Invoke(uid, itemIndex, item);
+
+		internal static void GridLayoutItemClick(string uid, string itemUID) => GridLayoutItemClicked?.Invoke(uid, itemUID);
+		internal static void GridLayoutItemHold(string uid, string itemUID) => GridLayoutItemHeld?.Invoke(uid, itemUID);
+		internal static void GridLayoutItemHover(string uid, string itemUID) => GridLayoutItemHovered?.Invoke(uid, itemUID);
+		internal static void GridLayoutItemUnhover(string uid, string itemUID) => GridLayoutItemUnhovered?.Invoke(uid, itemUID);
+		internal static void GridLayoutItemPress(string uid, string itemUID) => GridLayoutItemPressed?.Invoke(uid, itemUID);
+		internal static void GridLayoutItemRelease(string uid, string itemUID) => GridLayoutItemReleased?.Invoke(uid, itemUID);
 
 		internal static void ListDropdownToggle(string uid) => ListDropdownToggled?.Invoke(uid);
 		internal static void ScrollBarMove(string uid) => ScrollBarMoved?.Invoke(uid);

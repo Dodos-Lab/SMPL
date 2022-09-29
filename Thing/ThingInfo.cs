@@ -186,10 +186,10 @@
 		public class Method
 		{
 			#region Method Names
-			public const string GET_LOCAL_POSITION_FROM_PARENT = nameof(ThingInstance.LocalPositionFromParent);
-			public const string GET_POSITION_FROM_PARENT = nameof(ThingInstance.PositionFromParent);
-			public const string GET_LOCAL_POSITION_FROM_SELF = nameof(ThingInstance.LocalPositionFromSelf);
-			public const string GET_POSITION_FROM_SELF = nameof(ThingInstance.PositionFromSelf);
+			public const string LOCAL_POSITION_FROM_PARENT = nameof(ThingInstance.LocalPositionFromParent);
+			public const string POSITION_FROM_PARENT = nameof(ThingInstance.PositionFromParent);
+			public const string LOCAL_POSITION_FROM_SELF = nameof(ThingInstance.LocalPositionFromSelf);
+			public const string POSITION_FROM_SELF = nameof(ThingInstance.PositionFromSelf);
 			public const string DESTROY = nameof(ThingInstance.Destroy);
 
 			public const string CAMERA_SNAP = nameof(CameraInstance.Snap);
@@ -200,7 +200,7 @@
 			public const string PARTICLE_MANAGER_SPAWN = nameof(ParticleManagerInstance.Spawn);
 			public const string PARTICLE_MANAGER_DESTROY = nameof(ParticleManagerInstance.Destroy);
 
-			public const string VISUAL_GET_EFFECT_CODE = nameof(VisualInstance.GetEffectCode);
+			public const string VISUAL_EFFECT_CODE = nameof(VisualInstance.EffectCode);
 			public const string VISUAL_SET_CUSTOM_EFFECT = nameof(VisualInstance.SetCustomEffect);
 			public const string VISUAL_SET_EFFECT_BOOL = nameof(VisualInstance.SetEffectBool);
 			public const string VISUAL_SET_EFFECT_INT = nameof(VisualInstance.SetEffectInt);
@@ -215,19 +215,19 @@
 			public const string TILEMAP_HAS_TILE = nameof(TilemapInstance.HasTile);
 			public const string TILEMAP_REMOVE_TILES = nameof(TilemapInstance.RemoveTiles);
 			public const string TILEMAP_REMOVE_TILE_SQUARE = nameof(TilemapInstance.RemoveTileSquare);
-			public const string TILEMAP_GET_TILE_INDEXES = nameof(TilemapInstance.GetTileIndexes);
-			public const string TILEMAP_GET_TILE_POSITION = nameof(TilemapInstance.GetTilePosition);
-			public const string TILEMAP_GET_PALETTE_UIDS_FROM_POSITION = nameof(TilemapInstance.GetPaletteUIDsFromPosition);
-			public const string TILEMAP_GET_PALETTE_UIDS_FROM_TILE_INDEXES = nameof(TilemapInstance.GetPaletteUIDsFromTileIndexes);
+			public const string TILEMAP_TILE_INDEXES = nameof(TilemapInstance.TileIndexes);
+			public const string TILEMAP_TILE_POSITION = nameof(TilemapInstance.TilePosition);
+			public const string TILEMAP_PALETTE_UIDS_FROM_POSITION = nameof(TilemapInstance.PaletteUIDsFromPosition);
+			public const string TILEMAP_PALETTE_UIDS_FROM_TILE_INDEXES = nameof(TilemapInstance.PaletteUIDsFromTileIndexes);
 
 			public const string CLOTH_CUT = nameof(ClothInstance.Cut);
 			public const string CLOTH_PIN = nameof(ClothInstance.Pin);
 
 			public const string UI_BUTTON_TRIGGER = nameof(ButtonInstance.Trigger);
 
-			public const string UI_TEXTBOX_GET_SYMBOL_CORNERS = nameof(TextboxInstance.GetSymbolCorners);
-			public const string UI_TEXTBOX_GET_SYMBOL_INDEX = nameof(TextboxInstance.GetSymbolIndex);
-			public const string UI_TEXTBOX_GET_SYMBOLS = nameof(TextboxInstance.GetSymbols);
+			public const string UI_TEXTBOX_GET_SYMBOL_CORNERS = nameof(TextboxInstance.SymbolCorners);
+			public const string UI_TEXTBOX_GET_SYMBOL_INDEX = nameof(TextboxInstance.SymbolIndex);
+			public const string UI_TEXTBOX_GET_SYMBOLS = nameof(TextboxInstance.Symbols);
 
 			public const string UI_INPUTBOX_SUBMIT = nameof(InputboxInstance.Submit);
 

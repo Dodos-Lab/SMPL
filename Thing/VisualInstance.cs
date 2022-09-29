@@ -157,7 +157,7 @@ void main()
 
 		public string CameraTag { get; set; }
 
-		public Thing.CodeGLSL GetEffectCode(Thing.Effect effect)
+		public Thing.CodeGLSL EffectCode(Thing.Effect effect)
 		{
 			return effect == Thing.Effect.Custom ? custom : shaders[effect];
 		}

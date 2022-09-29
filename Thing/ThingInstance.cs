@@ -119,12 +119,12 @@
 		[JsonIgnore]
 		public float Age => age.ElapsedTime.AsSeconds();
 
-		public Vector2 LocalPosition
+		public virtual Vector2 LocalPosition
 		{
 			get => localPos;
 			set { localPos = value; UpdateSelfAndChildren(); }
 		}
-		public float LocalScale
+		public virtual float LocalScale
 		{
 			get => localSc;
 			set { localSc = value; UpdateSelfAndChildren(); }

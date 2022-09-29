@@ -103,6 +103,7 @@
 				public float OutlineSize { get; set; } = 1;
 				public Text.Styles Style { get; set; }
 				public Vector2 OriginUnit { get; set; } = new(0.5f);
+				public float Scale { get; set; } = 1;
 
 				#region Backend
 				private int symbolSize = 32;
@@ -129,7 +130,7 @@
 					text.DisplayedString = Value;
 					text.Position = position.ToSFML();
 					text.Rotation = angle;
-					text.Scale = new(scale, scale);
+					text.Scale = new(scale * Scale, scale * Scale);
 
 					var local = text.GetLocalBounds(); // has to be after everything
 					text.Origin = new(local.Width * OriginUnit.X, local.Height * OriginUnit.Y * 1.4f);
@@ -141,14 +142,6 @@
 					return path != null && fonts.ContainsKey(path) ? fonts[path] : null;
 				}
 				#endregion
-			}
-			public class ListGridCutDetails
-			{
-				public string NewItemUID { get; set; }
-				public string TargetItemUID { get; set; }
-				public float Size { get; set; }
-				public float Offset { get; set; } = 4f;
-				public Extensions.Direction4 Direction { get; set; }
 			}
 
 			public enum TextboxAlignment
@@ -225,7 +218,7 @@
 			}
 			public static string CreateListGrid(string uid, string texturePath)
 			{
-				var t = new ListGridInstance(uid) { TexturePath = texturePath };
+				var t = new GridLayoutInstance(uid) { TexturePath = texturePath };
 				return t.UID;
 			}
 		}
@@ -430,7 +423,7 @@
 
 			return Info.getters.ContainsKey(key) ? Info.getters[key].Invoke(obj) : default;
 		}
-		public static void CallVoid(string uid, string voidMethodName, params object[] parameters)
+		public static void Do(string uid, string voidMethodName, params object[] parameters)
 		{
 			var obj = ThingInstance.GetTryError(uid);
 			if(obj == null)
@@ -459,7 +452,7 @@
 			if(Info.voidMethods.ContainsKey(key) && TryTypeMismatchError(obj, key, Info.voidMethodParamTypes[key], parameters.ToArray()) == false)
 				Info.voidMethods[key].Invoke(obj, parameters);
 		}
-		public static object CallGet(string uid, string getMethodName, params object[] parameters)
+		public static object DoGet(string uid, string getMethodName, params object[] parameters)
 		{
 			var obj = ThingInstance.GetTryError(uid);
 			if(obj == null)
@@ -485,10 +478,11 @@
 					MissingMethodError(obj, getMethodName, false);
 			}
 
+			var paramLength = parameters == null ? 1 : parameters.Length;
 			return Info.returnMethodParamTypes.ContainsKey(key) == false || // no params found on that method
-				Info.returnMethodParamTypes[key].Count != parameters.Length || // provided params are different than method params
+				Info.returnMethodParamTypes[key].Count != paramLength || // provided params are different than method params
 				TryTypeMismatchError(obj, key, Info.returnMethodParamTypes[key], parameters) ? // provided param types are different than desired
-				default : Info.returnMethods[key].Invoke(obj, parameters);
+				default : Info.returnMethods[key].Invoke(obj, parameters == null ? new object[1] : parameters); // possible null parameter, not null array
 		}
 
 		#region Backend
@@ -509,7 +503,7 @@
 				return false;
 
 			var nth = new string[] { "st", "nd", "rd" };
-			var method = Info.GetMethod(obj.UID, key.Item2);
+			var method = Info.GetMethod(obj.UID, key.Item2).ToString().Replace("Instance", "");
 
 			if(paramTypes.Count != parameters.Length)
 			{
@@ -519,13 +513,18 @@
 			}
 
 			for(int i = 0; i < paramTypes.Count; i++)
-				if(parameters[i].GetType() != paramTypes[i])
+			{
+				var p = parameters[i];
+				var t = paramTypes[i];
+				if((p == null && t.IsClass == false) || (p != null && p.GetType() != t))
 				{
 					var nthStr = i < 4 ? nth[i] : "th";
+					var paramStr = p == null ? "null" : p.GetType().GetPrettyName(true);
 					Console.LogError(2, $"The method\n{method}\ncannot process the value of its {i + 1}{nthStr} parameter.",
-						$"It expects a value of type {paramTypes[i].FullName}, not {parameters[i].GetType().FullName}.");
+						$"It expects a value of type {paramTypes[i].GetPrettyName()}, not {paramStr}.");
 					return true;
 				}
+			}
 			return false;
 		}
 		internal static void MissingPropError(ThingInstance obj, string propertyName, bool set, bool skipGetSet = false)
