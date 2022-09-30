@@ -175,13 +175,6 @@
 		}
 
 		/// <summary>
-		/// Picks randomly a single <typeparamref name="T"/> value out of a <paramref name="list"/> and returns it.
-		/// </summary>
-		public static T Choose<T>(this IList<T> list)
-		{
-			return list[Random(0, list.Count - 1)];
-		}
-		/// <summary>
 		/// Randomly shuffles the contents of a <paramref name="list"/>.
 		/// </summary>
 		public static void Shuffle<T>(this IList<T> list)
@@ -195,6 +188,22 @@
 			}
 		}
 		/// <summary>
+		/// Picks randomly a single <typeparamref name="T"/> value out of a <paramref name="list"/> and returns it.
+		/// </summary>
+		public static T ChooseOne<T>(this IList<T> list)
+		{
+			return list[Random(0, list.Count - 1)];
+		}
+		/// <summary>
+		/// Picks randomly a single <typeparamref name="T"/> value out of some <paramref name="choices"/> and returns it.
+		/// </summary>
+		public static T ChooseOneFrom<T>(this T choice, params T[] choices)
+		{
+			var list = choices == null ? new() : choices.ToList();
+			list.Add(choice);
+			return ChooseOne(list);
+		}
+		/// <summary>
 		/// Calculates the average <see cref="float"/> out of a <paramref name="list"/> of <see cref="float"/>s and returns it.
 		/// </summary>
 		public static float Average(this IList<float> list)
@@ -203,6 +212,15 @@
 			for(int i = 0; i < list.Count; i++)
 				sum += list[i];
 			return sum / list.Count;
+		}
+		/// <summary>
+		/// Calculates the average <see cref="float"/> out of a <paramref name="list"/> of <see cref="float"/>s and returns it.
+		/// </summary>
+		public static float AverageFrom(this float number, params float[] numbers)
+		{
+			var list = numbers == null ? new() : numbers.ToList();
+			list.Add(number);
+			return Average(list);
 		}
 
 		/// <summary>
@@ -723,7 +741,7 @@
 		/// Calculates the direction between <paramref name="point"/> and <paramref name="targetPoint"/>. The result may be
 		/// <paramref name="normalized"/> (see <see cref="Normalize"/> for info). Then it is returned.
 		/// </summary>
-		public static Vector2 DirectionBetweenPoints(this Vector2 point, Vector2 targetPoint, bool normalized = true)
+		public static Vector2 Direction(this Vector2 point, Vector2 targetPoint, bool normalized = true)
 		{
 			return normalized ? Vector2.Normalize(targetPoint - point) : targetPoint - point;
 		}
@@ -945,6 +963,13 @@
 			renderTarget.Draw(lines.ToVertices(color, size), PrimitiveType.Quads);
 		}
 
+		/// <summary>
+		/// Wraps a <paramref name="number"/> around 0 to <paramref name="range"/> and returns it.
+		/// </summary>
+		public static int Wrap(this int number, int range)
+		{
+			return ((number % range) + range) % range;
+		}
 		/// <summary>
 		/// Generates a random <see cref="int"/> number in the inclusive range [<paramref name="rangeA"/> - <paramref name="rangeB"/>] with an
 		/// optional <paramref name="seed"/>. Then returns the result.

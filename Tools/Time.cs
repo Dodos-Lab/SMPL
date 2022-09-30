@@ -17,41 +17,17 @@
 			DaysToMinutes, DaysToHours, DaysToWeeks,
 			WeeksToHours, WeeksToDays
 		}
-
-		public static string ToTimer(this float seconds)
+		[Flags]
+		public enum Unit
 		{
-			var ts = TimeSpan.FromSeconds(seconds);
-			return $"{ts:%h}h {ts:%m}m {ts:%s}s";
+			Day = 1,
+			Hour = 2,
+			Minute = 4,
+			Second = 8,
+			Millisecond = 16,
+			AM_PM = 32,
+			DisplayAM_PM = 64,
 		}
-		/// <summary>
-		/// Converts a <paramref name="time"/> from one time unit to another (chosen by <paramref name="convertType"/>). Then returns the result.
-		/// </summary>
-		public static float ToTime(this float time, Convertion convertType)
-		{
-			return convertType switch
-			{
-				Convertion.MillisecondsToSeconds => time / 1000,
-				Convertion.MillisecondsToMinutes => time / 1000 / 60,
-				Convertion.SecondsToMilliseconds => time * 1000,
-				Convertion.SecondsToMinutes => time / 60,
-				Convertion.SecondsToHours => time / 3600,
-				Convertion.MinutesToMilliseconds => time * 60000,
-				Convertion.MinutesToSeconds => time * 60,
-				Convertion.MinutesToHours => time / 60,
-				Convertion.MinutesToDays => time / 1440,
-				Convertion.HoursToSeconds => time * 3600,
-				Convertion.HoursToMinutes => time * 60,
-				Convertion.HoursToDays => time / 24,
-				Convertion.HoursToWeeks => time / 168,
-				Convertion.DaysToMinutes => time * 1440,
-				Convertion.DaysToHours => time * 24,
-				Convertion.DaysToWeeks => time / 7,
-				Convertion.WeeksToHours => time * 168,
-				Convertion.WeeksToDays => time * 7,
-				_ => 0,
-			};
-		}
-
 		/// <summary>
 		/// The real time clock taken from <see cref="DateTime.Now"/> in seconds ranged
 		/// [0 - 86399]<br></br>or in clock hours ranged [12 AM, 00:00, 24:00 - 11:59:59 AM, 23:59:59].
@@ -92,7 +68,155 @@
 		/// </summary>
 		public static uint FrameCount { get; private set; }
 
-		public static void Update()
+		public static string ToClock(this float seconds, string separator = ":", Unit units = Unit.Hour | Unit.Minute | Unit.Second)
+		{
+			var ts = TimeSpan.FromSeconds(seconds);
+			var result = "";
+			var counter = 0;
+
+			if(units.HasFlag(Unit.Day))
+			{
+				var val = (int)ts.TotalDays;
+				result += $"{val:D2}";
+				counter++;
+			}
+			if(units.HasFlag(Unit.Hour))
+			{
+				var sep = counter > 0 ? separator : "";
+				var val = counter == 0 ? (int)ts.TotalHours : (units.HasFlag(Unit.AM_PM) ? ts.Hours.Wrap(12) : ts.Hours);
+				val = val == 0 ? 12 : val;
+				result += $"{sep}{val:D2}";
+				counter++;
+			}
+			if(units.HasFlag(Unit.Minute))
+			{
+				var sep = counter > 0 ? separator : "";
+				var val = counter == 0 ? (int)ts.TotalMinutes : ts.Minutes;
+				result += $"{sep}{val:D2}";
+				counter++;
+			}
+			if(units.HasFlag(Unit.Second))
+			{
+				var sep = counter > 0 ? separator : "";
+				var val = counter == 0 ? (int)ts.TotalSeconds : ts.Seconds;
+				result += $"{sep}{val:D2}";
+				counter++;
+			}
+			if(units.HasFlag(Unit.Millisecond))
+			{
+				var val = counter == 0 ? (int)ts.TotalMilliseconds : ts.Milliseconds;
+				var dot = units.HasFlag(Unit.Second) ? "." : "";
+				var sep = dot == "" && counter > 0 ? separator : "";
+				result += $"{sep}{dot}{val:D3}";
+				counter++;
+			}
+			if(units.HasFlag(Unit.DisplayAM_PM))
+			{
+				var sep = counter > 0 ? " " : "";
+				var str = ts.Hours >= 12 ? "PM" : "AM";
+				result += $"{sep}{str}";
+			}
+			return result;
+		}
+		/// <summary>
+		/// Converts a <paramref name="time"/> from one time unit to another (chosen by <paramref name="convertType"/>). Then returns the result.
+		/// </summary>
+		public static float ToTime(this float time, Convertion convertType)
+		{
+			return convertType switch
+			{
+				Convertion.MillisecondsToSeconds => time / 1000,
+				Convertion.MillisecondsToMinutes => time / 1000 / 60,
+				Convertion.SecondsToMilliseconds => time * 1000,
+				Convertion.SecondsToMinutes => time / 60,
+				Convertion.SecondsToHours => time / 3600,
+				Convertion.MinutesToMilliseconds => time * 60000,
+				Convertion.MinutesToSeconds => time * 60,
+				Convertion.MinutesToHours => time / 60,
+				Convertion.MinutesToDays => time / 1440,
+				Convertion.HoursToSeconds => time * 3600,
+				Convertion.HoursToMinutes => time * 60,
+				Convertion.HoursToDays => time / 24,
+				Convertion.HoursToWeeks => time / 168,
+				Convertion.DaysToMinutes => time * 1440,
+				Convertion.DaysToHours => time * 24,
+				Convertion.DaysToWeeks => time / 7,
+				Convertion.WeeksToHours => time * 168,
+				Convertion.WeeksToDays => time * 7,
+				_ => 0,
+			};
+		}
+
+		public static void DoAfter(float seconds, Action method, bool isRepeating = false)
+		{
+			timers.Add(new Timer(seconds, isRepeating, method));
+		}
+		public static void DoCancel(Action method)
+		{
+			var timersToRemove = new List<Timer>();
+			for(int i = 0; i < timers.Count; i++)
+				if(timers[i].method == method)
+					timersToRemove.Add(timers[i]);
+
+			for(int i = 0; i < timersToRemove.Count; i++)
+				timers.Remove(timersToRemove[i]);
+		}
+		public static void DoOffset(float secondsOffset, Action method)
+		{
+			for(int i = 0; i < timers.Count; i++)
+				if(timers[i].method == method)
+					timers[i].delay += secondsOffset;
+		}
+
+		#region Backend
+		internal class Timer
+		{
+			public Action method;
+			public Clock clock = new();
+			public bool isLooping;
+			public float delay;
+			public bool IsDisposed => method == null;
+
+			public Timer(float seconds, bool isLooping, Action method)
+			{
+				delay = seconds;
+				this.isLooping = isLooping;
+				this.method = method;
+			}
+
+			public void TryTrigger()
+			{
+				if(clock.ElapsedTime.AsSeconds() < delay)
+					return;
+
+				Trigger(true);
+
+				if(isLooping == false)
+					Dispose();
+			}
+			public void Restart()
+			{
+				clock.Restart();
+			}
+			public void Trigger(bool reset)
+			{
+				method?.Invoke();
+
+				if(reset)
+					Restart();
+			}
+
+			private void Dispose()
+			{
+				method = null;
+				clock.Dispose();
+			}
+		}
+
+		private readonly static List<Timer> timers = new();
+		private static readonly Clock time = new(), delta = new(), updateFPS = new();
+
+		internal static void Update()
 		{
 			GameClock = (float)time.ElapsedTime.AsSeconds();
 			Delta = ((float)delta.ElapsedTime.AsSeconds()).Limit(0, MathF.Max(0, MaxDelta));
@@ -105,9 +229,25 @@
 				AverageFPS = FrameCount / GameClock;
 			}
 			FrameCount++;
+
+			var toBeRemoved = new List<Timer>();
+			for(int i = 0; i < timers.Count; i++)
+			{
+				var timer = timers[i];
+
+				timer.TryTrigger();
+
+				if(timer.IsDisposed)
+					toBeRemoved.Add(timer);
+			}
+
+			for(int i = 0; i < toBeRemoved.Count; i++)
+			{
+				var timer = toBeRemoved[i];
+				timers.Remove(timer);
+			}
 		}
-		#region Backend
-		private static readonly Clock time = new(), delta = new(), updateFPS = new();
 		#endregion
 	}
 }
+
