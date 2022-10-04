@@ -2,7 +2,7 @@
 {
 	public static partial class Thing
 	{
-		public class Property
+		public sealed class Property
 		{
 			#region Property Names
 			public const string IS_DISABLED = nameof(ThingInstance.IsDisabled);
@@ -183,6 +183,74 @@
 				return $"{OwnerType} {{ {Type.GetPrettyName()} {Name} {{ {getStr}{sep}{setStr} }} }}";
 			}
 
+			public static void Add<T>(string uid, string propertyName, T value)
+			{
+				var instance = ThingInstance.GetTryError(uid);
+				if(instance == null)
+					return;
+
+				if(string.IsNullOrWhiteSpace(propertyName))
+				{
+					Console.LogError(1, $"The '{nameof(propertyName)}' should not be empty or null.");
+					return;
+				}
+				else if(Has(uid, propertyName))
+				{
+					Console.LogError(1, $"The {instance.GetType().GetPrettyName()} '{uid}' already contains a property with the name '{propertyName}'.");
+					return;
+				}
+
+				var type = typeof(T);
+				type.Whitelist();
+				instance.customProperties[propertyName] = new()
+				{
+					Type = type,
+					Value = value
+				};
+			}
+			public static bool Has(string uid, string propertyName)
+			{
+				return GetPropInfo(uid, false, propertyName, false) != null;
+			}
+			public static Property Get(string uid, string propertyName)
+			{
+				var obj = ThingInstance.GetTryError(uid);
+				if(obj == null)
+					return default;
+
+				// don't even bother checking setters since all props have getters
+				var get = GetPropInfo(uid, false, propertyName, false);
+				if(get == null)
+				{
+					MissingPropError(ThingInstance.GetTryError(uid), propertyName, false);
+					return default;
+				}
+
+				return get;
+			}
+			public static List<Property> GetAll(string uid)
+			{
+				var names = new List<string>();
+				var result = new List<Property>();
+				var getters = GetPropsInfo(uid, false);
+				var setters = GetPropsInfo(uid, true);
+
+				ProcessList(getters);
+				ProcessList(setters);
+
+				return result;
+
+				void ProcessList(List<Property> list)
+				{
+					for(int i = 0; i < list.Count; i++)
+						if(names.Contains(list[i].ToString()) == false)
+						{
+							result.Add(list[i]);
+							names.Add(list[i].ToString());
+						}
+				}
+			}
+
 			#region Backend
 			internal string name, ownerType;
 			internal Type type;
@@ -191,7 +259,7 @@
 			internal Property() { }
 			#endregion
 		}
-		public class Method
+		public sealed class Method
 		{
 			#region Method Names
 			public const string LOCAL_POSITION_FROM_PARENT = nameof(ThingInstance.LocalPositionFromParent);
@@ -243,7 +311,7 @@
 			public const string UI_SCROLL_BAR_GO_DOWN = nameof(ScrollBarInstance.GoDown);
 			#endregion
 
-			public class Parameter
+			public sealed class Parameter
 			{
 				public string Name => name;
 				public Type Type => type;
@@ -258,6 +326,8 @@
 				internal string name;
 				internal Type type;
 				internal Method owner;
+
+				internal Parameter() { }
 				#endregion
 			}
 
@@ -273,6 +343,46 @@
 				for(int i = 0; i < parameters.Count; i++)
 					paramStr += (i == 0 ? "" : ", ") + parameters[i].ToString();
 				return $"{OwnerType} {{ {returnTypeStr} {Name}({paramStr}) }}";
+			}
+
+			public static bool Has(string uid, string methodName)
+			{
+				return Get(uid, methodName) != null;
+			}
+			public static Method Get(string uid, string methodName)
+			{
+				var rtrn = GetMethodInfo(uid, false, methodName, false);
+				var vd = GetMethodInfo(uid, true, methodName, false);
+
+				if(rtrn == null && vd == null)
+				{
+					MissingMethodError(ThingInstance.GetTryError(uid), methodName, false, true);
+					return default;
+				}
+
+				return rtrn ?? vd;
+			}
+			public static List<Method> GetAll(string uid)
+			{
+				var names = new List<string>();
+				var result = new List<Method>();
+				var voids = GetMethodsInfo(uid, true);
+				var returns = GetMethodsInfo(uid, false);
+
+				ProcessList(voids);
+				ProcessList(returns);
+
+				return result;
+
+				void ProcessList(List<Method> list)
+				{
+					for(int i = 0; i < list.Count; i++)
+						if(names.Contains(list[i].ToString()) == false)
+						{
+							result.Add(list[i]);
+							names.Add(list[i].ToString());
+						}
+				}
 			}
 
 			#region Backend
@@ -698,7 +808,7 @@
 			var type = obj.GetType();
 			var key = (type, getPropertyName);
 			var result = GetResult(out var success);
-			var prop = GetProperty(uid, getPropertyName);
+			var prop = Property.Get(uid, getPropertyName);
 
 			if(success == false && prop != null)
 			{
@@ -800,187 +910,6 @@
 				default : returnMethods[key].Invoke(obj, parameters == null ? new object[1] : parameters); // possible null parameter, not null array
 		}
 
-		public static void AddProperty<T>(string uid, string propertyName, T value)
-		{
-			var instance = ThingInstance.GetTryError(uid);
-			if(instance == null)
-				return;
-
-			if(string.IsNullOrWhiteSpace(propertyName))
-			{
-				Console.LogError(1, $"The '{nameof(propertyName)}' should not be empty or null.");
-				return;
-			}
-			else if(HasProperty(uid, propertyName))
-			{
-				Console.LogError(1, $"The {instance.GetType().GetPrettyName()} '{uid}' already contains a property with the name '{propertyName}'.");
-				return;
-			}
-
-			var type = typeof(T);
-			type.Whitelist();
-			instance.customProperties[propertyName] = new()
-			{
-				Type = type,
-				Value = value
-			};
-		}
-
-		public static bool HasSetter(string uid, string setPropertyName)
-		{
-			var obj = ThingInstance.Get_(uid);
-			if(obj == null)
-			{
-				ThingInstance.MissingError(uid);
-				return default;
-			}
-			var type = obj.GetType();
-			TryAddAllProps(type, true);
-
-			return settersAllNames.ContainsKey(type) && settersAllNames[type].Contains(setPropertyName);
-		}
-		public static bool HasGetter(string uid, string getPropertyName)
-		{
-			var obj = ThingInstance.Get_(uid);
-			if(obj == null)
-			{
-				ThingInstance.MissingError(uid);
-				return default;
-			}
-			var type = obj.GetType();
-
-			if(obj.customProperties.ContainsKey(getPropertyName))
-				return true;
-
-			TryAddAllProps(type, false);
-
-			return gettersAllNames.ContainsKey(type) && gettersAllNames[type].Contains(getPropertyName);
-		}
-		public static bool HasReturnMethod(string uid, string returnMethodName)
-		{
-			var obj = ThingInstance.Get_(uid);
-			if(obj == null)
-			{
-				ThingInstance.MissingError(uid);
-				return default;
-			}
-			var type = obj.GetType();
-			TryAddAllMethods(type, false);
-
-			return returnMethodsAllNames.ContainsKey(type) && returnMethodsAllNames[type].Contains(returnMethodName);
-		}
-		public static bool HasVoidMethod(string uid, string voidMethodName)
-		{
-			var obj = ThingInstance.Get_(uid);
-			if(obj == null)
-			{
-				ThingInstance.MissingError(uid);
-				return default;
-			}
-			var type = obj.GetType();
-			TryAddAllMethods(type, true);
-
-			return voidMethodsAllNames.ContainsKey(type) && voidMethodsAllNames[type].Contains(voidMethodName);
-		}
-		public static bool HasProperty(string uid, string propertyName)
-		{
-			return HasGetter(uid, propertyName);
-		}
-		public static bool HasMethod(string uid, string methodName)
-		{
-			return HasVoidMethod(uid, methodName) || HasReturnMethod(uid, methodName);
-		}
-
-		public static Property GetProperty(string uid, string propertyName)
-		{
-			var obj = ThingInstance.GetTryError(uid);
-			if(obj == null)
-				return default;
-
-			// don't even bother checking setters since all props have getters
-			var get = GetPropInfo(uid, false, propertyName, false);
-			if(get == null)
-			{
-				MissingPropError(ThingInstance.GetTryError(uid), propertyName, false, true);
-				return default;
-			}
-
-			return get;
-		}
-		public static Method GetMethod(string uid, string methodName)
-		{
-			var rtrn = GetMethodInfo(uid, false, methodName, false);
-			var vd = GetMethodInfo(uid, true, methodName, false);
-
-			if(rtrn == null && vd == null)
-			{
-				MissingMethodError(ThingInstance.GetTryError(uid), methodName, false, true);
-				return default;
-			}
-
-			return rtrn ?? vd;
-		}
-		public static List<Property> GetProperties(string uid)
-		{
-			var names = new List<string>();
-			var result = new List<Property>();
-			var getters = GetGetters(uid);
-			var setters = GetSetters(uid);
-
-			ProcessList(getters);
-			ProcessList(setters);
-
-			return result;
-
-			void ProcessList(List<Property> list)
-			{
-				for(int i = 0; i < list.Count; i++)
-					if(names.Contains(list[i].ToString()) == false)
-					{
-						result.Add(list[i]);
-						names.Add(list[i].ToString());
-					}
-			}
-		}
-		public static List<Method> GetMethods(string uid)
-		{
-			var names = new List<string>();
-			var result = new List<Method>();
-			var voids = GetVoidMethods(uid);
-			var returns = GetReturnMethods(uid);
-
-			ProcessList(voids);
-			ProcessList(returns);
-
-			return result;
-
-			void ProcessList(List<Method> list)
-			{
-				for(int i = 0; i < list.Count; i++)
-					if(names.Contains(list[i].ToString()) == false)
-					{
-						result.Add(list[i]);
-						names.Add(list[i].ToString());
-					}
-			}
-		}
-		public static List<Property> GetGetters(string uid)
-		{
-			return GetPropsInfo(uid, false);
-		}
-		public static List<Property> GetSetters(string uid)
-		{
-			return GetPropsInfo(uid, true);
-		}
-		public static List<Method> GetReturnMethods(string uid)
-		{
-			return GetMethodsInfo(uid, false);
-		}
-		public static List<Method> GetVoidMethods(string uid)
-		{
-			return GetMethodsInfo(uid, true);
-		}
-
 		#region Backend
 		internal class CustomProperty
 		{
@@ -1052,7 +981,7 @@
 		}
 		internal static string GetAllProps(string uid, bool setter)
 		{
-			var all = setter ? GetSetters(uid) : GetGetters(uid);
+			var all = GetPropsInfo(uid, setter);
 			var result = "";
 
 			for(int i = 0; i < all.Count; i++)
@@ -1065,7 +994,7 @@
 		}
 		internal static string GetAllMethods(string uid, bool onlyVoid)
 		{
-			var all = onlyVoid ? GetVoidMethods(uid) : GetReturnMethods(uid);
+			var all = GetMethodsInfo(uid, onlyVoid);
 			var result = "";
 
 			for(int i = 0; i < all.Count; i++)
@@ -1082,6 +1011,7 @@
 			var obj = ThingInstance.GetTryError(uid);
 			if(obj == null)
 				return new();
+
 			var type = obj.GetType();
 
 			TryAddAllProps(type, true);
@@ -1089,8 +1019,12 @@
 
 			var result = new List<Property>();
 			var allNames = set ? settersAllNames[type] : gettersAllNames[type];
+
 			for(int i = 0; i < allNames.Count; i++)
-				result.Add(GetPropInfo(uid, set, allNames[i]));
+				result.Add(GetPropInfo(uid, set, allNames[i], false));
+			foreach(var kvp in obj.customProperties)
+				result.Add(GetPropInfo(uid, set, kvp.Key, false));
+
 			return result;
 		}
 		internal static List<Method> GetMethodsInfo(string uid, bool isVoid)
@@ -1098,13 +1032,17 @@
 			var obj = ThingInstance.GetTryError(uid);
 			if(obj == null)
 				return new();
+
 			var type = obj.GetType();
 
 			TryAddAllMethods(type, isVoid);
+
 			var result = new List<Method>();
 			var allNames = isVoid ? voidMethodsAllNames[type] : returnMethodsAllNames[type];
+
 			for(int i = 0; i < allNames.Count; i++)
-				result.Add(GetMethod(uid, allNames[i]));
+				result.Add(GetMethodInfo(uid, isVoid, allNames[i], false));
+
 			return result;
 		}
 		internal static Property GetPropInfo(string uid, bool set, string propName, bool error = true)
@@ -1194,7 +1132,7 @@
 				return false;
 
 			var nth = new string[] { "st", "nd", "rd" };
-			var method = GetMethod(obj.UID, key.Item2).ToString().Replace("Instance", "");
+			var method = Method.Get(obj.UID, key.Item2).ToString().Replace("Instance", "");
 
 			if(paramTypes.Count != parameters.Length)
 			{
@@ -1220,17 +1158,17 @@
 		}
 		internal static void MissingPropError(ThingInstance obj, string propertyName, bool set, bool skipGetSet = false)
 		{
-			var setStr = set ? "setter" : "getter";
-			var final = setStr + "s";
+			var prop = set ? "setter property" : "getter property";
+			var props = set ? "setter properties" : "getter properties";
 
 			if(skipGetSet)
 			{
-				setStr = "property";
-				final = "properties";
+				prop = "property";
+				props = "properties";
 			}
 
-			Console.LogError(2, $"The {obj.GetType().GetPrettyName()} '{obj.UID}' does not have a {setStr} '{propertyName}'.",
-				$"It has the following {final}:\n{GetAllProps(obj.UID, set)}");
+			Console.LogError(2, $"The {obj.GetType().GetPrettyName()} '{obj.UID}' does not have a {prop} '{propertyName}'.",
+				$"It has the following {props}:\n{GetAllProps(obj.UID, set)}");
 		}
 		internal static void MissingMethodError(ThingInstance obj, string methodName, bool isVoid, bool skipVoidReturn = false)
 		{
@@ -1244,7 +1182,7 @@
 		}
 		internal static void PropTypeMismatchError(ThingInstance obj, string propertyName, Type valueType, Type expectedValueType)
 		{
-			var prop = GetProperty(obj.UID, propertyName);
+			var prop = Property.Get(obj.UID, propertyName);
 			Console.LogError(1, $"The property\n{prop}\ncannot process the provided value.",
 				$"It expects a value of type {expectedValueType.GetPrettyName(true)}, not {valueType.GetPrettyName(true)}.");
 		}
