@@ -47,7 +47,7 @@
 				return result.AsReadOnly();
 			}
 		}
-		public bool IsLoaded { get; private set; }
+		public bool IsLoaded => isLoaded;
 		public string Name { get; set; }
 
 		public Scene(string name)
@@ -68,17 +68,18 @@
 				var loadedScene = filePath.Load<Scene>();
 
 				loadedScene.objs = def.objs;
-				loadedScene.IsLoaded = true;
+				loadedScene.isLoaded = true;
 				scene = prevScene;
 
 				foreach(var kvp in loadedScene.things)
+				{
+					kvp.Value.TryCastCustomProperties();
+
 					if(kvp.Value is TilemapInstance tm)
 						tm.MapFromJSON();
+				}
 
 				CurrentScene = loadedScene;
-
-				//foreach(var kvp in CurrentScene.objs)
-				//	kvp.Value.UpdateParency();
 			}
 			catch(Exception) { Console.LogError(1, $"Could not load {nameof(Scene)} from '{filePath}'."); }
 		}
@@ -248,7 +249,7 @@
 		}
 
 		private static Vector2 mouseDelta, prevMousePos;
-		private bool hasStarted;
+		private bool hasStarted, isLoaded;
 		private static Scene scene, loadScene, unloadScene, startScene, stopScene;
 		internal static Thread assetsLoading;
 		internal static CameraInstance MainCamera => ThingInstance.Get_<CameraInstance>(MAIN_CAMERA_UID);

@@ -1035,7 +1035,7 @@
 		internal static string GetPrettyName(this Type type, bool full = false)
 		{
 			var n = full ? type.FullName : type.Name;
-			n = n.Replace("+", ".");
+			n = n.Replace("+", ".").Replace("Instance", "");
 
 			if(type.GetGenericArguments().Length == 0)
 				return n;

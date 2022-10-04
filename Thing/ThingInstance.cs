@@ -214,7 +214,7 @@
 			return Vector2.Transform(localPosition, global);
 		}
 
-		public void Destroy(bool includeChildren)
+		public void Destroy(bool isIncludingChildren)
 		{
 			OnDestroy();
 
@@ -228,8 +228,8 @@
 				// prevents hard jump to world coordinates
 				child.ParentUID = null;
 
-				if(includeChildren)
-					child.Destroy(includeChildren);
+				if(isIncludingChildren)
+					child.Destroy(isIncludingChildren);
 			}
 			Scene.CurrentScene.objs.Remove(uid);
 
@@ -249,6 +249,8 @@
 		}
 
 		#region Backend
+		[JsonProperty(Order = -100)]
+		internal Dictionary<string, Thing.CustomProperty> customProperties = new();
 		private bool isDisabled;
 		private const float DEFAULT_BB_SIZE = 50f;
 		private readonly Clock age = new();
@@ -264,20 +266,32 @@
 		private readonly int numUID;
 
 		[JsonConstructor]
-		internal ThingInstance() => Init();
+		internal ThingInstance() => Event.ThingCreate(UID);
 		internal ThingInstance(string uid)
 		{
 			var objs = Scene.CurrentScene.objs;
 			numUID = objs.Count; // before UID to be 0 based
 
-			UID = Thing.FreeUID(uid);
+			UID = Thing.GetFreeUID(uid);
 			LocalScale = 1;
 
 			Event.ThingCreate(UID);
 		}
-		private void Init()
+		internal void TryCastCustomProperties()
 		{
-			Event.ThingCreate(UID);
+			// the cast from object to the specific type is needed since
+			// the json parses the values as object for one reason or another
+
+			if(customProperties.Count == 0)
+				return;
+			
+			var keys = customProperties.Keys.ToList();
+			for(int i = 0; i < keys.Count; i++)
+			{
+				var key = keys[i];
+				var value = customProperties[key];
+				customProperties[key].Value = Convert.ChangeType(value.Value, value.Type);
+			}
 		}
 
 		internal virtual void OnDestroy() { }
@@ -381,6 +395,9 @@
 		}
 		internal static T Get_<T>(string uid) where T : ThingInstance
 		{
+			if(Scene.CurrentScene == null)
+				return default;
+
 			var objs = Scene.CurrentScene.objs;
 			return Thing.Exists(uid) == false || objs[uid] is not T ? default : (T)objs[uid];
 		}

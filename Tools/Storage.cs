@@ -69,6 +69,9 @@
 				KnownTypes.Add(typeof(ConcurrentDictionary<string, Vec3>));
 				KnownTypes.Add(typeof(ConcurrentDictionary<string, Vec4>));
 
+				KnownTypes.Add(typeof(Thing.CustomProperty));
+				KnownTypes.Add(typeof(Dictionary<string, Thing.CustomProperty>));
+
 				KnownTypes.Add(typeof(AudioInstance));
 				KnownTypes.Add(typeof(CameraInstance));
 				KnownTypes.Add(typeof(ClothInstance));
