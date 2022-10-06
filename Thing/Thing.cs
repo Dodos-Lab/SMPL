@@ -839,11 +839,13 @@
 					else
 						return default;
 
-					if(getters[key].Invoke(obj) is T t)
-					{
-						success = true;
-						return t;
-					}
+
+				}
+
+				if(getters.ContainsKey(key) && getters[key].Invoke(obj) is T t)
+				{
+					success = true;
+					return t;
 				}
 				return default;
 			}
