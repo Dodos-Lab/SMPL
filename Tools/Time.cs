@@ -147,11 +147,11 @@
 			};
 		}
 
-		public static void DoAfter(float seconds, Action method, bool isRepeating = false)
+		public static void CallAfter(float seconds, Action method, bool isRepeating = false)
 		{
 			timers.Add(new Timer(seconds, isRepeating, method));
 		}
-		public static void DoCancel(Action method)
+		public static void CancelCall(Action method)
 		{
 			var timersToRemove = new List<Timer>();
 			for(int i = 0; i < timers.Count; i++)
@@ -161,7 +161,7 @@
 			for(int i = 0; i < timersToRemove.Count; i++)
 				timers.Remove(timersToRemove[i]);
 		}
-		public static void DoOffset(float secondsOffset, Action method)
+		public static void OffsetCall(float secondsOffset, Action method)
 		{
 			for(int i = 0; i < timers.Count; i++)
 				if(timers[i].method == method)

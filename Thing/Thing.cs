@@ -183,7 +183,7 @@
 				return $"{OwnerType} {{ {Type.GetPrettyName()} {Name} {{ {getStr}{sep}{setStr} }} }}";
 			}
 
-			public static void Add<T>(string uid, string propertyName, T value)
+			public static void AddTo<T>(string uid, string propertyName, T value)
 			{
 				var instance = ThingInstance.GetTryError(uid);
 				if(instance == null)
@@ -194,7 +194,7 @@
 					Console.LogError(1, $"The '{nameof(propertyName)}' should not be empty or null.");
 					return;
 				}
-				else if(Has(uid, propertyName))
+				else if(IsOwnedBy(uid, propertyName))
 				{
 					Console.LogError(1, $"The {instance.GetType().GetPrettyName()} '{uid}' already contains a property with the name '{propertyName}'.");
 					return;
@@ -208,11 +208,11 @@
 					Value = value
 				};
 			}
-			public static bool Has(string uid, string propertyName)
+			public static bool IsOwnedBy(string uid, string propertyName)
 			{
 				return GetPropInfo(uid, false, propertyName, false) != null;
 			}
-			public static Property Get(string uid, string propertyName)
+			public static Property GetFrom(string uid, string propertyName)
 			{
 				var obj = ThingInstance.GetTryError(uid);
 				if(obj == null)
@@ -228,7 +228,7 @@
 
 				return get;
 			}
-			public static List<Property> GetAll(string uid)
+			public static List<Property> GetAllFrom(string uid)
 			{
 				var names = new List<string>();
 				var result = new List<Property>();
@@ -345,11 +345,11 @@
 				return $"{OwnerType} {{ {returnTypeStr} {Name}({paramStr}) }}";
 			}
 
-			public static bool Has(string uid, string methodName)
+			public static bool IsOwnedBy(string uid, string methodName)
 			{
-				return Get(uid, methodName) != null;
+				return GetFrom(uid, methodName) != null;
 			}
-			public static Method Get(string uid, string methodName)
+			public static Method GetFrom(string uid, string methodName)
 			{
 				var rtrn = GetMethodInfo(uid, false, methodName, false);
 				var vd = GetMethodInfo(uid, true, methodName, false);
@@ -362,7 +362,7 @@
 
 				return rtrn ?? vd;
 			}
-			public static List<Method> GetAll(string uid)
+			public static List<Method> GetAllFrom(string uid)
 			{
 				var names = new List<string>();
 				var result = new List<Method>();
@@ -658,6 +658,15 @@
 			var objs = Scene.CurrentScene.objs;
 			while(objs.ContainsKey(freeUID))
 			{
+				var lastSymbol = freeUID[^1].ToString();
+
+				if(lastSymbol.IsNumber())
+				{
+					freeUID = $"{freeUID[..^1]}{i}";
+					i++;
+					continue;
+				}
+
 				freeUID = $"{uid}{i}";
 				i++;
 			}
@@ -683,6 +692,8 @@
 			thing.UID = prevUID;
 			thing.oldUID = prevOldUID;
 			var newThing = JsonConvert.DeserializeObject<ThingInstance>(json, settings);
+			newThing.numUID = ThingInstance.currNumUID;
+			ThingInstance.currNumUID++;
 
 			for(int i = 0; i < children.Count; i++)
 			{
@@ -790,7 +801,7 @@
 
 			var valueType = value.GetType();
 			var t = setterTypes[key];
-			if(valueType != t && valueType.Inherits(t) == false)
+			if(valueType != t)
 			{
 				PropTypeMismatchError(obj, setPropertyName, valueType, t);
 				return;
@@ -807,12 +818,15 @@
 
 			var type = obj.GetType();
 			var key = (type, getPropertyName);
+
+			TryAddAllProps(type, false);
+
 			var result = GetResult(out var success);
-			var prop = Property.Get(uid, getPropertyName);
+			var prop = Property.GetFrom(uid, getPropertyName);
 
 			if(success == false && prop != null)
 			{
-				PropTypeMismatchError(obj, getPropertyName, typeof(T), prop.type);
+				ReturnTypeMismatchError(false, obj, getPropertyName, typeof(T), prop.type);
 				return default;
 			}
 			return result;
@@ -824,7 +838,7 @@
 				if(obj.customProperties.ContainsKey(getPropertyName))
 				{
 					var prop = obj.customProperties[getPropertyName];
-					if(prop.Type == typeof(T)) // is T doesn't work
+					if(prop.Type == typeof(T))
 					{
 						success = true;
 						return (T)prop.Value;
@@ -832,20 +846,21 @@
 				}
 				else if(getters.ContainsKey(key) == false)
 				{
-					TryAddAllProps(type, false);
-
 					if(gettersAllNames[type].Contains(getPropertyName))
 						getters[key] = type.DelegateForGetPropertyValue(getPropertyName);
 					else
 						return default;
-
-
 				}
 
-				if(getters.ContainsKey(key) && getters[key].Invoke(obj) is T t)
+				if(getters.ContainsKey(key) == false)
+					return default;
+
+				var value = getters[key].Invoke(obj);
+				var valueIsNull = value == null; // some properties can be null, null is not T
+				if(valueIsNull || value.GetType() == typeof(T))
 				{
 					success = true;
-					return t;
+					return (T)value;
 				}
 				return default;
 			}
@@ -879,7 +894,7 @@
 			if(voidMethods.ContainsKey(key) && TryTypeMismatchError(obj, key, voidMethodParamTypes[key], parameters.ToArray()) == false)
 				voidMethods[key].Invoke(obj, parameters);
 		}
-		public static object DoGet(string uid, string getMethodName, params object[] parameters)
+		public static T DoGet<T>(string uid, string getMethodName, params object[] parameters)
 		{
 			var obj = ThingInstance.GetTryError(uid);
 			if(obj == null)
@@ -902,14 +917,24 @@
 					returnMethodParamTypes[key] = paramTypes;
 				}
 				else
+				{
 					MissingMethodError(obj, getMethodName, false);
+					return default;
+				}
 			}
 
 			var paramLength = parameters == null ? 1 : parameters.Length;
-			return returnMethodParamTypes.ContainsKey(key) == false || // no params found on that method
-				returnMethodParamTypes[key].Count != paramLength || // provided params are different than method params
-				TryTypeMismatchError(obj, key, returnMethodParamTypes[key], parameters) ? // provided param types are different than desired
-				default : returnMethods[key].Invoke(obj, parameters == null ? new object[1] : parameters); // possible null parameter, not null array
+			if(returnMethodParamTypes.ContainsKey(key) == false || // no params found on that method
+				returnMethodParamTypes[key].Count != paramLength || // provided params are more or less than method params
+				TryTypeMismatchError(obj, key, returnMethodParamTypes[key], parameters)) // provided params are different types from method params
+				return default;
+
+			var result = returnMethods[key].Invoke(obj, parameters ?? new object[1]); // possible null parameter, not null params array
+			if(result is T t)
+				return t;
+
+			ReturnTypeMismatchError(true, obj, getMethodName, typeof(T), returnMethodTypes[key]);
+			return default;
 		}
 
 		#region Backend
@@ -1134,7 +1159,7 @@
 				return false;
 
 			var nth = new string[] { "st", "nd", "rd" };
-			var method = Method.Get(obj.UID, key.Item2).ToString().Replace("Instance", "");
+			var method = Method.GetFrom(obj.UID, key.Item2).ToString().Replace("Instance", "");
 
 			if(paramTypes.Count != parameters.Length)
 			{
@@ -1146,8 +1171,10 @@
 			for(int i = 0; i < paramTypes.Count; i++)
 			{
 				var p = parameters[i];
-				var t = paramTypes[i];
-				if((p == null && t.IsClass == false) || (p != null && p.GetType() != t))
+				var expectedType = paramTypes[i];
+				var type = p.GetType();
+				if((p == null && expectedType.IsClass == false) ||
+					(p != null && type != expectedType))
 				{
 					var nthStr = i < 4 ? nth[i] : "th";
 					var paramStr = p == null ? "null" : p.GetType().GetPrettyName(true);
@@ -1184,9 +1211,16 @@
 		}
 		internal static void PropTypeMismatchError(ThingInstance obj, string propertyName, Type valueType, Type expectedValueType)
 		{
-			var prop = Property.Get(obj.UID, propertyName);
+			var prop = Property.GetFrom(obj.UID, propertyName);
 			Console.LogError(1, $"The property\n{prop}\ncannot process the provided value.",
 				$"It expects a value of type {expectedValueType.GetPrettyName(true)}, not {valueType.GetPrettyName(true)}.");
+		}
+		internal static void ReturnTypeMismatchError(bool isMethod, ThingInstance obj, string memberName, Type valueType, Type expectedValueType)
+		{
+			object member = isMethod ? Method.GetFrom(obj.UID, memberName) : Property.GetFrom(obj.UID, memberName);
+			var memberStr = isMethod ? "method" : "property";
+			Console.LogError(1, $"The {memberStr}\n{member}\ncannot process the provided return type.",
+				$"It expects the type {expectedValueType.GetPrettyName(true)}, not {valueType.GetPrettyName(true)}.");
 		}
 		#endregion
 	}

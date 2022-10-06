@@ -263,20 +263,22 @@
 		private Matrix3x2 global;
 		private string uid;
 		[JsonProperty]
-		private readonly int numUID;
+		internal int numUID;
+		internal static int currNumUID;
 
 		[JsonConstructor]
 		internal ThingInstance() => Event.ThingCreate(UID);
 		internal ThingInstance(string uid)
 		{
-			var objs = Scene.CurrentScene.objs;
-			numUID = objs.Count; // before UID to be 0 based
+			numUID = currNumUID;
+			currNumUID++;
 
 			UID = Thing.GetFreeUID(uid);
 			LocalScale = 1;
 
 			Event.ThingCreate(UID);
 		}
+
 		internal void TryCastCustomProperties()
 		{
 			// the cast from object to the specific type is needed since
@@ -284,7 +286,7 @@
 
 			if(customProperties.Count == 0)
 				return;
-			
+
 			var keys = customProperties.Keys.ToList();
 			for(int i = 0; i < keys.Count; i++)
 			{
