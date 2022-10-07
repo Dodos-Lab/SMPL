@@ -252,7 +252,7 @@
 		[JsonProperty(Order = -100)]
 		internal Dictionary<string, Thing.CustomProperty> customProperties = new();
 		private bool isDisabled;
-		private const float DEFAULT_BB_SIZE = 50f;
+		internal const float DEFAULT_BB_SIZE = 50f;
 		private readonly Clock age = new();
 		protected readonly Hitbox hitbox = new(), bb = new();
 		[JsonProperty]

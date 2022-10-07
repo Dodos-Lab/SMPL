@@ -41,23 +41,31 @@
 			return false;
 		}
 
-		internal void UpdateGlobalArrays()
+		internal static void UpdateGlobalArrays()
 		{
-			var i = lights.IndexOf(this);
-			positions[i] = Position;
-			colors[i] = Color;
-			scales[i] = Scale;
+			for(int i = 0; i < lights.Count; i++)
+			{
+				var light = lights[i];
+				positions[i] = light.Position;
+				colors[i] = light.Color;
+				scales[i] = light.Scale;
+			}
 		}
 		internal static void Update(VisualInstance visual, RenderTarget renderTarget)
 		{
-			for(int i = 0; i < lights.Count; i++)
-				lights[i].UpdateGlobalArrays();
-
 			var positionsInShader = new Vector2[positions.Length];
-			for(int j = 0; j < positionsInShader.Length; j++)
+			for(int j = 0; j < lights.Count; j++)
 			{
-				var p = renderTarget.MapCoordsToPixel(positions[j].ToSFML(), renderTarget.GetView()) - new Vector2i(0, (int)(renderTarget.Size.Y));
+				var light = lights[j];
+				var pos = light.Position;
+				var sc = light.Scale;
+				var dist = pos.Distance(visual.Position);
+
+				var p = renderTarget.MapCoordsToPixel(pos.ToSFML(), renderTarget.GetView()) - new Vector2i(0, (int)renderTarget.Size.Y);
 				positionsInShader[j] = new Vector2(p.X, p.Y);
+
+				var verts = GetShadowVerts(visual.BoundingBox, pos, sc);
+				renderTarget.Draw(verts, PrimitiveType.Quads);
 			}
 
 			var amb = Thing.AmbientColor;
@@ -68,6 +76,46 @@
 			visual.SetShaderColorArray("Colors", colors);
 			visual.SetShaderVector2Array("Positions", positionsInShader);
 			visual.SetShaderFloatArray("Scales", scales);
+		}
+		private static Vertex[] GetShadowVerts(Hitbox hitbox, Vector2 lightPos, float lightSc)
+		{
+			var lines = hitbox.Lines;
+			if(lines.Count == 0)
+				return Array.Empty<Vertex>();
+
+			var verts = new Vertex[lines.Count * 4];
+			var shadowSize = DEFAULT_BB_SIZE * lightSc * 0.75f;
+
+			for(int i = 0; i < lines.Count; i++)
+			{
+				var a = lines[i].A;
+				var b = lines[i].B;
+				var c = b.MoveToTarget(lightPos, -shadowSize, false);
+				var d = a.MoveToTarget(lightPos, -shadowSize, false);
+				var center = a.PercentToTarget(b, new(50));
+				var index = i * 4;
+				var ray = new Hitbox(center, lightPos);
+				var rayHits = hitbox.CrossPoints(ray);
+				//var distA = a.Distance(lightPos);
+				//var distB = b.Distance(lightPos);
+
+				if(rayHits.Count == 1)
+					continue;
+
+				verts[index + 0] = new Vertex(a.ToSFML(), Color.Black);
+				verts[index + 1] = new Vertex(b.ToSFML(), Color.Black);
+				verts[index + 2] = new Vertex(c.ToSFML(), Color.Black);
+				verts[index + 3] = new Vertex(d.ToSFML(), Color.Black);
+			}
+
+			return verts;
+
+			Color GetColor(float dist)
+			{
+				var c = dist.Map(shadowSize, 0, 0, 255);
+				c = Math.Clamp(c, 0, 255);
+				return new(0, 0, 0, (byte)c);
+			}
 		}
 
 		internal override void OnDestroy()

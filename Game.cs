@@ -65,6 +65,7 @@ namespace SMPL
 		{
 			Time.Update();
 			Pseudo3DInstance.Update();
+			LightInstance.UpdateGlobalArrays();
 
 			var visuals = VisualInstance.visuals.Reverse();
 			var cameras = CameraInstance.cameras;
