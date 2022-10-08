@@ -1066,6 +1066,27 @@
 		{
 			return new(col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f);
 		}
+		internal static Vec2[] ToGLSL(this Vector2[] arr)
+		{
+			var array = new Vec2[arr.Length];
+			for(int i = 0; i < array.Length; i++)
+				array[i] = arr[i].ToGLSL();
+			return array;
+		}
+		internal static Vec4[] ToGLSL(this Vector4[] arr)
+		{
+			var array = new Vec4[arr.Length];
+			for(int i = 0; i < array.Length; i++)
+				array[i] = arr[i].ToGLSL();
+			return array;
+		}
+		internal static Vec4[] ToGLSL(this Color[] arr)
+		{
+			var array = new Vec4[arr.Length];
+			for(int i = 0; i < array.Length; i++)
+				array[i] = arr[i].ToGLSL();
+			return array;
+		}
 		internal static string ToBackslashPath(this string path)
 		{
 			return string.IsNullOrWhiteSpace(path) ? default : path.Replace("/", "\\");

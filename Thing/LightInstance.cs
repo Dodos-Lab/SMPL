@@ -2,7 +2,8 @@
 {
 	public static partial class Thing
 	{
-		public static Color AmbientColor { get; set; } = new(50, 50, 50);
+		public static Color ShadowColor { get; set; } = new(50, 50, 50, 150);
+		public static int ShadowOrderZ { get; set; }
 		public static Color SunColor { get; set; } = Color.White;
 		public static float SunAngle { get; set; } = 45f;
 	}
@@ -41,81 +42,68 @@
 			return false;
 		}
 
-		internal static void UpdateGlobalArrays()
-		{
-			for(int i = 0; i < lights.Count; i++)
-			{
-				var light = lights[i];
-				positions[i] = light.Position;
-				colors[i] = light.Color;
-				scales[i] = light.Scale;
-			}
-		}
-		internal static void Update(VisualInstance visual, RenderTarget renderTarget)
-		{
-			var positionsInShader = new Vector2[positions.Length];
-			for(int j = 0; j < lights.Count; j++)
-			{
-				var light = lights[j];
-				var pos = light.Position;
-				var sc = light.Scale;
-				var dist = pos.Distance(visual.Position);
-
-				var p = renderTarget.MapCoordsToPixel(pos.ToSFML(), renderTarget.GetView()) - new Vector2i(0, (int)renderTarget.Size.Y);
-				positionsInShader[j] = new Vector2(p.X, p.Y);
-
-				var verts = GetShadowVerts(visual.BoundingBox, pos, sc);
-				renderTarget.Draw(verts, PrimitiveType.Quads);
-			}
-
-			var amb = Thing.AmbientColor;
-			var ambientVec = new Vector3(amb.R, amb.G, amb.B);
-			var lerp = Vector3.Lerp(new(), ambientVec, amb.A / 255f);
-			var resultCol = new Color((byte)lerp.X, (byte)lerp.Y, (byte)lerp.Z);
-			visual.SetEffectColor("AmbientColor", resultCol);
-			visual.SetShaderColorArray("Colors", colors);
-			visual.SetShaderVector2Array("Positions", positionsInShader);
-			visual.SetShaderFloatArray("Scales", scales);
-		}
-		private static Vertex[] GetShadowVerts(Hitbox hitbox, Vector2 lightPos, float lightSc)
+		private static void CalculateShadowVerts(Hitbox hitbox, Vector2 lightPos, float lightSc, VertexArray shadowMapVerts)
 		{
 			var lines = hitbox.Lines;
 			if(lines.Count == 0)
-				return Array.Empty<Vertex>();
+				return;
 
-			var verts = new Vertex[lines.Count * 4];
-			var shadowSize = DEFAULT_BB_SIZE * lightSc * 0.75f;
+			var shadowSize = DEFAULT_BB_SIZE * lightSc * 1.05f;
 
 			for(int i = 0; i < lines.Count; i++)
 			{
 				var a = lines[i].A;
 				var b = lines[i].B;
-				var c = b.MoveToTarget(lightPos, -shadowSize, false);
-				var d = a.MoveToTarget(lightPos, -shadowSize, false);
-				var center = a.PercentToTarget(b, new(50));
-				var index = i * 4;
-				var ray = new Hitbox(center, lightPos);
-				var rayHits = hitbox.CrossPoints(ray);
-				//var distA = a.Distance(lightPos);
-				//var distB = b.Distance(lightPos);
+				var distA = lightPos.Distance(a);
+				var distB = lightPos.Distance(b);
+				var c = b.MoveToTarget(lightPos, -MathF.Max(0, shadowSize - distB), false);
+				var d = a.MoveToTarget(lightPos, -MathF.Max(0, shadowSize - distA), false);
 
-				if(rayHits.Count == 1)
-					continue;
+				//var center = a.PercentToTarget(b, new(50));
+				//var ray = new Hitbox(center, lightPos);
+				//var rayHits = hitbox.CrossPoints(ray);
+				//if(rayHits.Count == 1)
+				//	continue;
 
-				verts[index + 0] = new Vertex(a.ToSFML(), Color.Black);
-				verts[index + 1] = new Vertex(b.ToSFML(), Color.Black);
-				verts[index + 2] = new Vertex(c.ToSFML(), Color.Black);
-				verts[index + 3] = new Vertex(d.ToSFML(), Color.Black);
+				shadowMapVerts.Append(new(a.ToSFML(), Thing.ShadowColor));
+				shadowMapVerts.Append(new(b.ToSFML(), Thing.ShadowColor));
+				shadowMapVerts.Append(new(c.ToSFML(), Color.Transparent));
+				shadowMapVerts.Append(new(d.ToSFML(), Color.Transparent));
+
 			}
-
-			return verts;
-
-			Color GetColor(float dist)
+		}
+		internal static void UpdateGlobalArrays(RenderTarget renderTarget)
+		{
+			for(int i = 0; i < lights.Count; i++)
 			{
-				var c = dist.Map(shadowSize, 0, 0, 255);
-				c = Math.Clamp(c, 0, 255);
-				return new(0, 0, 0, (byte)c);
+				var light = lights[i];
+				colors[i] = light.Color;
+				scales[i] = light.Scale;
+
+				var p = renderTarget.MapCoordsToPixel(
+					light.Position.ToSFML(), renderTarget.GetView()) - new Vector2i(0, (int)renderTarget.Size.Y);
+				positions[i] = new Vector2(p.X, p.Y);
 			}
+		}
+		internal static void Update(VisualInstance visual, VertexArray shadowMapVerts)
+		{
+			for(int j = 0; j < lights.Count; j++)
+			{
+				var light = lights[j];
+				var pos = light.Position;
+				var sc = light.Scale;
+
+				CalculateShadowVerts(visual.BoundingBox, pos, sc, shadowMapVerts);
+			}
+
+			var amb = Thing.ShadowColor;
+			var ambientVec = new Vector3(amb.R, amb.G, amb.B);
+			var lerp = Vector3.Lerp(new(), ambientVec, amb.A / 255f);
+			var resultCol = new Color((byte)lerp.X, (byte)lerp.Y, (byte)lerp.Z);
+			visual.SetEffectColor("AmbientColor", resultCol);
+			visual.SetShaderColorArray("Colors", colors);
+			visual.SetShaderVector2Array("Positions", positions);
+			visual.SetShaderFloatArray("Scales", scales);
 		}
 
 		internal override void OnDestroy()

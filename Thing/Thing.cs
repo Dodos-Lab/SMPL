@@ -28,16 +28,17 @@
 			public const string BOUNDING_BOX = nameof(ThingInstance.BoundingBox);
 
 			public const string CAMERA_IS_SMOOTH = nameof(CameraInstance.IsSmooth);
-			public const string CAMERA_MOUSE_CURSOR_POSITION = nameof(CameraInstance.MousePosition);
+			public const string CAMERA_MOUSE_POSITION = nameof(CameraInstance.MousePosition);
 			public const string CAMERA_RENDER_TEXTURE = nameof(CameraInstance.RenderTexture);
 			public const string CAMERA_RESOLUTION = nameof(CameraInstance.Resolution);
+			public const string CAMERA_BACKGROUND_COLOR = nameof(CameraInstance.BackgroundColor);
 
 			public const string VISUAL_TINT = nameof(VisualInstance.Tint);
 			public const string VISUAL_IS_HIDDEN = nameof(VisualInstance.IsHidden);
 			public const string VISUAL_IS_HIDDEN_SELF = nameof(VisualInstance.IsHiddenSelf);
 			public const string VISUAL_IS_SMOOTH = nameof(VisualInstance.IsSmooth);
 			public const string VISUAL_IS_REPEATED = nameof(VisualInstance.IsRepeated);
-			public const string VISUAL_ORDER = nameof(VisualInstance.Order);
+			public const string VISUAL_ORDER_Z = nameof(VisualInstance.OrderZ);
 			public const string VISUAL_TEXTURE_PATH = nameof(VisualInstance.TexturePath);
 			public const string VISUAL_EFFECT = nameof(VisualInstance.Effect);
 			public const string VISUAL_CAMERA_TAG = nameof(VisualInstance.CameraTag);

@@ -228,7 +228,7 @@
 				var overallSunEffect = Thing.SunColor.A / 255f;
 				sunValue *= overallSunEffect;
 
-				var amb = Thing.AmbientColor;
+				var amb = Thing.ShadowColor;
 				var sun = Thing.SunColor;
 				var ambVec = Vector3.Lerp(new(), new Vector3(amb.R, amb.G, amb.B), amb.A / 255f);
 				var sunCol = new Vector3(sun.R, sun.G, sun.B);

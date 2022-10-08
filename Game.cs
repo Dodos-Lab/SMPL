@@ -35,6 +35,8 @@ global using Color = SFML.Graphics.Color;
 global using Console = SMPL.Tools.Console;
 global using Time = SMPL.Tools.Time;
 
+using static SMPL.Thing;
+
 namespace SMPL
 {
 	public static class Game
@@ -43,7 +45,7 @@ namespace SMPL
 		public static Settings Settings => settings;
 
 		public static RenderWindow Window => window;
-		public static Vector2 MouseCursorPosition
+		public static Vector2 MousePosition
 		{
 			get { var p = Mouse.GetPosition(Window); return new(p.X, p.Y); }
 			set { Mouse.SetPosition(new((int)value.X, (int)value.Y), Window); }
@@ -65,33 +67,8 @@ namespace SMPL
 		{
 			Time.Update();
 			Pseudo3DInstance.Update();
-			LightInstance.UpdateGlobalArrays();
 
-			var visuals = VisualInstance.visuals.Reverse();
-			var cameras = CameraInstance.cameras;
-
-			for(int i = 0; i < cameras.Count; i++)
-				cameras[i].RenderTexture.Clear(Color.Transparent);
-
-			foreach(var kvp in visuals)
-				for(int i = 0; i < kvp.Value.Count; i++)
-				{
-					var camUIDs = Thing.GetUIDsByTag(kvp.Value[i].CameraTag);
-					for(int j = 0; j < camUIDs.Count; j++)
-					{
-						var cam = ThingInstance.Get_<CameraInstance>(camUIDs[j]);
-						if(cam != null && cam.IsDisabled == false)
-							kvp.Value[i].Draw(cam.RenderTexture);
-					}
-				}
-
-			for(int i = 0; i < cameras.Count; i++)
-				if(cameras[i].UID != Scene.MAIN_CAMERA_UID)
-					cameras[i].RenderTexture.Display();
-
-			foreach(var kvp in visuals)
-				for(int i = 0; i < kvp.Value.Count; i++)
-					kvp.Value[i].Draw(mainCamera);
+			Draw(mainCamera);
 
 			Scene.UpdateCurrentScene();
 			AudioInstance.Update();
@@ -178,6 +155,97 @@ namespace SMPL
 			}
 		}
 		private static void OnClose(object sender, EventArgs e) => Stop();
+		private static void Draw(RenderTarget mainCamera)
+		{
+			var visuals = VisualInstance.visuals;
+			var cameras = CameraInstance.cameras;
+			var shadowMappedCams = new List<CameraInstance>();
+			var minOrderZ = visuals.FirstOrDefault().Key;
+			var maxOrderZ = visuals.LastOrDefault().Key;
+
+			ClearAllCamerasAndUpdateLightArrays();
+			UpdateShadowMapAndDrawUserCameras();
+			DisplayUserCameras();
+
+			DrawMainCamera();
+			// displaying the main camera/drawing it to the window is a call from outside
+			// since it might be a window, like in the SMPLSceneEditor
+
+			void ClearAllCamerasAndUpdateLightArrays()
+			{
+				for(int i = 0; i < cameras.Count; i++)
+				{
+					var cam = cameras[i];
+
+					LightInstance.UpdateGlobalArrays(cam.RenderTexture);
+					cam.RenderTexture.Clear(cam.BackgroundColor);
+					cam.shadowMapVerts.Clear();
+				}
+			}
+			void UpdateShadowMapAndDrawUserCameras()
+			{
+				foreach(var kvp in visuals)
+					for(int i = 0; i < kvp.Value.Count; i++)
+					{
+						var visual = kvp.Value[i];
+						var camUIDs = GetUIDsByTag(visual.CameraTag);
+
+						if(visual.Effect == Effect.Lights)
+							LightInstance.Update(visual, Scene.MainCamera.shadowMapVerts);
+
+						for(int j = 0; j < camUIDs.Count; j++)
+						{
+							var cam = ThingInstance.Get_<CameraInstance>(camUIDs[j]);
+
+							if(visual.Effect == Effect.Lights)
+								LightInstance.Update(visual, cam.shadowMapVerts);
+
+							TryDrawShadowMap(kvp.Key, cam, true, false, false); // try before draw
+
+							if(cam != null && cam.IsDisabled == false)
+								visual.Draw(cam.RenderTexture);
+
+							TryDrawShadowMap(kvp.Key, cam, false, true, true); // try after draw
+						}
+					}
+			}
+			void DisplayUserCameras()
+			{
+				for(int i = 0; i < cameras.Count; i++)
+				{
+					var cam = cameras[i];
+					if(cam.UID != Scene.MAIN_CAMERA_UID)
+						cam.RenderTexture.Display();
+				}
+			}
+			void DrawMainCamera()
+			{
+				foreach(var kvp in visuals)
+				{
+					TryDrawShadowMap(kvp.Key, Scene.MainCamera, true, false, false); // try before draw
+
+					for(int i = 0; i < kvp.Value.Count; i++)
+						kvp.Value[i].Draw(mainCamera);
+
+					TryDrawShadowMap(kvp.Key, Scene.MainCamera, false, true, true); // try after draw
+				}
+			}
+
+			void TryDrawShadowMap(int currentOrderZ, CameraInstance cam, bool beforeTest, bool inbetweenTest, bool afterTest)
+			{
+				if(shadowMappedCams.Contains(cam))
+					return;
+
+				if((beforeTest && ShadowOrderZ < minOrderZ) ||
+					(inbetweenTest && currentOrderZ == ShadowOrderZ) ||
+					(afterTest && ShadowOrderZ > maxOrderZ))
+				{
+					shadowMappedCams.Add(cam);
+					cam.DrawShadowMap();
+				}
+
+			}
+		}
 
 		internal static void InitWindow(WindowState windowState, Vector2 resolution)
 		{

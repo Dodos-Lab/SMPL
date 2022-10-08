@@ -120,7 +120,7 @@ void main()
 		public bool IsRepeated { get; set; } = true;
 
 		public virtual string TexturePath { get; set; }
-		public int Order
+		public int OrderZ
 		{
 			get => depth;
 			set
@@ -484,7 +484,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 		internal VisualInstance() { }
 		internal VisualInstance(string uid) : base(uid)
 		{
-			Order = 0;
+			OrderZ = 0;
 		}
 
 		internal void Draw(RenderTarget renderTarget)
@@ -502,9 +502,6 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 				tex.Repeated = IsRepeated;
 			}
 
-			if(Effect == Thing.Effect.Lights)
-				LightInstance.Update(this, renderTarget);
-
 			OnDraw(renderTarget);
 
 			if(tex != null)
@@ -521,6 +518,39 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 			var path = TexturePath.ToBackslashPath();
 			return path != null && textures.ContainsKey(path) ? textures[path] : Game.defaultTexture;
 		}
+		internal Shader GetShader(RenderTarget renderTarget)
+		{
+			if(Shader.IsAvailable == false || shader == default)
+				return default;
+
+			var tex = GetTexture();
+			if(tex != null)
+			{
+				shader?.SetUniform("Texture", tex);
+				shader?.SetUniform("TextureSize", new Vec2(tex.Size.X, tex.Size.Y));
+			}
+
+			shader?.SetUniform("HasTexture", tex != null);
+			shader?.SetUniform("Time", Age);
+
+			var sz = renderTarget.GetView().Size;
+			var res = renderTarget.Size;
+			shader?.SetUniform("CameraSize", new Vec2(sz.X, sz.Y));
+			shader?.SetUniform("CameraResolution", new Vec2(res.X, res.Y));
+
+			return shader;
+		}
+		internal BlendMode GetBlendMode()
+		{
+			return BlendMode switch
+			{
+				Thing.BlendMode.Alpha => SFML.Graphics.BlendMode.Alpha,
+				Thing.BlendMode.Add => SFML.Graphics.BlendMode.Add,
+				Thing.BlendMode.Multiply => SFML.Graphics.BlendMode.Multiply,
+				_ => SFML.Graphics.BlendMode.None,
+			};
+		}
+
 		internal void SetShader(Thing.Effect effect)
 		{
 			if(Shader.IsAvailable == false)
@@ -571,11 +601,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 		}
 		internal void SetShaderVector2Array(string uniformName, Vector2[] value)
 		{
-			var array = new Vec2[value.Length];
-			for(int i = 0; i < array.Length; i++)
-				array[i] = value[i].ToGLSL();
-
-			shader?.SetUniformArray(uniformName, array);
+			shader?.SetUniformArray(uniformName, value.ToGLSL());
 		}
 		internal void SetShaderVector3Array(string uniformName, Vector3[] value)
 		{
@@ -587,11 +613,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 		}
 		internal void SetShaderVector4Array(string uniformName, Vector4[] value)
 		{
-			var array = new Vec4[value.Length];
-			for(int i = 0; i < array.Length; i++)
-				array[i] = value[i].ToGLSL();
-
-			shader?.SetUniformArray(uniformName, array);
+			shader?.SetUniformArray(uniformName, value.ToGLSL());
 		}
 		internal void SetShaderColorArray(string uniformName, Color[] value)
 		{
@@ -601,38 +623,7 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 
 			shader?.SetUniformArray(uniformName, array);
 		}
-		internal Shader GetShader(RenderTarget renderTarget)
-		{
-			if(Shader.IsAvailable == false || shader == default)
-				return default;
 
-			var tex = GetTexture();
-			if(tex != null)
-			{
-				shader?.SetUniform("Texture", tex);
-				shader?.SetUniform("TextureSize", new Vec2(tex.Size.X, tex.Size.Y));
-			}
-
-			shader?.SetUniform("HasTexture", tex != null);
-			shader?.SetUniform("Time", Age);
-
-			var sz = renderTarget.GetView().Size;
-			var res = renderTarget.Size;
-			shader?.SetUniform("CameraSize", new Vec2(sz.X, sz.Y));
-			shader?.SetUniform("CameraResolution", new Vec2(res.X, res.Y));
-
-			return shader;
-		}
-		internal BlendMode GetBlendMode()
-		{
-			return BlendMode switch
-			{
-				Thing.BlendMode.Alpha => SFML.Graphics.BlendMode.Alpha,
-				Thing.BlendMode.Add => SFML.Graphics.BlendMode.Add,
-				Thing.BlendMode.Multiply => SFML.Graphics.BlendMode.Multiply,
-				_ => SFML.Graphics.BlendMode.None,
-			};
-		}
 		internal override void OnDestroy()
 		{
 			base.OnDestroy();
