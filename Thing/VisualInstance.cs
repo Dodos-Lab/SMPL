@@ -379,11 +379,13 @@ FinalColor = GetPixelColor(Texture, TextureCoords);"
 				FragmentUniforms = @"
 uniform vec4 AmbientColor = vec4(0.2, 0.2, 0.2, 1.0);
 
+uniform bool IsShadow;
 uniform vec2 Positions[50];
 uniform vec4 Colors[50];
 uniform float Scales[50];",
 				FragmentCode = @"
 vec3 result = AmbientColor.rgb;
+float resultAlpha = FinalColor.a;
 float cameraRatio = CameraSize.x / CameraSize.y;
 
 for(int i = 0; i < 50; i++)
@@ -396,10 +398,15 @@ for(int i = 0; i < 50; i++)
 	if (dist < radius)
 	{
 		float value = Map(dist, radius, 0, 0, Colors[i].a * 5);
+		
 		result += value * Colors[i].rgb;
+		resultAlpha -= value * Colors[i].a;
 	}
 }
-FinalColor.rgb *= result;"
+if (IsShadow)
+	FinalColor.a = resultAlpha;
+else
+	FinalColor.rgb *= result;"
 			} },
 			{ Thing.Effect.Grid, new()
 			{

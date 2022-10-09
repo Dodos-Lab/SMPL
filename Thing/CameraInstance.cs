@@ -143,7 +143,6 @@
 
 		internal void DrawShadowMap()
 		{
-
 			var amb = Thing.ShadowColor;
 			var ambientVec = new Vector3(amb.R, amb.G, amb.B);
 			var lerp = Vector3.Lerp(new(), ambientVec, amb.A / 255f);
@@ -160,7 +159,8 @@
 			shadowMapShader.SetUniform("CameraSize", new Vec2(sz.X, sz.Y));
 			shadowMapShader.SetUniform("CameraResolution", new Vec2(res.X, res.Y));
 
-			shadowMapShader.SetUniform("AmbientColor", Color.Red.ToGLSL());
+			shadowMapShader.SetUniform("IsShadow", true);
+			shadowMapShader.SetUniform("AmbientColor", resultCol.ToGLSL());
 			shadowMapShader.SetUniformArray("Colors", LightInstance.colors.ToGLSL());
 			shadowMapShader.SetUniformArray("Positions", LightInstance.positions.ToGLSL());
 			shadowMapShader.SetUniformArray("Scales", LightInstance.scales);

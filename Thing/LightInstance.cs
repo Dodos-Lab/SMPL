@@ -12,6 +12,7 @@
 	{
 		public Color Color { get; set; } = new Color(255, 255, 255, 50);
 		#region Backend
+		internal static readonly Hitbox map = new();
 		internal static readonly Vector2[] positions = new Vector2[50];
 		internal static readonly Color[] colors = new Color[50];
 		internal static readonly float[] scales = new float[50];
@@ -42,36 +43,6 @@
 			return false;
 		}
 
-		private static void CalculateShadowVerts(Hitbox hitbox, Vector2 lightPos, float lightSc, VertexArray shadowMapVerts)
-		{
-			var lines = hitbox.Lines;
-			if(lines.Count == 0)
-				return;
-
-			var shadowSize = DEFAULT_BB_SIZE * lightSc * 1.05f;
-
-			for(int i = 0; i < lines.Count; i++)
-			{
-				var a = lines[i].A;
-				var b = lines[i].B;
-				var distA = lightPos.Distance(a);
-				var distB = lightPos.Distance(b);
-				var c = b.MoveToTarget(lightPos, -MathF.Max(0, shadowSize - distB), false);
-				var d = a.MoveToTarget(lightPos, -MathF.Max(0, shadowSize - distA), false);
-
-				//var center = a.PercentToTarget(b, new(50));
-				//var ray = new Hitbox(center, lightPos);
-				//var rayHits = hitbox.CrossPoints(ray);
-				//if(rayHits.Count == 1)
-				//	continue;
-
-				shadowMapVerts.Append(new(a.ToSFML(), Thing.ShadowColor));
-				shadowMapVerts.Append(new(b.ToSFML(), Thing.ShadowColor));
-				shadowMapVerts.Append(new(c.ToSFML(), Color.Transparent));
-				shadowMapVerts.Append(new(d.ToSFML(), Color.Transparent));
-
-			}
-		}
 		internal static void UpdateGlobalArrays(RenderTarget renderTarget)
 		{
 			for(int i = 0; i < lights.Count; i++)
@@ -85,17 +56,55 @@
 				positions[i] = new Vector2(p.X, p.Y);
 			}
 		}
-		internal static void Update(VisualInstance visual, VertexArray shadowMapVerts)
+		internal static void GenerateHitboxMap()
+		{
+			map.Lines.Clear();
+
+			var visuals = VisualInstance.visuals;
+			foreach(var kvp in visuals)
+				for(int i = 0; i < kvp.Value.Count; i++)
+				{
+					var visual = kvp.Value[i];
+
+					if(visual.Effect != Thing.Effect.Lights)
+						continue;
+
+					var hb = visual.Hitbox.Lines.Count == 0 ? visual.BoundingBox : visual.Hitbox;
+					map.Lines.AddRange(hb.Lines);
+				}
+		}
+		internal static void CalculateShadowVerts(VertexArray shadowMapVerts)
 		{
 			for(int j = 0; j < lights.Count; j++)
 			{
 				var light = lights[j];
-				var pos = light.Position;
-				var sc = light.Scale;
+				var lightPos = light.Position;
+				var lightSc = light.Scale;
 
-				CalculateShadowVerts(visual.BoundingBox, pos, sc, shadowMapVerts);
+				var lines = map.Lines;
+				if(lines.Count == 0)
+					continue;
+
+				var shadowSize = DEFAULT_BB_SIZE * lightSc * 1.05f;
+
+				for(int i = 0; i < lines.Count; i++)
+				{
+					var a = lines[i].A;
+					var b = lines[i].B;
+					var distA = lightPos.Distance(a);
+					var distB = lightPos.Distance(b);
+					var c = b.MoveToTarget(lightPos, -MathF.Max(0, shadowSize - distB), false);
+					var d = a.MoveToTarget(lightPos, -MathF.Max(0, shadowSize - distA), false);
+
+					shadowMapVerts.Append(new(a.ToSFML(), Thing.ShadowColor));
+					shadowMapVerts.Append(new(b.ToSFML(), Thing.ShadowColor));
+					shadowMapVerts.Append(new(c.ToSFML(), Color.Transparent));
+					shadowMapVerts.Append(new(d.ToSFML(), Color.Transparent));
+				}
 			}
-
+		}
+		internal static void UpdateUniforms(VisualInstance visual)
+		{
 			var amb = Thing.ShadowColor;
 			var ambientVec = new Vector3(amb.R, amb.G, amb.B);
 			var lerp = Vector3.Lerp(new(), ambientVec, amb.A / 255f);

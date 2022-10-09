@@ -163,7 +163,7 @@ namespace SMPL
 			var minOrderZ = visuals.FirstOrDefault().Key;
 			var maxOrderZ = visuals.LastOrDefault().Key;
 
-			ClearAllCamerasAndUpdateLightArrays();
+			ClearAllCamerasAndGenerateHitboxMap();
 			UpdateShadowMapAndDrawUserCameras();
 			DisplayUserCameras();
 
@@ -171,15 +171,16 @@ namespace SMPL
 			// displaying the main camera/drawing it to the window is a call from outside
 			// since it might be a window, like in the SMPLSceneEditor
 
-			void ClearAllCamerasAndUpdateLightArrays()
+			void ClearAllCamerasAndGenerateHitboxMap()
 			{
 				for(int i = 0; i < cameras.Count; i++)
 				{
 					var cam = cameras[i];
-
-					LightInstance.UpdateGlobalArrays(cam.RenderTexture);
 					cam.RenderTexture.Clear(cam.BackgroundColor);
 					cam.shadowMapVerts.Clear();
+
+					LightInstance.UpdateGlobalArrays(mainCamera);
+					LightInstance.GenerateHitboxMap();
 				}
 			}
 			void UpdateShadowMapAndDrawUserCameras()
@@ -191,14 +192,18 @@ namespace SMPL
 						var camUIDs = GetUIDsByTag(visual.CameraTag);
 
 						if(visual.Effect == Effect.Lights)
-							LightInstance.Update(visual, Scene.MainCamera.shadowMapVerts);
+							LightInstance.UpdateUniforms(visual);
 
 						for(int j = 0; j < camUIDs.Count; j++)
 						{
 							var cam = ThingInstance.Get_<CameraInstance>(camUIDs[j]);
 
 							if(visual.Effect == Effect.Lights)
-								LightInstance.Update(visual, cam.shadowMapVerts);
+							{
+								//LightInstance.UpdateGlobalArrays(cam.RenderTexture);
+								LightInstance.CalculateShadowVerts(cam.shadowMapVerts);
+								LightInstance.UpdateUniforms(visual);
+							}
 
 							TryDrawShadowMap(kvp.Key, cam, true, false, false); // try before draw
 
@@ -220,6 +225,9 @@ namespace SMPL
 			}
 			void DrawMainCamera()
 			{
+				LightInstance.UpdateGlobalArrays(Scene.MainCamera.RenderTexture);
+				LightInstance.CalculateShadowVerts(Scene.MainCamera.shadowMapVerts);
+
 				foreach(var kvp in visuals)
 				{
 					TryDrawShadowMap(kvp.Key, Scene.MainCamera, true, false, false); // try before draw
